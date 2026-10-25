@@ -1,0 +1,35 @@
+{
+  "run_id": "qwen4b-focus01-20261025-02",
+  "limit": 40,
+  "baseline": false,
+  "checkpoint_step": 250,
+  "tasks": [
+    "oct_uveitis_4class",
+    "fundus_toxo_binary",
+    "eye_five_class",
+    "oct_aux_4class"
+  ],
+  "test_rows": 1557,
+  "balance": "round_robin_by_task_and_label",
+  "evaluated_rows": 40,
+  "evaluated_label_counts": {
+    "eye_five_class::Conjunctivitis": 2,
+    "oct_aux_4class::CNV": 3,
+    "oct_aux_4class::DME": 3,
+    "eye_five_class::Cataract": 2,
+    "oct_aux_4class::DRUSEN": 2,
+    "oct_uveitis_4class::Normal": 3,
+    "fundus_toxo_binary::toxoplasmosis": 5,
+    "oct_aux_4class::NORMAL": 2,
+    "oct_uveitis_4class::RRD-PVR": 2,
+    "oct_uveitis_4class::Panuveitis": 3,
+    "oct_uveitis_4class::Intermediate+Posterior Uveitis": 2,
+    "fundus_toxo_binary::healthy": 5,
+    "eye_five_class::Uveitis": 2,
+    "eye_five_class::Eyelid": 2,
+    "eye_five_class::Normal": 2
+  },
+  "selection_sha256": "1ac1697d151a100c8ad4b906253804a055df0fd5e6bb06a2d64a44b886c6e549",
+  "output_dir": "/runs/qwen3.5-4b/qwen4b-focus01-20261025-02/paired40-step-000250",
+  "started_at": "2026-10-25T05:28:56.733816+00:00"
+}

@@ -1,0 +1,2 @@
+# Local controller environment: this file is not the remote training image.
+modal==1.6.2

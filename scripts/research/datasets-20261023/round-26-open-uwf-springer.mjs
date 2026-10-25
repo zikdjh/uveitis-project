@@ -1,0 +1,17 @@
+const task = await taskSpace("uveitis figshare downloads 20261024");
+const page = task.page("p1");
+
+await page.goto("https://springernature.figshare.com/articles/dataset/Open_ultrawidefield_fundus_image_dataset_with_disease_diagnosis_and_clinical_image_quality_assessment/26936446", { timeout: 45_000 });
+await page.waitForLoadState("load");
+
+const detail = await page.evaluate(() => {
+  const targets = [...document.querySelectorAll("a, button")].map((node) => ({
+    tag: node.tagName.toLowerCase(),
+    text: node.textContent?.trim() || "",
+    href: node instanceof HTMLAnchorElement ? node.href : null,
+  })).filter((x) => /download/i.test(x.text) || /ndownloader/i.test(x.href || ""));
+  return { title: document.title, bodyStart: document.body.innerText.slice(0, 500), targets: targets.slice(0, 30) };
+});
+
+console.log({ url: await page.url(), title: await page.title() });
+console.log(JSON.stringify(detail, null, 2));

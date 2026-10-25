@@ -1,0 +1,151 @@
+{
+  "run_id": "local-4060-grouped-cont-20261025-01",
+  "status": "ok",
+  "started_at": "2026-10-25T21:51:44.463993+08:00",
+  "mode": "local_stage1_grouped_generative_qlora",
+  "model_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\manifest.csv",
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "total_memory_gib": 7.99560546875,
+    "compute_capability": [
+      8,
+      9
+    ]
+  },
+  "configuration": {
+    "quantization": "4-bit NF4, bfloat16 compute, double quant",
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "gradient_checkpointing": true,
+    "image_pixels": 65536,
+    "max_length": 256,
+    "target_steps": 150,
+    "grad_accum": 4,
+    "learning_rate": 2.5E-05,
+    "validation_every": 25,
+    "save_every": 25,
+    "early_stop_patience": 3,
+    "seed": 20261025,
+    "checkpoint_selection": "task_mean_macro_f1_then_json_rate_then_loss",
+    "init_adapter": "D:\\temp\\gpt\\uveitis-project\\artifacts\\qwen3.5-4b\\local-4060-formal-20261025-01\\best_adapter"
+  },
+  "split": {
+    "train_rows": 12101,
+    "validation_rows": 55,
+    "train_groups": 5184,
+    "validation_groups": 33,
+    "validation_selection_sha256": "b58be38480a47892fcb7f5eef5b1d1ab904abb0f7eb4979d2422c392d62c7ef8",
+    "schedule_sha256": "838d8a0ec79c1d25ed02c61323e436e13566dce18b5230d7693cec2e539d30ab",
+    "class_exposures": {
+      "eye_five_class::Cataract": 54,
+      "eye_five_class::Conjunctivitis": 54,
+      "eye_five_class::Eyelid": 55,
+      "eye_five_class::Normal": 54,
+      "eye_five_class::Uveitis": 55,
+      "fundus_toxo_binary::healthy": 54,
+      "fundus_toxo_binary::toxoplasmosis": 55,
+      "oct_aux_4class::CNV": 54,
+      "oct_aux_4class::DME": 55,
+      "oct_aux_4class::DRUSEN": 55,
+      "oct_aux_4class::NORMAL": 55
+    },
+    "test_intersection_audit": {
+      "policy": "13=label+patient_id; 03=label+stem_with_aug_prefix_removed; 02=image_path; 01=excluded",
+      "datasets": {
+        "01_uveitis_oct": {
+          "train_rows": 60,
+          "eligible_rows": 0,
+          "excluded_rows": 60,
+          "test_rows": 15,
+          "train_groups": 4,
+          "eligible_groups": 0,
+          "test_groups": 4,
+          "shared_train_test_groups": 4
+        },
+        "02_toxofundus": {
+          "train_rows": 330,
+          "eligible_rows": 330,
+          "excluded_rows": 0,
+          "test_rows": 82,
+          "train_groups": 330,
+          "eligible_groups": 330,
+          "test_groups": 82,
+          "shared_train_test_groups": 0
+        },
+        "03_eye_five_class": {
+          "train_rows": 1837,
+          "eligible_rows": 1826,
+          "excluded_rows": 11,
+          "test_rows": 460,
+          "train_groups": 1807,
+          "eligible_groups": 1796,
+          "test_groups": 459,
+          "shared_train_test_groups": 11
+        },
+        "13_zhanglab_oct": {
+          "train_rows": 10000,
+          "eligible_rows": 10000,
+          "excluded_rows": 0,
+          "test_rows": 1000,
+          "train_groups": 3091,
+          "eligible_groups": 3091,
+          "test_groups": 685,
+          "shared_train_test_groups": 0
+        }
+      },
+      "excluded_rows": 71,
+      "exclusion_counts": {
+        "01_uveitis_oct::no_patient_ids_and_all_source_groups_overlap_test": 60,
+        "03_eye_five_class::group_overlaps_test": 11
+      },
+      "eligible_rows": 12156,
+      "eligible_groups": 5217,
+      "eligible_test_group_overlap": 0,
+      "test_images_read": false
+    }
+  },
+  "after_load": {
+    "allocated_gib": 4.309648036956787,
+    "reserved_gib": 5.529296875,
+    "trainable_parameters": 10616832,
+    "resumed_from_step": 0,
+    "initialization_adapter": {
+      "directory": "D:\\temp\\gpt\\uveitis-project\\artifacts\\qwen3.5-4b\\local-4060-formal-20261025-01\\best_adapter",
+      "sha256": "8820450d565b5c139d9b0bda228b4375e2ed5b3af7c87670d8637069a0384b3e",
+      "rank": 8
+    }
+  },
+  "completed_steps": 150,
+  "truncated_reason": "target_steps",
+  "best_step": 100,
+  "best_validation_loss": 0.04034776285883378,
+  "best_validation_macro_f1": 0.8658040027605245,
+  "best_validation_json_valid_rate": 1.0,
+  "selection_score": [
+    0.8658040027605245,
+    1.0,
+    -0.04034776285883378
+  ],
+  "last_gradient_norm": 0.03246697038412094,
+  "final_adapter": {
+    "directory": "artifacts\\qwen3.5-4b\\local-4060-grouped-cont-20261025-01\\final_adapter",
+    "sha256": "9249271189cf5cb613e2d22834fc21e4909ccc0a42107caa9db5bc637c4e96eb"
+  },
+  "best_adapter": {
+    "directory": "artifacts\\qwen3.5-4b\\local-4060-grouped-cont-20261025-01\\best_adapter",
+    "sha256": "517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a"
+  },
+  "peak_allocated_gib": 5.452396869659424,
+  "peak_reserved_gib": 5.69140625,
+  "final_memory": {
+    "allocated_gib": 4.4046196937561035,
+    "reserved_gib": 5.69140625,
+    "peak_allocated_gib": 5.452396869659424,
+    "peak_reserved_gib": 5.69140625
+  },
+  "total_seconds": 1880.9496105000144,
+  "finished_at": "2026-10-25T22:23:05.413442+08:00",
+  "selection_note": "Best checkpoint selected by task-mean macro-F1, then JSON validity, then lower token loss. Step 75 and 100 tied on macro-F1 and JSON validity; step 100 won the loss tiebreak."
+}

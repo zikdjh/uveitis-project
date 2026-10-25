@@ -1,0 +1,13 @@
+{
+  "step": 1,
+  "validation_loss": 0.025393870753759984,
+  "validation_macro_f1": 0.8888888888888888,
+  "validation_json_valid_rate": 1.0,
+  "selection_score": [
+    0.8888888888888888,
+    1.0,
+    -0.025393870753759984
+  ],
+  "checkpoint_dir": "artifacts\\qwen3.5-4b\\local-4060-oct-focus-smoke-20261025-01\\checkpoints\\step-000001",
+  "adapter_sha256": "56556e8ebdf99b3c4c6cbff23fdfbd037dd61f96d01f27dddf0fc85d92eb92b4"
+}

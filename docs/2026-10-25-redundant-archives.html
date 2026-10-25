@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>压缩包清理记录 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-dataset-index.html">上一份</a>
+    <a href="2026-10-25-dataset-training-map.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>数据</span>
+    <span>2026-10-25</span>
+  </div>
+  <h1>压缩包清理记录</h1>
+  <p class="doc-summary">已删除归档的校验结果、容量和后续暂存规则</p>
+  <p class="doc-source">Markdown 源文件：<code>datasets/extracted/manifests/archive-cleanup.md</code></p>
+  <article class="markdown-body">
+<p>整理日期：2026-10-25</p>
+<p>本轮删除了 18 个已完成解压和逐成员校验的 ZIP：14 个根目录下载包，以及 4 个重复内层 ZIP。删除前后没有移动或删除 <code>datasets/extracted/</code> 中的图像和标签。</p>
+<p>删除依据：</p>
+<ul>
+<li>17 个归档的 182,754 个数据成员全部找到对应解压文件。</li>
+<li>文件大小与 CRC 不一致均为 0。</li>
+<li><code>datasets/extracted/manifests/extracted-files.csv</code> 的 180,456 条保留记录均可定位。</li>
+<li><code>datasets/training/manifest.csv</code> 的 16,638 条训练记录均可定位。</li>
+</ul>
+<p>逐包删除账本：<code>archive-cleanup-2026-10-25.csv</code>，记录原始路径、字节数、校验状态和删除动作。</p>
+<p>删除容量：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th style="text-align:right">数量</th>
+<th style="text-align:right">字节数</th>
+<th style="text-align:right">约值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>根目录下载 ZIP</td>
+<td style="text-align:right">14</td>
+<td style="text-align:right">24,212,809,851</td>
+<td style="text-align:right">22.55 GiB</td>
+</tr>
+<tr>
+<td>重复内层 ZIP</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">8,504,821,552</td>
+<td style="text-align:right">7.92 GiB</td>
+</tr>
+<tr>
+<td>合计</td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">32,717,631,403</td>
+<td style="text-align:right">30.47 GiB</td>
+</tr>
+</tbody>
+</table>
+<p>后续规则：</p>
+<ol>
+<li>新下载包先放 <code>datasets/raw/</code>。</li>
+<li>解压到 <code>datasets/extracted/&lt;数据集名&gt;/</code>，保留原划分和标签文件。</li>
+<li>校验逐文件清单、训练清单和相关标签。</li>
+<li>确认完整后清理 <code>datasets/raw/</code> 中对应的临时 ZIP。</li>
+<li>不在 <code>datasets/</code> 根目录长期散放压缩包。</li>
+</ol>
+
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>压缩包清理记录 · 2026-10-25</span>
+  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>训练状态 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-model-training-management.html">上一份</a>
+    <a href="2026-10-25-artifacts-index.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>训练</span>
+    <span>2026-10-25</span>
+  </div>
+  <h1>训练状态</h1>
+  <p class="doc-summary">当前模型、数据、checkpoint、预算和训练前后检查</p>
+  <p class="doc-source">Markdown 源文件：<code>model-training/STATUS.md</code></p>
+  <article class="markdown-body">
+<p>更新日期：2026-10-25</p>
+<h2 id="当前状态">当前状态</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主模型</td>
+<td>Qwen3.5-4B</td>
+</tr>
+<tr>
+<td>本地基座</td>
+<td><code>model-training/models/qwen/Qwen3.5-4B/</code>，14 个模型文件，9.34 GB</td>
+</tr>
+<tr>
+<td>训练方式</td>
+<td>4-bit NF4 QLoRA，Modal L40S</td>
+</tr>
+<tr>
+<td>训练数据</td>
+<td><code>datasets/training/manifest.csv</code>，16,638 张图像</td>
+</tr>
+<tr>
+<td>数据划分</td>
+<td>train 14,734 / validation 177 / test 1,727</td>
+</tr>
+<tr>
+<td>当前部署 adapter</td>
+<td><code>uveitis-runs:/runs/qwen3.5-4b/qwen4b-stage1-20261025-01/best_adapter</code></td>
+</tr>
+<tr>
+<td>最近实验候选</td>
+<td><code>focus01-20261025-02</code> 的 step 250</td>
+</tr>
+<tr>
+<td>补充决策模型</td>
+<td>默认关闭，等待真实决策数据与医生审核</td>
+</tr>
+<tr>
+<td>活跃训练容器</td>
+<td>无</td>
+</tr>
+<tr>
+<td>本机控制环境</td>
+<td>Python 3.11.17、Modal 1.6.2，预检 18/18 通过</td>
+</tr>
+<tr>
+<td>远端依赖探测</td>
+<td>固定提交镜像可识别 <code>qwen3_5</code>、processor 和 AutoModel；无 GPU 探测成功</td>
+</tr>
+</tbody>
+</table>
+<p>最近一轮新增计量约 <code>$0.87</code>，按用户给定预算口径估算余额约 <code>$12.13</code>。这是执行账目，不是 Modal 控制台实时余额；再次启动前必须以控制台账期和额度为准。</p>
+<p>本地基座已从 Modal <code>uveitis-models</code> 拉取完成，两份掩码权重分片均通过 safetensors 头校验；训练脚本仍优先使用远程卷，避免把训练节点绑定到开发机的本地路径。</p>
+<p>环境已经具备启动短程训练的条件，但尚未启动正式 GPU 训练。正式启动前仍要从 Modal 控制台核对当前账期额度；探测产生的镜像构建和少量非 GPU 运行费用应以控制台账单为准。</p>
+<h2 id="训练前检查">训练前检查</h2>
+<ul>
+<li>确认 <code>datasets/training/manifest.csv</code> 可定位全部图像。</li>
+<li>确认数据清单哈希、任务分布和排除项与本次 run 配置一致。</li>
+<li>确认 <code>uveitis-data</code>、<code>uveitis-models</code>、<code>uveitis-runs</code> 均有预期内容。</li>
+<li>确认当前预算和允许运行时长；不要使用常驻 GPU 服务。</li>
+<li>设置唯一 <code>UV_RUN_ID</code>，保留 config、指标、checkpoint、评估和 model card。</li>
+<li>用 <code>model-training/scripts/launch_training.ps1 -DryRun</code> 检查参数；确认后再去掉 <code>-DryRun</code>。</li>
+</ul>
+<h2 id="训练后检查">训练后检查</h2>
+<ul>
+<li>将 best adapter 与对应 checkpoint 分开记录，不把最后一步 adapter 自动当成最佳模型。</li>
+<li>提交 Volume，保存训练指标、验证指标和固定 holdout 结果。</li>
+<li>更新 <code>model-training/docs/training-cost-ledger-modal-20261025.md</code>。</li>
+<li>将小型评估快照放入 <code>artifacts/qwen3.5-4b/&lt;run-id&gt;/</code>。</li>
+<li>记录是否触发停止条件、累计消耗和未完成事项。</li>
+</ul>
+
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>训练状态 · 2026-10-25</span>
+  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

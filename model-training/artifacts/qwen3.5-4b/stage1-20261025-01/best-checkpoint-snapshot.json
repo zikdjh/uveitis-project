@@ -1,0 +1,6 @@
+{
+  "step": 50,
+  "validation_loss": Infinity,
+  "checkpoint_dir": "/runs/qwen3.5-4b/qwen4b-stage1-20261025-01/checkpoints/step-000050",
+  "note": "final_adapter is the last in-memory adapter; deploy the best checkpoint unless a final evaluation says otherwise."
+}

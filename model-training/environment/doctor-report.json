@@ -1,0 +1,95 @@
+{
+  "checks": [
+    {
+      "name": "local Python is the Modal controller venv",
+      "ok": true,
+      "detail": "D:\\temp\\gpt\\uveitis-project\\.venv-modal\\Scripts\\python.exe"
+    },
+    {
+      "name": "local Python version",
+      "ok": true,
+      "detail": "3.11.17"
+    },
+    {
+      "name": "Modal CLI",
+      "ok": true,
+      "detail": "D:\\temp\\gpt\\uveitis-project\\.venv-modal\\Scripts\\modal.exe"
+    },
+    {
+      "name": "Modal client version",
+      "ok": true,
+      "detail": "1.6.2"
+    },
+    {
+      "name": "training manifest exists",
+      "ok": true,
+      "detail": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\manifest.csv"
+    },
+    {
+      "name": "training manifest SHA256",
+      "ok": true,
+      "detail": "0BA7F4F9F56A411BBEF43836E8453CC2A10C52B7D86B7CA86A071E7233E91580"
+    },
+    {
+      "name": "training row count",
+      "ok": true,
+      "detail": "16,638"
+    },
+    {
+      "name": "training split counts",
+      "ok": true,
+      "detail": "{\"test\": 1727, \"train\": 14734, \"validation\": 177}"
+    },
+    {
+      "name": "training image paths exist",
+      "ok": true,
+      "detail": "missing=0"
+    },
+    {
+      "name": "training summary exists",
+      "ok": true,
+      "detail": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\summary.json"
+    },
+    {
+      "name": "training summary SHA256",
+      "ok": true,
+      "detail": "7634E9EAB952F638E304170DA04CD1F38614333E947B8CF8FE88F2F961A0A406"
+    },
+    {
+      "name": "local model directory",
+      "ok": true,
+      "detail": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B"
+    },
+    {
+      "name": "weight index exists",
+      "ok": true,
+      "detail": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B\\model.safetensors.index.json"
+    },
+    {
+      "name": "safetensors shard count",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "weight shard model.safetensors-00001-of-00002.safetensors",
+      "ok": true,
+      "detail": "5,329,398,688 bytes"
+    },
+    {
+      "name": "weight shard model.safetensors-00002-of-00002.safetensors",
+      "ok": true,
+      "detail": "3,990,429,408 bytes"
+    },
+    {
+      "name": "model config exists",
+      "ok": true,
+      "detail": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B\\config.json"
+    },
+    {
+      "name": "model type",
+      "ok": true,
+      "detail": "qwen3_5"
+    }
+  ],
+  "failures": []
+}

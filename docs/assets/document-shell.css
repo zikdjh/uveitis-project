@@ -1,0 +1,56 @@
+/* Shared shell for the existing standalone HTML documents. */
+body > .wrap,
+body > main,
+body > .page {
+  width: min(100% - 40px, 1080px) !important;
+  max-width: 1080px !important;
+  margin: 28px auto 56px !important;
+  padding: clamp(24px, 5vw, 56px) !important;
+  border: 1px solid #d9e0e5;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(31, 41, 51, 0.06);
+}
+
+body > .doc-nav,
+body > .doc-footer {
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding-left: max(20px, calc((100vw - 1080px) / 2)) !important;
+  padding-right: max(20px, calc((100vw - 1080px) / 2)) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+body > .doc-nav {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+body > .doc-footer {
+  padding-top: 18px !important;
+  padding-bottom: 36px !important;
+}
+
+@media (max-width: 760px) {
+  body > .wrap,
+  body > main,
+  body > .page {
+    width: calc(100% - 20px) !important;
+    margin-top: 10px !important;
+    padding: 24px 18px !important;
+  }
+}
+
+@media print {
+  body > .wrap,
+  body > main,
+  body > .page {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}

@@ -1,0 +1,13 @@
+const task = await taskSpace(8);
+const page = task.page("p1");
+await page.fill("textarea[placeholder^='例如']", "右眼红痛伴畏光两天，近日视力略下降");
+await page.fill("textarea[placeholder^='既往史']", "无特殊全身病史，未自行用药");
+await page.selectOption("select", { label: "右眼" });
+await page.check("input[type=checkbox]");
+await page.click("button[type=submit]");
+await page.waitForURL("**/summary", { timeout: 15000 });
+await page.waitForSelector(".case-tabs");
+const url = await page.url();
+console.log("newCase=" + url);
+console.log(await page.snapshot());
+console.log(await page.evaluate(() => ({ url: location.href, overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth })));

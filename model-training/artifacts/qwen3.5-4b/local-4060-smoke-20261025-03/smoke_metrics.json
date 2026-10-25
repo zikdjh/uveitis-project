@@ -1,0 +1,62 @@
+{
+  "run_id": "local-4060-smoke-20261025-03",
+  "status": "ok",
+  "started_at": "2026-10-25T10:12:08.073618+00:00",
+  "model_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\manifest.csv",
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "total_memory_gib": 7.99560546875,
+    "compute_capability": [
+      8,
+      9
+    ]
+  },
+  "configuration": {
+    "quantization": "4-bit NF4, bfloat16 compute, double quant",
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "gradient_checkpointing": true,
+    "image_pixels": 200704,
+    "max_length": 512,
+    "requested_steps": 1,
+    "learning_rate": 0.0001
+  },
+  "after_load": {
+    "allocated_gib": 4.309648036956787,
+    "reserved_gib": 5.529296875,
+    "trainable_parameters": 10616832
+  },
+  "steps": [
+    {
+      "step": 1,
+      "task": "oct_uveitis_4class",
+      "label": "Intermediate+Posterior Uveitis",
+      "image": "datasets\\training\\data\\01_uveitis_oct\\01_uveitis_oct\\Optical Coherence Tomography (OCT) Images of Proliferative Vitreoretinopathy, Uveitis, and Normal Eyes\\Intermediate+Posterior Uveitis\\Int+Post Uveitis 1.jpeg",
+      "loss": 0.02182251773774624,
+      "gradient_norm": 2.253363847732544,
+      "sequence_tokens": 295,
+      "visual_tokens": 748,
+      "step_seconds": 1.50042840000242,
+      "peak_allocated_gib": 5.510238170623779,
+      "peak_reserved_gib": 5.6875
+    }
+  ],
+  "adapter": {
+    "directory": "artifacts\\qwen3.5-4b\\local-4060-smoke-20261025-03\\final_adapter",
+    "adapter_model_sha256": "a03b3eee43c8b47b4ec8b7a5b0e5aa64be66e4fb55ff72b033301890133cb1b5",
+    "adapter_config_sha256": "ae62cb62ce09c636ca8913f64a857a8d721ae3ba7d9fd67133a9910d84708955",
+    "bytes": 42504600
+  },
+  "peak_allocated_gib": 5.510238170623779,
+  "peak_reserved_gib": 5.6875,
+  "final": {
+    "allocated_gib": 4.4441704750061035,
+    "reserved_gib": 5.6875,
+    "peak_allocated_gib": 5.510238170623779,
+    "peak_reserved_gib": 5.6875
+  },
+  "total_seconds": 9.521539900015341,
+  "finished_at": "2026-10-25T10:12:17.594873+00:00"
+}

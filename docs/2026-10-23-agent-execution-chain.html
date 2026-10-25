@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>智能体执行链路规划 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-outputs-guide.html">上一份</a>
+    <a href="2026-10-23-training-plan-modal-l40s.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>系统设计</span>
+    <span>2026-10-23</span>
+  </div>
+  <h1>智能体执行链路规划</h1>
+  <p class="doc-summary">病例接入、影像感知、检索、决策和安全复核链路</p>
+  <p class="doc-source">Markdown 源文件：<code>docs/agent-execution-chain-20261023.md</code></p>
+  <article class="markdown-body">
+<p>目标：把诊断系统拆成一条可审计、可回滚、可扩展的智能体链路，而不是让一个大模型一次性完成所有任务。</p>
+<h2 id="1-总体链路">1. 总体链路</h2>
+<pre><code class="language-text">用户/医生输入
+  -&gt; IntakeAgent
+  -&gt; PreprocessAgent
+  -&gt; RouterAgent
+  -&gt; PerceptionAgent(Qwen3.5-4B)
+  -&gt; RetrievalAgent(BGE-M3)
+  -&gt; DecisionAgent(可选补充分支)
+  -&gt; SafetyAgent
+  -&gt; ReportAgent
+  -&gt; ReviewAgent
+  -&gt; LearningAgent
+</code></pre>
+<p>核心思想：</p>
+<ul>
+<li>每个节点只做一件事。</li>
+<li>每个节点都有明确的输入/输出 JSON。</li>
+<li>所有结果都带 <code>case_id</code> 和 <code>trace_id</code>。</li>
+<li>医生复核永远保留在链路里。</li>
+</ul>
+<h2 id="2-节点职责">2. 节点职责</h2>
+<h3 id="1-intakeagent">1. IntakeAgent</h3>
+<p>接收用户输入。</p>
+<p>输入：</p>
+<ul>
+<li>患者基本信息</li>
+<li>主诉</li>
+<li>病史</li>
+<li>影像文件</li>
+<li>已有检查结果</li>
+</ul>
+<p>输出：</p>
+<pre><code class="language-json">{
+  &quot;case_id&quot;: &quot;uuid&quot;,
+  &quot;patient&quot;: {
+    &quot;age&quot;: 41,
+    &quot;sex&quot;: &quot;F&quot;
+  },
+  &quot;complaint&quot;: &quot;眼红、视物模糊 3 天&quot;,
+  &quot;images&quot;: [
+    {&quot;type&quot;: &quot;fundus&quot;, &quot;path&quot;: &quot;/cases/uuid/fundus_1.jpg&quot;}
+  ],
+  &quot;consent&quot;: true
+}
+</code></pre>
+<h3 id="2-preprocessagent">2. PreprocessAgent</h3>
+<p>负责标准化和脱敏。</p>
+<p>任务：</p>
+<ul>
+<li>图像格式转换</li>
+<li>去标识化</li>
+<li>影像质量检查</li>
+<li>OCR 已有报告</li>
+<li>生成统一 metadata</li>
+</ul>
+<p>输出：</p>
+<pre><code class="language-json">{
+  &quot;quality&quot;: &quot;pass&quot;,
+  &quot;images&quot;: [
+    {&quot;type&quot;: &quot;fundus&quot;, &quot;path&quot;: &quot;/clean/uuid/fundus_1.jpg&quot;, &quot;laterality&quot;: &quot;OD&quot;}
+  ],
+  &quot;ocr_text&quot;: &quot;...&quot;,
+  &quot;risk_flags&quot;: []
+}
+</code></pre>
+<h3 id="3-routeragent">3. RouterAgent</h3>
+<p>决定使用哪条模态路径。</p>
+<p>可路由到：</p>
+<ul>
+<li>fundus / UWF 路径</li>
+<li>OCT 路径</li>
+<li>anterior segment 路径</li>
+<li>text-only 路径</li>
+</ul>
+<p>输出：</p>
+<pre><code class="language-json">{
+  &quot;route&quot;: [&quot;fundus&quot;, &quot;text&quot;],
+  &quot;confidence&quot;: 0.94
+}
+</code></pre>
+<h3 id="4-perceptionagent">4. PerceptionAgent</h3>
+<p>主力模型：Qwen3.5-4B。</p>
+<p>任务：</p>
+<ul>
+<li>影像理解</li>
+<li>病灶描述</li>
+<li>结构化发现</li>
+<li>可疑诊断线索抽取</li>
+</ul>
+<p>输出：</p>
+<pre><code class="language-json">{
+  &quot;findings&quot;: [
+    {
+      &quot;finding&quot;: &quot;vitreous opacity&quot;,
+      &quot;location&quot;: &quot;posterior chamber&quot;,
+      &quot;confidence&quot;: 0.82
+    }
+  ],
+  &quot;impression&quot;: &quot;suspected posterior uveitis&quot;,
+  &quot;report&quot;: &quot;...&quot;
+}
+</code></pre>
+<h3 id="5-retrievalagent">5. RetrievalAgent</h3>
+<p>向量化模型：BGE-M3；向量数据库：zvec。</p>
+<p>zvec 是嵌入式本地向量数据库，承担向量、标量字段和过滤条件的持久化检索，不另外部署独立向量服务。BGE-M3 只负责把文本转换为 DIM 维向量。</p>
+<p>BGE-M3 从 ModelScope 的 <code>BAAI/bge-m3</code> 下载到项目本地，在 CPU 上以 FP32 运行，默认使用稠密向量。模型首次检索时惰性加载，不在 API 启动阶段占用内存。切换 embedding provider 后必须重建 zvec 索引。</p>
+<p>本项目的集合为 <code>uveitis_knowledge</code>，默认维度 1024，使用 HNSW + COSINE。zvec 写入为单进程独占，一个集合不应由多个 API worker 同时打开；横向扩容时应改为独立检索服务或按分片拆分集合。</p>
+<p>任务：</p>
+<ul>
+<li>检索指南</li>
+<li>检索相似病例</li>
+<li>检索文献</li>
+<li>提供可引用证据</li>
+</ul>
+<p>输出：</p>
+<pre><code class="language-json">{
+  &quot;evidence&quot;: [
+    {
+      &quot;id&quot;: &quot;guideline_2026_014&quot;,
+      &quot;source&quot;: &quot;RCOphth Uveitis dataset&quot;,
+      &quot;score&quot;: 0.87,
+      &quot;snippet&quot;: &quot;...&quot;
+    }
+  ]
+}
+</code></pre>
+<h3 id="6-decisionagent">6. DecisionAgent</h3>
+<p>状态：可选补充方案，默认关闭。是否启用由项目进度、真实决策标注质量和试点评测决定，不阻塞核心流程。</p>
+<p>候选模型：Intern-Decision-4B；Kev-4B 作为对照，不默认常驻。</p>
+<p>输入：</p>
+<ul>
+<li>PerceptionAgent 输出</li>
+<li>RetrievalAgent 证据</li>
+<li>患者 metadata</li>
+<li>临床主诉</li>
+</ul>
+<p>输出：</p>
+<pre><code class="language-json">{
+  &quot;primary_class&quot;: &quot;posterior_uveitis&quot;,
+  &quot;differential&quot;: [
+    {&quot;class&quot;: &quot;toxoplasmosis&quot;, &quot;score&quot;: 0.62},
+    {&quot;class&quot;: &quot;VKH&quot;, &quot;score&quot;: 0.24}
+  ],
+  &quot;urgency&quot;: &quot;medium&quot;,
+  &quot;recommended_action&quot;: [
+    &quot;fundus fluorescein angiography&quot;,
+    &quot;infectious workup&quot;
+  ],
+  &quot;evidence_ids&quot;: [&quot;guideline_2026_014&quot;],
+  &quot;confidence&quot;: 0.71
+}
+</code></pre>
+<h3 id="7-safetyagent">7. SafetyAgent</h3>
+<p>这是一个确定性校验节点，不是大模型。</p>
+<p>检查：</p>
+<ul>
+<li>JSON schema 是否合法</li>
+<li>是否缺少关键信息</li>
+<li>是否给出高风险但无证据的结论</li>
+<li>是否超出辅助诊断边界</li>
+<li>是否需要转人工</li>
+</ul>
+<p>失败时：</p>
+<ul>
+<li>补充决策不可用时直接跳过该分支，不阻断检索、安全校验和医生复核</li>
+<li>补充决策已启用但输出不合法时，返回 <code>noul</code> 或转医生人工判断</li>
+<li>不把 Kev-4B 作为无条件的自动重试依赖</li>
+</ul>
+<h3 id="8-reportagent">8. ReportAgent</h3>
+<p>生成医生端报告和患者友好说明。</p>
+<p>输出：</p>
+<ul>
+<li>医生报告</li>
+<li>患者摘要</li>
+<li>检查建议</li>
+<li>证据引用</li>
+</ul>
+<h3 id="9-reviewagent">9. ReviewAgent</h3>
+<p>医生复核节点。</p>
+<p>记录：</p>
+<ul>
+<li>是否接受</li>
+<li>修改后的诊断</li>
+<li>不同意原因</li>
+<li>是否允许入训练集</li>
+</ul>
+<h3 id="10-learningagent">10. LearningAgent</h3>
+<p>后台节点，不在线上实时跑。</p>
+<p>任务：</p>
+<ul>
+<li>复核结果入库</li>
+<li>构建微调样本</li>
+<li>触发下一轮训练</li>
+<li>记录模型版本</li>
+</ul>
+<h2 id="3-modal-部署结构">3. Modal 部署结构</h2>
+<table>
+<thead>
+<tr>
+<th>服务</th>
+<th>类型</th>
+<th style="text-align:right">GPU</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>intake</td>
+<td>API</td>
+<td style="text-align:right">0</td>
+<td>轻量</td>
+</tr>
+<tr>
+<td>preprocess</td>
+<td>Worker</td>
+<td style="text-align:right">0/1</td>
+<td>可用 CPU 完成</td>
+</tr>
+<tr>
+<td>router</td>
+<td>API</td>
+<td style="text-align:right">0</td>
+<td>小模型即可</td>
+</tr>
+<tr>
+<td>perception</td>
+<td>Inference</td>
+<td style="text-align:right">L40S</td>
+<td>Qwen3.5-4B</td>
+</tr>
+<tr>
+<td>retrieval</td>
+<td>Inference</td>
+<td style="text-align:right">L4/T4</td>
+<td>BGE-M3</td>
+</tr>
+<tr>
+<td>decision</td>
+<td>Inference（按需）</td>
+<td style="text-align:right">L40S</td>
+<td>补充方案通过门槛后再启用</td>
+</tr>
+<tr>
+<td>safety</td>
+<td>API</td>
+<td style="text-align:right">0</td>
+<td>确定性规则</td>
+</tr>
+<tr>
+<td>report</td>
+<td>API</td>
+<td style="text-align:right">0/1</td>
+<td>文本生成</td>
+</tr>
+<tr>
+<td>review</td>
+<td>API</td>
+<td style="text-align:right">0</td>
+<td>医生复核</td>
+</tr>
+<tr>
+<td>learning</td>
+<td>Batch</td>
+<td style="text-align:right">L40S</td>
+<td>训练</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-状态存储">4. 状态存储</h2>
+<table>
+<thead>
+<tr>
+<th>存储</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Volume: raw</td>
+<td>原始影像</td>
+</tr>
+<tr>
+<td>Volume: clean</td>
+<td>清洗后影像</td>
+</tr>
+<tr>
+<td>Volume: models</td>
+<td>模型和 adapter</td>
+</tr>
+<tr>
+<td>Volume: index</td>
+<td>向量索引</td>
+</tr>
+<tr>
+<td>Volume: runs</td>
+<td>日志、评估、训练输出</td>
+</tr>
+<tr>
+<td>DB: cases</td>
+<td>病例状态</td>
+</tr>
+<tr>
+<td>DB: feedback</td>
+<td>医生复核</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-失败与回退">5. 失败与回退</h2>
+<table>
+<thead>
+<tr>
+<th>失败点</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>图像质量不合格</td>
+<td>返回重拍/补图，不强行诊断</td>
+</tr>
+<tr>
+<td>Perception 超时</td>
+<td>降级为 text-only</td>
+</tr>
+<tr>
+<td>Retrieval 无高置信证据</td>
+<td>保留证据缺口提示，不生成越界结论</td>
+</tr>
+<tr>
+<td>补充决策未启用或不可用</td>
+<td>跳过该分支，直接进入安全校验和人工复核</td>
+</tr>
+<tr>
+<td>Decision JSON 不合法</td>
+<td>返回 <code>noul</code>，必要时转人工复核</td>
+</tr>
+<tr>
+<td>置信度低于阈值</td>
+<td>转 <code>noul</code> + 人工复核</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-最小可用版本-mvp">6. 最小可用版本 MVP</h2>
+<p>第一阶段只需要保留：</p>
+<pre><code class="language-text">Intake -&gt; Preprocess -&gt; Perception -&gt; Retrieval -&gt; Safety -&gt; Report -&gt; Review
+</code></pre>
+<p>Decision 为补充分支；Learning 可以后补。补充决策必须通过标注和评测门槛后再插入链路。</p>
+<p>这样能最快跑通，且不会牺牲安全边界。</p>
+
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>智能体执行链路规划 · 2026-10-23</span>
+  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

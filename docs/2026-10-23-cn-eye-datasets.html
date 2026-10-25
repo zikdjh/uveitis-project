@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国内开源免费眼科数据集核验清单 · 葡萄膜炎辅助诊断项目</title>
+<style>
+  body { font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+         color: #1f2328; margin: 0; background: #f6f7f9; line-height: 1.7; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 28px 64px; background: #fff; }
+  h1 { font-size: 26px; margin: 8px 0 4px; }
+  h2 { font-size: 20px; margin-top: 40px; border-left: 4px solid #2563eb; padding-left: 10px; }
+  h3 { font-size: 16px; margin-top: 24px; }
+  .meta { color: #57606a; font-size: 13px; border-bottom: 1px solid #d8dee4; padding-bottom: 14px; }
+  .meta b { color: #1f2328; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 20px; font-size: 13.5px; }
+  th, td { border: 1px solid #d8dee4; padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { background: #eef2ff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  a { color: #2563eb; text-decoration: none; word-break: break-all; }
+  a:hover { text-decoration: underline; }
+  .tag { display: inline-block; font-size: 12px; border-radius: 3px; padding: 1px 7px; margin-right: 4px; white-space: nowrap; }
+  .ok { background: #dcfce7; color: #166534; }
+  .manual { background: #fef3c7; color: #92400e; }
+  .reg { background: #e0e7ff; color: #3730a3; }
+  .na { background: #f3f4f6; color: #57606a; }
+  .note { background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 14px; font-size: 13.5px; }
+  .warn { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 10px 14px; font-size: 13.5px; }
+  ol li, ul li { margin: 4px 0; }
+  footer { margin-top: 48px; color: #6b7280; font-size: 12.5px; border-top: 1px solid #d8dee4; padding-top: 12px; }
+  code { background: #f3f4f6; border-radius: 3px; padding: 1px 5px; font-size: 12.5px; }
+  @media print { body { background: #fff; } .wrap { padding: 0; } }
+</style>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-modal-uploaded-artifacts.html">上一份</a>
+    <a href="2026-10-23-intl-eye-datasets.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content">
+
+<div class="wrap">
+
+<h1>国内开源免费眼科数据集核验清单</h1>
+<div class="meta">
+  <b>面向项目</b>：葡萄膜炎辅助诊断智能系统（多模态训练数据规划）<br>
+  <b>核验日期</b>：2026-10-23 · <b>性质</b>：非商用科研用途 · <b>版本</b>：v1.0<br>
+  <b>方法</b>：当日对 iChallenge 官网、ODIR-2019 官方页、天池、飞桨 AI Studio、Kaggle、IEEE DataPort、
+  GitHub API、Nature/Scientific Data 文章页、DataCite API 逐个打开或调用确认；
+  不沿用历史调研结论。检索脚本见仓库 <code>scripts/research/cn-datasets-20261023/</code>（round-01～05.mjs）。
+</div>
+
+<h2>一、核心结论</h2>
+<ol>
+  <li>国内目前<b>没有免费开源的葡萄膜炎专病影像数据集</b>。温州医科大学葡萄膜炎专病库为申请/交易制，不满足「开源免费」条件。</li>
+  <li>国内免费通用眼科数据量足以支撑「大规模预训练迁移 + 原型验证」：眼底万级（ODIR-5K、DDR、EDDFS 类）、OCT 十万级（OCT2017 镜像）、前节 OCT 4800 张（AGE）、OCTA 500 眼。</li>
+  <li>葡萄膜炎信号的免费来源 = ODIR-5K「Other」弱标签（关键词筛选）+ 新核验的 UWF-700 葡萄膜炎子集（100 张，含人口学信息）+ 医生端对照数据回流。</li>
+</ol>
+
+<h2>二、总览</h2>
+<table>
+  <tr><th>数据集</th><th>机构</th><th>模态 / 规模</th><th>许可</th><th>获取状态</th></tr>
+  <tr><td>ODIR-5K</td><td>上工医疗 + 北京大学</td><td>眼底 ×10,000 + 患者信息，8 类含 Other</td><td>未明示</td><td><span class="tag ok">官方页在架</span><span class="tag ok">天池镜像</span></td></tr>
+  <tr><td>Open UWF 700</td><td>浙江省人民医院</td><td>UWF ×700（含葡萄膜炎 100）+ 人口学</td><td>figshare 条目为准</td><td><span class="tag manual">需人工浏览器</span></td></tr>
+  <tr><td>iChallenge 十子集</td><td>HDMI + 中山眼科 + 深圳眼科</td><td>眼底 / OCT / 前节 OCT，合计约 1.2 万+</td><td>各子集不同（REFUGE 为 CC BY 4.0）</td><td><span class="tag ok">网盘直链在架</span></td></tr>
+  <tr><td>DDR (OIA-DDR)</td><td>南开 + 北京同仁等</td><td>眼底 ×13,673，分类+分割+检测</td><td>非商用（NC）</td><td><span class="tag ok">网盘直链在架</span></td></tr>
+  <tr><td>DeepDRiD</td><td>上海市第六人民医院</td><td>常规眼底 ×2,000 + UWF ×256，质量+DR</td><td>CC BY-SA 4.0</td><td><span class="tag ok">GitHub 直下</span></td></tr>
+  <tr><td>FIVES</td><td>浙大二院</td><td>高分辨眼底 ×800 + 血管像素级标注</td><td>CC BY 4.0（DataCite 核验）</td><td><span class="tag manual">需人工浏览器</span></td></tr>
+  <tr><td>OCTA-500</td><td>南京理工大学</td><td>OCT + OCTA ×500 眼（约 80 GB）</td><td>平台条款</td><td><span class="tag reg">免费注册</span></td></tr>
+  <tr><td>EyeQ</td><td>国内团队标注（图源 EyePACS）</td><td>眼底 ×28,792，三级质量</td><td>CC BY-NC-SA</td><td><span class="tag ok">GitHub 直下</span></td></tr>
+  <tr><td>LAG</td><td>北京同仁医院</td><td>眼底 ×11,760 + 注意力标注</td><td>仅学术</td><td><span class="tag reg">免费+邮件要密码</span></td></tr>
+  <tr><td>JSIEC1000</td><td>汕头国际眼科中心</td><td>眼底 ×1,000 / 39 类细粒度</td><td>ODbL（JSIEC 版权）</td><td><span class="tag ok">Kaggle 在架</span></td></tr>
+  <tr><td>MultiEYE</td><td>香港中文大学</td><td>OCT 增强眼底识别基准</td><td>repo 为 MIT</td><td><span class="tag ok">HuggingFace 在架</span></td></tr>
+  <tr><td>Sci Data 中国新集（2024–2026，7 篇）</td><td>浙省人民 / 深圳眼科 / 华南理工+鹏城+中山 / 北大+华科 / 清华深研 / 南医大 / 南科大</td><td>UWF、肿瘤、近视、白内障、血管分割等</td><td>以条目为准</td><td><span class="tag manual">figshare 人工下载</span></td></tr>
+</table>
+
+<h2>三、多模态底座（图像 + 患者信息，项目首选）</h2>
+<h3>3.1 ODIR-5K</h3>
+<ul>
+  <li>内容：5,000 名患者 / 10,000 张双目眼底彩照；附年龄、性别、眼别与医生诊断关键词；8 类多标签（N/D/G/C/A/H/M/O）。</li>
+  <li>葡萄膜炎用法：O 类（Other）弱标签，需用诊断关键词筛选，避免混入其他病种。</li>
+  <li>渠道（当日全部验活）：
+    <a href="https://odir2019.grand-challenge.org/dataset/">ODIR-2019 官方页（Download Link）</a> ·
+    <a href="https://www.kaggle.com/datasets/andrewmvd/ocular-disease-recognition-odir5k">Kaggle 镜像</a> ·
+    <a href="https://tianchi.aliyun.com/dataset/94998">天池 94998</a>（免费，需账号；学生认证后免审批，文件清单已确认：训练包 1.09 GB、预处理包 376 MB、测试包 164 MB 等）。</li>
+  <li>许可：官方未明示（Kaggle 标注 not specified）；内部科研使用惯例，公开成果前联系数据方确认。</li>
+</ul>
+<h3>3.2 Open UWF 700（Scientific Data 2024，含葡萄膜炎子集）</h3>
+<ul>
+  <li>内容：700 张高分辨超广角眼底 = DR / AMD / RVO / 病理性近视 / <b>葡萄膜炎（100 张）</b> / 视网膜脱离 / 健康，各 100 张；
+    附诊断、年龄、性别、眼别（人口学表）与三位医生按视野/照明/伪影/对比度/总体的质量标注。</li>
+  <li>价值：当前最贴合本项目「图像 + 患者信息」输入形态的国内免费集，可直接服务 T3 多模态原型。</li>
+  <li>论文：<a href="https://www.nature.com/articles/s41597-024-04113-2">s41597-024-04113-2</a>；数据托管 figshare（本环境自动化访问 403，需人工浏览器下载，下载时核对条目许可）。</li>
+</ul>
+<h3>3.3 白内障细粒度集（Scientific Data 2026）</h3>
+<ul>
+  <li>机构：北京大学 + 华中科技大学。内容：白内障严重程度评分 + <b>临床诊断描述文本</b> + 眼底区域/视盘标注。</li>
+  <li>价值：自带文本描述，可作「图像 + 结构化文字」弱配对样本，服务白内障鉴别分支。</li>
+  <li>论文：<a href="https://www.nature.com/articles/s41597-026-06684-8">s41597-026-06684-8</a>；figshare 人工下载。</li>
+</ul>
+
+<h2>四、iChallenge 全家桶（官网直链免费）</h2>
+<p>官网 <a href="http://hdmilab.cn/ichallenge">hdmilab.cn/ichallenge</a> 已确认 10 个子集全部提供百度网盘 + Google Drive 下载：
+HDMI 实验室（深圳）携手中山大学中山眼科中心张秀兰教授团队、深圳市眼科医院建立，2023 年获 Bench Council TOP100 成就奖。</p>
+<table>
+  <tr><th>子集</th><th>数量</th><th>模态 / 任务</th><th>发布</th></tr>
+  <tr><td>REFUGE1 / REFUGE2</td><td>1,200 / 2,000</td><td>眼底彩照，视盘视杯分割、青光眼分类</td><td>MICCAI 2018 / 2020</td></tr>
+  <tr><td>PALM</td><td>1,200</td><td>眼底彩照，病理性近视分类 + 视盘/病灶分割</td><td>ISBI 2019</td></tr>
+  <tr><td>AGE</td><td>4,800</td><td><b>前节 OCT（AS-OCT）</b>，原发性房角关闭</td><td>MICCAI 2019</td></tr>
+  <tr><td>ADAM (iChallenge-AMD)</td><td>1,200</td><td>眼底 AMD 分类 + 病灶区域标注</td><td>ISBI 2020</td></tr>
+  <tr><td>GAMMA</td><td>300 例</td><td><b>眼底 + 3D OCT 配对</b>，青光眼分级（多模态融合范式参考）</td><td>MICCAI 2021</td></tr>
+  <tr><td>GOALS / STAGE / STAGE2</td><td>300 / 401 / 301</td><td>环扫 OCT / 3D OCT / 眼底+OCT</td><td>MICCAI 2022–2024</td></tr>
+</table>
+<p>补充：飞桨 AI Studio 的 <a href="https://aistudio.baidu.com/dataset/detail/88462">iChallenge-AMD 镜像</a> 当日显示许可为 <b>CC BY</b>（更新于 2025-08-27），可直接在平台内调用。</p>
+<p>另可作 PALM 扩展：华南理工 + 鹏城实验室 + 中山眼科的「病理性近视识别 + 解剖结构标注」开放眼底集
+（<a href="https://www.nature.com/articles/s41597-024-02911-2">Sci Data 2024-01</a>，已按训练/验证/测试划分，figshare 人工下载）。</p>
+
+<h2>五、预训练与辅助数据集</h2>
+<h3>5.1 病灶分割 / 质量 / 大规模眼底</h3>
+<ul>
+  <li><b>DDR (OIA-DDR)</b>：南开大学 + 北京同仁等；13,673 张眼底，DR 五级分类 + 4 类病灶分割 + 检测；
+    <a href="https://github.com/nkicsl/DDR-dataset">GitHub README</a> 内百度网盘直链（提取码 ue0t）+ Google Drive，当日确认在架；10 个分卷需先合并再解压；许可为非商用（NC）。</li>
+  <li><b>DeepDRiD</b>：上海市第六人民医院；常规眼底 2,000 张 + UWF 256 张，DR 分级 + 图像质量评估；
+    <a href="https://github.com/deepdrdoc/DeepDRiD">GitHub 直下</a>；CC BY-SA 4.0（对外再分发衍生数据需同许可）。</li>
+  <li><b>EyeQ</b>：国内团队在 EyePACS（美国图源）上重标注；28,792 张，Good/Usable/Reject 三级质量；
+    <a href="https://github.com/HzFu/EyeQ">GitHub 直下</a>；CC BY-NC-SA。用途：训练前质量过滤分支。</li>
+  <li><b>LAG</b>：北京同仁医院；11,760 张眼底（4,878 可疑 + 6,882 阴性），5,824 张含医生注意力区域标注；
+    <a href="https://github.com/smilell/AG-CNN">AG-CNN 仓库</a> Dropbox 第一部分 + <b>邮件索取解压密码</b>（免费）；仅限学术，禁止再上传。</li>
+</ul>
+<h3>5.2 血管分割 / OCT / OCTA</h3>
+<ul>
+  <li><b>FIVES</b>：浙大二院；800 张 2048×2048 眼底 + 视网膜血管像素级标注，约 1.76 GB；
+    许可 <b>CC BY 4.0</b>（经 DataCite API 核验：DOI 10.6084/m9.figshare.19688169）；figshare 需人工下载。
+    用途：视网膜血管定量，服务血管炎特征分析。</li>
+  <li><b>OCTA-500</b>：南京理工大学；500 眼 OCT + OCTA 三维数据（6×6 mm 与 3×3 mm），约 80 GB；
+    <a href="https://ieee-dataport.org/open-access/octa-500">IEEE DataPort</a> 免费注册下载（页面已确认）。用途：OCTA 血管特征编码器。</li>
+  <li><b>AV 动静脉分割集</b>：清华深研院 + 深圳市眼科；UWF 动静脉分割（Sci Data 2025-07，
+    <a href="https://www.nature.com/articles/s41597-025-05381-2">s41597-025-05381-2</a>，figshare 人工下载）。</li>
+  <li><b>OCT2017</b>（非国内图源，骨干预训练备选）：108,312 张 OCT，Mendeley 直下，CC BY 4.0。</li>
+</ul>
+<h3>5.3 细粒度 / 特殊模态 / 近期新集</h3>
+<ul>
+  <li><b>JSIEC1000</b>：汕头国际眼科中心（广东）；1,000 张眼底 / 39 类细粒度（母库 209,494 张）；
+    <a href="https://www.kaggle.com/datasets/linchundan/fundusimage1000">Kaggle 镜像</a>（ODbL，当日确认）；版权归 JSIEC，
+    引用 <a href="https://www.nature.com/articles/s41467-021-25138-w">Nat Commun 2021</a>。39 类覆盖多种眼底病，下载后需核对其中与葡萄膜炎/炎症相关的类别。</li>
+  <li><b>UWF 眼内肿瘤集</b>：深圳市眼科医院（南方医科大）+ 澳门理工；6 类 UWF（脉络膜血管瘤、视网膜毛细血管瘤、脉络膜骨瘤等）；
+    <a href="https://www.nature.com/articles/s41597-025-05864-2">Sci Data 2025-08</a>。价值：眼内肿瘤是葡萄膜炎的「伪装综合征」鉴别对象。</li>
+  <li><b>MultiEYE</b>：香港中文大学；OCT 增强眼底疾病识别基准（IEEE TMI 2024）；
+    <a href="https://github.com/xmed-lab/MultiEYE">GitHub（MIT）</a>，数据集挂
+    <a href="https://huggingface.co/datasets/Luxuriant16/MultiEYE">HuggingFace</a>（本环境页面超时，README 已确认在架；国内建议走 hf-mirror.com 镜像）。</li>
+  <li><b>其他 Sci Data 国内新集</b>（均 figshare，按需取用）：
+    <a href="https://www.nature.com/articles/s41597-026-08342-5">小儿 UWF 动静脉分割</a>（南京医科大学，2026-09）、
+    <a href="https://www.nature.com/articles/s41597-024-03362-5">ROP 智能筛查</a>（深圳眼科，2024-05）、
+    <a href="https://www.nature.com/articles/s41597-025-04426-w">COph100 婴儿眼底配准（RIDIRP）</a>（南方科大，2025-01，figshare DOI 10.6084/m9.figshare.27061084）。</li>
+  <li><b>EyecareGPT 数据集</b>：浙江大学（ACM MM 2025），中文眼科多模态；官方 README 标注 <b>Coming Soon</b>，建议持续关注
+    <a href="https://github.com/ZJU4HealthCare/EyecareGPT">仓库</a>。</li>
+</ul>
+
+<h2>六、文本与知识库（T2 / RAG，免费部分）</h2>
+<ul>
+  <li><b>葡萄膜炎临床字段规范</b>：英国皇家眼科医师学会 Uveitis data set（2018，PDF 免费下载）——
+    最小/扩展数据集规范，覆盖分型、活动性、并发症、治疗；用作病例 JSON Schema 与公开端问卷字段的对齐参照。
+    <a href="https://www.rcophth.ac.uk/guidance-resources/uveitis-data-set/">rcophth.ac.uk</a></li>
+  <li><b>中文指南 / 共识</b>：中华医学会眼科学分会葡萄膜炎相关共识与 MUV 多模态成像指南系列（2025–2026 多篇，文献库检索确认存在）；
+    经出版社 / 医脉通等渠道阅读，仅作 RAG 内部科研语料，注意版权。</li>
+  <li><b>中文结构化病例</b>：无现成开源集；按训练计划 SOP 由 LLM 生成 3,000–5,000 条 + 医学顾问审核。</li>
+</ul>
+
+<h2>七、元资源（继续找数据的入口）</h2>
+<ul>
+  <li><a href="https://github.com/uni-medical/Project-Imaging-X">Project-Imaging-X</a>：1000+ 开放医学影像数据集综述（MIT）。</li>
+  <li><a href="https://github.com/pooyakhosravi/EyeDataHub">EyeDataHub</a>：350+ 眼科数据集检索 / 引用 / 访问 CLI。</li>
+  <li><a href="https://github.com/NanxuGong/Awesome-Ophthalmology-Dataset">Awesome-Ophthalmology-Dataset</a>、
+      <a href="https://github.com/openmedlab/Awesome-Medical-Dataset">Awesome-Medical-Dataset</a>（openmedlab）。</li>
+</ul>
+
+<h2>八、行动顺序建议</h2>
+<ol>
+  <li><b>零门槛直下</b>（无需申请）：iChallenge 百度网盘直链、DDR 网盘、DeepDRiD、EyeQ、JSIEC1000（Kaggle）、ODIR-5K（Kaggle/天池）；LAG 发邮件要密码。</li>
+  <li><b>需人工浏览器</b>：figshare 上的 Open UWF 700（含葡萄膜炎 100 张，最高优先）、白内障细粒度集、FIVES、AV 分割集、眼内肿瘤集、病理性近视结构集。</li>
+  <li><b>免费注册即可</b>：OCTA-500（IEEE DataPort）、ODIR-2019（Grand Challenge）、REFUGE（Grand Challenge）。</li>
+  <li>下载后逐项归档许可文本；ODIR-5K 遵守「内部科研 + 成果公开前联系数据方」原则。</li>
+</ol>
+
+<h2>九、合规要点</h2>
+<div class="warn">
+  <ul>
+    <li>本清单仅覆盖非商用科研场景；NC 类许可（DDR、EyeQ 等）只允许非商用使用。</li>
+    <li>SA / ND 条款仅影响「再分发」：训练模型、发论文不受影响；对外发布预处理/衍生数据集时，CC BY-SA 需同许可发布，ND 禁止。</li>
+    <li>未明示许可（ODIR-5K）：从官方渠道获取、注明出处、勿再分发原始数据；公开发布模型或商业化前书面确认。</li>
+    <li>JSIEC1000 版权归 JSIEC，按 Kaggle 页面条款使用并引用原始论文；LAG 仅学术、禁止再上传。</li>
+    <li>即使数据已脱敏，也不得尝试重新识别个人身份。</li>
+  </ul>
+</div>
+
+<h2>十、核验方法说明</h2>
+<div class="note">
+  <ul>
+    <li>页面级核验：iChallenge 官网、ODIR-2019 官方页、天池数据页、飞桨 AI Studio 数据页、Kaggle 数据页、IEEE DataPort 页、Nature 文章页当日逐个打开。</li>
+    <li>API 级核验：GitHub REST API（仓库 README、搜索）、DataCite API（figshare 条目许可与体积）、OpenAlex（国内机构 2024+ 眼科数据集论文普查）。</li>
+    <li>环境限制记录：GitHub 网页与 HuggingFace 页面在核验时段无法直连（API 可用，HF 建议走镜像）；figshare 对自动化访问返回 403，相关条目标注「需人工浏览器」。</li>
+    <li>检索与核验脚本：仓库 <code>scripts/research/cn-datasets-20261023/</code>（round-01～05.mjs，ego-browser 环境）。</li>
+    <li>数据集许可、可下载状态与字段可能随源站调整，正式使用前请以源站最新说明为准。</li>
+  </ul>
+</div>
+
+<footer>
+  国内开源免费眼科数据集核验清单 · 葡萄膜炎辅助诊断智能系统 · v1.0 · 2026-10-23 现场核验 · 仅用于非商用科研数据选型，不构成医疗建议。
+</footer>
+
+</div>
+
+</main>
+<footer class="doc-footer">
+  <span>国内眼科数据集核验 · 2026-10-23</span>
+  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,237 @@
+{
+  "run_id": "qwen4b-stage1-20261025-01",
+  "checkpoint_step": 100,
+  "evaluation_type": "qlora_adapter",
+  "rows": 40,
+  "tasks": {
+    "oct_uveitis_4class": {
+      "samples": 10,
+      "accuracy": 0.5,
+      "macro_f1": 0.3392857142857143,
+      "json_valid_rate": 1.0,
+      "per_class": {
+        "Intermediate+Posterior Uveitis": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 2
+        },
+        "Normal": {
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571428571428571,
+          "support": 3
+        },
+        "Panuveitis": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "RRD-PVR": {
+          "precision": 0.3333333333333333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 2
+        }
+      },
+      "confusion_matrix": {
+        "Intermediate+Posterior Uveitis": {
+          "Intermediate+Posterior Uveitis": 0,
+          "Normal": 1,
+          "Panuveitis": 0,
+          "RRD-PVR": 1
+        },
+        "Normal": {
+          "Intermediate+Posterior Uveitis": 0,
+          "Normal": 3,
+          "Panuveitis": 0,
+          "RRD-PVR": 0
+        },
+        "Panuveitis": {
+          "Intermediate+Posterior Uveitis": 0,
+          "Normal": 0,
+          "Panuveitis": 0,
+          "RRD-PVR": 3
+        },
+        "RRD-PVR": {
+          "Intermediate+Posterior Uveitis": 0,
+          "Normal": 0,
+          "Panuveitis": 0,
+          "RRD-PVR": 2
+        }
+      },
+      "errors": 0
+    },
+    "fundus_toxo_binary": {
+      "samples": 10,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "json_valid_rate": 1.0,
+      "per_class": {
+        "healthy": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 5
+        },
+        "toxoplasmosis": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 5
+        }
+      },
+      "confusion_matrix": {
+        "healthy": {
+          "healthy": 5,
+          "toxoplasmosis": 0
+        },
+        "toxoplasmosis": {
+          "healthy": 0,
+          "toxoplasmosis": 5
+        }
+      },
+      "errors": 0
+    },
+    "eye_five_class": {
+      "samples": 10,
+      "accuracy": 0.8,
+      "macro_f1": 0.7999999999999999,
+      "json_valid_rate": 1.0,
+      "per_class": {
+        "Cataract": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2
+        },
+        "Conjunctivitis": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "support": 2
+        },
+        "Eyelid": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.6666666666666666,
+          "support": 2
+        },
+        "Normal": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2
+        },
+        "Uveitis": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.6666666666666666,
+          "support": 2
+        }
+      },
+      "confusion_matrix": {
+        "Cataract": {
+          "Cataract": 2,
+          "Conjunctivitis": 0,
+          "Eyelid": 0,
+          "Normal": 0,
+          "Uveitis": 0
+        },
+        "Conjunctivitis": {
+          "Cataract": 0,
+          "Conjunctivitis": 2,
+          "Eyelid": 0,
+          "Normal": 0,
+          "Uveitis": 0
+        },
+        "Eyelid": {
+          "Cataract": 0,
+          "Conjunctivitis": 1,
+          "Eyelid": 1,
+          "Normal": 0,
+          "Uveitis": 0
+        },
+        "Normal": {
+          "Cataract": 0,
+          "Conjunctivitis": 0,
+          "Eyelid": 0,
+          "Normal": 2,
+          "Uveitis": 0
+        },
+        "Uveitis": {
+          "Cataract": 0,
+          "Conjunctivitis": 1,
+          "Eyelid": 0,
+          "Normal": 0,
+          "Uveitis": 1
+        }
+      },
+      "errors": 0
+    },
+    "oct_aux_4class": {
+      "samples": 10,
+      "accuracy": 0.9,
+      "macro_f1": 0.9,
+      "json_valid_rate": 1.0,
+      "per_class": {
+        "CNV": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 3
+        },
+        "DME": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1": 0.8,
+          "support": 3
+        },
+        "DRUSEN": {
+          "precision": 0.6666666666666666,
+          "recall": 1.0,
+          "f1": 0.8,
+          "support": 2
+        },
+        "NORMAL": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2
+        }
+      },
+      "confusion_matrix": {
+        "CNV": {
+          "CNV": 3,
+          "DME": 0,
+          "DRUSEN": 0,
+          "NORMAL": 0
+        },
+        "DME": {
+          "CNV": 0,
+          "DME": 2,
+          "DRUSEN": 1,
+          "NORMAL": 0
+        },
+        "DRUSEN": {
+          "CNV": 0,
+          "DME": 0,
+          "DRUSEN": 2,
+          "NORMAL": 0
+        },
+        "NORMAL": {
+          "CNV": 0,
+          "DME": 0,
+          "DRUSEN": 0,
+          "NORMAL": 2
+        }
+      },
+      "errors": 0
+    }
+  },
+  "elapsed_seconds": 40.53400522,
+  "peak_gpu_memory_gib": 3.2651209831237793,
+  "finished_at": "2026-10-25T03:36:05.218846+00:00",
+  "note": "Only the frozen manifest test split was evaluated. 03 is prototype data; outputs require human review."
+}

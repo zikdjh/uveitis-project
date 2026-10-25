@@ -1,0 +1,84 @@
+{
+  "run_id": "local-4060-formal-20261025-01",
+  "status": "ok",
+  "started_at": "2026-10-25T12:38:12.991632+00:00",
+  "mode": "local_stage1_class_balanced_qlora",
+  "model_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\manifest.csv",
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "total_memory_gib": 7.99560546875,
+    "compute_capability": [
+      8,
+      9
+    ]
+  },
+  "configuration": {
+    "quantization": "4-bit NF4, bfloat16 compute, double quant",
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "gradient_checkpointing": true,
+    "image_pixels": 65536,
+    "max_length": 256,
+    "target_steps": 500,
+    "grad_accum": 4,
+    "learning_rate": 2.5e-05,
+    "validation_every": 25,
+    "save_every": 25,
+    "early_stop_patience": 3,
+    "seed": 20261025
+  },
+  "split": {
+    "train_rows": 12159,
+    "validation_rows": 68,
+    "validation_selection_sha256": "f0f08cdd3f2dbcd194f925cf75283ebc67fb164d15b0dbac868bf26916b3aa34",
+    "schedule_sha256": "04f1bd3793be7469639e125b8e5f13c6a9e031b7f8fb0d0bcbc3c9b749e3a12a",
+    "class_exposures": {
+      "eye_five_class::Cataract": 134,
+      "eye_five_class::Conjunctivitis": 133,
+      "eye_five_class::Eyelid": 133,
+      "eye_five_class::Normal": 134,
+      "eye_five_class::Uveitis": 134,
+      "fundus_toxo_binary::healthy": 133,
+      "fundus_toxo_binary::toxoplasmosis": 133,
+      "oct_aux_4class::CNV": 133,
+      "oct_aux_4class::DME": 133,
+      "oct_aux_4class::DRUSEN": 133,
+      "oct_aux_4class::NORMAL": 133,
+      "oct_uveitis_4class::Intermediate+Posterior Uveitis": 133,
+      "oct_uveitis_4class::Normal": 133,
+      "oct_uveitis_4class::Panuveitis": 134,
+      "oct_uveitis_4class::RRD-PVR": 134
+    }
+  },
+  "after_load": {
+    "allocated_gib": 4.388749599456787,
+    "reserved_gib": 5.607421875,
+    "trainable_parameters": 10616832,
+    "resumed_from_step": 450
+  },
+  "completed_steps": 500,
+  "truncated_reason": "target_steps",
+  "best_step": 450,
+  "best_validation_loss": 0.02545971898293561,
+  "last_gradient_norm": 0.0905725285410881,
+  "final_adapter": {
+    "directory": "artifacts\\qwen3.5-4b\\local-4060-formal-20261025-01\\final_adapter",
+    "sha256": "2d5f02d78b30a4bfb6ef639ae28f8b14e32b26eabe0e7185dee44ccad0cb1e59"
+  },
+  "best_adapter": {
+    "directory": "artifacts\\qwen3.5-4b\\local-4060-formal-20261025-01\\best_adapter",
+    "sha256": "8820450d565b5c139d9b0bda228b4375e2ed5b3af7c87670d8637069a0384b3e"
+  },
+  "peak_allocated_gib": 5.452396869659424,
+  "peak_reserved_gib": 5.69140625,
+  "final_memory": {
+    "allocated_gib": 4.4046196937561035,
+    "reserved_gib": 5.69140625,
+    "peak_allocated_gib": 5.452396869659424,
+    "peak_reserved_gib": 5.69140625
+  },
+  "total_seconds": 317.50039420000394,
+  "finished_at": "2026-10-25T12:43:30.491571+00:00"
+}

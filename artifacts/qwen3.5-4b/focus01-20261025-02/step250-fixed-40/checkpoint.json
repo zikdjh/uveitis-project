@@ -1,0 +1,5 @@
+{
+  "step": 250,
+  "validation_loss": null,
+  "kind": "adapter_with_optimizer_state"
+}

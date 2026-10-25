@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国外开源免费眼科数据集核验清单 · 葡萄膜炎辅助诊断项目</title>
+<style>
+  body { font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+         color: #1f2328; margin: 0; background: #f6f7f9; line-height: 1.7; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 28px 64px; background: #fff; }
+  h1 { font-size: 26px; margin: 8px 0 4px; }
+  h2 { font-size: 20px; margin-top: 40px; border-left: 4px solid #059669; padding-left: 10px; }
+  h3 { font-size: 16px; margin-top: 24px; }
+  .meta { color: #57606a; font-size: 13px; border-bottom: 1px solid #d8dee4; padding-bottom: 14px; }
+  .meta b { color: #1f2328; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 20px; font-size: 13.5px; }
+  th, td { border: 1px solid #d8dee4; padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { background: #ecfdf5; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  a { color: #2563eb; text-decoration: none; word-break: break-all; }
+  a:hover { text-decoration: underline; }
+  .tag { display: inline-block; font-size: 12px; border-radius: 3px; padding: 1px 7px; margin-right: 4px; white-space: nowrap; }
+  .ok { background: #dcfce7; color: #166534; }
+  .manual { background: #fef3c7; color: #92400e; }
+  .reg { background: #e0e7ff; color: #3730a3; }
+  .no { background: #fee2e2; color: #991b1b; }
+  .note { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 14px; font-size: 13.5px; }
+  .warn { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 10px 14px; font-size: 13.5px; }
+  ol li, ul li { margin: 4px 0; }
+  footer { margin-top: 48px; color: #6b7280; font-size: 12.5px; border-top: 1px solid #d8dee4; padding-top: 12px; }
+  code { background: #f3f4f6; border-radius: 3px; padding: 1px 5px; font-size: 12.5px; }
+  @media print { body { background: #fff; } .wrap { padding: 0; } }
+</style>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-23-cn-eye-datasets.html">上一份</a>
+    <a href="2026-10-23-manual-download-links.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content">
+
+<div class="wrap">
+
+<h1>国外开源免费眼科数据集核验清单</h1>
+<div class="meta">
+  <b>面向项目</b>：葡萄膜炎辅助诊断智能系统（多模态训练数据规划 · 国外部分）<br>
+  <b>核验日期</b>：2026-10-23 · <b>性质</b>：非商用科研用途 · <b>版本</b>：v1.0<br>
+  <b>网络方式</b>：figshare / HuggingFace / 部分站点经本机代理 <code>127.0.0.1:7890</code> 访问
+  （figshare 直连 403，代理后 API 全通）；其余直连。<br>
+  <b>检索脚本</b>：仓库 <code>scripts/research/intl-datasets-20261023/</code>（round-01～08.mjs）。
+  姊妹文档：<a href="2026-10-23-cn-eye-datasets.html">国内开源免费眼科数据集核验清单</a>。
+</div>
+
+<h2>一、核心结论</h2>
+<ol>
+  <li>国外免费专病影像呈「<b>小样本直下 + 一个大规模受限申请</b>」格局：葡萄膜炎 OCT（75 文件）、
+      ToxoFundus（眼底+病灶 mask）、五分类含症状文本（v2）即时可用；
+      Birdshot-WIDE（6,352 张超广角）是唯一大规模专病集，需签 DUA 申请，建议立即启动。</li>
+  <li>国外「图像 + 患者信息」多模态层的最佳免费项是 <b>BRSET</b>（巴西，PhysioNet open 状态已核验），
+      16k+ 眼底带结构化患者元数据；OLIVES 与 AI-READI 免费但需人工走 gated / credentialed 流程。</li>
+  <li>骨干预训练与分割经典集全部免费可得：OCT2017、RFMiD 2.0、IDRiD、APTOS、Messidor、RETOUCH、DRIVE、STARE、DRISHTI-GS、HRF。</li>
+  <li>与国内清单互补：专病深度靠国际集，多模态形态贴近度靠国内 ODIR-5K / UWF-700，
+      两份清单合并即为完整数据规划。</li>
+</ol>
+
+<h2>二、总览</h2>
+<table>
+  <tr><th>数据集</th><th>国家 / 机构</th><th>规模与内容</th><th>许可</th><th>获取状态</th></tr>
+  <tr><td>葡萄膜炎 OCT（Mendeley）</td><td>印度尼西亚</td><td>OCT 4 类，7.22 MB</td><td>CC BY 4.0</td><td><span class="tag ok">直下</span></td></tr>
+  <tr><td>ToxoFundus（Zenodo）</td><td>巴拉圭</td><td>眼底 + 病灶 mask</td><td>CC BY 4.0</td><td><span class="tag ok">直下</span><span class="tag ok">Kaggle 镜像</span></td></tr>
+  <tr><td>五分类含症状文本（Mendeley v2）</td><td>孟加拉</td><td>5 类图像 + 症状文本</td><td>CC BY 4.0</td><td><span class="tag ok">直下</span><span class="tag no">仅原型</span></td></tr>
+  <tr><td>Birdshot-WIDE（Zenodo）</td><td>法国</td><td>BSCR UWF 5,042 + 对照 1,310</td><td>DUA（CC BY 4.0）</td><td><span class="tag manual">申请</span></td></tr>
+  <tr><td>BRSET（PhysioNet）</td><td>巴西</td><td>16k+ 眼底 + 患者元数据</td><td>open</td><td><span class="tag reg">免费注册</span></td></tr>
+  <tr><td>OLIVES</td><td>美国 Clarkson</td><td>OCTA + OCT + 临床文本</td><td>gated</td><td><span class="tag manual">人工申请</span></td></tr>
+  <tr><td>AI-READI</td><td>美国 NIH 资助</td><td>多设备多模态 + 患者信息</td><td>credentialed 免费</td><td><span class="tag manual">人工定位</span></td></tr>
+  <tr><td>OCT2017（Mendeley）</td><td>美国 UCSD</td><td>OCT ×108,312</td><td>CC BY 4.0</td><td><span class="tag ok">直下</span></td></tr>
+  <tr><td>RFMiD 2.0（Zenodo）</td><td>意大利</td><td>长尾多病种眼底</td><td>CC BY 4.0</td><td><span class="tag ok">直下</span></td></tr>
+  <tr><td>IDRiD / RETOUCH</td><td>印度 / 多中心</td><td>DR 分级+病灶分割 / OCT 液体分割</td><td>挑战条款</td><td><span class="tag reg">注册下载</span></td></tr>
+  <tr><td>APTOS 2019 / EyePACS</td><td>印度 / 美国</td><td>DR 竞赛眼底</td><td>竞赛条款</td><td><span class="tag reg">Kaggle 账号</span></td></tr>
+  <tr><td>Messidor-1/2</td><td>法国 ADCIS</td><td>眼底 1,200 + 1,748</td><td>协议后免费</td><td><span class="tag reg">接受协议</span></td></tr>
+  <tr><td>DRIVE / STARE / DRISHTI-GS / HRF</td><td>荷兰/美国/印度/德国</td><td>血管与视盘分割经典集</td><td>学术免费</td><td><span class="tag ok">官方页在架</span></td></tr>
+  <tr><td>RIM-ONE r3</td><td>西班牙</td><td>视盘/视杯分割</td><td>学术</td><td><span class="tag manual">官方渠道待定位</span></td></tr>
+</table>
+
+<h2>三、核心专病层（葡萄膜炎相关）</h2>
+<h3>3.1 葡萄膜炎 OCT（Mendeley hbr5pwk5w5 v1）</h3>
+<ul>
+  <li>Universitas Indonesia，2023-04 发布；4 类：中间+后葡萄膜炎 / 全葡萄膜炎 / 正常 / RRD-PVR；共 7.22 MB，免登录直下；CC BY 4.0（当日页面核验）。</li>
+  <li>用途：T1 OCT 细分类与 T3 专病微调的核心直用集；样本量小，只做微调/概念验证。</li>
+  <li>链接：<a href="https://data.mendeley.com/datasets/hbr5pwk5w5/1">data.mendeley.com/datasets/hbr5pwk5w5/1</a></li>
+</ul>
+<h3>3.2 ToxoFundus（Zenodo 5156953 / 2024 版记录 13883485）</h3>
+<ul>
+  <li>巴拉圭亚松森两家医院采集；眼底图像 + 活动性/非活动性病灶分割 mask + labels CSV；眼弓形虫是感染性后葡萄膜炎的常见病因。</li>
+  <li>CC BY 4.0（API 核验 open）；Kaggle 存在同名镜像（TensorKitty，702 下载，当日核验）。</li>
+  <li>用途：病灶分割头训练 + 感染性亚型外部验证。</li>
+</ul>
+<h3>3.3 五分类含症状文本（Mendeley n9zp473wfw v2，2024-12）</h3>
+<ul>
+  <li>Daffodil International University（孟加拉）；Uveitis / Conjunctivitis / Cataract / Eyelid / Normal 五类图像，附每类症状文本描述；CC BY 4.0（当日页面核验）。</li>
+  <li><b>红线</b>：图像来自网络爬取且经 SMOTE 复制，仅限管线原型验证，禁入结论性训练与对外指标。</li>
+</ul>
+<h3>3.4 Birdshot-WIDE（Zenodo 19474623，Scientific Data 2026）</h3>
+<ul>
+  <li>巴黎 Cochin 医院 CO-BIRD 队列；5,042 张 BSCR 超广角眼底 + 1,310 张年龄/性别匹配对照；带纵向随访（中位 4.31 年）与患者元数据。</li>
+  <li>受控访问：Zenodo 提交申请 → 签署 DUA → 审批下载；许可 CC BY 4.0（API 核验 restricted + cc-by-4.0）。</li>
+  <li>价值：当前唯一大规模葡萄膜炎专用 UWF 集，适合微调与外部验证。<b>建议立即启动申请</b>。</li>
+</ul>
+<h3>3.5 其他专病相关工件（非数据集）</h3>
+<ul>
+  <li>AS-OCT 葡萄膜炎 SUN 分级方法记录（Zenodo 7754367）：当日核验无文件，纯论文工件，仅方法参考。</li>
+  <li>眼弓形虫 DL 系统综述工件（figshare 34179423，2026-10-07）：CC BY 4.0，2 文件；可作 RAG 证据，非训练数据。</li>
+</ul>
+
+<h2>四、多模态 + 患者信息层</h2>
+<ul>
+  <li><b>BRSET</b>（巴西 MOBI，PhysioNet v1.0.2）：16k+ 眼底彩照 + 结构化患者元数据（年龄、性别、糖尿病等），多标签疾病标注。
+      PhysioNet <b>open</b> 访问（当日 curl 核验标题与状态），免费注册后下载。
+      国外最贴合「图像 + 患者信息」形态的免费集，T3 预训练首选之一。</li>
+  <li><b>OLIVES</b>（Clarkson 大学 iVIL 实验室）：OCTA + OCT + 临床文本，含血流/灌注标签；HuggingFace gated（API 401 确认），官方 GitHub 仓库本轮未定位成功；接受条款后免费。</li>
+  <li><b>AI-READI</b>（美国 NIH 资助 STAND-UP 项目）：糖尿病相关并发症多设备多模态（眼底/OCT/OCTA/裂隙灯）+ 患者信息；免费但 credentialed（需完成培训并签协议）。PhysioNet 旧路径 <code>/content/ai-readi/</code> 已 404，发布渠道调整中，需人工定位。</li>
+  <li>佐证细节：figshare 上「Uveitis_All_2025_Oct」（5.1 GB，CC BY 4.0）描述含 "all cell types"，疑似组学而非影像；角膜内皮 AU 表格（76 KB，CC BY 4.0）可作前葡萄膜炎问卷字段参考。两者均已通过 figshare API（代理）核验。</li>
+</ul>
+
+<h2>五、预训练骨干层</h2>
+<ul>
+  <li><b>OCT2017</b>（UCSD，Mendeley rscbjbr9sj v3）：108,312 张 OCT，7.85 GB，CC BY 4.0（页面+许可当日核验）；OCT 骨干预训练。</li>
+  <li><b>RFMiD 2.0</b>（意大利，Zenodo 7505822）：45 类长尾多病种眼底，CC BY 4.0（API 核验 open）；泛化评估与长尾预训练。</li>
+  <li><b>IDRiD</b>（印度）：516 张眼底，DR 五级 + 4 类病灶像素级分割/检测；Grand Challenge 页面在架（当日核验），注册下载。</li>
+  <li><b>APTOS 2019</b>（印度 APTOS 学会）：~3,662 训练眼底 DR 五级；Kaggle 竞赛页在架（当日核验），Late Submission 开放，账号即可取数。</li>
+  <li><b>EyePACS</b>（美国）：~88k 眼底；本轮页面未渲染（待人工确认），该竞赛长期在架。</li>
+  <li><b>Messidor-1 / Messidor-2</b>（法国 ADCIS）：1,200 / 1,748 张；ADCIS 页面在架（当日核验），接受使用协议后免费。</li>
+  <li><b>RETOUCH</b>（多中心欧美）：OCT/OCTA 液体分割挑战；Grand Challenge 页面在架（当日核验），数据注册获取。</li>
+  <li><b>EyeQ</b>（美国 EyePACS 图源、国内团队重标注）：28,792 张三级质量标注；GitHub 直下（前一轮核验）；CC BY-NC-SA；训练前质量过滤分支。</li>
+</ul>
+
+<h2>六、分割经典层（可解释性辅助）</h2>
+<ul>
+  <li><b>DRIVE</b>（荷兰）：40 张眼底血管分割基准；<a href="https://drive.grand-challenge.org/">drive.grand-challenge.org</a> 在架（当日核验）。</li>
+  <li><b>STARE</b>（美国 UCSD/VA）：400 张 + 两套血管标注；Clemson 官方页在架（当日核验），直下。</li>
+  <li><b>DRISHTI-GS</b>（印度 IIIT + Aravind）：101 张视盘/视杯分割；CVIT 官方页在架（当日核验）。</li>
+  <li><b>HRF</b>（德国 FAU Erlangen）：45 张高分辨 + 血管标注；官方页在架（当日核验，旧站仍可用）。</li>
+  <li><b>RIM-ONE r3</b>（西班牙）：视盘/视杯分割；原 miag-ull GitHub 仓库 404（API 核验），官方渠道需人工定位。</li>
+  <li><b>候选未核验</b>：CHASE_DB1（英国，申请制）、ORIGA（新加坡）、IOSTAR（欧洲）。</li>
+</ul>
+
+<h2>七、组学与背景资源（可选）</h2>
+<ul>
+  <li><b>Uveitis Atlas</b>（Zenodo 20783773）：眼内液 + 血 scRNA/TCR/BCR（病毒 vs 非感染性葡萄膜炎），CC BY 4.0，open（API 核验）；非影像，跨模态背景可选。</li>
+  <li><b>葡萄膜炎 FFA 渗漏 RETFound 微调权重</b>（Zenodo 23503796）：restricted + CC BY-NC 4.0（API 核验）；用 OCT/眼底预测 FFA 渗漏，可作 T1 迁移起点（非数据）。</li>
+</ul>
+
+<h2>八、行动顺序建议</h2>
+<ol>
+  <li><b>零门槛直下</b>：葡萄膜炎 OCT、ToxoFundus、五分类（限原型）、OCT2017、RFMiD 2.0。</li>
+  <li><b>免费注册</b>：PhysioNet（取 BRSET）、Grand Challenge（IDRiD / RETOUCH / DRIVE）、Kaggle（APTOS / EyePACS / uveitis 镜像）、ADCIS（Messidor 协议）。</li>
+  <li><b>人工 / 代理走 gated</b>：OLIVES（HF gated）、AI-READI（credentialed，渠道已变需定位）、RIM-ONE 官方渠道、figshare 相关条目（代理 API 已通，页面下载建议人工）。</li>
+  <li><b>立即启动申请</b>：Birdshot-WIDE（Zenodo 提交访问申请 + 签 DUA），审批周期不定，越早越好。</li>
+</ol>
+
+<h2>九、合规要点</h2>
+<div class="warn">
+  <ul>
+    <li>CC BY 4.0 的唯一义务是署名引用原始论文；转载/分发需保留许可声明。</li>
+    <li>NC 类（如 EyeQ 的 CC BY-NC-SA、FFA 权重的 CC BY-NC）仅限非商用科研。</li>
+    <li>restricted / gated / credentialed 集（Birdshot-WIDE、OLIVES、AI-READI、RETOUCH 部分）遵守各自 DUA，不得再分发。</li>
+    <li>竞赛条款集（IDRiD、APTOS、EyePACS、RETOUCH）仅限学术用途，对外发布成果前核对条款。</li>
+    <li>爬取 + SMOTE 来源（五分类 v2）只允许原型验证，不进入结论性训练集或对外指标。</li>
+    <li>即使数据已脱敏，也不得尝试重新识别个人身份。</li>
+  </ul>
+</div>
+
+<h2>十、核验方法说明</h2>
+<div class="note">
+  <ul>
+    <li>API 级核验：Zenodo REST API（记录/许可/访问权）、figshare API（经代理，条目详情与搜索）、DataCite API、HuggingFace API（经代理）、GitHub REST API、PhysioNet 页面 curl。</li>
+    <li>页面级核验：Mendeley 数据页、Kaggle 搜索与竞赛页、Grand Challenge 页（IDRiD/DRIVE/RETOUCH）、ADCIS、FAU、Clemson、IIIT CVIT、PhysioNet。</li>
+    <li>代理说明：figshare 直连 403（反爬），经 <code>127.0.0.1:7890</code> 代理后 API 正常；HuggingFace 直连超时，走代理或镜像。</li>
+    <li>环境限制记录：PhysioNet 网页在自动化浏览器下返回空，curl 可取；DataCite 部分查询瞬时失败；RIM-ONE / OLIVES 官方仓库地址未定位成功，均标注「待人工」。</li>
+    <li>检索与核验脚本：仓库 <code>scripts/research/intl-datasets-20261023/</code>（round-01～08.mjs，ego-browser 环境，含 curl 代理调用）。</li>
+    <li>数据集许可、可下载状态与字段可能随源站调整，正式使用前请以源站最新说明为准。</li>
+  </ul>
+</div>
+
+<footer>
+  国外开源免费眼科数据集核验清单 · 葡萄膜炎辅助诊断智能系统 · v1.0 · 2026-10-23 现场核验 · 仅用于非商用科研数据选型，不构成医疗建议。
+</footer>
+
+</div>
+
+</main>
+<footer class="doc-footer">
+  <span>国外眼科数据集核验 · 2026-10-23</span>
+  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+</footer>
+
+</body>
+</html>

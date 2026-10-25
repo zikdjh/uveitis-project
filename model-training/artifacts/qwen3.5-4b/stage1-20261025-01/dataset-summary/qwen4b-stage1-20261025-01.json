@@ -1,0 +1,77 @@
+{
+  "manifest": "/data/data/manifest.csv",
+  "stage": 1,
+  "tasks": [
+    "oct_uveitis_4class",
+    "fundus_toxo_binary",
+    "eye_five_class",
+    "oct_aux_4class"
+  ],
+  "full_task_counts": {
+    "oct_uveitis_4class": 60,
+    "fundus_toxo_binary": 330,
+    "eye_five_class": 1837,
+    "oct_aux_4class": 10000
+  },
+  "train_rows": 900,
+  "validation_rows": 96,
+  "holdout_rows": 1557,
+  "train_label_counts": {
+    "oct_aux_4class::DME": 77,
+    "fundus_toxo_binary::healthy": 77,
+    "oct_aux_4class::CNV": 77,
+    "fundus_toxo_binary::toxoplasmosis": 77,
+    "oct_aux_4class::DRUSEN": 77,
+    "eye_five_class::Normal": 77,
+    "eye_five_class::Cataract": 78,
+    "eye_five_class::Eyelid": 77,
+    "oct_aux_4class::NORMAL": 77,
+    "eye_five_class::Conjunctivitis": 78,
+    "eye_five_class::Uveitis": 77,
+    "oct_uveitis_4class::Normal": 19,
+    "oct_uveitis_4class::RRD-PVR": 13,
+    "oct_uveitis_4class::Intermediate+Posterior Uveitis": 8,
+    "oct_uveitis_4class::Panuveitis": 11
+  },
+  "validation_label_counts": {
+    "fundus_toxo_binary::healthy": 8,
+    "eye_five_class::Normal": 8,
+    "eye_five_class::Cataract": 8,
+    "oct_uveitis_4class::Intermediate+Posterior Uveitis": 2,
+    "oct_aux_4class::NORMAL": 7,
+    "eye_five_class::Eyelid": 8,
+    "oct_aux_4class::DRUSEN": 8,
+    "oct_aux_4class::CNV": 8,
+    "eye_five_class::Conjunctivitis": 8,
+    "oct_uveitis_4class::RRD-PVR": 2,
+    "oct_aux_4class::DME": 8,
+    "oct_uveitis_4class::Normal": 3,
+    "oct_uveitis_4class::Panuveitis": 2,
+    "eye_five_class::Uveitis": 8,
+    "fundus_toxo_binary::toxoplasmosis": 8
+  },
+  "holdout_label_counts": {
+    "oct_uveitis_4class::Intermediate+Posterior Uveitis": 2,
+    "oct_uveitis_4class::Normal": 6,
+    "oct_uveitis_4class::Panuveitis": 3,
+    "oct_uveitis_4class::RRD-PVR": 4,
+    "fundus_toxo_binary::toxoplasmosis": 56,
+    "fundus_toxo_binary::healthy": 26,
+    "eye_five_class::Cataract": 109,
+    "eye_five_class::Conjunctivitis": 71,
+    "eye_five_class::Eyelid": 105,
+    "eye_five_class::Normal": 130,
+    "eye_five_class::Uveitis": 45,
+    "oct_aux_4class::CNV": 250,
+    "oct_aux_4class::DME": 250,
+    "oct_aux_4class::DRUSEN": 250,
+    "oct_aux_4class::NORMAL": 250
+  },
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "notes": [
+    "Validation was split from train rows deterministically by task/label.",
+    "The frozen test split never participates in training or checkpoint selection.",
+    "03 is used as a prototype and is not a clinical test set.",
+    "Training text contains only the true task and label."
+  ]
+}

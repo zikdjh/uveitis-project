@@ -1,0 +1,15 @@
+const task = await taskSpace(8);
+const page = task.page("p1");
+const base = "http://127.0.0.1:5173/doctor/cases/0f7762ec-c7b4-4965-9efb-67cba861f326";
+await page.goto(base + "/review");
+await page.waitForSelector("form");
+await page.fill("textarea[name=final_impression]", "结合右眼红痛与畏光表现，需尽快由眼科医生进行裂隙灯等检查。");
+await page.fill("textarea[name=note]", "已完成界面流程验证，建议结合原始检查资料判断。");
+await page.fill("input[name=reviewer]", "验收医生");
+await page.click("button[type=submit]");
+await page.waitForSelector("text=完成");
+await page.goto(base + "/report");
+await page.waitForSelector("text=病例报告");
+console.log("review=" + await page.url());
+console.log(await page.snapshot());
+console.log(await page.evaluate(() => ({ url: location.href, overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth })));

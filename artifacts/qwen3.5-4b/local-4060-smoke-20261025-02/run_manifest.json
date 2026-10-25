@@ -1,0 +1,10 @@
+{
+  "run_id": "local-4060-smoke-20261025-02",
+  "status": "ok",
+  "python": "D:\\temp\\gpt\\uveitis-project\\model-training\\.venv-local\\Scripts\\python.exe",
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "metrics": "smoke_metrics.json",
+  "memory_monitor": "memory_monitor.jsonl"
+}

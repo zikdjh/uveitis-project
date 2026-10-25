@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modal L40S 预算排期 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-training-cost-ledger-modal.html">上一份</a>
+    <a href="2026-10-25-dataset-index.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>训练</span>
+    <span>2026-10-25</span>
+  </div>
+  <h1>Modal L40S 预算排期</h1>
+  <p class="doc-summary">本月与下月预算、训练顺序和数据集安排</p>
+  <p class="doc-source">Markdown 源文件：<code>model-training/docs/training-budget-plan-modal-l40s-44usd-20261025.md</code></p>
+  <article class="markdown-body">
+<p>日期：2026-10-25</p>
+<p>目标：在本月 $14、下月 $30 的额度内，优先完成 Qwen3.5-4B 多模态模型的第一阶段 QLoRA 和固定 holdout 评估。Qwen3.5-2B 仅作对照，Intern-Decision-4B 是补充方案，只在真实决策数据、医生复核、进度和预算门槛都通过后占用预算。所有时间均指单卡 L40S 的实际运行时间，不包含本地数据整理时间。</p>
+<h2 id="0-执行结论">0. 执行结论</h2>
+<ul>
+<li>4B 正式训练器已完成真实前向、反向、优化器更新、adapter 与 checkpoint 保存验证。</li>
+<li>2026-10-25 的 20 步标定使用 20 个真实训练样本，成功 <code>20</code>、跳过 <code>0</code>、OOM <code>0</code>。</li>
+<li>标定函数总耗时 <code>52.1</code> 秒，含模型加载、首步编译和一次 checkpoint 写入；峰值分配显存约 <code>5.58GiB</code>。</li>
+<li>稳定优化步约 <code>0.6-1.35s/样本</code>，后续预算仍按 <code>2.0s/样本</code> 保守计算。</li>
+<li>本月先做覆盖四类任务和类别的 4B 第一阶段，不用 $14 强行跑完 12,227 个训练样本。</li>
+<li>Decision 模型当前不训练；现有数据缺少完整病例、医生确认的处置标签和独立决策测试集。</li>
+</ul>
+<h2 id="1-预算口径">1. 预算口径</h2>
+<p>沿用项目已有 Modal 成本清单：</p>
+<table>
+<thead>
+<tr>
+<th>资源</th>
+<th style="text-align:right">保守单价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L40S</td>
+<td style="text-align:right">约 $1.95/GPU小时</td>
+</tr>
+<tr>
+<td>8 核 CPU + 64 GiB 内存</td>
+<td style="text-align:right">约 $0.89/小时</td>
+</tr>
+<tr>
+<td>合计</td>
+<td style="text-align:right">约 $2.84/小时</td>
+</tr>
+</tbody>
+</table>
+<p>按合计价计算：</p>
+<ul>
+<li>$44 的理论上限约为 <code>15.5 GPU小时</code>。</li>
+<li>不把理论值全部花完，计划安排 <code>14.4 GPU小时</code>。</li>
+<li>预计花费约 <code>$40.87</code>，保留约 <code>$3.13</code>，用于冷启动、镜像构建、失败重跑和最终核账。</li>
+</ul>
+<p>实际以 Modal 账单为准。模型下载、镜像构建、应用空闲、checkpoint 写入和调试也会计费，因此不能只按训练 step 估算。</p>
+<p>2026-10-25 已执行的 1 步诊断和 20 步标定都只产生分钟级 GPU 费用。CLI 的累计计量页面不能单独证明剩余额度；只有 Modal 控制台的当前账期余额、团队额度或付款方界面能作为最终依据。每次正式启动前必须再次核账。</p>
+<p>2026-10-25 的 focus01 短程实验已结束，阶段性新增计量约 <code>$0.55</code>。step 20 将 01 macro-F1 从 <code>0.3393</code> 提高到 <code>0.5625</code>，但 40 样本中 Intermediate/Posterior 仍为 0 召回，且单类只有 2 个测试样本。该结果仅用于证明数据重加权方向，不改变正式部署 adapter，也不应据此继续盲目续训。</p>
+<p>随后从 step 35 受控续训到 step 250，再降到 <code>2.5e-5</code> 续训到 step 313。step 250 的固定 40 样本 01 macro-F1 达 <code>0.6833</code>，02、03 均为 <code>1.0</code>，13 为 <code>0.9</code>；但 step 300 的内部验证损失从 step 100 的 <code>0.018165</code> 回升到 <code>0.030704</code>，因此已主动停止。训练没有用尽用户给定的 <code>$13</code>，而是保留在越界前：</p>
+<table>
+<thead>
+<tr>
+<th>账目</th>
+<th style="text-align:right">金额</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本轮起点 <code>metered_cost</code></td>
+<td style="text-align:right">$19.48187695</td>
+</tr>
+<tr>
+<td>本轮终点 <code>metered_cost</code></td>
+<td style="text-align:right">$20.35187695</td>
+</tr>
+<tr>
+<td>本轮新增</td>
+<td style="text-align:right"><strong>$0.87000000</strong></td>
+</tr>
+<tr>
+<td>按用户 <code>$13</code> 额度估算余额</td>
+<td style="text-align:right"><strong>约 $12.13</strong></td>
+</tr>
+</tbody>
+</table>
+<p>上述余额是从用户给定额度扣减累计计量得出的执行口径，不是 Modal 控制台 credit 余额。终止状态：没有活跃容器；step 250 和 step 300 均存在于 <code>uveitis-runs</code>。</p>
+<h2 id="2-总量分配">2. 总量分配</h2>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th style="text-align:right">可用额度</th>
+<th style="text-align:right">安排时长</th>
+<th style="text-align:right">预计花费</th>
+<th style="text-align:right">预留</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本月 10/25-10/31</td>
+<td style="text-align:right">$14</td>
+<td style="text-align:right">3.8 小时</td>
+<td style="text-align:right">$10.79</td>
+<td style="text-align:right">$3.21</td>
+</tr>
+<tr>
+<td>下月 11 月</td>
+<td style="text-align:right">$30</td>
+<td style="text-align:right">10.5 小时</td>
+<td style="text-align:right">$29.81</td>
+<td style="text-align:right">$0.19</td>
+</tr>
+<tr>
+<td>合计</td>
+<td style="text-align:right">$44</td>
+<td style="text-align:right">14.4 小时</td>
+<td style="text-align:right">$40.87</td>
+<td style="text-align:right">$3.13</td>
+</tr>
+</tbody>
+</table>
+<p>模型必须顺序训练，不能同时常驻。训练结束后立即停止容器，不使用常驻 GPU 服务。补充决策未达到启用门槛时，其预算保留，不为了消耗排期而训练。</p>
+<h2 id="3-本月-qwen3-5-4b-第一阶段">3. 本月：Qwen3.5-4B 第一阶段</h2>
+<h3 id="3-1-时间安排">3.1 时间安排</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>内容</th>
+<th style="text-align:right">时长</th>
+<th style="text-align:right">预算</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q0</td>
+<td>Modal 镜像、模型加载、单 batch smoke test</td>
+<td style="text-align:right">0.5 小时</td>
+<td style="text-align:right">$1.42</td>
+</tr>
+<tr>
+<td>Q1</td>
+<td>小规模零样本基线</td>
+<td style="text-align:right">0.2 小时</td>
+<td style="text-align:right">$0.57</td>
+</tr>
+<tr>
+<td>Q2</td>
+<td>Qwen3.5-4B QLoRA 第一阶段</td>
+<td style="text-align:right">2.6 小时</td>
+<td style="text-align:right">$7.38</td>
+</tr>
+<tr>
+<td>Q3</td>
+<td>holdout 评估、adapter 导出、checkpoint 校验</td>
+<td style="text-align:right">0.5 小时</td>
+<td style="text-align:right">$1.42</td>
+</tr>
+<tr>
+<td>合计</td>
+<td></td>
+<td style="text-align:right">3.8 小时</td>
+<td style="text-align:right">$10.79</td>
+</tr>
+</tbody>
+</table>
+<p>训练过程设置 20-30 分钟 checkpoint、2.6 小时硬超时、验证损失 early stopping 和最多连续 3 个样本异常即终止。到时间上限即停止，不为了“跑满 epoch”继续消耗额度。</p>
+<p>第一阶段使用 <code>448 x 448</code> 最大像素、<code>1024</code> token、micro-batch 1、梯度累积 4。2026-10-25 已完成 150 步正式 run；第 100 步验证损失 <code>0.027432</code> 最低，第 150 步回升到 <code>0.031464</code>。因此不再按旧计划盲目扩充到 <code>1,800-3,000</code> 步，下一次训练必须先补 01 的难例和数据质量，再重新确定步数。每个任务和每个标签必须在训练集和验证集里出现，验证集只从 <code>train</code> 行确定性切分，固定 test 不参与训练或选模。</p>
+<h3 id="3-2-数据集">3.2 数据集</h3>
+<p>本月只取葡萄膜炎专项数据和必要的 OCT 形态辅助数据，不把 13 个数据集的标签合并。</p>
+<table>
+<thead>
+<tr>
+<th>数据</th>
+<th>训练用途</th>
+<th style="text-align:right">计划用量</th>
+<th>切分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01_uveitis_oct</td>
+<td>OCT 四分类</td>
+<td style="text-align:right">60 训练 / 15 测试</td>
+<td>类分层切分；无患者 ID，指标只能标为数据集内评估</td>
+</tr>
+<tr>
+<td>02_toxofundus</td>
+<td>健康 / 眼弓形虫病二分类</td>
+<td style="text-align:right">约 330 训练 / 82 测试</td>
+<td>优先按患者或来源分组切分</td>
+</tr>
+<tr>
+<td>03_eye_five_class</td>
+<td>五分类和 Uveitis 阳性识别</td>
+<td style="text-align:right">约 1,838 训练 / 459 测试</td>
+<td>去重后类分层切分；只作原型，不进入最终临床测试</td>
+</tr>
+<tr>
+<td>13_zhanglab 的 OCT 子集</td>
+<td>OCT 形态辅助</td>
+<td style="text-align:right">10,000 训练，每类 2,500；1,000 固定测试</td>
+<td>使用 <code>CellData/OCT/</code>，排除胸片子目录</td>
+</tr>
+</tbody>
+</table>
+<p>第一阶段 train 合计 12,227 张。每张图像保留独立任务提示，不让四类 OCT、五类眼病和 Toxo 二分类共享错误标签空间。</p>
+<p>目标输出示例：</p>
+<pre><code class="language-json">{
+  &quot;task&quot;: &quot;oct_uveitis_4class&quot;,
+  &quot;label&quot;: &quot;Panuveitis&quot;,
+  &quot;requires_human_review&quot;: true
+}
+</code></pre>
+<p>不使用目录标签伪造置信度，也不训练模板生成的长篇影像描述。01、02、03 的 holdout 必须在训练前固定，不能根据模型效果反复调测试集。</p>
+<h3 id="3-3-本月验收门槛">3.3 本月验收门槛</h3>
+<p>只有同时满足以下条件，才进入下月第二阶段：</p>
+<ul>
+<li>smoke test 能完成前向、反向和 checkpoint 保存。</li>
+<li>Qwen3.5-4B adapter 在 01、02、03 的固定 holdout 上均有可复现结果。</li>
+<li>01、02、03 之外，13 OCT 辅助任务必须单独报告，不能把辅助类别当作葡萄膜炎诊断结果。</li>
+<li>三类任务的输出 JSON 合法率接近 100%。</li>
+<li>已记录每个数据集的来源、去重状态、切分规则和不能宣称的能力边界。</li>
+<li>与零样本基线比较后，至少专项任务不出现明显退化。</li>
+</ul>
+<p>如果 smoke test 失败或显存不稳，优先减少图像分辨率和序列长度，不追加购买大模型时间。</p>
+<h2 id="4-下月-4b-续训-评估与条件补充决策">4. 下月：4B 续训、评估与条件补充决策</h2>
+<h3 id="4-1-时间安排">4.1 时间安排</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>内容</th>
+<th style="text-align:right">时长</th>
+<th style="text-align:right">预算</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q4</td>
+<td>Qwen3.5-4B 第二阶段续训（有数据改进时）</td>
+<td style="text-align:right">5.0 小时</td>
+<td style="text-align:right">$14.19</td>
+</tr>
+<tr>
+<td>Q5</td>
+<td>Qwen3.5-4B 固定 holdout 评估与错误分析</td>
+<td style="text-align:right">1.5 小时</td>
+<td style="text-align:right">$4.26</td>
+</tr>
+<tr>
+<td>D0-D2</td>
+<td>Intern-Decision 条件实验预留，默认不执行</td>
+<td style="text-align:right">2.0 小时</td>
+<td style="text-align:right">$5.68</td>
+</tr>
+<tr>
+<td>E0</td>
+<td>核心链路与补充决策对照评估（按需）</td>
+<td style="text-align:right">0.5 小时</td>
+<td style="text-align:right">$1.42</td>
+</tr>
+<tr>
+<td>R0</td>
+<td>故障重跑与额度缓冲</td>
+<td style="text-align:right">1.5 小时</td>
+<td style="text-align:right">$4.26</td>
+</tr>
+<tr>
+<td>合计</td>
+<td></td>
+<td style="text-align:right">10.5 小时</td>
+<td style="text-align:right">$29.81</td>
+</tr>
+</tbody>
+</table>
+<p>若 4B 第一阶段未通过固定 holdout 验收，Q4 优先修正数据和评估，不启动 2B 或 Decision。2B 只在 4B 的吞吐、显存或部署约束出现明确问题时做对照，不能替代 4B 主线。</p>
+<h3 id="4-2-qwen3-5-4b-第二阶段数据">4.2 Qwen3.5-4B 第二阶段数据</h3>
+<p>第二阶段在已固定专项 holdout 不变的前提下，增加少量泛化数据：</p>
+<table>
+<thead>
+<tr>
+<th>数据</th>
+<th style="text-align:right">计划用量</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01、02、03</td>
+<td style="text-align:right">沿用第一阶段训练集</td>
+<td>保持葡萄膜炎专项任务为主</td>
+</tr>
+<tr>
+<td>04_ODIR</td>
+<td style="text-align:right">2,000 张唯一图，来自 1,000 个患者，左右眼各 1,000 张</td>
+<td>眼底多标签泛化；不把其 8 类解释为葡萄膜炎</td>
+</tr>
+<tr>
+<td>06_RFMiD 2</td>
+<td style="text-align:right">原始训练/验证/测试 509/177/174</td>
+<td>45 类长尾眼底泛化</td>
+</tr>
+<tr>
+<td>13 OCT</td>
+<td style="text-align:right">沿用 10,000 张辅助集</td>
+<td>保持 OCT 形态能力</td>
+</tr>
+</tbody>
+</table>
+<p>采样比例建议为专项数据 60%、OCT 辅助 25%、眼底泛化 15%。泛化任务使用独立 task prompt 和独立评估，不将 ODIR/RFMiD 的类别混入葡萄膜炎四分类。</p>
+<p>ODIR 的 <code>full_df.csv</code> 存在以文件名索引的左右眼记录，同一患者可能再次出现；采样脚本已按“患者 + 文件名”去重。训练加载时仍应使用“图像路径 + 任务”作为键，绝不能因此把左右眼拆到不同患者组。</p>
+<h3 id="4-3-补充决策模型的启用门槛">4.3 补充决策模型的启用门槛</h3>
+<p>当前下载数据没有足够真实的医生处置标签，因此 Intern-Decision 不是无条件训练项。后端默认 <code>APP_DECISION_ENABLED=false</code>，未启用时分析流程直接进入安全校验和人工复核，不影响核心检索闭环。只有满足以下门槛才启动 D0-D2：</p>
+<ul>
+<li>至少 300 个脱敏病例，建议 300-500 个训练病例。</li>
+<li>至少 80 个验证病例和 80 个独立测试病例。</li>
+<li>每例包含病例摘要、人工审核的影像描述、检索证据和医生确认的处置选择。</li>
+<li>目标字段统一为 <code>choice</code>、<code>score</code>、<code>noul</code>、<code>requires_human_review</code>。</li>
+<li>按患者切分，且病例摘要、影像和证据之间不存在跨集泄漏。</li>
+</ul>
+<p>建议的 <code>decision_sft</code> 格式：</p>
+<pre><code class="language-json">{
+  &quot;case_id&quot;: &quot;case_0001&quot;,
+  &quot;input&quot;: {
+    &quot;summary&quot;: &quot;年龄、性别、主诉、病程、既往史和关键检查&quot;,
+    &quot;vision&quot;: &quot;经医生审核的影像描述&quot;,
+    &quot;evidence&quot;: [&quot;指南条目&quot;, &quot;文献段落&quot;, &quot;相似病例&quot;]
+  },
+  &quot;target&quot;: {
+    &quot;choice&quot;: &quot;受约束的处置选项&quot;,
+    &quot;score&quot;: 0.0,
+    &quot;noul&quot;: &quot;在证据边界内的说明&quot;,
+    &quot;requires_human_review&quot;: true
+  }
+}
+</code></pre>
+<p>Intern-Decision 训练配置：</p>
+<ul>
+<li>4-bit QLoRA，LoRA rank 16。</li>
+<li>最大序列长度 2048，稳定后可试 3072。</li>
+<li>micro-batch 1，梯度累积 16。</li>
+<li>3-5 epochs 或 2 小时硬超时，取较早的早停 checkpoint。</li>
+<li>只训练语言层 adapter，不在此阶段训练图像编码器。</li>
+</ul>
+<p>如果 11 月前拿不到合格病例和医生确认标签，D0-D2 不启动，E0 也只评估核心链路。这 4.5 小时优先用于 Qwen 的独立测试和错误分析，剩余额度保留；不能用 ODIR 的诊断关键词自动生成 <code>choice</code>、<code>score</code> 或医生决策，也不能用合成标签制造“补充模型已验证”的结论。</p>
+<p>补充决策启用前至少应证明：</p>
+<ul>
+<li>固定测试集上相对“仅感知 + 检索 + 医生复核”的基线有一致增益。</li>
+<li>决策 JSON 合法率和拒答行为可复现。</li>
+<li>误诊代价、证据引用和人工升级路径经过医生评审。</li>
+</ul>
+<h2 id="5-日历排期">5. 日历排期</h2>
+<table>
+<thead>
+<tr>
+<th>日期</th>
+<th>工作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10/25-10/26</td>
+<td>本地生成 manifest、去重、固定切分和训练包；0 Modal GPU</td>
+</tr>
+<tr>
+<td>10/25</td>
+<td>4B smoke、20 步真实标定（已完成）</td>
+</tr>
+<tr>
+<td>10/26</td>
+<td>修复多任务训练器、固定验证集、预算冻结（已完成）</td>
+</tr>
+<tr>
+<td>10/27</td>
+<td>Q0 基线 + Q2 4B 第一阶段，0.6 小时</td>
+</tr>
+<tr>
+<td>10/28</td>
+<td>Q2 Qwen3.5-4B QLoRA 续训，1.2 小时</td>
+</tr>
+<tr>
+<td>10/29</td>
+<td>Q2 Qwen3.5-4B QLoRA 续训，0.8 小时</td>
+</tr>
+<tr>
+<td>10/30</td>
+<td>Q3 4B 固定 holdout 评估与导出，0.5 小时</td>
+</tr>
+<tr>
+<td>10/31</td>
+<td>核对本月账单，冻结 checkpoint；不再启动 GPU</td>
+</tr>
+<tr>
+<td>11/01-11/07</td>
+<td>补建并审核 decision SFT 数据；不燃 GPU</td>
+</tr>
+<tr>
+<td>11/08-11/10</td>
+<td>Q4 Qwen3.5-4B 第二阶段，累计上限 5 小时；验证无改善即早停</td>
+</tr>
+<tr>
+<td>11/11</td>
+<td>Q5 4B 固定 holdout 评估与错误分析，上限 1.5 小时</td>
+</tr>
+<tr>
+<td>11/12-11/14</td>
+<td>仅当数据门槛通过时执行 Intern-Decision smoke + LoRA</td>
+</tr>
+<tr>
+<td>11/15</td>
+<td>补充决策评估或核心链路错误分析，二选一</td>
+</tr>
+<tr>
+<td>11/16</td>
+<td>获得增益证据后再做对照联调；否则保留额度</td>
+</tr>
+<tr>
+<td>11/17-11/30</td>
+<td>仅保留 1.5 小时故障缓冲，不再主动训练</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-节省额度的执行要求">6. 节省额度的执行要求</h2>
+<ol>
+<li>在本地完成解压、去重、切分、图像缩放和 manifest，Modal 只接收已筛选的训练包。</li>
+<li>训练包只放约 12k-17k 张图，不上传 63 GB 全量数据和无用的预处理副本。</li>
+<li>模型、图像缓存和 adapter 放在持久 Volume；代码镜像固定版本，避免每次重新安装。</li>
+<li>训练和评估分成两个 Modal 函数，评估时只加载 adapter 和必要的 holdout。</li>
+<li>关闭 warm container、定时任务和长期在线 GPU 服务。</li>
+<li>BGE-M3 索引在本地 4060 或 CPU 上建立，不占用 Qwen3.5-4B 的 L40S 训练额度。</li>
+<li>每次 Modal 启动前打印 <code>max_runtime</code>、数据规模和预计成本，超过上限自动停止。</li>
+</ol>
+<p>2026-10-25 的实测补充：不要在训练容器内启动嵌套 Modal 评估函数。该路径可能生成额外 GPU 作业，失败时还可能被训练循环误认为样本异常。正确流程是只训练并保存 checkpoint，等训练 app 完全停止后，再单独运行评估 app；每次停止都用 <code>modal app stop</code> 终止整个 app，避免容器被自动恢复。</p>
+<h2 id="7-优先级">7. 优先级</h2>
+<ol>
+<li>Qwen3.5-4B 影像分类闭环。</li>
+<li>固定的专项 holdout 和可复现评估。</li>
+<li>Qwen3.5-4B 第二阶段续训和泛化评估。</li>
+<li>Qwen3.5-2B 只在明确的资源或对照问题出现时启用。</li>
+<li>Intern-Decision 只在真实决策标注、医生评审、进度和评测增益均合格后训练与启用。</li>
+</ol>
+<p>预算不足时，优先削减 Qwen 第二阶段的泛化数据或推迟补充决策实验，不应削减 01、02、03 的专项 holdout，也不应使用合成决策标签换取“两个模型都训练过”的形式结果。</p>
+
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>Modal L40S 预算排期 · 2026-10-25</span>
+  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

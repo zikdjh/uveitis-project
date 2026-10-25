@@ -1,0 +1,29 @@
+{
+  "run_id": "qwen4b-stage1-20261025-01",
+  "base_model": "qwen/Qwen3.5-4B",
+  "base_quantization": "4-bit NF4, bfloat16 compute, double quant",
+  "lora": {
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0.05
+  },
+  "train_rows": 900,
+  "validation_rows": 96,
+  "holdout_rows": 1557,
+  "run_kind": "calibration",
+  "max_steps": 30,
+  "max_minutes": 20,
+  "grad_accum": 8,
+  "save_every_steps": 10,
+  "validation_every_steps": 10,
+  "validation_limit": 96,
+  "early_stopping_patience": 3,
+  "max_pixels": 200704,
+  "max_length": 1024,
+  "seed": 20261025,
+  "training_framework": "transformers and peft pinned commits, manual loop",
+  "transformers_commit": "50e35cc0ca18ec19b80653690de553e6decf74f5",
+  "peft_commit": "7d6315ae910bf62b6044a7ca917bccf5881f5e43",
+  "output_volume": "uveitis-runs",
+  "run_root": "/runs/qwen3.5-4b/qwen4b-stage1-20261025-01"
+}

@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>24GB 显卡模型选型与部署资料</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --ink: #17202a;
+      --muted: #5f6b7a;
+      --line: #d8dee6;
+      --panel: #fff;
+      --blue: #1d6fd2;
+      --green: #177245;
+      --yellow: #9a6b00;
+      --red: #b33a3a;
+      --green-bg: #e6f4ec;
+      --yellow-bg: #fdf3d9;
+      --red-bg: #fdeaea;
+      --blue-bg: #e6f0fb;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2.05rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 1.35rem;
+    }
+    h3 {
+      margin: 24px 0 8px;
+      font-size: 1.08rem;
+    }
+    p {
+      margin: 8px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.94rem;
+    }
+    th {
+      background: #eef2f6;
+      color: #39434f;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    code, kbd {
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 0.9em;
+      background: #edf1f5;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    a {
+      color: var(--blue);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .green { background: var(--green-bg); color: var(--green); }
+    .yellow { background: var(--yellow-bg); color: var(--yellow); }
+    .red { background: var(--red-bg); color: var(--red); }
+    .blue { background: var(--blue-bg); color: var(--blue); }
+    .callout {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin: 16px 0 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0 24px;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+    .metric .value {
+      font-size: 1.35rem;
+      font-weight: 650;
+      margin-top: 4px;
+    }
+    ul {
+      margin: 8px 0 0;
+      padding-left: 1.25rem;
+    }
+    li + li {
+      margin-top: 6px;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+    .checkbox {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      border: 1px solid #7b8794;
+      border-radius: 3px;
+      margin-right: 7px;
+      vertical-align: -2px;
+    }
+    @media (max-width: 720px) {
+      main { padding: 24px 16px 64px; }
+      h1 { font-size: 1.6rem; }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead { display: none; }
+      tr {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 8px;
+      }
+      td {
+        border: 0;
+        padding-left: 0;
+      }
+      td::before {
+        content: attr(data-label);
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-bottom: 2px;
+      }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>24GB 显卡模型选型与部署资料</h1>
+    <div class="meta">核验日期：2026-10-23 · 数据来源：HuggingFace API / GitHub API / 模型卡与 LICENSE 现场读取 · 项目：葡萄膜炎辅助诊断</div>
+  </header>
+
+  <section>
+    <h2>一句话结论</h2>
+    <div class="callout">
+      <p><strong>首选：Cloudflare Clef-flash。</strong> 9.4B、Apache 2.0、多模态、Jev-compatible，是 24GB 单卡上质量与工程可用性最平衡的决策模型。</p>
+      <p><strong>更稳的第二选择：Intern-Decision-4B。</strong> Apache 2.0、多模态、显存压力更小，适合先跑通管线。</p>
+      <p><strong>不要把 Jev 官方模型当开源模型。</strong> Jev 是 TypeSafe AI 的托管 API，不是开放权重；开源部署要选 Clef、Intern-Decision、Kev、Tacit、d1 等。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>24GB 部署预算</h2>
+    <div class="grid">
+      <div class="metric">
+        <div class="label">推荐可用预算</div>
+        <div class="value">约 21-22 GB</div>
+      </div>
+      <div class="metric">
+        <div class="label">4B 模型 FP16</div>
+        <div class="value">约 8-11 GB</div>
+      </div>
+      <div class="metric">
+        <div class="label">9B 模型 FP16</div>
+        <div class="value">约 19-23 GB</div>
+      </div>
+    </div>
+    <p>粗算规则：</p>
+    <ul>
+      <li>FP16 / BF16：参数量 × 2 字节 + 运行时与 KV/激活缓存。</li>
+      <li>8-bit / Q8：参数量 × 1 字节 + 运行时与 KV/激活缓存。</li>
+      <li>4-bit / Q4：参数量 × 0.5-0.6 字节 + 运行时与 KV/激活缓存。</li>
+      <li>Jev-like 模型通常没有长输出生成，KV 压力比聊天模型小，但长状态输入仍会占用显存。</li>
+    </ul>
+    <p class="note">结论：4B 级模型在 24GB 卡上最稳；9.4B 级模型 FP16 可试但偏紧，建议优先考虑 8-bit 或 Q4；27B 级模型不要用 FP16 直接部署。</p>
+  </section>
+
+  <section>
+    <h2>Jev-like 决策模型候选</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>层级</th>
+          <th>模型</th>
+          <th>参数量</th>
+          <th>许可</th>
+          <th>模态</th>
+          <th>24GB 适配性</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="层级"><span class="badge green">P0 首选</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/Cloudflare/clef-flash">Cloudflare Clef-flash</a></td>
+          <td data-label="参数量">9.41B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本 / JSON / 图像 / 视频</td>
+          <td data-label="24GB 适配性"><span class="badge yellow">可部署，偏紧</span></td>
+          <td data-label="说明">质量与功能上限最高，Jev-compatible。FP16 大约占 18-20GB 权重空间，24GB 卡可试，但更适合 8-bit / Q4 或短上下文。</td>
+        </tr>
+        <tr>
+          <td data-label="层级"><span class="badge green">P0 稳妥</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/internlm/Intern-Decision-4B">Intern-Decision-4B</a></td>
+          <td data-label="参数量">约 4B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本 / 图像</td>
+          <td data-label="24GB 适配性"><span class="badge green">最稳</span></td>
+          <td data-label="说明">显存余量大，训练代码与推理后端齐全，适合作为第一套多模态决策管线。</td>
+        </tr>
+        <tr>
+          <td data-label="层级"><span class="badge green">P0 轻量</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/LiquidAI/d1-3B">LiquidAI d1-3B</a></td>
+          <td data-label="参数量">3.12B</td>
+          <td data-label="许可"><span class="badge yellow">LFM Open License v1.0</span></td>
+          <td data-label="模态">文本 / 图像</td>
+          <td data-label="24GB 适配性"><span class="badge green">很稳</span></td>
+          <td data-label="说明">支持中文，多模态，32k 上下文。许可可用但不是标准 OSI 开源，商用有年收入 1000 万美元限制。</td>
+        </tr>
+        <tr>
+          <td data-label="层级"><span class="badge green">P1 可训练</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/jaredpalmer/kev-4b">Kev-4B</a></td>
+          <td data-label="参数量">4B 级</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本</td>
+          <td data-label="24GB 适配性"><span class="badge green">很稳</span></td>
+          <td data-label="说明">基于 Qwen3.5-4B 的决策模型，适合用自己的标注数据训练。文本-only，显存压力小。</td>
+        </tr>
+        <tr>
+          <td data-label="层级"><span class="badge green">P1 精度</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/morriszjm/Tacit-9B">AnyJev Tacit-9B</a></td>
+          <td data-label="参数量">9.4B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本 / 图像</td>
+          <td data-label="24GB 适配性"><span class="badge yellow">可试，偏紧</span></td>
+          <td data-label="说明">单次前向决策，适合与 Clef-flash 做精度对照。FP16 部署建议控制在中等上下文。</td>
+        </tr>
+        <tr>
+          <td data-label="层级"><span class="badge green">P1 低资源</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/LiquidAI/d1-omni-600M">LiquidAI d1-omni-600M</a></td>
+          <td data-label="参数量">0.587B</td>
+          <td data-label="许可"><span class="badge yellow">LFM Open License v1.0</span></td>
+          <td data-label="模态">文本 / 图像 / 音频</td>
+          <td data-label="24GB 适配性"><span class="badge green">极稳</span></td>
+          <td data-label="说明">适合端侧、低延迟、实时分诊和 API 冒烟测试；不是精度主力。</td>
+        </tr>
+        <tr>
+          <td data-label="层级"><span class="badge green">P2 兜底</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/fastino/GLiNER2.5-Decide">GLiNER2.5-Decide</a></td>
+          <td data-label="参数量">0.486B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本</td>
+          <td data-label="24GB 适配性"><span class="badge green">极稳</span></td>
+          <td data-label="说明">适合做症状分类、简单路由、检查项抽取等确定性任务。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>医疗方向对照</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>参数量</th>
+          <th>许可</th>
+          <th>语言</th>
+          <th>结论</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="模型"><a href="https://huggingface.co/lighteternal/biodecision-v2-4b">BioDecision-4B v2</a></td>
+          <td data-label="参数量">4B</td>
+          <td data-label="许可"><span class="badge red">research-only</span></td>
+          <td data-label="语言">英文 / 中文</td>
+          <td data-label="结论">医学方向最贴合，但许可限制了生产化。建议只做基线对照，不进主链路。</td>
+        </tr>
+        <tr>
+          <td data-label="模型"><a href="https://huggingface.co/FreedomIntelligence/HuatuoGPT-o1-8B">HuatuoGPT-o1-8B</a></td>
+          <td data-label="参数量">8.0B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="语言">英文 / 中文</td>
+          <td data-label="结论">适合医疗 LLM 对照，但它不是 Jev-like 决策模型。</td>
+        </tr>
+        <tr>
+          <td data-label="模型"><a href="https://huggingface.co/google/medgemma-1.5-4b-it">MedGemma-1.5-4B-it</a></td>
+          <td data-label="参数量">4.3B</td>
+          <td data-label="许可"><span class="badge yellow">Gemma Terms</span></td>
+          <td data-label="语言">需验证中文</td>
+          <td data-label="结论">医学多模态候选，但 HuggingFace 需要登录并接受条款。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>通用 LLM / MLLM 兜底层</h2>
+    <p>Jev-like 模型负责低延迟、可阈值化的决策；复杂解释、RAG 推理和人工复核摘要可以交给通用 LLM。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>参数量</th>
+          <th>许可</th>
+          <th>模态</th>
+          <th>24GB 适配性</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="模型"><a href="https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct">Qwen3-VL-8B-Instruct</a></td>
+          <td data-label="参数量">8.8B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本 / 图像</td>
+          <td data-label="24GB 适配性"><span class="badge green">稳</span></td>
+        </tr>
+        <tr>
+          <td data-label="模型"><a href="https://huggingface.co/Qwen/Qwen3.5-9B">Qwen3.5-9B</a></td>
+          <td data-label="参数量">9.7B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本 / 图像</td>
+          <td data-label="24GB 适配性"><span class="badge yellow">可试，偏紧</span></td>
+        </tr>
+        <tr>
+          <td data-label="模型"><a href="https://huggingface.co/Qwen/Qwen3-8B">Qwen3-8B</a></td>
+          <td data-label="参数量">8.2B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本</td>
+          <td data-label="24GB 适配性"><span class="badge green">稳</span></td>
+        </tr>
+        <tr>
+          <td data-label="模型"><a href="https://huggingface.co/Qwen/Qwen3-14B">Qwen3-14B</a></td>
+          <td data-label="参数量">14.8B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态">文本</td>
+          <td data-label="24GB 适配性"><span class="badge red">FP16 不建议，需量化</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>建议部署路线</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>阶段</th>
+          <th>动作</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="阶段"><span class="checkbox"></span>1. 冒烟</td>
+          <td data-label="动作">先部署 <a href="https://huggingface.co/LiquidAI/d1-omni-600M">d1-omni-600M</a> 或 <a href="https://huggingface.co/internlm/Intern-Decision-0.8B">Intern-Decision-0.8B</a></td>
+          <td data-label="说明">跑通 typed question → typed probability 的最小闭环，验证输入格式、JSON Schema 和前端展示。</td>
+        </tr>
+        <tr>
+          <td data-label="阶段"><span class="checkbox"></span>2. 主链路</td>
+          <td data-label="动作">部署 <a href="https://huggingface.co/internlm/Intern-Decision-4B">Intern-Decision-4B</a></td>
+          <td data-label="说明">显存稳，Apache 2.0，支持图像，适合作为第一套可复现实验模型。</td>
+        </tr>
+        <tr>
+          <td data-label="阶段"><span class="checkbox"></span>3. 精度对照</td>
+          <td data-label="动作">试部署 <a href="https://huggingface.co/Cloudflare/clef-flash">Clef-flash</a></td>
+          <td data-label="说明">先用短上下文和 8-bit / Q4 部署，确认能跑稳后再决定是否作为默认模型。</td>
+        </tr>
+        <tr>
+          <td data-label="阶段"><span class="checkbox"></span>4. 自训练</td>
+          <td data-label="动作">用 <a href="https://huggingface.co/jaredpalmer/kev-4b">Kev-4B</a> 训练自己的决策头</td>
+          <td data-label="说明">适合接入项目自己的葡萄膜炎标注数据，尤其是解剖分型、急迫度、是否需要转诊等 typed tasks。</td>
+        </tr>
+        <tr>
+          <td data-label="阶段"><span class="checkbox"></span>5. 医学基线</td>
+          <td data-label="动作">用 <a href="https://huggingface.co/lighteternal/biodecision-v2-4b">BioDecision v2</a> 做评测</td>
+          <td data-label="说明">只做研究/评测，不进生产。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>许可风险</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>状态</th>
+          <th>许可</th>
+          <th>代表模型</th>
+          <th>结论</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="状态"><span class="badge green">优先</span></td>
+          <td data-label="许可">Apache 2.0 / MIT</td>
+          <td data-label="代表模型">Clef-flash、Intern-Decision、Kev、Tacit、GLiNER2.5-Decide</td>
+          <td data-label="结论">集成与再分发风险最低，适合生产。</td>
+        </tr>
+        <tr>
+          <td data-label="状态"><span class="badge yellow">可用但有条件</span></td>
+          <td data-label="许可">LFM Open License v1.0</td>
+          <td data-label="代表模型">LiquidAI d1-3B、d1-omni-600M</td>
+          <td data-label="结论">免费可用，但商用有 1000 万美元收入阈值限制。</td>
+        </tr>
+        <tr>
+          <td data-label="状态"><span class="badge red">只做研究</span></td>
+          <td data-label="许可">research-only</td>
+          <td data-label="代表模型">BioDecision v1 / v2</td>
+          <td data-label="结论">不要进生产，只能做医学基线对照。</td>
+        </tr>
+        <tr>
+          <td data-label="状态"><span class="badge red">不用于生产</span></td>
+          <td data-label="许可">CC BY-NC 4.0</td>
+          <td data-label="代表模型">OpenJev、StartLux-Decision、AgentDecision</td>
+          <td data-label="结论">非商业许可，不适合本项目生产。</td>
+        </tr>
+        <tr>
+          <td data-label="状态"><span class="badge yellow">需人工确认</span></td>
+          <td data-label="许可">Gemma Terms</td>
+          <td data-label="代表模型">MedGemma 系列</td>
+          <td data-label="结论">HuggingFace 需登录并接受条款。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>下一步清单</h2>
+    <ul>
+      <li><span class="checkbox"></span>确认 24GB 显卡是 RTX 3090 / 4090 还是工作站卡。</li>
+      <li><span class="checkbox"></span>先用 <code>Intern-Decision-4B</code> 或 <code>d1-omni-600M</code> 跑通 Jev-like 决策 API。</li>
+      <li><span class="checkbox"></span>确定诊断任务 Schema：<code>noul</code>、<code>choice</code>、<code>score</code>。</li>
+      <li><span class="checkbox"></span>准备小规模 typed decision 标注数据，优先覆盖解剖分型与红诊判断。</li>
+      <li><span class="checkbox"></span>再测试 <code>Clef-flash</code> 的 8-bit / Q4 部署与长上下文稳定性。</li>
+      <li><span class="checkbox"></span>把通用 LLM 兜底层与决策层分开跑，不要同时加载两个 9B 级模型。</li>
+    </ul>
+  </section>
+
+  <footer class="meta" style="margin-top:40px; border-top:1px solid var(--line); padding-top:16px;">
+    本文档只做模型选型与部署规划，不替代临床判断。所有开源模型输出仍需医疗专业人员复核。
+  </footer>
+</main>
+</body>
+</html>

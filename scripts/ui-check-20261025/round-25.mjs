@@ -1,0 +1,10 @@
+const task = await taskSpace(8);
+const page = task.page("p1");
+await page.goto("http://127.0.0.1:5173/doctor/knowledge");
+await page.waitForSelector("h1:has-text('临床知识')");
+console.log(await page.snapshot());
+await page.fill("input[name=query]", "眼红眼痛畏光需要检查吗");
+await page.click("button[type=submit]");
+await page.waitForSelector(".knowledge-results article", { timeout: 30000 });
+console.log(await page.snapshot());
+console.log(await page.evaluate(() => ({ url: location.href, overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth, resultCount: document.querySelectorAll(".knowledge-results article").length })));

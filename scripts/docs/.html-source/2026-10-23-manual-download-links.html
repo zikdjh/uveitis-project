@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手动下载清单 · 条目页 + 下载入口 · 葡萄膜炎辅助诊断项目</title>
+<style>
+  body { font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+         color: #1f2328; margin: 0; background: #f6f7f9; line-height: 1.7; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 28px 64px; background: #fff; }
+  h1 { font-size: 26px; margin: 8px 0 4px; }
+  h2 { font-size: 20px; margin-top: 36px; border-left: 4px solid #2563eb; padding-left: 10px; }
+  .meta { color: #57606a; font-size: 13px; border-bottom: 1px solid #d8dee4; padding-bottom: 14px; }
+  .meta b { color: #1f2328; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 24px; font-size: 13.5px; }
+  th, td { border: 1px solid #d8dee4; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #eef2ff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  a { color: #2563eb; text-decoration: none; word-break: break-all; }
+  a:hover { text-decoration: underline; }
+  .tag { display: inline-block; font-size: 12px; border-radius: 3px; padding: 1px 7px; margin-right: 4px; white-space: nowrap; }
+  .ok { background: #dcfce7; color: #166534; }
+  .login { background: #e0e7ff; color: #3730a3; }
+  .manual { background: #fef3c7; color: #92400e; }
+  .note { background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px 16px; font-size: 13.5px; }
+  .warn { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 12px 16px; font-size: 13.5px; }
+  code { background: #f3f4f6; border-radius: 3px; padding: 1px 5px; font-size: 12.5px; }
+  input[type=checkbox] { transform: scale(1.15); margin-right: 6px; vertical-align: middle; }
+  footer { margin-top: 44px; color: #6b7280; font-size: 12.5px; border-top: 1px solid #d8dee4; padding-top: 12px; }
+  @media print { body { background: #fff; } .wrap { padding: 0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>手动下载清单 · 条目页 + 下载入口</h1>
+<div class="meta">
+  <b>用途</b>：人工浏览器逐项下载，避免脚本/直链被挡。<br>
+  <b>整理日期</b>：2026-10-23 · <b>版本</b>：v1.0<br>
+  <b>本轮口径</b>：全部条目均按<b>待重新下载</b>处理（上一轮已下载文件已清理）。<br>
+  <b>建议保存位置</b>：<code>datasets/p0/&lt;数据集名&gt;/</code> 或 <code>datasets/p1/&lt;数据集名&gt;/</code>
+</div>
+
+<div class="note">
+  <b>用法</b>：先点“条目页 / 界面”，在页面上找对应的下载按钮。不要直接右键另存为 <code>ndownloader</code> 链接，
+  有些站会校验来源或要求登录。<br>
+  <b>figshare</b>：如果条目页被重定向到 <code>springernature.figshare.com</code>，只要页面能打开，仍然用页面上的
+  <code>Download all</code> 即可。
+</div>
+
+<h2>一、直接打开就能下</h2>
+<table>
+  <tr><th>✓</th><th>#</th><th>数据集</th><th>状态</th><th>条目页 / 界面</th><th>下载按钮 / 操作</th><th>备注</th></tr>
+  <tr><td><input type="checkbox"></td><td>1</td><td>葡萄膜炎 OCT（Mendeley）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://data.mendeley.com/datasets/hbr5pwk5w5/1">Mendeley 条目页</a></td>
+      <td>页面右上 <code>Download All 7.22 MB</code></td>
+      <td>CC BY 4.0；单 zip</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>2</td><td>ToxoFundus（Zenodo）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://zenodo.org/records/5156953">Zenodo 条目页</a></td>
+      <td>右侧 <code>Download all</code> 或逐文件 <code>Download</code></td>
+      <td>CC BY 4.0；约 272 MB</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>3</td><td>五分类含症状文本（Mendeley）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://data.mendeley.com/datasets/n9zp473wfw/2">Mendeley 条目页</a></td>
+      <td>页面右上 <code>Download All 40.8 MB</code></td>
+      <td>CC BY 4.0；原型验证</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>4</td><td>OCT2017（Mendeley）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://data.mendeley.com/datasets/rscbjbr9sj/3">Mendeley 条目页</a></td>
+      <td>页面右上 <code>Download All 7.85 GB</code></td>
+      <td>CC BY 4.0；单 zip，建议晚间挂机</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>5</td><td>RFMiD 2.0（Zenodo）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://zenodo.org/records/7505822">Zenodo 条目页</a></td>
+      <td>右侧 <code>Download all</code></td>
+      <td>CC BY 4.0；约 64 MB</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>6</td><td>Open UWF 700（figshare）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://figshare.com/articles/dataset/Open_ultrawidefield_fundus_image_dataset_with_disease_diagnosis_and_clinical_image_quality_assessment/26936446">figshare 条目页</a></td>
+      <td>页面右侧 <code>Download all</code></td>
+      <td>约 1.5 GB；含葡萄膜炎 100 张</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>7</td><td>FIVES（figshare）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://figshare.com/articles/figure/FIVES_A_Fundus_Image_Dataset_for_AI-based_Vessel_Segmentation/19688169">figshare 条目页</a></td>
+      <td>页面右侧 <code>Download all</code></td>
+      <td>约 1.7 GB；血管分割</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>8</td><td>SUSTech-SYSU 角膜溃疡（figshare）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://figshare.com/articles/dataset/Metadata_record_for_The_SUSTech-SYSU_dataset_for_automatically_segmenting_and_classifying_corneal_ulcers/11371803">figshare 条目页</a></td>
+      <td>页面右侧 <code>Download all</code></td>
+      <td>条目页含元数据；实际数据可能另列，先抓全文件</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>9</td><td>Uveitis_All_2025_Oct（figshare）</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://figshare.com/articles/dataset/Uveitis_All_2025_Oct/30333775">figshare 条目页</a></td>
+      <td>页面右侧 <code>Download all</code></td>
+      <td>约 5.1 GB；疑似组学，先确认内容</td></tr>
+</table>
+
+<h2>二、需要登录 / 注册 / 协议</h2>
+<table>
+  <tr><th>✓</th><th>#</th><th>数据集</th><th>状态</th><th>条目页 / 界面</th><th>下载按钮 / 操作</th><th>备注</th></tr>
+  <tr><td><input type="checkbox"></td><td>10</td><td>ODIR-5K（Kaggle）</td><td><span class="tag login">待登录下载</span></td>
+      <td><a href="https://www.kaggle.com/datasets/andrewmvd/ocular-disease-recognition-odir5k">Kaggle 条目页</a></td>
+      <td>页面右上 <code>Download</code></td>
+      <td>约 1.7 GB；需 Kaggle 账号</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>11</td><td>Kaggle uveitis 镜像（kondwani）</td><td><span class="tag login">待登录下载</span></td>
+      <td><a href="https://www.kaggle.com/datasets/kondwani/eye-disease-dataset">Kaggle 条目页</a></td>
+      <td>页面右上 <code>Download</code></td>
+      <td>仅管线调试</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>12</td><td>Kaggle uveitis 镜像（orvile）</td><td><span class="tag login">待登录下载</span></td>
+      <td><a href="https://www.kaggle.com/datasets/orvile/eye-diseases-classification">Kaggle 条目页</a></td>
+      <td>页面右上 <code>Download</code></td>
+      <td>仅管线调试</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>13</td><td>JSIEC1000（Kaggle）</td><td><span class="tag login">待登录下载</span></td>
+      <td><a href="https://www.kaggle.com/datasets/linchundan/fundusimage1000">Kaggle 条目页</a></td>
+      <td>页面右上 <code>Download</code></td>
+      <td>约 1.2 GB；ODbL</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>14</td><td>APTOS 2019（Kaggle 竞赛）</td><td><span class="tag login">待登录下载</span></td>
+      <td><a href="https://www.kaggle.com/competitions/aptos2019-blindness-detection">Kaggle 竞赛页</a></td>
+      <td><code>Data</code> 标签页 → <code>Download All</code></td>
+      <td>约 4 GB；需接受竞赛条款</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>15</td><td>BRSET（PhysioNet）</td><td><span class="tag login">待登录下载</span></td>
+      <td><a href="https://physionet.org/content/brazilian-ophthalmological/">PhysioNet 条目页</a></td>
+      <td><code>Files</code> → <code>Download zip</code></td>
+      <td>约 8 GB；需 PhysioNet 注册</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>16</td><td>IDRiD（Grand Challenge）</td><td><span class="tag login">待登录下载</span></td>
+      <td><a href="https://idrid.grand-challenge.org/">Grand Challenge 页面</a></td>
+      <td><code>Data</code> → <code>Download</code></td>
+      <td>约 3 GB；需注册</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>17</td><td>DRIVE（Grand Challenge）</td><td><span class="tag login">待登录下载</span></td>
+      <td><a href="https://drive.grand-challenge.org/">DRIVE 页面</a></td>
+      <td><code>Data</code> → <code>Download</code></td>
+      <td>小规模血管分割基准</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>18</td><td>Messidor-1 / 2（ADCIS）</td><td><span class="tag login">待协议下载</span></td>
+      <td><a href="https://www.adcis.net/en/Download-Third-Party/Messidor.html">ADCIS 页面</a></td>
+      <td>接受协议后 <code>Download</code></td>
+      <td>约 3 GB；协议后免费</td></tr>
+</table>
+
+<h2>三、网盘 / GitHub</h2>
+<table>
+  <tr><th>✓</th><th>#</th><th>数据集</th><th>状态</th><th>条目页 / 界面</th><th>下载按钮 / 操作</th><th>备注</th></tr>
+  <tr><td><input type="checkbox"></td><td>19</td><td>iChallenge 十子集</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="http://hdmilab.cn/ichallenge">官网页面</a></td>
+      <td>每个子集对应 <code>Download</code> / 百度网盘</td>
+      <td>约 14 GB；含 REFUGE / PALM / AGE / ADAM</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>20</td><td>DDR (OIA-DDR)</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://github.com/nkicsl/DDR-dataset">GitHub README</a></td>
+      <td>README 内百度网盘 / Google Drive 链接</td>
+      <td>约 3 GB；10 分卷先合并</td></tr>
+
+  <tr><td><input type="checkbox"></td><td>21</td><td>EyeQ</td><td><span class="tag manual">待手动下载</span></td>
+      <td><a href="https://github.com/HzFu/EyeQ">GitHub README</a></td>
+      <td>README 内下载入口</td>
+      <td>约 4 GB；CC BY-NC-SA</td></tr>
+</table>
+
+<div class="warn">
+  <b>提醒</b>：Kaggle / PhysioNet / Grand Challenge / ADCIS 都需要先登录或接受协议。
+  figshare 页面如果反复 403，换浏览器或网络环境后从条目页手动点 <code>Download all</code>。
+</div>
+
+<footer>
+  手动下载清单 · 葡萄膜炎辅助诊断智能系统 · v1.1 · 2026-10-23 ·
+  仅列条目页与界面操作，避免直链失效或被站点拦截。
+</footer>
+
+</div>
+</body>
+</html>

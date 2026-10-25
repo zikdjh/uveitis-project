@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>24GB 显卡核心模型与条件决策方案资料</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --ink: #17202a;
+      --muted: #5f6b7a;
+      --line: #d8dee6;
+      --panel: #fff;
+      --blue: #1d6fd2;
+      --green: #177245;
+      --yellow: #9a6b00;
+      --red: #b33a3a;
+      --green-bg: #e6f4ec;
+      --yellow-bg: #fdf3d9;
+      --red-bg: #fdeaea;
+      --blue-bg: #e6f0fb;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2.05rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 1.35rem;
+    }
+    h3 {
+      margin: 24px 0 8px;
+      font-size: 1.08rem;
+    }
+    p {
+      margin: 8px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.94rem;
+    }
+    th {
+      background: #eef2f6;
+      color: #39434f;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    code, kbd {
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 0.9em;
+      background: #edf1f5;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    a {
+      color: var(--blue);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .green { background: var(--green-bg); color: var(--green); }
+    .yellow { background: var(--yellow-bg); color: var(--yellow); }
+    .red { background: var(--red-bg); color: var(--red); }
+    .blue { background: var(--blue-bg); color: var(--blue); }
+    .callout {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin: 16px 0 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0 24px;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+    .metric .value {
+      font-size: 1.35rem;
+      font-weight: 650;
+      margin-top: 4px;
+    }
+    ul {
+      margin: 8px 0 0;
+      padding-left: 1.25rem;
+    }
+    li + li {
+      margin-top: 6px;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+    .checkbox {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      border: 1px solid #7b8794;
+      border-radius: 3px;
+      margin-right: 7px;
+      vertical-align: -2px;
+    }
+    @media (max-width: 720px) {
+      main { padding: 24px 16px 64px; }
+      h1 { font-size: 1.6rem; }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead { display: none; }
+      tr {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 8px;
+      }
+      td {
+        border: 0;
+        padding-left: 0;
+      }
+      td::before {
+        content: attr(data-label);
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-bottom: 2px;
+      }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-23-model-24gb.html">上一份</a>
+    <a href="2026-10-25-gpu-cloud-price-list.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content">
+
+<div>
+  <header>
+    <h1>24GB 显卡核心模型与条件决策方案资料</h1>
+    <div class="meta">核验日期：2026-10-23 · 数据来源：HuggingFace API / GitHub API / 模型卡与 LICENSE 现场读取 · 项目：葡萄膜炎辅助诊断</div>
+  </header>
+
+  <section>
+    <h2>确定方案</h2>
+    <div class="callout">
+      <p><strong>核心链路：</strong><code>Qwen3.5-4B</code> 做多模态理解，<code>BAAI/bge-m3</code> 在 CPU 上生成向量，<code>zvec</code> 提供本地嵌入式检索索引。</p>
+      <p>第一阶段先完成病例结构化、影像理解、证据检索、安全校验与医生复核闭环。BGE-M3 不占用显卡，zvec 与 FastAPI 同进程运行，部署压力集中在多模态模型。</p>
+      <p><strong>补充决策：</strong><code>Intern-Decision-4B</code> 默认关闭，只有真实脱敏病例、医生确认的决策标签和独立评测增益达标后才按需启用。<code>Kev-4B</code> 仅作为对照，不默认常驻。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>24GB 显存预算</h2>
+    <div class="grid">
+      <div class="metric">
+        <div class="label">Qwen3.5-4B FP16</div>
+        <div class="value">约 9-10 GB</div>
+      </div>
+      <div class="metric">
+        <div class="label">BGE-M3（CPU / FP32）</div>
+        <div class="value">显卡 0 GB</div>
+      </div>
+      <div class="metric">
+        <div class="label">启用补充决策后的可用余量</div>
+        <div class="value">约 11-13 GB</div>
+      </div>
+    </div>
+    <p>粗算规则：</p>
+    <ul>
+      <li>FP16 / BF16：参数量 × 2 字节 + 运行时与 KV/激活缓存。</li>
+      <li>8-bit / Q8：参数量 × 1 字节 + 运行时与 KV/激活缓存。</li>
+      <li>4-bit / Q4：参数量 × 0.5-0.6 字节 + 运行时与 KV/激活缓存。</li>
+    </ul>
+    <p class="note">BGE-M3 在项目后端使用 CPU 推理，不占显存。补充决策模型是条件启用项；即使未来启用，也应与多模态模型顺序运行、分时加载或独立部署，避免同时常驻多个 4B 级模型。</p>
+  </section>
+
+  <section>
+    <h2>核心与补充模型</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>模块</th>
+          <th>模型</th>
+          <th>参数量</th>
+          <th>许可</th>
+          <th>模态 / 任务</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="模块"><span class="badge blue">多模态</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/Qwen/Qwen3.5-4B">Qwen3.5-4B</a></td>
+          <td data-label="参数量">4.66B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态 / 任务">文本 / 图像</td>
+          <td data-label="说明">多模态理解、影像描述、结构化抽取。Apache 2.0，适合生产。</td>
+        </tr>
+        <tr>
+          <td data-label="模块"><span class="badge yellow">补充决策</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/internlm/Intern-Decision-4B">Intern-Decision-4B</a></td>
+          <td data-label="参数量">约 4B</td>
+          <td data-label="许可"><span class="badge green">Apache 2.0</span></td>
+          <td data-label="模态 / 任务">文本 / 图像 → typed decision</td>
+          <td data-label="说明">Jev-like 决策模型，支持 <code>choice</code>、<code>score</code>、<code>noul</code>。默认关闭，通过数据和评测门槛后再评估。</td>
+        </tr>
+        <tr>
+          <td data-label="模块"><span class="badge blue">向量</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/BAAI/bge-m3">BAAI/bge-m3</a></td>
+          <td data-label="参数量">约 0.57B</td>
+          <td data-label="许可"><span class="badge green">MIT</span></td>
+          <td data-label="模态 / 任务">文本 → 向量</td>
+          <td data-label="说明">轻量、下载量高、生态成熟，适合病历/指南/文献检索。本地后端固定使用 CPU。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>常驻部署组合</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>方案</th>
+          <th>组合</th>
+          <th>显存压力</th>
+          <th>适用</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="方案"><span class="badge green">P0 核心闭环</span></td>
+          <td data-label="组合">Qwen3.5-4B + BAAI/bge-m3（CPU）+ zvec</td>
+          <td data-label="显存压力">约 9-10GB</td>
+          <td data-label="适用">先完成影像理解、证据检索、安全校验和医生复核。</td>
+        </tr>
+        <tr>
+          <td data-label="方案"><span class="badge yellow">P1 条件补充</span></td>
+          <td data-label="组合">核心闭环 + Intern-Decision-4B</td>
+          <td data-label="显存压力">约 18-23GB</td>
+          <td data-label="适用">仅在决策数据、JSON 合法率、独立测试增益和医生评审通过后启用。</td>
+        </tr>
+        <tr>
+          <td data-label="方案"><span class="badge yellow">P0 备选</span></td>
+          <td data-label="组合">Kev-4B（基于 Qwen3.5-4B）</td>
+          <td data-label="显存压力">约 8-11GB</td>
+          <td data-label="适用">文本-only 决策或自有数据微调；建议换装或 Adapter 方式使用。</td>
+        </tr>
+        <tr>
+          <td data-label="方案"><span class="badge yellow">P1 精度升级</span></td>
+          <td data-label="组合">Cloudflare Clef-flash 9.4B + Qwen3-Embedding-4B</td>
+          <td data-label="显存压力">约 22-26GB</td>
+          <td data-label="适用">决策和检索质量更强，但需要分时运行或量化。</td>
+        </tr>
+        <tr>
+          <td data-label="方案"><span class="badge yellow">P1 多模态升级</span></td>
+          <td data-label="组合">Qwen3-VL-8B-Instruct + Qwen3-Embedding-4B</td>
+          <td data-label="显存压力">约 20-26GB</td>
+          <td data-label="适用">影像理解更强，但不要同时加载 9B 级决策模型。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>替代与升级选项</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>模块</th>
+          <th>模型</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="模块"><span class="badge blue">多模态升级</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct">Qwen3-VL-8B-Instruct</a></td>
+          <td data-label="说明">Apache 2.0，8.8B，精度更高，但 24GB 卡上要与决策模型分时运行。</td>
+        </tr>
+        <tr>
+          <td data-label="模块"><span class="badge blue">决策升级</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/Cloudflare/clef-flash">Cloudflare Clef-flash</a></td>
+          <td data-label="说明">9.4B，Apache 2.0，Jev-compatible，多模态。可作补充决策的高精度对照，但需分时运行或量化。</td>
+        </tr>
+        <tr>
+          <td data-label="模块"><span class="badge blue">决策备选</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/jaredpalmer/kev-4b">Kev-4B</a></td>
+          <td data-label="说明">Apache 2.0，文本-only 决策，适合用自有标注数据训练。</td>
+        </tr>
+        <tr>
+          <td data-label="模块"><span class="badge blue">向量升级</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/Qwen/Qwen3-Embedding-4B">Qwen3-Embedding-4B</a></td>
+          <td data-label="说明">Apache 2.0，4.02B，检索质量更强，但会吃掉大量显存。</td>
+        </tr>
+        <tr>
+          <td data-label="模块"><span class="badge blue">向量备选</span></td>
+          <td data-label="模型"><a href="https://huggingface.co/BAAI/bge-m3">BAAI/bge-m3</a></td>
+          <td data-label="说明">MIT 许可，社区使用广泛，适合中文与多语言文本检索。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>许可风险</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>状态</th>
+          <th>许可</th>
+          <th>代表模型</th>
+          <th>结论</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="状态"><span class="badge green">优先</span></td>
+          <td data-label="许可">Apache 2.0 / MIT</td>
+          <td data-label="代表模型">Qwen3-VL、Qwen3-Embedding、Intern-Decision、Kev、BAAI/bge-m3</td>
+          <td data-label="结论">集成与再分发风险最低，适合生产。</td>
+        </tr>
+        <tr>
+          <td data-label="状态"><span class="badge yellow">可用但有条件</span></td>
+          <td data-label="许可">LFM Open License v1.0</td>
+          <td data-label="代表模型">LiquidAI d1-3B、d1-omni-600M</td>
+          <td data-label="结论">免费可用，但商用有 1000 万美元收入阈值限制。</td>
+        </tr>
+        <tr>
+          <td data-label="状态"><span class="badge red">只做研究</span></td>
+          <td data-label="许可">research-only</td>
+          <td data-label="代表模型">BioDecision v1 / v2</td>
+          <td data-label="结论">不要进生产，只能做医学基线对照。</td>
+        </tr>
+        <tr>
+          <td data-label="状态"><span class="badge red">不用于生产</span></td>
+          <td data-label="许可">CC BY-NC 4.0</td>
+          <td data-label="代表模型">OpenJev、StartLux-Decision、AgentDecision</td>
+          <td data-label="结论">非商业许可，不适合本项目生产。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>下一步清单</h2>
+    <ul>
+      <li><span class="checkbox"></span>先完成核心闭环，补充决策保持 <code>APP_DECISION_ENABLED=false</code>。</li>
+          <li><span class="checkbox"></span>先用 <code>Qwen3.5-4B</code> 跑通影像 + 文本理解。</li>
+          <li><span class="checkbox"></span>用本地 CPU <code>BAAI/bge-m3</code> 和 <code>zvec</code> 建病历/指南/文献向量库。</li>
+          <li><span class="checkbox"></span>先积累真实决策标注、独立测试集和医生评审结果，再决定是否启用 <code>Intern-Decision-4B</code>。</li>
+          <li><span class="checkbox"></span>仅当补充决策有稳定增益时，再验证 <code>Kev-4B</code> 对照或换装方案。</li>
+    </ul>
+  </section>
+
+  <footer class="meta" style="margin-top:40px; border-top:1px solid var(--line); padding-top:16px;">
+    本文档只做模型选型与部署规划，不替代临床判断。所有开源模型输出仍需医疗专业人员复核。
+  </footer>
+</div>
+
+</main>
+<footer class="doc-footer">
+  <span>24GB 核心模型方案 · 2026-10-23</span>
+  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+</footer>
+
+</body>
+</html>

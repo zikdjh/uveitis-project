@@ -1,0 +1,71 @@
+{
+  "run_id": "local-4060-preflight-20261025-01",
+  "status": "ok",
+  "started_at": "2026-10-25T11:51:09.132419+00:00",
+  "mode": "local_stage1_class_balanced_qlora",
+  "model_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\manifest.csv",
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "total_memory_gib": 7.99560546875,
+    "compute_capability": [
+      8,
+      9
+    ]
+  },
+  "configuration": {
+    "quantization": "4-bit NF4, bfloat16 compute, double quant",
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "gradient_checkpointing": true,
+    "image_pixels": 16384,
+    "max_length": 256,
+    "target_steps": 2,
+    "grad_accum": 1,
+    "learning_rate": 0.0001,
+    "validation_every": 1,
+    "save_every": 1,
+    "early_stop_patience": 3,
+    "seed": 20261025
+  },
+  "split": {
+    "train_rows": 12159,
+    "validation_rows": 68,
+    "validation_selection_sha256": "f0f08cdd3f2dbcd194f925cf75283ebc67fb164d15b0dbac868bf26916b3aa34",
+    "schedule_sha256": "c819f28b42b240dfb24c8a420444dff11ae695336512cbd07c01cc21871416c6",
+    "class_exposures": {
+      "fundus_toxo_binary::toxoplasmosis": 1,
+      "oct_aux_4class::NORMAL": 1
+    }
+  },
+  "after_load": {
+    "allocated_gib": 4.309648036956787,
+    "reserved_gib": 5.529296875,
+    "trainable_parameters": 10616832,
+    "resumed_from_step": 0
+  },
+  "completed_steps": 2,
+  "truncated_reason": "target_steps",
+  "best_step": 1,
+  "best_validation_loss": 0.1491325584183334,
+  "last_gradient_norm": 0.02073061279952526,
+  "final_adapter": {
+    "directory": "artifacts\\qwen3.5-4b\\local-4060-preflight-20261025-01\\final_adapter",
+    "sha256": "eb9813cec82e6e430972d74a829546828e03b6c822baa31690e14195747f714a"
+  },
+  "best_adapter": {
+    "directory": "artifacts\\qwen3.5-4b\\local-4060-preflight-20261025-01\\best_adapter",
+    "sha256": "649efe1a261e0ff0fad363140bebee9d096f42295ae749ff9dac7409fa3a88f4"
+  },
+  "peak_allocated_gib": 5.452396869659424,
+  "peak_reserved_gib": 5.689453125,
+  "final_memory": {
+    "allocated_gib": 4.4046196937561035,
+    "reserved_gib": 5.689453125,
+    "peak_allocated_gib": 5.452396869659424,
+    "peak_reserved_gib": 5.689453125
+  },
+  "total_seconds": 39.74560459997156,
+  "finished_at": "2026-10-25T11:51:48.878113+00:00"
+}

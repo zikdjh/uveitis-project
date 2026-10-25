@@ -1,0 +1,88 @@
+{
+  "run_id": "local-4060-smoke-20261025-06",
+  "status": "ok",
+  "started_at": "2026-10-25T10:14:10.541136+00:00",
+  "model_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\manifest.csv",
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "total_memory_gib": 7.99560546875,
+    "compute_capability": [
+      8,
+      9
+    ]
+  },
+  "configuration": {
+    "quantization": "4-bit NF4, bfloat16 compute, double quant",
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "gradient_checkpointing": true,
+    "image_pixels": 65536,
+    "max_length": 256,
+    "requested_steps": 3,
+    "learning_rate": 0.0001
+  },
+  "after_load": {
+    "allocated_gib": 4.309648036956787,
+    "reserved_gib": 5.529296875,
+    "trainable_parameters": 10616832
+  },
+  "steps": [
+    {
+      "step": 1,
+      "task": "oct_uveitis_4class",
+      "label": "Intermediate+Posterior Uveitis",
+      "image": "datasets\\training\\data\\01_uveitis_oct\\01_uveitis_oct\\Optical Coherence Tomography (OCT) Images of Proliferative Vitreoretinopathy, Uveitis, and Normal Eyes\\Intermediate+Posterior Uveitis\\Int+Post Uveitis 1.jpeg",
+      "loss": 0.0345475859940052,
+      "gradient_norm": 2.8938732147216797,
+      "sequence_tokens": 162,
+      "visual_tokens": 216,
+      "step_seconds": 1.2448348000179976,
+      "peak_allocated_gib": 5.452396869659424,
+      "peak_reserved_gib": 5.689453125
+    },
+    {
+      "step": 2,
+      "task": "fundus_toxo_binary",
+      "label": "toxoplasmosis",
+      "image": "datasets\\training\\data\\02_toxofundus\\02_toxofundus\\images\\(742).jpg",
+      "loss": 0.00023587141185998917,
+      "gradient_norm": 0.019391212612390518,
+      "sequence_tokens": 147,
+      "visual_tokens": 224,
+      "step_seconds": 0.780276799981948,
+      "peak_allocated_gib": 5.452396869659424,
+      "peak_reserved_gib": 5.69140625
+    },
+    {
+      "step": 3,
+      "task": "eye_five_class",
+      "label": "Cataract",
+      "image": "datasets\\training\\data\\03_eye_five_class\\03_eye_five_class\\Image Dataset on Eye Diseases Classification (Uveitis, Conjunctivitis, Cataract, Eyelid) with Symptoms and SMOTE Validation\\Cataract\\1.jpg",
+      "loss": 0.013453425839543343,
+      "gradient_norm": 1.3241770267486572,
+      "sequence_tokens": 156,
+      "visual_tokens": 216,
+      "step_seconds": 0.7663058000034653,
+      "peak_allocated_gib": 5.452396869659424,
+      "peak_reserved_gib": 5.69140625
+    }
+  ],
+  "adapter": {
+    "directory": "artifacts\\qwen3.5-4b\\local-4060-smoke-20261025-06\\final_adapter",
+    "adapter_model_sha256": "c7688e9ae5ebeb6e555a36e55b60ba920d750079012fa3514ac639062b03cf88",
+    "adapter_config_sha256": "805b8c781e5778c930786c24903eca1c54e0fea377c316785aac03e23b0a74e2",
+    "bytes": 42504600
+  },
+  "peak_allocated_gib": 5.452396869659424,
+  "peak_reserved_gib": 5.69140625,
+  "final": {
+    "allocated_gib": 4.4441704750061035,
+    "reserved_gib": 5.69140625,
+    "peak_allocated_gib": 5.452396869659424,
+    "peak_reserved_gib": 5.69140625
+  },
+  "total_seconds": 11.908903500007,
+  "finished_at": "2026-10-25T10:14:22.450381+00:00"
+}

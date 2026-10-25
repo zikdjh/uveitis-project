@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>推荐级数据集下载清单（P0+P1 · 约59 GB） · 葡萄膜炎辅助诊断项目</title>
+<style>
+  body { font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+         color: #1f2328; margin: 0; background: #f6f7f9; line-height: 1.7; }
+  .wrap { max-width: 1020px; margin: 0 auto; padding: 32px 28px 64px; background: #fff; }
+  h1 { font-size: 26px; margin: 8px 0 4px; }
+  h2 { font-size: 20px; margin-top: 40px; border-left: 4px solid #4f46e5; padding-left: 10px; }
+  h3 { font-size: 16px; margin-top: 24px; }
+  .meta { color: #57606a; font-size: 13px; border-bottom: 1px solid #d8dee4; padding-bottom: 14px; }
+  .meta b { color: #1f2328; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 20px; font-size: 13.5px; }
+  th, td { border: 1px solid #d8dee4; padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { background: #eef2ff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  a { color: #2563eb; text-decoration: none; word-break: break-all; }
+  a:hover { text-decoration: underline; }
+  .tag { display: inline-block; font-size: 12px; border-radius: 3px; padding: 1px 7px; margin-right: 4px; white-space: nowrap; }
+  .ok { background: #dcfce7; color: #166534; }
+  .manual { background: #fef3c7; color: #92400e; }
+  .reg { background: #e0e7ff; color: #3730a3; }
+  .p0 { background: #fee2e2; color: #991b1b; }
+  .p1 { background: #ffedd5; color: #9a3412; }
+  .sum { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .note { background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 14px; font-size: 13.5px; }
+  .warn { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 10px 14px; font-size: 13.5px; }
+  ol li, ul li { margin: 4px 0; }
+  input[type=checkbox] { transform: scale(1.15); margin-right: 6px; vertical-align: middle; }
+  footer { margin-top: 48px; color: #6b7280; font-size: 12.5px; border-top: 1px solid #d8dee4; padding-top: 12px; }
+  code { background: #f3f4f6; border-radius: 3px; padding: 1px 5px; font-size: 12.5px; }
+  @media print { body { background: #fff; } .wrap { padding: 0; } }
+</style>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-23-manual-download-links.html">上一份</a>
+    <a href="2026-10-23-model-24gb.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content">
+
+<div class="wrap">
+
+<h1>推荐级数据集下载清单（P0 + P1）</h1>
+<div class="meta">
+  <b>面向项目</b>：葡萄膜炎辅助诊断智能系统 · 多模态训练数据<br>
+  <b>整理日期</b>：2026-10-23 · <b>版本</b>：v1.0 · <b>范围</b>：P0 必需 + P1 重要（约 <b>59 GB</b> 压缩包口径）<br>
+  <b>依据</b>：<a href="2026-10-23-cn-eye-datasets.html">国内核验清单</a> ·
+  <a href="2026-10-23-intl-eye-datasets.html">国外核验清单</a> ·
+  体量估算（原 SIZE-ESTIMATE.md 未随项目保留）<br>
+  <b>说明</b>：P2 可选项（OCTA-500、EyePACS、GAMMA、Birdshot-WIDE 申请、组学件等约 170 GB）<b>不在本清单</b>，按需另行启动。
+</div>
+
+<div class="sum">
+  <b>汇总</b>：共 <b>24 项</b>，压缩下载约 <b>59 GB</b>；解压后约 <b>100-130 GB</b>，
+  建议预留 <b>500 GB</b> 磁盘（含训练缓存）。按 50 Mbps 直连估算全程 <b>约 3 小时</b>，
+  网盘/figshare/注册渠道以实测吞吐为准。
+</div>
+
+<h2>一、P0 必需（约 12 GB，当天跑通管线）</h2>
+<table>
+  <tr><th>✓</th><th>#</th><th>数据集</th><th>体量</th><th>许可</th><th>用途</th><th>获取</th></tr>
+  <tr><td><input type="checkbox"></td><td>1</td><td>葡萄膜炎 OCT（Mendeley hbr5pwk5w5 v1）</td><td>7.22 MB</td><td>CC BY 4.0</td><td>T1 OCT 细分类 / T3 微调</td><td><a href="https://data.mendeley.com/datasets/hbr5pwk5w5/1">Mendeley 直下</a></td></tr>
+  <tr><td><input type="checkbox"></td><td>2</td><td>ToxoFundus（Zenodo 5156953）</td><td>272 MB</td><td>CC BY 4.0</td><td>T1 病灶分割 / 感染性亚型</td><td><a href="https://zenodo.org/records/5156953">Zenodo 直下</a>（2024 版记录 13883485 同名；Kaggle 有镜像）</td></tr>
+  <tr><td><input type="checkbox"></td><td>3</td><td>五分类含症状文本（Mendeley n9zp473wfw v2）</td><td>41 MB</td><td>CC BY 4.0</td><td>原型验证（禁入结论性训练）</td><td><a href="https://data.mendeley.com/datasets/n9zp473wfw/2">Mendeley 直下</a></td></tr>
+  <tr><td><input type="checkbox"></td><td>4</td><td>Kaggle uveitis 镜像 ×2（kondwani / orvile）</td><td>~0.5 GB</td><td>以页面为准</td><td>管线调试</td><td><a href="https://www.kaggle.com/datasets/kondwani/eye-disease-dataset">kondwani</a> · <a href="https://www.kaggle.com/datasets/orvile/eye-diseases-classification">orvile</a>（需 Kaggle 账号）</td></tr>
+  <tr><td><input type="checkbox"></td><td>5</td><td>ODIR-5K</td><td>1.7 GB</td><td>未明示（内部科研）</td><td>T3 图文底座 / Other 弱标签</td><td><a href="https://tianchi.aliyun.com/dataset/94998">天池 94998</a> · <a href="https://www.kaggle.com/datasets/andrewmvd/ocular-disease-recognition-odir5k">Kaggle</a> · <a href="https://odir2019.grand-challenge.org/dataset/">官方页</a></td></tr>
+  <tr><td><input type="checkbox"></td><td>6</td><td>Open UWF 700（含葡萄膜炎 100 张）</td><td>~1.5 GB（估）</td><td>figshare 条目为准</td><td>T3 多模态（图像+人口学）</td><td><a href="https://www.nature.com/articles/s41597-024-04113-2">论文页</a> → Data availability 内 figshare 链接（<b>需人工浏览器</b>）</td></tr>
+  <tr><td><input type="checkbox"></td><td>7</td><td>OCT2017</td><td>7.85 GB</td><td>CC BY 4.0</td><td>T1 OCT 骨干预训练</td><td><a href="https://data.mendeley.com/datasets/rscbjbr9sj/3">Mendeley 直下</a>（单 zip 7.86 GB）</td></tr>
+  <tr><td><input type="checkbox"></td><td>8</td><td>RFMiD 2.0</td><td>64 MB</td><td>CC BY 4.0</td><td>长尾泛化评估</td><td><a href="https://zenodo.org/records/7505822">Zenodo 直下</a></td></tr>
+</table>
+
+<h2>二、P1 重要（约 47 GB，预训练增强 + 分割/质量辅助）</h2>
+<table>
+  <tr><th>✓</th><th>#</th><th>数据集</th><th>体量</th><th>许可</th><th>用途</th><th>获取</th></tr>
+  <tr><td><input type="checkbox"></td><td>9</td><td>iChallenge 精选：REFUGE1 / REFUGE2 / PALM / AGE / ADAM</td><td>~14 GB</td><td>各子集条款（ADAM 镜像标 CC BY）</td><td>结构分割预训练 / 前节 OCT 模态 / AMD 病灶</td><td><a href="http://hdmilab.cn/ichallenge">官网网盘直链</a> · <a href="https://aistudio.baidu.com/dataset/detail/88462">ADAM AI Studio</a></td></tr>
+  <tr><td><input type="checkbox"></td><td>10</td><td>DDR (OIA-DDR)</td><td>~3 GB</td><td>非商用（NC）</td><td>病灶分割/检测预训练</td><td><a href="https://github.com/nkicsl/DDR-dataset">GitHub README</a> 内百度网盘（提取码 ue0t）/ GDrive；10 分卷先合并</td></tr>
+  <tr><td><input type="checkbox"></td><td>11</td><td>DeepDRiD</td><td>~2.8 GB</td><td>CC BY-SA 4.0</td><td>质量评估分支 + UWF 迁移</td><td><a href="https://github.com/deepdrdoc/DeepDRiD">GitHub 直下</a></td></tr>
+  <tr><td><input type="checkbox"></td><td>12</td><td>EyeQ</td><td>~4 GB</td><td>CC BY-NC-SA</td><td>训练前质量过滤</td><td><a href="https://github.com/HzFu/EyeQ">GitHub 直下</a></td></tr>
+  <tr><td><input type="checkbox"></td><td>13</td><td>BRSET</td><td>~8 GB（估）</td><td>open</td><td>T3 患者信息融合 / 多标签</td><td><a href="https://physionet.org/content/brazilian-ophthalmological/">PhysioNet</a>（免费注册）</td></tr>
+  <tr><td><input type="checkbox"></td><td>14</td><td>FIVES</td><td>1.7 GB</td><td>CC BY 4.0</td><td>血管分割（血管炎量化）</td><td><a href="https://doi.org/10.6084/m9.figshare.19688169">figshare DOI</a>（需人工浏览器）</td></tr>
+  <tr><td><input type="checkbox"></td><td>15</td><td>JSIEC1000</td><td>~1.2 GB</td><td>ODbL（JSIEC 版权）</td><td>39 类细粒度补充</td><td><a href="https://www.kaggle.com/datasets/linchundan/fundusimage1000">Kaggle</a></td></tr>
+  <tr><td><input type="checkbox"></td><td>16</td><td>IDRiD</td><td>~3 GB</td><td>挑战条款</td><td>DR 分级 + 病灶分割</td><td><a href="https://idrid.grand-challenge.org/">Grand Challenge</a>（注册）</td></tr>
+  <tr><td><input type="checkbox"></td><td>17</td><td>APTOS 2019（训练包）</td><td>~4 GB</td><td>竞赛条款</td><td>DR 五级预训练</td><td><a href="https://www.kaggle.com/competitions/aptos2019-blindness-detection">Kaggle 竞赛页</a></td></tr>
+  <tr><td><input type="checkbox"></td><td>18</td><td>Messidor-1 / 2</td><td>~3 GB</td><td>协议后免费</td><td>通用眼底预训练补充</td><td><a href="https://www.adcis.net/en/Download-Third-Party/Messidor.html">ADCIS</a>（接受协议）</td></tr>
+  <tr><td><input type="checkbox"></td><td>19</td><td>病理性近视 + 解剖结构标注集</td><td>~1.5 GB（估）</td><td>figshare 条目为准</td><td>近视性改变鉴别（排除项）</td><td><a href="https://www.nature.com/articles/s41597-024-02911-2">论文页</a> → figshare（人工浏览器）</td></tr>
+  <tr><td><input type="checkbox"></td><td>20</td><td>AV 动静脉分割集</td><td>~1.5 GB（估）</td><td>figshare 条目为准</td><td>视网膜血管定量</td><td><a href="https://www.nature.com/articles/s41597-025-05381-2">论文页</a> → figshare（人工浏览器）</td></tr>
+  <tr><td><input type="checkbox"></td><td>21</td><td>UWF 眼内肿瘤集</td><td>~1.5 GB（估）</td><td>figshare 条目为准</td><td>伪装综合征鉴别</td><td><a href="https://www.nature.com/articles/s41597-025-05864-2">论文页</a> → figshare（人工浏览器）</td></tr>
+  <tr><td><input type="checkbox"></td><td>22</td><td>SUSTech-SYSU 角膜溃疡</td><td>~1.2 GB</td><td>CC0 / CC BY</td><td>眼前节分割范式</td><td><a href="https://doi.org/10.6084/m9.figshare.11371803">figshare 元数据记录</a>（数据同 collection，人工浏览器）</td></tr>
+  <tr><td><input type="checkbox"></td><td>23</td><td>小分割集：DRIVE / STARE / HRF / DRISHTI-GS</td><td>~0.8 GB 合计</td><td>学术免费</td><td>血管/视盘分割经典基准</td><td><a href="https://drive.grand-challenge.org/">DRIVE</a> · <a href="https://cecas.clemson.edu/~ahoover/stare/">STARE</a> · <a href="https://www5.cs.fau.de/research/data/fundus-images/">HRF</a> · <a href="https://cvit.iiit.ac.in/projects/mip/drishti-gs/">DRISHTI-GS</a></td></tr>
+</table>
+<p class="note"><b>已从推荐级排除</b>：RIM-ONE r3（官方渠道 404 待人工定位）、OLIVES / AI-READI（gated/credentialed 流程）、
+LAG（邮件要密码）、GAMMA / STAGE / STAGE2 / GOALS（体量大且偏青光眼）、OCTA-500 / EyePACS（体量大）、
+Birdshot-WIDE（需 DUA 申请）、组学件（Uveitis Atlas / Uveitis_All）。以上全部列入 P2，按需启动。</p>
+
+<h2>三、按渠道分批执行（建议顺序）</h2>
+<h3>批次 A：零门槛直下（约 10.5 GB，当天完成）</h3>
+<ol>
+  <li><input type="checkbox"> Mendeley 两件：葡萄膜炎 OCT（7 MB）、五分类 v2（41 MB）</li>
+  <li><input type="checkbox"> Zenodo 两件：ToxoFundus（272 MB）、RFMiD 2.0（64 MB）</li>
+  <li><input type="checkbox"> OCT2017（7.85 GB，单 zip，建议晚间挂机）</li>
+  <li><input type="checkbox"> GitHub 两件：DeepDRiD（~2.8 GB）、EyeQ（~4 GB）</li>
+  <li><input type="checkbox"> 官方页三小件：STARE、HRF、DRISHTI-GS（合计 ~0.7 GB）</li>
+</ol>
+<h3>批次 B：注册即取（约 22 GB）</h3>
+<ol>
+  <li><input type="checkbox"> 注册天池或 Kaggle → ODIR-5K（1.7 GB）</li>
+  <li><input type="checkbox"> 注册 Kaggle → uveitis 镜像 ×2（0.5 GB）、JSIEC1000（1.2 GB）、APTOS 训练包（4 GB）</li>
+  <li><input type="checkbox"> 注册 PhysioNet → BRSET（~8 GB）</li>
+  <li><input type="checkbox"> 注册 Grand Challenge → IDRiD（3 GB）、DRIVE（30 MB）</li>
+  <li><input type="checkbox"> ADCIS 接受协议 → Messidor-1/2（3 GB）</li>
+  <li><input type="checkbox"> 百度网盘 → iChallenge 精选（REFUGE1/2、PALM、AGE、ADAM，~14 GB）+ DDR（3 GB，提取码 ue0t）</li>
+</ol>
+<h3>批次 C：需人工浏览器（约 7 GB，到时候我把浏览器交接给你）</h3>
+<ol>
+  <li><input type="checkbox"> figshare：UWF-700（1.5 GB，P0 内唯一人工项，最高优先）</li>
+  <li><input type="checkbox"> figshare：FIVES（1.7 GB）</li>
+  <li><input type="checkbox"> figshare：病理性近视结构集、AV 分割集、眼内肿瘤集、SUSTech-SYSU（合计 ~5.7 GB）</li>
+</ol>
+<h3>批次 D：并行提交（无下载量）</h3>
+<ol>
+  <li><input type="checkbox"> Birdshot-WIDE：Zenodo 访问申请 + DUA（P2，但流程长建议现在发）</li>
+  <li><input type="checkbox"> 逐项归档许可文本到 <code>datasets/licenses/</code>，登记来源与版本号</li>
+</ol>
+
+<h2>四、磁盘与时间</h2>
+<ul>
+  <li>压缩包约 59 GB；解压后约 100-130 GB；加训练缓存建议预留 <b>500 GB</b>。</li>
+  <li>目录约定：<code>datasets/zip/</code> 存压缩包，<code>datasets/extracted/&lt;数据集名&gt;/</code> 存解压内容，核验完成后可删 zip 省一半空间。</li>
+  <li>按 50 Mbps 直连全程约 3 小时；OCT2017 单件建议用下载工具断点续传。</li>
+</ul>
+
+<h2>五、合规要点</h2>
+<div class="warn">
+  <ul>
+    <li>CC BY 4.0（8 项）：署名引用原始论文即可；EyeQ（CC BY-NC-SA）与 DDR（NC）仅限非商用。</li>
+    <li>ODIR-5K 许可未明示：内部科研使用，公开成果前联系数据方；Other 类弱标签需关键词筛选。</li>
+    <li>五分类 v2 与 Kaggle 镜像（爬取 + SMOTE）：仅限原型验证，禁入结论性训练与对外指标。</li>
+    <li>竞赛条款集（IDRiD、APTOS）与挑战条款集仅限学术用途；JSIEC1000 版权归 JSIEC 并需引用原文。</li>
+    <li>figshare 项下载后核对条目许可并归档；即使数据已脱敏也不得尝试重新识别身份。</li>
+  </ul>
+</div>
+
+<footer>
+  推荐级数据集下载清单 · 葡萄膜炎辅助诊断智能系统 · v1.0 · 2026-10-23 ·
+  依据当日核验的国内/国外清单与体量估算整理 · 仅用于非商用科研数据选型，不构成医疗建议。
+</footer>
+
+</div>
+
+</main>
+<footer class="doc-footer">
+  <span>推荐数据集清单 · 2026-10-23</span>
+  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+</footer>
+
+</body>
+</html>

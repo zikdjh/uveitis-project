@@ -1,0 +1,5 @@
+{"time": "2026-10-25T10:11:18.686264+00:00", "allocated_gib": 1.2270655632019043, "reserved_gib": 3.013671875, "device_free_gib": 3.912109375, "device_total_gib": 7.99560546875}
+{"time": "2026-10-25T10:11:20.712645+00:00", "allocated_gib": 1.7990097999572754, "reserved_gib": 3.03125, "device_free_gib": 3.89453125, "device_total_gib": 7.99560546875}
+{"time": "2026-10-25T10:11:22.738516+00:00", "allocated_gib": 2.3432369232177734, "reserved_gib": 3.05078125, "device_free_gib": 3.875, "device_total_gib": 7.99560546875}
+{"time": "2026-10-25T10:11:24.752619+00:00", "allocated_gib": 2.889838218688965, "reserved_gib": 3.068359375, "device_free_gib": 3.857421875, "device_total_gib": 7.99560546875}
+{"time": "2026-10-25T10:11:26.762887+00:00", "allocated_gib": 4.503482341766357, "reserved_gib": 5.560546875, "device_free_gib": 1.33984375, "device_total_gib": 7.99560546875}

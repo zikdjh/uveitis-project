@@ -1,0 +1,11 @@
+const task = await taskSpace(8);
+const page = task.page("p1");
+await page.goto("http://127.0.0.1:5173/login");
+await page.waitForTimeout(300);
+await page.fill("input[name=username]", "doctor");
+await page.fill("input[name=password]", "doctor-dev-2026");
+await page.click("button[type=submit]");
+await page.waitForSelector("h1:has-text('工作台')");
+console.log("url=" + await page.url());
+console.log(await page.snapshot());
+await page.screenshot({ path: "D:/temp/gpt/uveitis-project/scripts/ui-check-20261025/doctor-workbench-desktop.png" });

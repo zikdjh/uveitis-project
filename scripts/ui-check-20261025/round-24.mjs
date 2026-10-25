@@ -1,0 +1,10 @@
+const task = await taskSpace(8);
+const page = task.page("p1");
+const base = "http://127.0.0.1:5173/doctor/cases/0f7762ec-c7b4-4965-9efb-67cba861f326";
+await page.goto(base + "/report");
+await page.waitForSelector("h2:has-text('病例报告')");
+console.log("report=" + await page.url());
+console.log(await page.snapshot());
+const knowledge = await page.fetch("/api/v1/knowledge/status");
+console.log({ knowledgeStatus: knowledge.status, knowledgeBody: knowledge.body });
+console.log(await page.evaluate(() => ({ url: location.href, overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth, report: document.querySelector(".case-report")?.textContent })));
