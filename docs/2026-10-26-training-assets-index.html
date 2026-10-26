@@ -27,7 +27,7 @@
   <p class="doc-source">规范入口：<code>model-training/assets/README.md</code></p>
   <article class="html-body">
 <p>整理日期：2026-10-26</p>
-<p>这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除本地 smoke adapter、历史中间 checkpoint、<code>training_state.pt</code>、第二/第三阶段实验权重和重复 processor；当前保留两组工作 adapter、阶段实验指标、摘要、决策文件和冻结评估断点。实验 adapter 不作为运行候选。完整训练状态仍以 Modal <code>uveitis-runs</code> 为唯一真相源。</p>
+<p>这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除本地 smoke adapter、历史中间 checkpoint、<code>training_state.pt</code>、第二/第三阶段实验权重和重复 processor；当前保留两组工作 adapter、阶段实验指标、摘要、决策文件、错误来源分析和受控推理 smoke。实验 adapter 不作为运行候选。完整训练状态仍以 Modal <code>uveitis-runs</code> 为唯一真相源。</p>
 <p>本目录属于训练侧。模型运行服务只读取 adapter，不在 <code>model-runtime/</code> 复制权重。</p>
 <h2>Qwen3.5-4B</h2>
 <h3>focus01-20261025-02（历史实验）</h3>
@@ -68,10 +68,14 @@
 <li><code>eval-oct-stage2-20261026-01/stage2_decision.json</code>：第二阶段结论，决定保留第 20 步候选，不提升实验 final adapter。</li>
 <li><code>local-4060-oct-stage3-hires-20261026-01/</code>：高分率受控复核指标、切分快照和实验日志；6 步后早停，最佳点仍远低于第 20 步候选。</li>
 <li><code>eval-oct-stage3-20261026-01/stage3_decision.json</code>：第三阶段结论，决定保留第 20 步候选，不提升高分率实验 adapter。</li>
+<li><code>eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code>：第 20 步候选的类别、患者/来源组错误分析，以及与第 100 步基线的逐类变化。</li>
+<li><code>eval-oct-step20-runtime-smoke-20261026-01/</code>：第 20 步候选的四类均衡本地推理 smoke，记录 16 条预测、指标、抽样模式和显存峰值。</li>
 </ul>
 <p>选型决定为 <code>promote_step20_candidate</code>：候选 macro-F1 <code>0.947245</code>，基线 <code>0.918252</code>，提升 <code>+0.028993</code>，JSON 有效率均为 <code>100%</code>。该结果仍受数据来源、增强图和患者隔离限制约束。</p>
 <p>第二阶段复核使用 <code>5e-6</code> 和 <code>1e-5</code> 两个学习率，均从第 20 步候选初始化，OCT 任务权重保持 4。两次运行的第 5、10 步验证 macro-F1 均为 <code>0.867725</code>，OCT macro-F1 均为 <code>0.774603</code>，低于入口的 <code>0.873358</code> / <code>0.791503</code>，因此都在第 10 步触发早停。该结果说明继续同一数据、同一任务权重和同一 8 GB 配置下的短程续训没有带来收益；后续优先检查数据和错误来源，而不是继续增加步数。</p>
 <p>第三阶段把图像输入预算提高到 <code>131,072</code> 像素，保持第 20 步初始化、OCT 任务权重 4 和 <code>2.5e-6</code> 学习率，目标是增加 CNV/DRUSEN 边界细节。高分率初始化的 55 条验证只有 macro-F1 <code>0.826256</code>、OCT <code>0.718769</code>；最佳第 2 步为 <code>0.832019</code> / <code>0.736058</code>，第 4 步持平，第 6 步回落后早停。高分率改变了输入分布但未提高指标，因此运行候选仍为低分辨率第 20 步 adapter。</p>
+<p>错误来源分析显示，第 20 步候选在 1,000 条测试中的主要错误为 <code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条，另有 <code>CNV-&gt;DRUSEN</code> 4 条、<code>DME-&gt;DRUSEN</code> 4 条、<code>DME-&gt;CNV</code> 3 条及两条其他错误。685 个患者/来源组中有 50 组存在错误，前 10 个错误组占全部错误约 <code>24.53%</code>。相对第 100 步基线，DRUSEN 纠正 38 条是主要收益，同时 CNV 退化 6 条、NORMAL 退化 4 条、DME 净改善 1 条。后续实验应围绕 NORMAL/DRUSEN 与 CNV/DME 的边界，而不是继续增加同配置步数或输入像素。</p>
+<p>受控推理 smoke 使用第 20 步 adapter、<code>65,536</code> 像素、每类 4 条共 16 条，selection SHA256 为 <code>77a65218744fe84896bb06d7d216bdb9b2329fc06e2de90bdba428dcf9a6a0ee</code>。结果为 16/16 正确、JSON 有效率 <code>100%</code>、生成错误 0；adapter 加载后分配显存 <code>3.114870 GiB</code>，峰值分配 <code>3.233283 GiB</code>，峰值保留 <code>3.310547 GiB</code>，总耗时约 63 秒。该结果不构成准确率或泛化证据。</p>
 <h2>参考材料</h2>
 <p><code>reference/</code> 保存 24 GB GPU 云价格表的 HTML 和 XLSX。价格是历史调研快照，使用前应核对供应商当前报价。</p>
 <h2>完整权重的保存约定</h2>

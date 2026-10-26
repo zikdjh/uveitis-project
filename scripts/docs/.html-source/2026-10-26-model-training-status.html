@@ -81,6 +81,14 @@
 <td>两组 adapter 均已完成 OCT 1,000 条；selection SHA256 一致，第 20 步候选胜出</td>
 </tr>
 <tr>
+<td>错误来源分析</td>
+<td>第 20 步候选 1,000 条中主要错误为 <code>NORMAL-&gt;DRUSEN</code> 18、<code>DRUSEN-&gt;CNV</code> 14、<code>CNV-&gt;DME</code> 8；685 个组中 50 组有错误</td>
+</tr>
+<tr>
+<td>受控推理 smoke</td>
+<td>第 20 步候选四类各 4 条；16/16 正确，JSON 有效率 100%，峰值保留显存 <code>3.31 GiB</code></td>
+</tr>
+<tr>
 <td>本地中间产物</td>
 <td>2026-10-26 已清理旧 smoke/中间 checkpoint、第二/第三阶段实验权重；指标、摘要和决策文件保留，所有实验 adapter 均不作为运行候选</td>
 </tr>
@@ -90,7 +98,7 @@
 </tr>
 <tr>
 <td>活跃训练容器</td>
-<td>无；第三阶段高分率复核和冻结评估均已结束，RTX 4060 已释放</td>
+<td>无；第三阶段、错误来源分析和受控推理 smoke 均已结束，RTX 4060 已释放</td>
 </tr>
 <tr>
 <td>本机控制环境</td>
@@ -130,6 +138,9 @@
 <p>结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>。后续若要继续，应先分析 CNV/DRUSEN 错误来源和患者/来源分布，而不是继续增加同配置训练步数。</p>
 <p><strong>2026-10-26 13:15–13:26：</strong>第三阶段从第 20 步候选初始化，图像输入预算提高到 <code>131,072</code> 像素，学习率 <code>2.5e-6</code>、OCT 任务权重 4、每 2 步验证。高分率初始化验证为 macro-F1 <code>0.826256</code>、OCT <code>0.718769</code>；最佳第 2 步为 <code>0.832019</code> / <code>0.736058</code>，第 4 步持平，第 6 步回落后连续两次未改善并早停。峰值保留显存 <code>5.689453125 GiB</code>，总耗时约 <code>623.54</code> 秒。</p>
 <p>第三阶段没有产生提升候选，不执行冻结测试提升门槛。结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage3-20261026-01/stage3_decision.json</code>；运行候选继续使用低分辨率第 20 步 adapter。</p>
+<p><strong>2026-10-26 13:54：</strong>完成第 20 步候选的错误来源分析。1,000 条冻结测试 accuracy <code>0.947</code>、macro-F1 <code>0.947245</code>、JSON 有效率 <code>100%</code>；错误共 53 条，其中 <code>NORMAL-&gt;DRUSEN</code> 18、<code>DRUSEN-&gt;CNV</code> 14、<code>CNV-&gt;DME</code> 8，其余为 13 条。<code>CNV</code>、<code>DME</code>、<code>DRUSEN</code>、<code>NORMAL</code> 的错误数分别为 13、7、15、18。685 个患者/来源组中有 50 组出现错误，前 10 个错误组占全部错误约 <code>24.53%</code>。</p>
+<p>相对第 100 步基线，第 20 步候选纠正 DRUSEN 38 条，是该候选总体提升的主要来源；同时 CNV 退化 6 条、NORMAL 退化 4 条，DME 纠正 3 条且退化 2 条。下一步错误检查应聚焦 NORMAL/DRUSEN 和 CNV/DME，而不是继续沿用同一配置增加步数。</p>
+<p><strong>2026-10-26 13:56–13:57：</strong>完成第 20 步候选的类别均衡推理 smoke。评估器新增 <code>--samples-per-class</code>，从四类各取首 4 条，共 16 条；selection SHA256 为 <code>77a65218744fe84896bb06d7d216bdb9b2329fc06e2de90bdba428dcf9a6a0ee</code>。结果为 16/16 正确、JSON 有效率 <code>100%</code>、生成错误 0，峰值分配显存 <code>3.233283 GiB</code>、峰值保留 <code>3.310547 GiB</code>，总耗时约 63 秒。该结果只用于验证本地推理链路和四类覆盖，不作为准确率证据。</p>
 <h2>2026-10-25 停止点</h2>
 <p>今日工作已停止，当前没有训练或评估进程，RTX 4060 显存占用已回落到 <code>0 MiB</code>。冻结测试集评估的完整进度、指标、配对快照和恢复命令见 <code>reports/qwen3.5-4B-progress-20261025-stop.md</code>。</p>
 <ul>

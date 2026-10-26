@@ -1,8 +1,10 @@
 """Evaluate local Qwen3.5-4B adapters on the frozen manifest test split.
 
 Predictions are appended to a partial JSONL file after each sample, so a long
-local evaluation can be resumed without rerunning completed images. The
-evaluator never uses test rows for training or checkpoint selection.
+local evaluation can be resumed without rerunning completed images. Callers can
+select the full test split, the first N rows, or a deterministic balanced sample
+per task and label. The evaluator never uses test rows for training or
+checkpoint selection.
 """
 
 from __future__ import annotations
@@ -143,6 +145,82 @@ def _load_test_rows(tasks: set[str]) -> list[dict]:
     return rows
 
 
+def _select_rows(
+    rows: list[dict],
+    *,
+    tasks: list[str],
+    max_samples: int | None,
+    samples_per_class: int | None,
+) -> tuple[list[dict], dict]:
+    if max_samples is not None and samples_per_class is not None:
+        raise ValueError("--max-samples and --samples-per-class are mutually exclusive")
+    if max_samples is not None:
+        if max_samples < 1:
+            raise ValueError("--max-samples must be positive")
+        return rows[:max_samples], {
+            "mode": "first_n",
+            "max_samples": max_samples,
+            "rows": min(max_samples, len(rows)),
+        }
+    if samples_per_class is None:
+        return rows, {"mode": "all", "rows": len(rows)}
+    if samples_per_class < 1:
+        raise ValueError("--samples-per-class must be positive")
+
+    available: dict[str, Counter[str]] = {
+        task: Counter(row["label"] for row in rows if row["task"] == task)
+        for task in tasks
+    }
+    missing = {
+        task: sorted(set(TASK_LABELS[task]) - set(available[task]))
+        for task in tasks
+        if set(TASK_LABELS[task]) - set(available[task])
+    }
+    if missing:
+        raise ValueError(
+            "Balanced sampling requires every allowed label in the test split: "
+            + json.dumps(
+                {task: labels for task, labels in sorted(missing.items())},
+                ensure_ascii=False,
+            )
+        )
+
+    selected_keys: set[tuple[str, str]] = set()
+    selected_counts: dict[str, int] = {}
+    for task in tasks:
+        for label in TASK_LABELS[task]:
+            class_rows = [
+                row
+                for row in rows
+                if row["task"] == task and row["label"] == label
+            ]
+            if len(class_rows) < samples_per_class:
+                raise ValueError(
+                    f"Not enough rows for {task}::{label}: "
+                    f"{len(class_rows)} < {samples_per_class}"
+                )
+            for row in class_rows[:samples_per_class]:
+                selected_keys.add((row["task"], row["image"]))
+            selected_counts[f"{task}::{label}"] = samples_per_class
+
+    selected = [
+        row
+        for row in rows
+        if (row["task"], row["image"]) in selected_keys
+    ]
+    return selected, {
+        "mode": "balanced_per_class",
+        "samples_per_class": samples_per_class,
+        "rows": len(selected),
+        "available_label_counts": {
+            f"{task}::{label}": count
+            for task in tasks
+            for label, count in sorted(available[task].items())
+        },
+        "selected_label_counts": dict(sorted(selected_counts.items())),
+    }
+
+
 def _prediction_key(item: dict) -> str:
     return f"{item['task']}\t{item['image']}"
 
@@ -188,6 +266,7 @@ def _summarize(
     torch,
     max_new_tokens: int,
     image_pixels: int,
+    sampling: dict,
 ) -> dict:
     outputs = [
         predictions_by_key[_prediction_key({"task": row["task"], "image": row["image"]})]
@@ -210,6 +289,7 @@ def _summarize(
         "selection_sha256": selection_sha256,
         "tasks": task_metrics,
         "rows": len(outputs),
+        "sampling": sampling,
         "evaluated_label_counts": dict(
             sorted(Counter(f"{item['task']}::{item['expected']}" for item in outputs).items())
         ),
@@ -250,6 +330,7 @@ def _summarize(
             "tasks": tasks,
             "rows": len(outputs),
             "selection_sha256": selection_sha256,
+            "sampling": sampling,
             "partial_predictions": "predictions.partial.jsonl",
             "output_dir": str(output_dir),
         },
@@ -260,6 +341,7 @@ def _summarize(
             "status": "ok",
             "adapter_sha256": metrics["adapter_sha256"],
             "selection_sha256": selection_sha256,
+            "sampling": sampling,
             "tasks": tasks,
             "rows": len(outputs),
             "elapsed_seconds": elapsed_seconds,
@@ -278,6 +360,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--max-new-tokens", type=int, default=32)
     parser.add_argument("--image-pixels", type=int, default=65_536)
     parser.add_argument("--max-samples", type=int)
+    parser.add_argument("--samples-per-class", type=int)
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
 
@@ -301,10 +384,12 @@ def main() -> None:
 
     os.environ.setdefault("HF_HUB_OFFLINE", "1")
     rows = _load_test_rows(set(tasks))
-    if args.max_samples is not None:
-        if args.max_samples < 1:
-            raise ValueError("--max-samples must be positive")
-        rows = rows[: args.max_samples]
+    rows, sampling = _select_rows(
+        rows,
+        tasks=tasks,
+        max_samples=args.max_samples,
+        samples_per_class=args.samples_per_class,
+    )
     selection_sha256 = _selection_sha256(rows)
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -330,6 +415,7 @@ def main() -> None:
                 "adapter_dir": str(args.adapter_dir.resolve()),
                 "output_dir": str(output_dir),
                 "tasks": tasks,
+                "sampling": sampling,
                 "total_rows": len(rows),
                 "completed_rows": len(rows) - len(remaining_rows),
                 "remaining_rows": len(remaining_rows),
@@ -496,6 +582,7 @@ def main() -> None:
         torch=torch,
         max_new_tokens=args.max_new_tokens,
         image_pixels=args.image_pixels,
+        sampling=sampling,
     )
     print(json.dumps(metrics, indent=2, ensure_ascii=False), flush=True)
 

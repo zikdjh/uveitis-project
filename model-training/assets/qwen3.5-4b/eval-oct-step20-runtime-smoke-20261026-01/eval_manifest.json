@@ -1,0 +1,28 @@
+{
+  "adapter_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\local-4060-oct-focus-cont-20261025-01\\best_adapter",
+  "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+  "tasks": [
+    "oct_aux_4class"
+  ],
+  "rows": 16,
+  "selection_sha256": "77a65218744fe84896bb06d7d216bdb9b2329fc06e2de90bdba428dcf9a6a0ee",
+  "sampling": {
+    "mode": "balanced_per_class",
+    "samples_per_class": 4,
+    "rows": 16,
+    "available_label_counts": {
+      "oct_aux_4class::CNV": 250,
+      "oct_aux_4class::DME": 250,
+      "oct_aux_4class::DRUSEN": 250,
+      "oct_aux_4class::NORMAL": 250
+    },
+    "selected_label_counts": {
+      "oct_aux_4class::CNV": 4,
+      "oct_aux_4class::DME": 4,
+      "oct_aux_4class::DRUSEN": 4,
+      "oct_aux_4class::NORMAL": 4
+    }
+  },
+  "partial_predictions": "predictions.partial.jsonl",
+  "output_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\eval-oct-step20-runtime-smoke-20261026-01"
+}

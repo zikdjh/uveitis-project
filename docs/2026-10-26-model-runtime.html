@@ -29,7 +29,7 @@
 <p>模型运行侧的代码、健康检查、评估脚本和部署入口统一放在本目录。当前服务提供模型与 adapter 状态查询，完整影像推理链路仍在接入中。</p>
 <ul>
 <li><code>app/</code>：模型运行 API，默认监听 <code>8010</code>。</li>
-<li><code>code/local_qwen4b_eval.py</code>：本地 4060 冻结测试集评估器。</li>
+<li><code>code/local_qwen4b_eval.py</code>：本地 4060 冻结测试集评估器，支持全量、按序截取和类别均衡抽样。</li>
 <li><code>scripts/run_local_4060_eval.ps1</code>：Windows 本地评估入口。</li>
 <li><code>assets/README.md</code>：可用 adapter 与评估结果索引。</li>
 <li><code>docs/2026-10-26-model-runtime-evaluation.html</code>：评估、续跑、显存限制和推理边界。</li>
@@ -43,9 +43,10 @@
 <h2>本地评估</h2>
 <pre><code class="language-powershell">.\model-runtime\scripts\run_local_4060_eval.ps1 `
   -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
-  -OutputDir 'model-training\assets\qwen3.5-4b\eval-layout-smoke-20261026' `
-  -Tasks 'oct_aux_4class' -MaxSamples 1
+  -OutputDir 'model-training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
+  -Tasks 'oct_aux_4class' -SamplesPerClass 4
 </code></pre>
+<p><code>-SamplesPerClass N</code> 会为每个 <code>task + label</code> 固定取前 N 条，适合四类均衡的受控 smoke；<code>-MaxSamples N</code> 仍保留为按排序取前 N 条，两者互斥。抽样模式、可用类别数和实际选择数会写入 <code>eval_manifest.json</code>、<code>eval_metrics.json</code> 和 <code>eval_summary.json</code>。</p>
 <p>评估会读取 <code>model-training/datasets/training/manifest.csv</code> 和冻结测试图像，不参与训练或 checkpoint 选择。没有 <code>-Overwrite</code> 时会从已有部分预测续跑。</p>
 
   </article>

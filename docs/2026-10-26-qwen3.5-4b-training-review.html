@@ -327,7 +327,7 @@
 <li>选型决定为 <code>promote_step20_candidate</code>，证据见 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/selection_decision.json</code>。</li>
 <li>该决定只确认研究型运行候选，不代表患者隔离外部验证或临床部署批准。</li>
 </ul>
-<p>下一步应冻结第 20 步 adapter、模型卡、指标文件和运行读取路径，并准备受控推理 smoke。若后续仍出现 CNV/DRUSEN 混淆，应优先检查两类在训练与测试中的患者、来源和图像分布，而不是继续提高训练步数。</p>
+<p>下一步应冻结第 20 步 adapter、模型卡、指标文件和运行读取路径。错误来源分析和四类均衡推理 smoke 已完成：53 条错误主要集中在 <code>NORMAL-&gt;DRUSEN</code>、<code>DRUSEN-&gt;CNV</code> 和 <code>CNV-&gt;DME</code>，后续实验应优先检查这些类别的患者、来源和图像分布，而不是继续提高训练步数。</p>
 <h2>2026-10-26 第二阶段受控复核</h2>
 <ul>
 <li>复核目标：从已选定的第 20 步 adapter 初始化，保持图像像素 65,536、最大序列 256、梯度累积 4 和 OCT 任务权重 4，只改变学习率。</li>
