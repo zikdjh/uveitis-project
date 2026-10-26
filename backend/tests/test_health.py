@@ -1,23 +1,25 @@
 from pathlib import Path
 from uuid import uuid4
 
+import pytest
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
+from app.db.audit import MemoryAuthAuditStore
 from app.main import create_app
 from app.db.users import MemoryUserStore
 from app.services.redis_store import MemorySessionStore
 
 
 def make_client(tmp_path: Path, role: str = "doctor") -> TestClient:
-    database_path = tmp_path / f"test-{uuid4().hex}.db"
     users = MemoryUserStore()
     sessions = MemorySessionStore()
     app = create_app(
-        database_path=database_path,
         upload_dir=tmp_path / "uploads",
         vector_dir=tmp_path / "vectors",
         use_environment_database=False,
         user_store=users,
+        audit_store=MemoryAuthAuditStore(),
         redis_store=sessions,
         bootstrap_users=False,
     )
@@ -27,7 +29,7 @@ def make_client(tmp_path: Path, role: str = "doctor") -> TestClient:
     client = TestClient(app)
     username = "admin" if role == "admin" else "doctor"
     login = client.post(
-        "/api/v1/auth/login",
+        "/api/v1/auth/admin/login" if role == "admin" else "/api/v1/auth/login",
         json={"username": username, "password": "test-password"},
     )
     assert login.status_code == 200
@@ -88,7 +90,7 @@ def test_case_analysis_and_review_workflow(tmp_path: Path) -> None:
     overview = client.get("/api/v1/system/overview")
     assert overview.status_code == 200
     assert overview.json()["stats"]["total"] == 1
-    assert len(overview.json()["models"]) == 5
+    assert len(overview.json()["models"]) == 6
     decision = next(
         model for model in overview.json()["models"]
         if model["role"].startswith("补充决策")
@@ -101,6 +103,13 @@ def test_case_analysis_and_review_workflow(tmp_path: Path) -> None:
         if stage["key"] == "decision"
     )
     assert decision_stage["status"] == "skipped"
+    assert case["analysis"]["summary"]
+    qwen_stage = next(
+        stage for stage in case["analysis"]["stages"]
+        if stage["key"] == "qwen_judgment"
+    )
+    assert qwen_stage["status"] == "skipped"
+    assert case["analysis"]["external_summary_used"] is False
 
 
 def test_case_requires_consent(tmp_path: Path) -> None:
@@ -119,11 +128,11 @@ def test_case_requires_consent(tmp_path: Path) -> None:
 
 def test_case_requires_authentication(tmp_path: Path) -> None:
     app = create_app(
-        database_path=tmp_path / f"test-{uuid4().hex}.db",
         upload_dir=tmp_path / "uploads",
         vector_dir=tmp_path / "vectors",
         use_environment_database=False,
         user_store=MemoryUserStore(),
+        audit_store=MemoryAuthAuditStore(),
         redis_store=MemorySessionStore(),
         bootstrap_users=False,
     )
@@ -192,6 +201,98 @@ def test_admin_can_manage_users_and_read_audit(tmp_path: Path) -> None:
 def test_doctor_cannot_manage_users(tmp_path: Path) -> None:
     client = make_client(tmp_path)
     assert client.get("/api/v1/admin/users").status_code == 403
+
+
+def test_integration_config_is_admin_managed_and_secret_is_write_only(
+    tmp_path: Path,
+) -> None:
+    doctor = make_client(tmp_path)
+    assert doctor.get("/api/v1/admin/integrations").status_code == 403
+    assert doctor.get("/api/v1/admin/integrations/status").status_code == 200
+
+    admin = make_client(tmp_path, role="admin")
+    initial = admin.get("/api/v1/admin/integrations")
+    assert initial.status_code == 200
+    assert initial.json()["summary_api_key_configured"] is False
+
+    updated = admin.patch(
+        "/api/v1/admin/integrations",
+        json={
+            "summary_enabled": True,
+            "summary_protocol": "openai_responses",
+            "summary_base_url": "https://summary.example/v1",
+            "summary_model": "summary-model",
+            "summary_api_key": "secret-never-returned",
+            "expected_revision": initial.json()["revision"],
+        },
+    )
+    assert updated.status_code == 200
+    assert updated.json()["summary_api_key_configured"] is True
+    assert "secret-never-returned" not in updated.text
+    assert "summary_api_key" not in updated.json()
+    assert updated.json()["revision"] == initial.json()["revision"] + 1
+
+    conflict = admin.patch(
+        "/api/v1/admin/integrations",
+        json={"summary_model": "stale", "expected_revision": 0},
+    )
+    assert conflict.status_code == 409
+
+    audit = admin.get("/api/v1/admin/audit-events")
+    assert audit.status_code == 200
+    assert audit.json()[0]["event"] == "integration_config_update"
+
+
+def test_admin_and_doctor_use_separate_login_entries(tmp_path: Path) -> None:
+    app = create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=MemoryUserStore(),
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=MemorySessionStore(),
+        bootstrap_users=False,
+    )
+    password = app.state.auth_service.hash_password("test-password")
+    app.state.user_store.ensure_user("doctor", password, "测试医生", "doctor")
+    app.state.user_store.ensure_user("admin", password, "测试管理员", "admin")
+
+    doctor_client = TestClient(app)
+    doctor_client.headers["X-CSRF-Token"] = "unused"
+    doctor_rejected = doctor_client.post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "password": "test-password"},
+    )
+    assert doctor_rejected.status_code == 403
+
+    admin_client = TestClient(app)
+    admin_client.headers["X-CSRF-Token"] = "unused"
+    admin_rejected = admin_client.post(
+        "/api/v1/auth/admin/login",
+        json={"username": "doctor", "password": "test-password"},
+    )
+    assert admin_rejected.status_code == 403
+
+    accepted = admin_client.post(
+        "/api/v1/auth/admin/login",
+        json={"username": "admin", "password": "test-password"},
+    )
+    assert accepted.status_code == 200
+    assert accepted.json()["user"]["role"] == "admin"
+
+
+def test_runtime_requires_postgres_database(tmp_path: Path) -> None:
+    production_settings = settings.model_copy(
+        update={"environment": "production", "database_url": ""}
+    )
+    with pytest.raises(RuntimeError, match="APP_DATABASE_URL"):
+        create_app(
+            upload_dir=tmp_path / "uploads",
+            vector_dir=tmp_path / "vectors",
+            use_environment_database=True,
+            bootstrap_users=False,
+            runtime_settings=production_settings,
+        )
 
 
 def test_disabled_user_cannot_login(tmp_path: Path) -> None:
@@ -306,21 +407,22 @@ def test_login_is_rate_limited(tmp_path: Path) -> None:
     assert blocked.status_code == 429
 
 
-def test_default_sqlite_auth_store_round_trip(tmp_path: Path) -> None:
+def test_memory_auth_store_round_trip(tmp_path: Path) -> None:
     app = create_app(
-        database_path=tmp_path / "sqlite-auth.db",
         upload_dir=tmp_path / "uploads",
         vector_dir=tmp_path / "vectors",
         use_environment_database=False,
+        user_store=MemoryUserStore(),
+        audit_store=MemoryAuthAuditStore(),
         redis_store=MemorySessionStore(),
         bootstrap_users=False,
     )
-    password = app.state.auth_service.hash_password("sqlite-test-password")
-    app.state.user_store.ensure_user("sqlite.doctor", password, "本地医生", "doctor")
+    password = app.state.auth_service.hash_password("memory-test-password")
+    app.state.user_store.ensure_user("memory.doctor", password, "内存医生", "doctor")
     client = TestClient(app)
     response = client.post(
         "/api/v1/auth/login",
-        json={"username": "sqlite.doctor", "password": "sqlite-test-password"},
+        json={"username": "memory.doctor", "password": "memory-test-password"},
     )
     assert response.status_code == 200
     assert response.json()["user"]["permissions"]

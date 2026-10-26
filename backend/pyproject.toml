@@ -23,6 +23,7 @@ dependencies = [
   "psycopg[binary]==3.2.10",
   "redis==6.4.0",
   "pwdlib[argon2]==0.3.0",
+  "cryptography==46.0.3",
 ]
 
 [dependency-groups]

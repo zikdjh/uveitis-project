@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from secrets import token_urlsafe
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
@@ -26,6 +27,11 @@ from app.services.auth import SessionTokens
 
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+
+ENTRY_LABELS = {
+    "doctor": "医生",
+    "admin": "管理员",
+}
 
 
 def _audit(
@@ -100,18 +106,24 @@ def _unauthorized_response(detail: str = "登录状态已失效") -> JSONRespons
     return response
 
 
-@router.post("/login", response_model=LoginResponse)
-def login(payload: LoginRequest, request: Request) -> Response:
+def _login_response(
+    payload: LoginRequest,
+    request: Request,
+    *,
+    expected_role: Literal["doctor", "admin"],
+    entry: Literal["doctor", "admin"],
+) -> Response:
     auth = request.app.state.auth_service
     username = payload.username.strip().lower()
     identity = f"{username}:{request_ip(request)}"
+    chinese_entry = ENTRY_LABELS[entry]
     if not auth.login_allowed(identity):
         _audit(
             request,
-            event="login",
+            event=f"{entry}_login",
             outcome="blocked",
             username=username,
-            detail="登录失败次数过多",
+            detail=f"{chinese_entry}入口登录失败次数过多",
         )
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -124,12 +136,24 @@ def login(payload: LoginRequest, request: Request) -> Response:
         failures = auth.record_login_failure(identity)
         _audit(
             request,
-            event="login",
+            event=f"{entry}_login",
             outcome="failure",
             username=username,
-            detail=f"凭据不正确或账号已停用（连续失败 {failures} 次）",
+            detail=f"{chinese_entry}入口：凭据不正确或账号已停用（连续失败 {failures} 次）",
         )
         raise HTTPException(status_code=401, detail="用户名或密码不正确")
+
+    if user.role != expected_role:
+        failures = auth.record_login_failure(identity)
+        _audit(
+            request,
+            event=f"{entry}_login",
+            outcome="forbidden",
+            username=username,
+            user_id=user.id,
+            detail=f"角色 {user.role} 不能进入{chinese_entry}入口（连续失败 {failures} 次）",
+        )
+        raise HTTPException(status_code=403, detail=f"该账号不能登录{chinese_entry}入口")
 
     auth.clear_login_failures(identity)
     tokens, result = auth.create_session(
@@ -146,13 +170,33 @@ def login(payload: LoginRequest, request: Request) -> Response:
     )
     _audit(
         request,
-        event="login",
+        event=f"{entry}_login",
         outcome="success",
         username=user.username,
         user_id=user.id,
-        detail=f"角色 {user.role}",
+        detail=f"角色 {user.role}，入口 {entry}",
     )
     return response
+
+
+@router.post("/login", response_model=LoginResponse)
+def login(payload: LoginRequest, request: Request) -> Response:
+    return _login_response(
+        payload,
+        request,
+        expected_role="doctor",
+        entry="doctor",
+    )
+
+
+@router.post("/admin/login", response_model=LoginResponse)
+def admin_login(payload: LoginRequest, request: Request) -> Response:
+    return _login_response(
+        payload,
+        request,
+        expected_role="admin",
+        entry="admin",
+    )
 
 
 @router.post("/refresh", response_model=LoginResponse)

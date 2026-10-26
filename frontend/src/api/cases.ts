@@ -19,6 +19,14 @@ export type PipelineStage = {
   detail: string;
 };
 
+export type ComponentResult = {
+  key: string;
+  label: string;
+  status: PipelineStage["status"];
+  detail: string;
+  latency_ms: number;
+};
+
 export type AnalysisResult = {
   status: "queued" | "running" | "completed" | "failed";
   model_mode: "mock" | "remote";
@@ -29,6 +37,17 @@ export type AnalysisResult = {
   urgency: "unknown" | "low" | "medium" | "high";
   recommendations: string[];
   evidence: Array<{ id: string; source: string; snippet: string; score: number }>;
+  web_evidence: Array<{
+    title: string;
+    url: string;
+    snippet: string;
+    provider: string;
+    score: number | null;
+  }>;
+  component_results: ComponentResult[];
+  summary: string;
+  external_summary_used: boolean;
+  external_payload: Record<string, unknown>;
   confidence: number;
   safety_flags: string[];
   started_at: string;

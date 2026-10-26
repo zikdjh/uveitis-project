@@ -64,7 +64,7 @@ def models() -> dict:
     return {
         "models": [
             {
-                "role": "multimodal",
+                "role": "qwen_judgment",
                 "name": payload["model"]["name"],
                 "status": payload["model"]["status"],
             },

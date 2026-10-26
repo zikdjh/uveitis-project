@@ -19,6 +19,8 @@ cd model-runtime
 
 打开 `http://127.0.0.1:8010/health`。返回 `ready` 表示基座目录和 adapter 文件均可定位；返回 `degraded` 表示路径缺失，服务本身仍可启动。`/v1/models` 提供感知模型、adapter 和补充决策模型的角色索引。
 
+后端分析链路预留 `POST /v1/judge`：输入病例元数据、影像引用和受限输出 schema，返回结构化标签、发现、置信度与 `requires_human_review`。该接口尚未实现真实 Qwen 推理；实现前后端会将该分支标记为失败或跳过，不影响安全校验和医生复核。
+
 ## 本地评估
 
 ```powershell

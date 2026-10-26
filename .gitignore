@@ -36,6 +36,7 @@ backend/pytest-cache-files-*/
 backend/.uv-cache/
 frontend/.npm-cache/
 scripts/ui-check-20261025/*.png
+docs/Uv*.csv
 model-training/.venv-local/
 model-training/models/
 model-training/data/

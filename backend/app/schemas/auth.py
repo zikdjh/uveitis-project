@@ -16,6 +16,8 @@ class Permission(StrEnum):
     KNOWLEDGE_WRITE = "knowledge:write"
     SYSTEM_READ = "system:read"
     SYSTEM_MANAGE = "system:manage"
+    INTEGRATION_READ = "integration:read"
+    INTEGRATION_MANAGE = "integration:manage"
     USER_READ = "user:read"
     USER_MANAGE = "user:manage"
     AUDIT_READ = "audit:read"

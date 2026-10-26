@@ -24,9 +24,13 @@ class CaseRepository(Protocol):
 class PostgresCaseStore:
     """PostgreSQL case repository with validated JSON payload snapshots."""
 
-    def __init__(self, database_url: str) -> None:
+    def __init__(self, database_url: str, connect_timeout_seconds: int = 5) -> None:
         self.database_url = database_url
-        self.engine: Engine = create_engine(database_url, pool_pre_ping=True)
+        self.engine: Engine = create_engine(
+            database_url,
+            pool_pre_ping=True,
+            connect_args={"connect_timeout": connect_timeout_seconds},
+        )
         self._session_factory = sessionmaker(
             bind=self.engine,
             class_=Session,

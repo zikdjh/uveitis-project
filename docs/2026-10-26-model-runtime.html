@@ -40,6 +40,7 @@
 ..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 </code></pre>
 <p>打开 <code>http://127.0.0.1:8010/health</code>。返回 <code>ready</code> 表示基座目录和 adapter 文件均可定位；返回 <code>degraded</code> 表示路径缺失，服务本身仍可启动。<code>/v1/models</code> 提供感知模型、adapter 和补充决策模型的角色索引。</p>
+<p>后端分析链路预留 <code>POST /v1/judge</code>：输入病例元数据、影像引用和受限输出 schema，返回结构化标签、发现、置信度与 <code>requires_human_review</code>。该接口尚未实现真实 Qwen 推理；实现前后端会将该分支标记为失败或跳过，不影响安全校验和医生复核。</p>
 <h2>本地评估</h2>
 <pre><code class="language-powershell">.\model-runtime\scripts\run_local_4060_eval.ps1 `
   -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `

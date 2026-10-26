@@ -4,6 +4,7 @@ import PatientShell from "@/components/PatientShell";
 import RouteGuard from "@/components/RouteGuard";
 import WorkspaceShell from "@/components/WorkspaceShell";
 import AdminPage from "@/pages/AdminPage";
+import AdminLoginPage from "@/pages/AdminLoginPage";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import PrivacyPage from "@/pages/PrivacyPage";
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
     ],
   },
   { path: "/login", element: <LoginPage /> },
+  { path: "/admin/login", element: <AdminLoginPage /> },
   { path: "/forbidden", element: <ForbiddenPage /> },
   {
     element: <RouteGuard roles={["doctor"]} />,

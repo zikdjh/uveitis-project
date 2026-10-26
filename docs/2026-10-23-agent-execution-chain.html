@@ -26,15 +26,17 @@
   <p class="doc-summary">病例接入、影像感知、检索、决策和安全复核链路</p>
   <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-23-agent-execution-chain.html</code></p>
   <article class="html-body">
-<p>目标：把诊断系统拆成一条可审计、可回滚、可扩展的智能体链路，而不是让一个大模型一次性完成所有任务。</p>
+<p>目标：把诊断系统拆成一条可审计、可回滚、可扩展的智能体链路。Qwen3.5-4B 微调模型只负责结构化判断，不负责最终报告；RAG、决策模型、网络搜索和外部总结都可以独立跳过，不阻塞主链路。</p>
 <h2>1. 总体链路</h2>
 <pre><code class="language-text">用户/医生输入
   -&gt; IntakeAgent
   -&gt; PreprocessAgent
   -&gt; RouterAgent
-  -&gt; PerceptionAgent(Qwen3.5-4B)
-  -&gt; RetrievalAgent(BGE-M3)
-  -&gt; DecisionAgent(可选补充分支)
+  -&gt; QwenJudgmentAgent(可选：Qwen3.5-4B 微调判断)
+  -&gt; RetrievalAgent(可选：BGE-M3 + zvec RAG)
+  -&gt; DecisionAgent(可选：补充决策模型)
+  -&gt; SearchAgent(可选：8 家主流搜索 API，按管理员顺序降级)
+  -&gt; ExternalSummaryAgent(可选：外部 API 总结梳理)
   -&gt; SafetyAgent
   -&gt; ReportAgent
   -&gt; ReviewAgent
@@ -44,7 +46,8 @@
 <ul>
 <li>每个节点只做一件事。</li>
 <li>每个节点都有明确的输入/输出 JSON。</li>
-<li>所有结果都带 <code>case_id</code> 和 <code>trace_id</code>。</li>
+<li>Qwen 判断、RAG、决策、搜索和外部总结均为增强组件，各自有超时和异常边界。</li>
+<li>任一增强组件不可用或输出不合法时，只记录 <code>skipped</code> 或 <code>failed</code>，主流程继续进入安全校验和医生复核。</li>
 <li>医生复核永远保留在链路里。</li>
 </ul>
 <h2>2. 节点职责</h2>
@@ -107,14 +110,13 @@
   &quot;confidence&quot;: 0.94
 }
 </code></pre>
-<h3>4. PerceptionAgent</h3>
-<p>主力模型：Qwen3.5-4B。</p>
+<h3>4. QwenJudgmentAgent</h3>
+<p>主力模型：Qwen3.5-4B 微调 adapter。该节点只做结构化判断，不直接生成最终临床报告。</p>
 <p>任务：</p>
 <ul>
-<li>影像理解</li>
-<li>病灶描述</li>
-<li>结构化发现</li>
-<li>可疑诊断线索抽取</li>
+<li>影像分类与受限标签判断</li>
+<li>病灶描述与结构化发现</li>
+<li>输出置信度和人工复核标记</li>
 </ul>
 <p>输出：</p>
 <pre><code class="language-json">{
@@ -125,12 +127,13 @@
       &quot;confidence&quot;: 0.82
     }
   ],
-  &quot;impression&quot;: &quot;suspected posterior uveitis&quot;,
-  &quot;report&quot;: &quot;...&quot;
+  &quot;label&quot;: &quot;oct_aux_4class::cnv&quot;,
+  &quot;confidence&quot;: 0.82,
+  &quot;requires_human_review&quot;: true
 }
 </code></pre>
 <h3>5. RetrievalAgent</h3>
-<p>向量化模型：BGE-M3；向量数据库：zvec。</p>
+<p>状态：可选增强。向量化模型：BGE-M3；向量数据库：zvec。</p>
 <p>zvec 是嵌入式本地向量数据库，承担向量、标量字段和过滤条件的持久化检索，不另外部署独立向量服务。BGE-M3 只负责把文本转换为 DIM 维向量。</p>
 <p>BGE-M3 从 ModelScope 的 <code>BAAI/bge-m3</code> 下载到项目本地，在 CPU 上以 FP32 运行，默认使用稠密向量。模型首次检索时惰性加载，不在 API 启动阶段占用内存。切换 embedding provider 后必须重建 zvec 索引。</p>
 <p>本项目的集合为 <code>uveitis_knowledge</code>，默认维度 1024，使用 HNSW + COSINE。zvec 写入为单进程独占，一个集合不应由多个 API worker 同时打开；横向扩容时应改为独立检索服务或按分片拆分集合。</p>
@@ -158,7 +161,7 @@
 <p>候选模型：Intern-Decision-4B；Kev-4B 作为对照，不默认常驻。</p>
 <p>输入：</p>
 <ul>
-<li>PerceptionAgent 输出</li>
+<li>QwenJudgmentAgent 输出</li>
 <li>RetrievalAgent 证据</li>
 <li>患者 metadata</li>
 <li>临床主诉</li>
@@ -179,7 +182,21 @@
   &quot;confidence&quot;: 0.71
 }
 </code></pre>
-<h3>7. SafetyAgent</h3>
+<h3>7. SearchAgent</h3>
+<p>状态：可选增强。统一适配 Tavily、Brave Search、Serper、Google Programmable Search (CSE)、Bing Web Search、Exa、Perplexity 和自建 SearXNG，输出可引用的网页证据。服务商密钥、启用集合和尝试顺序由管理员在服务配置页维护，医生没有读写权限。</p>
+<ul>
+<li>默认不把主诉等临床文本发送给外部搜索 API。</li>
+<li>查询词优先来自 Qwen 判断标签、补充分类和固定医学检索词。</li>
+<li>单个提供方失败时继续尝试其他提供方；全部失败只记失败，不改变主流程。</li>
+</ul>
+<h3>8. ExternalSummaryAgent</h3>
+<p>状态：可选增强。支持 OpenAI Responses、OpenAI Chat Completions 和 Anthropic Messages 三种接口，对结构化判断、RAG 证据、搜索证据和补充分类进行总结梳理。管理员维护协议、地址、模型与密钥，密钥只写不读。</p>
+<ul>
+<li>只接收结构化结果和证据，不接收原始影像。</li>
+<li>默认不发送主诉和病史；如需发送必须显式配置并完成外部数据处理评估。</li>
+<li>外部总结不是诊断，外部 API 不可用时自动使用确定性回退摘要。</li>
+</ul>
+<h3>9. SafetyAgent</h3>
 <p>这是一个确定性校验节点，不是大模型。</p>
 <p>检查：</p>
 <ul>
@@ -191,11 +208,11 @@
 </ul>
 <p>失败时：</p>
 <ul>
-<li>补充决策不可用时直接跳过该分支，不阻断检索、安全校验和医生复核</li>
-<li>补充决策已启用但输出不合法时，返回 <code>noul</code> 或转医生人工判断</li>
-<li>不把 Kev-4B 作为无条件的自动重试依赖</li>
+<li>Qwen 判断、RAG、搜索、补充决策或外部总结不可用时只跳过该分支，不阻断其他增强分支和医生复核</li>
+<li>任一增强模块输出不合法时，不把该输出写入最终判断，保留错误或跳过状态供审计</li>
+<li>不把外部 API 作为唯一的结论来源</li>
 </ul>
-<h3>8. ReportAgent</h3>
+<h3>10. ReportAgent</h3>
 <p>生成医生端报告和患者友好说明。</p>
 <p>输出：</p>
 <ul>
@@ -204,7 +221,7 @@
 <li>检查建议</li>
 <li>证据引用</li>
 </ul>
-<h3>9. ReviewAgent</h3>
+<h3>11. ReviewAgent</h3>
 <p>医生复核节点。</p>
 <p>记录：</p>
 <ul>
@@ -213,7 +230,7 @@
 <li>不同意原因</li>
 <li>是否允许入训练集</li>
 </ul>
-<h3>10. LearningAgent</h3>
+<h3>12. LearningAgent</h3>
 <p>后台节点，不在线上实时跑。</p>
 <p>任务：</p>
 <ul>
@@ -252,10 +269,10 @@
 <td>小模型即可</td>
 </tr>
 <tr>
-<td>perception</td>
+<td>qwen_judgment</td>
 <td>Inference</td>
 <td style="text-align:right">L40S</td>
-<td>Qwen3.5-4B</td>
+<td>Qwen3.5-4B 只输出结构化判断</td>
 </tr>
 <tr>
 <td>retrieval</td>
@@ -264,10 +281,22 @@
 <td>BGE-M3</td>
 </tr>
 <tr>
+<td>web_search</td>
+<td>External API</td>
+<td style="text-align:right">0</td>
+<td>Tavily / Brave / Serper / Google CSE / Bing / Exa / Perplexity / SearXNG，可多提供方降级</td>
+</tr>
+<tr>
 <td>decision</td>
 <td>Inference（按需）</td>
 <td style="text-align:right">L40S</td>
 <td>补充方案通过门槛后再启用</td>
+</tr>
+<tr>
+<td>external_summary</td>
+<td>External API</td>
+<td style="text-align:right">0</td>
+<td>OpenAI Responses / OpenAI Chat Completions / Anthropic Messages；失败时使用确定性摘要</td>
 </tr>
 <tr>
 <td>safety</td>
@@ -348,12 +377,16 @@
 <td>返回重拍/补图，不强行诊断</td>
 </tr>
 <tr>
-<td>Perception 超时</td>
-<td>降级为 text-only</td>
+<td>Qwen 判断不可用或超时</td>
+<td>跳过 Qwen 分支，其他增强分支和主链路继续</td>
 </tr>
 <tr>
-<td>Retrieval 无高置信证据</td>
-<td>保留证据缺口提示，不生成越界结论</td>
+<td>RAG 索引为空或检索失败</td>
+<td>跳过 RAG，保留证据缺口标记</td>
+</tr>
+<tr>
+<td>搜索 API 部分或全部不可用</td>
+<td>继续尝试其他提供方；全部失败时跳过搜索分支</td>
 </tr>
 <tr>
 <td>补充决策未启用或不可用</td>
@@ -361,20 +394,52 @@
 </tr>
 <tr>
 <td>Decision JSON 不合法</td>
-<td>返回 <code>noul</code>，必要时转人工复核</td>
+<td>丢弃该输出并标记失败，不写入最终判断</td>
 </tr>
 <tr>
-<td>置信度低于阈值</td>
-<td>转 <code>noul</code> + 人工复核</td>
+<td>外部总结不可用</td>
+<td>使用本地确定性摘要，报告与复核照常完成</td>
+</tr>
+<tr>
+<td>任一增强模块置信度低</td>
+<td>保留人工复核标记，不让模型替代医生判断</td>
 </tr>
 </tbody>
 </table>
 <h2>6. 最小可用版本 MVP</h2>
-<p>第一阶段只需要保留：</p>
-<pre><code class="language-text">Intake -&gt; Preprocess -&gt; Perception -&gt; Retrieval -&gt; Safety -&gt; Report -&gt; Review
+<p>主链路只需要保留：</p>
+<pre><code class="language-text">Intake -&gt; Preprocess -&gt; Safety -&gt; Report -&gt; Review
 </code></pre>
-<p>Decision 为补充分支；Learning 可以后补。补充决策必须通过标注和评测门槛后再插入链路。</p>
-<p>这样能最快跑通，且不会牺牲安全边界。</p>
+<p>Qwen 判断、RAG、网络搜索、补充决策和外部总结都是可插拔增强分支。任一分支不可用时记录跳过状态，不改变主链路状态。</p>
+<p>外部 API 默认不接收原始影像，也不默认接收主诉、病史等临床文本；启用外部数据处理前必须完成隐私与合规评估。</p>
+<h2>7. 关键配置</h2>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>APP_QWEN_JUDGMENT_ENABLED</code></td><td>启用 Qwen3.5-4B 微调判断分支</td></tr>
+<tr><td><code>APP_PERCEPTION_SERVICE_URL</code></td><td>Qwen 判断服务地址，调用 <code>/v1/judge</code></td></tr>
+<tr><td><code>APP_RAG_ENABLED</code></td><td>启用本地 BGE-M3 + zvec 检索</td></tr>
+<tr><td><code>APP_DECISION_ENABLED</code></td><td>启用补充决策模型，默认关闭</td></tr>
+<tr><td>管理端网络搜索配置</td><td>管理员维护服务商启用状态、尝试顺序、密钥、地址和最大结果数；运行时从数据库读取，环境变量不提供运营配置入口</td></tr>
+<tr><td>管理端外部总结配置</td><td>管理员维护协议、地址、模型、密钥和临床文本发送开关；启用状态与敏感性开关分开保存</td></tr>
+<tr><td><code>APP_SUMMARY_TIMEOUT_SECONDS</code></td><td>设置外部总结请求的部署级超时，不包含凭据</td></tr>
+<tr><td><code>APP_INTEGRATION_SECRET_KEY</code></td><td>用于 AES-GCM 加密数据库中的服务密钥；生产环境必须配置至少 32 个字符</td></tr>
+</tbody>
+</table>
+<h2>8. 管理员配置与权限</h2>
+<p>外部 API 与网络搜索 API 的配置权限只授予系统管理员。管理端提供 <code>integration:read</code> 与 <code>integration:manage</code> 对应能力；医生可通过 <code>system:read</code> 查看总结与搜索是否启用，但不能查看 API 地址、模型、服务商顺序、掩码提示或修改任何服务配置。</p>
+<ul>
+<li>配置保存在 PostgreSQL 的 <code>integration_settings</code>，管理员后台不使用 SQLite 持久化。</li>
+<li>API Key、搜索 Key 和自建实例凭据只写不读；返回字段仅表示“已配置”，不回传加密值或密钥原文。</li>
+<li>每次更新递增 <code>revision</code> 并写入审计事件 <code>integration_config_update</code>；并发覆盖使用 409 冲突保护。</li>
+<li>配置检查需要管理员权限；搜索服务会执行真实连通性检查，总结服务只校验协议、地址、模型与密钥是否齐全。检查失败只显示错误，不把密钥写入日志、审计详情或前端响应。</li>
+<li>启用搜索不等于发送临床文本：主诉发送开关独立且默认关闭。外部总结的临床文本开关同样独立且默认关闭，原始影像始终不发送。</li>
+</ul>
   </article>
 </main>
 <footer class="doc-footer">

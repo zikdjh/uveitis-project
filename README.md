@@ -1,6 +1,6 @@
 # 葡萄膜炎辅助诊断智能系统
 
-开源多模态模型 + 专项训练 + RAG 知识增强，决策模型作为按进度启用的补充方案；FastAPI + React 三端系统（公开端 / 医生端 / 管理员端）。项目性质：非商用科研原型，输出仅作辅助参考、不构成诊断。
+Qwen3.5-4B 微调判断 + 可选 RAG、决策模型、网络搜索和外部 API 总结，所有增强组件均可独立降级；FastAPI + React 三端系统（公开端 / 医生端 / 管理员端）。项目性质：非商用科研原型，输出仅作辅助参考、不构成诊断。
 
 ## 目录结构
 
@@ -47,11 +47,12 @@ uveitis-project/
 - [x] 训练结果快照已按 run 和评估阶段归档，索引见 `docs/2026-10-26-training-assets-index.html`
 - [x] M1 前后端基础框架：病例建档、影像上传、分析任务、医生复核、管理概览
 - [x] 鉴权与权限体系：医生/管理员角色、双令牌无感刷新、CSRF、账号管理、登录限流与审计；见 `docs/2026-10-26-auth-access-control.html`
-- [x] SQLite 病例持久化与本地影像存储
+- [x] PostgreSQL 病例、账号、审计与服务配置持久化
 - [x] 核心模型适配边界与演示模式
 - [x] zvec 嵌入式知识库适配层：文档写入、过滤检索与本地持久化
 - [x] BGE-M3 通过 ModelScope 下载到本地，使用 CPU 生成 1024 维向量
 - [x] zvec 检索使用本地 BGE-M3，管理端展示向量数据库状态
+- [x] 混合判断编排：Qwen 判断、RAG、补充决策、网络搜索和外部总结均为可跳过增强分支
 - [x] 项目目录完成训练资产、运行服务和项目文档归类；索引见 `docs/2026-10-26-project-layout.html`
 - [x] 前端首轮工作区界面完善：桌面/移动端导航、账号权限概览、账号列表移动卡片化和权限页空状态
 - [ ] 完成患者首页、病例详情、管理员概览、登录与状态页的统一视觉收口
@@ -88,8 +89,11 @@ cd model-runtime
 cd backend
 uv sync --group dev --cache-dir .uv-cache
 Copy-Item .env.example .env
-.\.venv\Scripts\uvicorn.exe app.main:app --reload --host 127.0.0.1 --port 8000
+docker compose up -d postgres redis
+.\.venv\Scripts\uvicorn.exe app.asgi:app --reload --host 127.0.0.1 --port 8000
 ```
+
+后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
 
 前端：
 
@@ -102,6 +106,30 @@ npm run dev
 打开 `http://127.0.0.1:5173`。API 文档位于 `http://127.0.0.1:8000/docs`。
 
 默认 `APP_MODEL_MODE=mock`，只验证业务链路，不生成临床结论。核心路径先完成病例结构化、影像理解、证据检索与医生复核；接入相应服务后切换为 `remote`。补充决策模型由 `APP_DECISION_ENABLED=false` 默认关闭，不作为核心流程的前置条件。
+
+## 混合判断链路
+
+`APP_MODEL_MODE=remote` 后，病例分析按以下顺序运行，每个增强组件都有独立超时和异常边界：
+
+```text
+病例结构化 -> 影像预处理
+  -> Qwen3.5-4B 微调判断（可选）
+  -> RAG 证据检索（可选）
+  -> 补充决策模型（可选）
+  -> 网络搜索辅助（可选）
+  -> 外部 API 总结（可选）
+  -> 安全校验 -> 报告整理 -> 医生复核
+```
+
+- Qwen3.5-4B 只输出受限标签、结构化发现和置信度，不生成最终临床报告。
+- RAG 使用本地 BGE-M3 和 zvec；索引为空、模型缺失或检索失败时直接跳过。
+- 网络搜索支持 Tavily、Brave Search、Serper、Google Programmable Search (CSE)、Bing Web Search、Exa、Perplexity 和自建 SearXNG；管理员可调整尝试顺序并逐项检查，单个提供方失败后继续下一个，全部失败只跳过搜索分支。默认不把主诉发送给外部搜索。
+- 补充决策模型保持默认关闭，待真实脱敏病例、医生确认标签和独立评测齐备后启用。
+- 外部总结支持 OpenAI Responses、OpenAI Chat Completions 和 Anthropic Messages 三种接口，调用时使用管理员在服务配置页保存的地址、模型与密钥；默认不发送原始影像、主诉和病史，不可用时使用确定性回退摘要。
+- 外部服务配置由管理员维护；医生只能读取是否启用，不能读取或修改凭据。API Key 使用 AES-GCM 加密保存，接口响应只返回“是否已配置”，永不回传原文。
+- 任一增强组件失败都只写 `failed` 或 `skipped`，病例仍进入 `awaiting_review`，不会阻断医生复核。
+
+外部服务的操作性配置在管理端“服务配置”页维护，包括接口协议、API 地址、模型、密钥、搜索服务商顺序和临床文本发送开关。运行时始终读取数据库中的管理员配置，不把环境变量作为外部 API 或网络搜索的运营配置入口；部署文件只保留启动主密钥 `APP_INTEGRATION_SECRET_KEY`。不要将第三方 API Key 提交到仓库。环境变量样例位于仓库的 `backend/.env.example`。外部 API 启用前需要完成数据处理和合规评估；项目 MIT License 只覆盖代码，不覆盖第三方数据、影像、模型权重或外部 API 内容。
 
 ## 本地 BGE-M3
 
