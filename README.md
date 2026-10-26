@@ -127,3 +127,7 @@ APP_DECISION_SERVICE_URL=
 ```
 
 达到启用门槛后，再配置决策服务地址并设置 `APP_DECISION_ENABLED=true`。管理端会区分核心模型与补充模型；未启用时分析记录明确标记为“跳过”，流程直接进入安全校验与医生复核。决策模型只能提供补充建议，最终结论仍由医生复核。
+
+## 开源协议
+
+本项目采用 MIT License，详见 [LICENSE](LICENSE)。
