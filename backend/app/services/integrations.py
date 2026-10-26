@@ -26,6 +26,15 @@ class IntegrationResult:
     latency_ms: int = 0
 
 
+@dataclass
+class IntegrationTestOutcome:
+    ok: bool
+    detail: str
+    latency_ms: int = 0
+    provider: str | None = None
+    attempts: int = 0
+
+
 def _json_object(text: str) -> dict[str, Any] | None:
     text = text.strip()
     if text.startswith("```"):
@@ -155,26 +164,159 @@ class OptionalIntegrations:
             return IntegrationConfigRead()
         return self.config_store.public()
 
-    def test_config(self, kind: str, provider: str | None, query: str) -> tuple[bool, str, int]:
+    def test_summary(self) -> IntegrationTestOutcome:
         started = time.perf_counter()
         try:
-            if kind == "search":
-                if not provider:
-                    raise ValueError("请选择搜索服务商")
-                results = self._run_search_provider(provider, query)
-                detail = f"连接成功，返回 {len(results)} 条结果"
+            config = self._config()
+            missing = [
+                label
+                for key, label in (
+                    ("summary_base_url", "API 地址"),
+                    ("summary_model", "模型名称"),
+                    ("summary_api_key", "API Key"),
+                )
+                if not str(config.get(key) or "").strip()
+            ]
+            if missing:
+                raise ValueError("尚未配置：" + "、".join(missing))
+            protocol = str(config.get("summary_protocol") or "openai_chat_completions")
+            model = str(config.get("summary_model") or "")
+            url = str(config.get("summary_base_url") or "").rstrip("/")
+            api_key = str(config.get("summary_api_key") or "")
+            probe = "Reply with OK. Do not add any other text."
+            if protocol == "anthropic_messages":
+                if not url.endswith("/messages"):
+                    url += "/messages"
+                response = self._post(
+                    url,
+                    {
+                        "model": model,
+                        "max_tokens": 16,
+                        "messages": [{"role": "user", "content": probe}],
+                    },
+                    timeout=self.settings.summary_timeout_seconds,
+                    headers={
+                        "Accept": "application/json",
+                        "x-api-key": api_key,
+                        "anthropic-version": "2023-06-01",
+                    },
+                )
+                content = "".join(
+                    str(item.get("text") or "")
+                    for item in response.get("content") or []
+                    if isinstance(item, dict)
+                )
+            elif protocol == "openai_responses":
+                if not url.endswith("/responses"):
+                    url += "/responses"
+                response = self._post(
+                    url,
+                    {"model": model, "input": probe, "max_output_tokens": 16},
+                    timeout=self.settings.summary_timeout_seconds,
+                    headers=self._headers(api_key),
+                )
+                content = str(response.get("output_text") or "")
+                if not content:
+                    content = "".join(
+                        str(part.get("text") or "")
+                        for item in response.get("output") or []
+                        if isinstance(item, dict)
+                        for part in item.get("content") or []
+                        if isinstance(part, dict) and part.get("type") == "output_text"
+                    )
             else:
-                if not self.summary_available:
-                    raise ValueError("外部总结 API 尚未完整配置")
-                config = self._config()
-                detail = f"配置完整，协议 {config.get('summary_protocol')}"
-            return True, detail, int((time.perf_counter() - started) * 1000)
-        except Exception as exc:
-            return (
-                False,
-                f"{type(exc).__name__}: {exc}",
+                if not url.endswith("/chat/completions"):
+                    url += "/chat/completions"
+                response = self._post(
+                    url,
+                    {
+                        "model": model,
+                        "messages": [{"role": "user", "content": probe}],
+                        "max_tokens": 16,
+                    },
+                    timeout=self.settings.summary_timeout_seconds,
+                    headers=self._headers(api_key),
+                )
+                choices = response.get("choices") or []
+                content = ""
+                if choices and isinstance(choices[0], dict):
+                    content = str(choices[0].get("message", {}).get("content") or "")
+            if not content.strip():
+                raise ValueError("外部模型返回空响应")
+            return IntegrationTestOutcome(
+                True,
+                f"连接成功，模型 {model} 已返回响应",
                 int((time.perf_counter() - started) * 1000),
+                attempts=1,
             )
+        except Exception as exc:
+            return IntegrationTestOutcome(
+                False,
+                f"连接失败：{type(exc).__name__}: {exc}",
+                int((time.perf_counter() - started) * 1000),
+                attempts=1,
+            )
+
+    def test_search(
+        self, provider: str | None = None, query: str = "uveitis clinical guideline"
+    ) -> IntegrationTestOutcome:
+        started = time.perf_counter()
+        config = self._config()
+        providers = (
+            [provider]
+            if provider
+            else [str(item).strip().lower() for item in config.get("search_provider_order", []) if str(item).strip()]
+        )
+        failures: list[str] = []
+        attempts = 0
+        for candidate in providers:
+            attempts += 1
+            try:
+                if not self._search_provider_configured(candidate):
+                    raise ValueError("尚未配置连接凭据")
+                results = self._run_search_provider(candidate, query)
+                if not results:
+                    raise ValueError("服务返回成功但无结果")
+                detail = f"连接成功，{candidate} 返回 {len(results)} 条结果"
+                if len(providers) > 1:
+                    detail += f"（已尝试 {attempts} 家）"
+                return IntegrationTestOutcome(
+                    True,
+                    detail,
+                    int((time.perf_counter() - started) * 1000),
+                    provider=candidate,
+                    attempts=attempts,
+                )
+            except Exception as exc:
+                failures.append(f"{candidate}: {type(exc).__name__}: {exc}")
+        if not failures:
+            return IntegrationTestOutcome(False, "没有已保存的搜索服务商", 0)
+        return IntegrationTestOutcome(
+            False,
+            "没有可用服务商：" + "; ".join(failures[:3]),
+            int((time.perf_counter() - started) * 1000),
+            attempts=attempts,
+        )
+
+    def _search_provider_configured(self, provider: str) -> bool:
+        config = self._config()
+        if provider == "searxng":
+            return bool(str(config.get("searxng_base_url") or "").strip())
+        if provider == "google_cse":
+            return bool(
+                str(config.get("google_cse_api_key") or "").strip()
+                and str(config.get("google_cse_id") or "").strip()
+            )
+        key_by_provider = {
+            "tavily": "tavily_api_key",
+            "brave": "brave_search_api_key",
+            "serper": "serper_api_key",
+            "bing": "bing_search_api_key",
+            "exa": "exa_api_key",
+            "perplexity": "perplexity_api_key",
+        }
+        key = key_by_provider.get(provider)
+        return bool(key and str(config.get(key) or "").strip())
 
     @property
     def qwen_available(self) -> bool:
@@ -258,7 +400,7 @@ class OptionalIntegrations:
                 image_payload["local_path"] = str(matches[0].resolve())
             image_payloads.append(image_payload)
         payload = {
-            "task": "structured_judgment",
+            "task": "oct_aux_4class",
             "case": {
                 "case_id": case.id,
                 "patient_age": case.patient_age,
@@ -292,7 +434,7 @@ class OptionalIntegrations:
             response = self._post(
                 url,
                 payload,
-                timeout=self.settings.integration_timeout_seconds,
+                timeout=self.settings.perception_timeout_seconds,
             )
             data = response.get("result") if isinstance(response.get("result"), dict) else response
             findings = _normalize_findings(data.get("findings"))

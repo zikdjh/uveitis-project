@@ -123,14 +123,29 @@ class IntegrationConfigTestRequest(BaseModel):
     provider: SearchProvider | None = None
     query: str = Field(default="uveitis clinical guideline", max_length=500)
 
-    @model_validator(mode="after")
-    def provider_required_for_search(self) -> "IntegrationConfigTestRequest":
-        if self.kind == "search" and self.provider is None:
-            raise ValueError("测试网络搜索时必须选择服务商")
-        return self
-
 
 class IntegrationConfigTestResult(BaseModel):
     ok: bool
     detail: str
     latency_ms: int = Field(default=0, ge=0)
+    provider: str | None = None
+    attempts: int = Field(default=0, ge=0)
+
+
+class IntegrationConfigTestBatchRequest(BaseModel):
+    providers: list[SearchProvider] = Field(default_factory=list, max_length=20)
+    query: str = Field(default="uveitis clinical guideline", max_length=500)
+
+    @model_validator(mode="after")
+    def providers_are_unique(self) -> "IntegrationConfigTestBatchRequest":
+        if len(set(self.providers)) != len(self.providers):
+            raise ValueError("测试服务商不能重复")
+        return self
+
+
+class IntegrationConfigTestBatchResult(BaseModel):
+    ok: bool
+    succeeded: int = Field(default=0, ge=0)
+    failed: int = Field(default=0, ge=0)
+    skipped: int = Field(default=0, ge=0)
+    items: list[IntegrationConfigTestResult]

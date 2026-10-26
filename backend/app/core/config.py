@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     decision_service_url: str = ""
     internal_service_token: str = ""
     integration_timeout_seconds: float = 12.0
+    perception_timeout_seconds: float = 45.0
     summary_timeout_seconds: float = 20.0
     web_search_enabled: bool = False
     web_search_providers: str = "tavily,brave,serper"

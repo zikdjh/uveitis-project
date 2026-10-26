@@ -6,6 +6,8 @@ from app.core.security import request_ip, request_user_agent, require_permission
 from app.schemas.auth import Permission
 from app.schemas.integrations import (
     IntegrationConfigRead,
+    IntegrationConfigTestBatchRequest,
+    IntegrationConfigTestBatchResult,
     IntegrationConfigTestRequest,
     IntegrationConfigTestResult,
     IntegrationConfigUpdate,
@@ -61,9 +63,41 @@ def update_config(payload: IntegrationConfigUpdate, request: Request) -> Integra
 @router.post("/test", response_model=IntegrationConfigTestResult)
 def test_config(payload: IntegrationConfigTestRequest, request: Request) -> IntegrationConfigTestResult:
     require_permission(request, Permission.INTEGRATION_MANAGE)
-    ok, detail, latency_ms = request.app.state.integrations.test_config(
-        payload.kind,
-        payload.provider,
-        payload.query,
+    outcome = (
+        request.app.state.integrations.test_search(payload.provider, payload.query)
+        if payload.kind == "search"
+        else request.app.state.integrations.test_summary()
     )
-    return IntegrationConfigTestResult(ok=ok, detail=detail, latency_ms=latency_ms)
+    return IntegrationConfigTestResult(**outcome.__dict__)
+
+
+@router.post("/test-search-batch", response_model=IntegrationConfigTestBatchResult)
+def test_search_batch(
+    payload: IntegrationConfigTestBatchRequest, request: Request
+) -> IntegrationConfigTestBatchResult:
+    require_permission(request, Permission.INTEGRATION_MANAGE)
+    if not payload.providers:
+        return IntegrationConfigTestBatchResult(
+            ok=False,
+            failed=0,
+            items=[
+                IntegrationConfigTestResult(
+                    ok=False,
+                    detail="没有已配置连接凭据的搜索服务商",
+                    latency_ms=0,
+                )
+            ],
+        )
+    items = [
+        IntegrationConfigTestResult(
+            **request.app.state.integrations.test_search(provider, payload.query).__dict__
+        )
+        for provider in payload.providers
+    ]
+    succeeded = sum(1 for item in items if item.ok)
+    return IntegrationConfigTestBatchResult(
+        ok=succeeded > 0,
+        succeeded=succeeded,
+        failed=sum(1 for item in items if not item.ok),
+        items=items,
+    )
