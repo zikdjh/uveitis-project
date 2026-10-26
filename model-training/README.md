@@ -46,9 +46,9 @@ model-training/
 - 补充决策模型：Intern-Decision-4B；在真实病例文本、医生处置标签和独立评测集到位前默认不训练。
 - 真相源：本轮训练使用本地 `datasets/training/manifest.csv` 和 `models/qwen/Qwen3.5-4B/`；checkpoint、验证指标和 adapter 位于 `assets/qwen3.5-4b/`。
 - 当前冻结评估基线：`local-4060-grouped-cont-20261025-01/best_adapter`，第 100 步。
-- 当前 OCT 候选：`local-4060-oct-focus-cont-20261025-01/best_adapter`，第 20 步。
-- 发布状态：尚未提升候选。第 20 步候选已完成 1,000 条 OCT 冻结测试评估；第 100 步基线的同一评估在 145/1,000 处停止，可断点续跑。停止点与恢复命令见 `docs/2026-10-26-qwen3.5-4b-progress-stop.html`。
-- 11.10 前收口条件：完成第 100 步基线的同一冻结测试，按冻结测试指标决定是否提升第 20 步候选，并冻结 adapter、指标、模型卡和运行读取路径。
+- 当前选定的 OCT 运行候选：`local-4060-oct-focus-cont-20261025-01/best_adapter`，第 20 步。
+- 发布状态：第 20 步候选和基线均已完成 1,000 条同源 OCT 冻结测试；候选 macro-F1 `0.947245`，基线 `0.918252`，提升 `+0.028993`，通过 `0.02` 选型门槛。当前尚未作为临床模型发布。
+- 11.10 前收口条件：冻结第 20 步候选 adapter、模型卡、指标文件和运行读取路径，并保留数据来源及患者隔离限制。
 
 ## 常用命令
 

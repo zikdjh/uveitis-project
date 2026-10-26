@@ -166,15 +166,16 @@
 <li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_manifest.json</code></li>
 <li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/predictions.json</code></li>
 </ul>
-<h3>第 100 步基线：已停止，待继续</h3>
+<h3>第 100 步基线：已完成并与候选同源比较</h3>
 <ul>
-<li>状态：未完成</li>
-<li>已完成：<code>145/1000</code></li>
-<li>断点文件：<code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/predictions.partial.jsonl</code></li>
-<li>日志：<code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01.step100.log</code></li>
+<li>状态：<code>ok</code>，<code>1000/1000</code> 条完成，生成错误 <code>0</code></li>
+<li>准确率：<code>0.918</code>；macro-F1：<code>0.9182517052346422</code>；严格 JSON 有效率：<code>1.0</code></li>
+<li>续跑起点：<code>145/1000</code>；本次完成 <code>855</code> 条，耗时 <code>2012.583</code> 秒</li>
+<li>结果文件：<code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/</code></li>
+<li>selection SHA256：<code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>，与第 20 步一致</li>
 <li>基线 adapter SHA256：<code>517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a</code></li>
 </ul>
-<p>停止时的 <code>145</code> 条都属于 CNV 区块，只能作为未完成快照：</p>
+<p>停止时的 <code>145</code> 条都属于 CNV 区块，只能作为历史未完成快照；完整 1,000 条结果已替换该快照作为选型依据：</p>
 <ul>
 <li>基线正确：<code>141/145</code>，准确率 <code>0.972414</code></li>
 <li>第 20 步候选在同一批样本上的正确数：<code>137/145</code></li>
@@ -182,7 +183,7 @@
 <li>候选修复基线错误：<code>0</code></li>
 <li>候选引入新错误：<code>4</code>，其中 CNV 错判为 DRUSEN <code>3</code> 条、错判为 NORMAL <code>1</code> 条</li>
 </ul>
-<p>这不是最终比较，不能据此判定第 20 步候选失败；完成全部 1,000 条并纳入每个类别后才能作决定。</p>
+<p>完成全部 1,000 条后，第 20 步候选相对第 100 步基线的 OCT macro-F1 提升 <code>0.028993</code>，超过 <code>0.02</code> 门槛，因此选型决定为 <code>promote_step20_candidate</code>。结构化证据见 <code>selection_decision.json</code>。</p>
 <h2>恢复方式</h2>
 <p>从项目根目录执行以下命令即可从第 145 条断点继续。不要添加 <code>-Overwrite</code>。</p>
 <pre><code class="language-powershell">powershell -NoProfile -ExecutionPolicy Bypass -File `
@@ -199,11 +200,12 @@
 <li>两份 <code>eval_manifest.json</code> 的 <code>selection_sha256</code> 与第 20 步完全相同，均为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。</li>
 <li>比较 OCT accuracy、macro-F1、各类别 F1，以及 CNV/DRUSEN 混淆矩阵和逐样本配对差异。</li>
 </ol>
-<h2>下一步判定</h2>
+<h2>选型与下一步</h2>
 <ul>
-<li>只有第 20 步候选相对第 100 步基线的 OCT macro-F1 至少提升 <code>0.02</code>，且 JSON 有效率不低于 <code>99%</code>，才继续把第 20 步作为候选。</li>
-<li>若不满足门槛，保留第 100 步基线的 <code>best_adapter</code>，不再延长当前 OCT 聚焦训练。</li>
+<li>第 20 步候选已通过门槛，作为下一阶段的运行候选，不再继续延长当前 OCT 聚焦训练。</li>
+<li>第 100 步基线保留为同源对照，不作为运行候选覆盖。</li>
 <li>即使通过冻结测试集，01 仍属于非患者隔离数据；03 存在原型或增强图关系；13 的组键包含标签，少数患者 ID 可能跨标签出现。上述限制使其不能作为临床泛化证明。</li>
+<li>下一项训练侧工作：冻结第 20 步 adapter、模型卡、指标文件和运行读取路径，并准备受控推理 smoke。</li>
 <li>在独立患者级测试集和医生复核完成前，不发布临床决策模型。</li>
 </ul>
   </article>

@@ -23,7 +23,7 @@ cd model-runtime
 
 ```powershell
 .\model-runtime\scripts\run_local_4060_eval.ps1 `
-  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
+  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
   -OutputDir 'model-training\assets\qwen3.5-4b\eval-layout-smoke-20261026' `
   -Tasks 'oct_aux_4class' -MaxSamples 1
 ```

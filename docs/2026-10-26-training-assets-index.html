@@ -61,10 +61,11 @@
 <p><code>pilot/</code> 保存 pilot run 的验证和评估快照；<code>smoke/</code> 保存早期配置、旧指标和中断步元数据。<code>local-4060-*</code> 冒烟目录中的 adapter、processor 和 checkpoint 已清理，只保留小型指标文件。smoke 指标只证明链路曾运行，不作为准确率证据。</p>
 <h3>当前本地工作适配器</h3>
 <ul>
-<li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：当前冻结评估基线，第 100 步。</li>
-<li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：当前 OCT 候选，第 20 步。</li>
-<li><code>eval-oct-step20-vs-step100-20261025-01/</code>：两个 adapter 的同集冻结评估、候选完整结果和基线断点。</li>
+<li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：第 100 步同源冻结评估基线。</li>
+<li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：第 20 步选定 OCT 运行候选。</li>
+<li><code>eval-oct-step20-vs-step100-20261025-01/</code>：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 <code>selection_decision.json</code>。</li>
 </ul>
+<p>选型决定为 <code>promote_step20_candidate</code>：候选 macro-F1 <code>0.947245</code>，基线 <code>0.918252</code>，提升 <code>+0.028993</code>，JSON 有效率均为 <code>100%</code>。该结果仍受数据来源、增强图和患者隔离限制约束。</p>
 <h2>参考材料</h2>
 <p><code>reference/</code> 保存 24 GB GPU 云价格表的 HTML 和 XLSX。价格是历史调研快照，使用前应核对供应商当前报价。</p>
 <h2>完整权重的保存约定</h2>

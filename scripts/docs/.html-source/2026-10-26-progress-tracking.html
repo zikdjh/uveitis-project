@@ -36,7 +36,7 @@
   </thead>
   <tbody>
     <tr><td>项目工程交付</td><td>进行中，约 72%</td><td>10-28：界面和文档第一轮冻结</td><td>患者端、医生端、管理员端可用；鉴权和病例流程可演示</td></tr>
-    <tr><td>模型训练</td><td>评估收口</td><td>10-27：补齐第 100 步冻结测试</td><td>两组 adapter 存在；第 20 步候选已完成，基线未完成</td></tr>
+    <tr><td>模型训练</td><td>选型完成，进入冻结</td><td>10-28：冻结第 20 步候选证据</td><td>两组同源评估均完成；第 20 步候选 macro-F1 0.947245，提升 0.028993，通过 0.02 门槛</td></tr>
     <tr><td>模型运行集成</td><td>部分完成</td><td>11-01：分析链路接入模型运行服务</td><td>当前只有健康检查和资产定位，真实推理未接入</td></tr>
     <tr><td>端到端验收</td><td>未开始</td><td>11-04：完成登录至复核的联调</td><td>需要连续流程证据，不接受单页孤岛演示</td></tr>
     <tr><td>最终冻结</td><td>未开始</td><td>11-10：冻结接口、adapter、文档和限制说明</td><td>项目完成定义为工程收口，不等同临床验证</td></tr>
@@ -69,9 +69,9 @@
     <tr><td>T-01</td><td>Qwen3.5-4B 基座准备</td><td>完成</td><td>本地基座约 9.34 GB，14 个模型文件；4-bit QLoRA 前向、反向和优化器更新已验证。</td><td>冻结运行读取路径</td><td><code>model-training/models/qwen/Qwen3.5-4B/</code></td></tr>
     <tr><td>T-02</td><td>分组续训</td><td>完成</td><td>150/150 步；最佳第 100 步；55 条验证任务平均 macro-F1 0.865804，OCT macro-F1 0.768841。</td><td>作为基线完成同源冻结测试</td><td><code>local-4060-grouped-cont-20261025-01</code></td></tr>
     <tr><td>T-03</td><td>OCT 聚焦续训</td><td>完成</td><td>50/50 步后早停；最佳第 20 步；55 条验证任务平均 macro-F1 0.873358，OCT macro-F1 0.790476。</td><td>等待完整基线比较</td><td><code>local-4060-oct-focus-cont-20261025-01</code></td></tr>
-    <tr><td>T-04</td><td>第 20 步候选冻结测试</td><td>完成</td><td>1,000/1,000 条；OCT accuracy 0.947，macro-F1 0.947245，JSON 有效率 100%。</td><td>作为候选保留，不单独宣布优胜</td><td><code>eval-oct-.../step20/eval_metrics.json</code></td></tr>
-    <tr><td>T-05</td><td>第 100 步基线冻结测试</td><td>进行中</td><td>已完成 145/1,000 条；停止时 145 条全部在 CNV 区块，不能作为最终结论。</td><td>10-27 前达到 1,000/1,000</td><td><code>eval-oct-.../step100/predictions.partial.jsonl</code></td></tr>
-    <tr><td>T-06</td><td>adapter 选型</td><td>等待中</td><td>只有候选相对基线的 OCT macro-F1 至少提升 0.02，且 JSON 有效率不低于 99%，才考虑提升。</td><td>10-28 记录提升或保留决定</td><td>两份同源 <code>eval_manifest.json</code></td></tr>
+    <tr><td>T-04</td><td>第 20 步候选冻结测试</td><td>完成</td><td>1,000/1,000 条；OCT accuracy 0.947，macro-F1 0.947245，JSON 有效率 100%。</td><td>已通过选型门槛</td><td><code>eval-oct-.../step20/eval_metrics.json</code></td></tr>
+    <tr><td>T-05</td><td>第 100 步基线冻结测试</td><td>完成</td><td>1,000/1,000 条；OCT accuracy 0.918，macro-F1 0.918252，JSON 有效率 100%；selection 哈希与候选一致。</td><td>作为同源比较基线冻结</td><td><code>eval-oct-.../step100/eval_metrics.json</code></td></tr>
+    <tr><td>T-06</td><td>adapter 选型</td><td>完成</td><td>第 20 步候选 macro-F1 比第 100 步基线提升 0.028993，超过 0.02 门槛；决定为 <code>promote_step20_candidate</code>。</td><td>冻结候选 adapter、模型卡和运行读取路径</td><td><code>selection_decision.json</code></td></tr>
     <tr><td>T-07</td><td>本地推理 smoke</td><td>未开始</td><td>需要检查模型运行服务的结构化输出、显存、超时和失败回退。</td><td>11-03 受控推理记录</td><td>模型评估与推理说明</td></tr>
     <tr><td>T-08</td><td>决策模型门槛复核</td><td>暂缓</td><td>缺少真实脱敏病例、医生处置标签、独立测试集和稳定评测。</td><td>11-03 决定是否进入后续研究</td><td>模型训练进度文档</td></tr>
   </tbody>
@@ -86,7 +86,7 @@
     <tr><td>内部验证准备</td><td>第 100 步</td><td>第 20 步</td><td>候选由小验证集筛出，不能替代冻结测试</td></tr>
     <tr><td>任务平均 macro-F1</td><td>0.865804</td><td>0.873358</td><td>候选暂高，但样本只有 55 条</td></tr>
     <tr><td>OCT 内部验证 macro-F1</td><td>0.768841</td><td>0.790476</td><td>提升 +0.021635，待冻结测试确认</td></tr>
-    <tr><td>OCT 冻结测试 macro-F1</td><td>待完成</td><td>0.947245</td><td>暂不能做完整比较</td></tr>
+    <tr><td>OCT 冻结测试 macro-F1</td><td>0.918252</td><td>0.947245</td><td>提升 +0.028993，通过 0.02 选型门槛</td></tr>
     <tr><td>严格 JSON 有效率</td><td>100%</td><td>100%</td><td>均满足结构化输出要求</td></tr>
     <tr><td>峰值保留显存</td><td>5.691 GiB</td><td>3.311 GiB（评估）</td><td>满足本地 8 GB 约束</td></tr>
   </tbody>
@@ -98,9 +98,9 @@
     <tr><th>日期</th><th>项目检查点</th><th>训练检查点</th><th>通过条件</th></tr>
   </thead>
   <tbody>
-    <tr><td>10-26</td><td>两份进度文档和跟踪页建立，目录状态同步</td><td>核对训练产物和第 100 步断点</td><td>文档构建和链接检查通过</td></tr>
-    <tr><td>10-27</td><td>剩余界面开始收口</td><td>完成第 100 步 1,000 条冻结评估</td><td>无生成错误，selection 哈希一致</td></tr>
-    <tr><td>10-28</td><td>界面、文档和运行边界第一轮冻结</td><td>完成基线与候选比较，记录选型决定</td><td>设计验收通过；选型有书面依据</td></tr>
+    <tr><td>10-26</td><td>两份进度文档和跟踪页建立，目录状态同步</td><td>完成第 100 步 1,000 条冻结评估并记录选型决定</td><td>已完成：无生成错误，selection 哈希一致，候选提升 0.028993</td></tr>
+    <tr><td>10-27</td><td>剩余界面开始收口</td><td>冻结第 20 步候选 adapter 和指标证据</td><td>模型卡、adapter 指纹和运行读取路径明确</td></tr>
+    <tr><td>10-28</td><td>界面、文档和运行边界第一轮冻结</td><td>准备受控推理 smoke</td><td>设计验收通过；推理输入输出与回退契约明确</td></tr>
     <tr><td>11-01</td><td>模型运行接入后端分析任务</td><td>冻结 adapter 并完成运行路径检查</td><td>请求、超时、回退和结果回写可演示</td></tr>
     <tr><td>11-04</td><td>完成端到端联调和移动端回归</td><td>完成受控推理 smoke</td><td>病例全流程无阻断，错误状态可恢复</td></tr>
     <tr><td>11-07</td><td>性能和可访问性复核</td><td>整理错误样本、指标和限制</td><td>无阻断问题，证据可复现</td></tr>
@@ -114,7 +114,7 @@
     <tr><th>风险</th><th>等级</th><th>当前处理</th><th>责任人</th><th>复审日期</th></tr>
   </thead>
   <tbody>
-    <tr><td>第 100 步基线冻结评估未完成</td><td>高</td><td>优先续跑，禁止在没有完整同源比较时提升候选。</td><td>训练执行</td><td>10-27</td></tr>
+    <tr><td>冻结测试集仍非患者隔离外部验证</td><td>高</td><td>选型已完成，但所有文档继续保留数据来源、增强图和患者隔离限制，不表述为临床泛化。</td><td>训练与数据</td><td>11-07</td></tr>
     <tr><td>真实模型推理未接入分析链路</td><td>高</td><td>先固定请求契约和 adapter 读取路径，再做端到端联调。</td><td>后端与运行集成</td><td>11-01</td></tr>
     <tr><td>前端剩余页面未统一</td><td>中</td><td>按工作区外壳已有规范逐页收口，使用桌面和移动截图验收。</td><td>前端执行</td><td>10-28</td></tr>
     <tr><td>数据患者隔离和增强图限制</td><td>高</td><td>在所有交付文档中保留限制，不将指标表述为临床泛化。</td><td>数据与训练</td><td>11-07</td></tr>
@@ -132,6 +132,8 @@
     <tr><td>2026-10-25</td><td>停止当天训练和评估，保留第 20 步候选结果及第 100 步断点。</td><td>避免继续消耗本地时间；第 100 步尚未完成同源比较。</td><td>已执行</td></tr>
     <tr><td>2026-10-26</td><td>项目按 2026-11-10 工程收口；不把当前 adapter 作为临床模型发布。</td><td>缺少患者级独立验证和医生复核。</td><td>生效</td></tr>
     <tr><td>2026-10-26</td><td>补充决策模型继续暂缓。</td><td>缺少真实脱敏病例、医生标签和独立评测集。</td><td>待门槛复核</td></tr>
+    <tr><td>2026-10-26</td><td>从 145/1,000 断点续跑第 100 步基线冻结评估，保持 selection 哈希不变。</td><td>先完成同源比较，再决定是否提升第 20 步候选。</td><td>已完成</td></tr>
+    <tr><td>2026-10-26</td><td>选择第 20 步 OCT 聚焦 adapter 作为运行候选。</td><td>冻结测试 macro-F1 0.947245，比第 100 步基线提升 0.028993，JSON 有效率 100%。</td><td>生效，待冻结交付</td></tr>
   </tbody>
 </table>
 

@@ -50,9 +50,11 @@ step 100、200、300 的内部验证 loss 分别为 `0.018165`、`0.020989`、`0
 
 ### 当前本地工作适配器
 
-- `local-4060-grouped-cont-20261025-01/best_adapter`：当前冻结评估基线，第 100 步。
-- `local-4060-oct-focus-cont-20261025-01/best_adapter`：当前 OCT 候选，第 20 步。
-- `eval-oct-step20-vs-step100-20261025-01/`：两个 adapter 的同集冻结评估、候选完整结果和基线断点。
+- `local-4060-grouped-cont-20261025-01/best_adapter`：第 100 步同源冻结评估基线。
+- `local-4060-oct-focus-cont-20261025-01/best_adapter`：第 20 步选定 OCT 运行候选。
+- `eval-oct-step20-vs-step100-20261025-01/`：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 `selection_decision.json`。
+
+选型决定为 `promote_step20_candidate`：候选 macro-F1 `0.947245`，基线 `0.918252`，提升 `+0.028993`，JSON 有效率均为 `100%`。该结果仍受数据来源、增强图和患者隔离限制约束。
 
 ## 参考材料
 

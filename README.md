@@ -146,4 +146,4 @@ APP_DECISION_SERVICE_URL=
 
 ## 开源协议
 
-本项目采用 MIT License，详见 [LICENSE](LICENSE)。
+本项目采用 MIT License，详见 [LICENSE](https://github.com/zikdjh/uveitis-project/blob/main/LICENSE)。

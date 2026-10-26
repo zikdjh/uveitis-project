@@ -1,0 +1,12 @@
+{
+  "status": "ok",
+  "adapter_sha256": "517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a",
+  "selection_sha256": "84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a",
+  "tasks": [
+    "oct_aux_4class"
+  ],
+  "rows": 1000,
+  "elapsed_seconds": 2012.5830024999996,
+  "metrics": "eval_metrics.json",
+  "predictions": "predictions.json"
+}

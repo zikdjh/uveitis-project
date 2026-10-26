@@ -62,7 +62,7 @@
 </tr>
 <tr>
 <td>当前 OCT 候选</td>
-<td><code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code>，第 20 步</td>
+<td><code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code>，第 20 步，已通过冻结测试选型</td>
 </tr>
 <tr>
 <td>最近正式本地训练</td>
@@ -70,7 +70,7 @@
 </tr>
 <tr>
 <td>当前冻结测试评估</td>
-<td>第 20 步候选 OCT 1,000 条已完成；第 100 步基线在 145/1,000 处停止，可断点续跑</td>
+<td>两组 adapter 均已完成 OCT 1,000 条；selection SHA256 一致，第 20 步候选胜出</td>
 </tr>
 <tr>
 <td>本地中间产物</td>
@@ -82,7 +82,7 @@
 </tr>
 <tr>
 <td>活跃训练容器</td>
-<td>无；本机评估进程已于 2026-10-25 23:51 左右停止，GPU 已释放</td>
+<td>无；第 100 步基线冻结评估已于 2026-10-26 12:31 完成，评估进程结束</td>
 </tr>
 <tr>
 <td>本机控制环境</td>
@@ -110,7 +110,13 @@
 </tr>
 </tbody>
 </table>
-<p>本轮正式训练全程在本地 RTX 4060 执行，新增 Modal GPU 计量为 <code>$0.00</code>。此前的 Modal 执行账目仍以控制台账单为准，不由本地训练改变。</p>
+<p>本轮正式训练全程在本地 RTX 4060 执行，新增 Modal GPU 计量为 <code>$0.00</code>。此前的 Modal 执行账目仍以控制台账单为准，不由本地训练改变。选型决定和双模型同源指标保存在 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/selection_decision.json</code>。</p>
+<h2>实时同步</h2>
+<p><strong>2026-10-26 11:57：</strong>第 100 步基线冻结评估已从 <code>145/1000</code> 断点续跑，计划补完 <code>855</code> 条。评估复用原冻结选择清单，selection SHA256 为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。本次不启动 Modal，不读取测试图片参与训练。</p>
+<p><strong>2026-10-26 12:02：</strong>本次已完成 <code>125</code> 条，累计 <code>270/1000</code>，剩余 <code>730</code> 条；约 <code>2.49 秒/条</code>，峰值保留显存 <code>3.31 GiB</code>，GPU 占用约 <code>4.39 GiB</code>，温度 <code>68°C</code>。</p>
+<p><strong>2026-10-26 12:12：</strong>累计进度达到 <code>546/1000</code>，剩余 <code>454</code> 条；本次约 <code>2.30 秒/条</code>，峰值保留显存保持 <code>3.31 GiB</code>，GPU 占用约 <code>4.39 GiB</code>，温度 <code>68°C</code>。</p>
+<p><strong>2026-10-26 12:22：</strong>累计进度达到 <code>805/1000</code>，剩余 <code>195</code> 条；运行速度约 <code>2.29 秒/条</code>，峰值保留显存保持 <code>3.31 GiB</code>，GPU 占用约 <code>4.54 GiB</code>，温度 <code>68°C</code>。</p>
+<p><strong>2026-10-26 12:31：</strong>第 100 步基线冻结评估达到 <code>1000/1000</code>，状态 <code>ok</code>。基线 accuracy <code>0.918</code>、macro-F1 <code>0.918252</code>、JSON 有效率 <code>100%</code>；第 20 步候选 accuracy <code>0.947</code>、macro-F1 <code>0.947245</code>、JSON 有效率 <code>100%</code>。候选提升 <code>+0.028993</code>，超过 <code>0.02</code> 门槛，选型决定记录为 <code>promote_step20_candidate</code>。</p>
 <h2>2026-10-25 停止点</h2>
 <p>今日工作已停止，当前没有训练或评估进程，RTX 4060 显存占用已回落到 <code>0 MiB</code>。冻结测试集评估的完整进度、指标、配对快照和恢复命令见 <code>reports/qwen3.5-4B-progress-20261025-stop.md</code>。</p>
 <ul>

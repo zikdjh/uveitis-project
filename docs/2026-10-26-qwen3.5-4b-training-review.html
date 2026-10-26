@@ -318,7 +318,16 @@
 <li>验证日志：<code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/validation_metrics.jsonl</code></li>
 <li>本地 checkpoint、最终 adapter、重复 processor 和 <code>training_state.pt</code> 已于 2026-10-26 清理；最佳 adapter 与验证指标保留。</li>
 </ul>
-<p>下一步应以第 20 步 adapter 对冻结测试集做全量生成式评估。若 OCT 测试集仍出现 CNV/DRUSEN 混淆，应优先检查这两类在训练与测试中的患者、来源和图像分布，而不是继续提高训练步数。</p>
+<h2>2026-10-26 同源冻结测试与选型</h2>
+<ul>
+<li>第 100 步基线和第 20 步候选都已完成 <code>oct_aux_4class</code> 冻结测试集 <code>1,000/1,000</code> 条，生成错误均为 <code>0</code>。</li>
+<li>两份 <code>selection_sha256</code> 均为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。</li>
+<li>第 100 步基线 macro-F1 <code>0.918252</code>；第 20 步候选 macro-F1 <code>0.947245</code>；提升 <code>+0.028993</code>，超过 <code>0.02</code> 门槛。</li>
+<li>候选的主要改善来自 CNV F1 <code>+0.063220</code> 和 DRUSEN F1 <code>+0.065101</code>；DME 和 NORMAL 有轻微下降，需保留在限制说明中。</li>
+<li>选型决定为 <code>promote_step20_candidate</code>，证据见 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/selection_decision.json</code>。</li>
+<li>该决定只确认研究型运行候选，不代表患者隔离外部验证或临床部署批准。</li>
+</ul>
+<p>下一步应冻结第 20 步 adapter、模型卡、指标文件和运行读取路径，并准备受控推理 smoke。若后续仍出现 CNV/DRUSEN 混淆，应优先检查两类在训练与测试中的患者、来源和图像分布，而不是继续提高训练步数。</p>
   </article>
 </main>
 <footer class="doc-footer">
