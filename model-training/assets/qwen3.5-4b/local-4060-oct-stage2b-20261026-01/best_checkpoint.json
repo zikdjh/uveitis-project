@@ -1,0 +1,17 @@
+{
+  "step": 0,
+  "initialization_adapter": {
+    "directory": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\local-4060-oct-focus-cont-20261025-01\\best_adapter",
+    "sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+    "rank": 8
+  },
+  "validation_loss": 0.0350562277181201,
+  "validation_macro_f1": 0.8733582321817616,
+  "validation_json_valid_rate": 1.0,
+  "selection_score": [
+    0.8733582321817616,
+    1.0,
+    -0.0350562277181201
+  ],
+  "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f"
+}

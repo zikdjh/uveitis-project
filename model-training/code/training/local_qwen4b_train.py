@@ -387,13 +387,8 @@ def _validation_score(validation: dict) -> tuple[float, float, float]:
 
 
 def _initialization_validation_score(validation: dict) -> tuple[float, float, float]:
-    """Prefer macro-F1, then OCT F1, then lower loss for continuation."""
-    oct_f1 = float(validation["per_task"]["oct_aux_4class"]["macro_f1"])
-    return (
-        float(validation["macro_f1"]),
-        oct_f1,
-        -float(validation["loss"]),
-    )
+    """Use the same selection key as later checkpoints."""
+    return _validation_score(validation)
 
 
 def _validate(

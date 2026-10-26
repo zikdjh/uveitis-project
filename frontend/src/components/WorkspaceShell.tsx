@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   ScanEye,
+  Settings2,
   ShieldCheck,
   Users,
   X,
@@ -55,7 +56,7 @@ const navigation: Record<WorkspaceMode, NavGroup[]> = {
         { to: "/admin", label: "运行概览", icon: LayoutDashboard, end: true },
         { to: "/admin/cases", label: "病例审计", icon: ClipboardList },
         { to: "/admin/knowledge", label: "知识库", icon: FileText },
-        { to: "/admin/services", label: "服务状态", icon: Activity },
+        { to: "/admin/services", label: "服务配置", icon: Settings2 },
       ],
     },
     {
@@ -85,6 +86,7 @@ function currentPageLabel(pathname: string, groups: NavGroup[]) {
 export default function WorkspaceShell({ mode }: { mode: WorkspaceMode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const loginPath = mode === "admin" ? "/admin/login" : "/login";
   const groups = navigation[mode];
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -96,11 +98,11 @@ export default function WorkspaceShell({ mode }: { mode: WorkspaceMode }) {
   useEffect(() => {
     getCurrentUser().then(setUser).catch(() => undefined);
     function handleUnauthorized() {
-      navigate("/login", { replace: true });
+      navigate(loginPath, { replace: true });
     }
     window.addEventListener("auth:unauthorized", handleUnauthorized);
     return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
-  }, [navigate]);
+  }, [loginPath, navigate]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -108,7 +110,7 @@ export default function WorkspaceShell({ mode }: { mode: WorkspaceMode }) {
 
   async function handleLogout() {
     await logout().catch(() => undefined);
-    navigate("/login", { replace: true });
+    navigate(loginPath, { replace: true });
   }
 
   return (

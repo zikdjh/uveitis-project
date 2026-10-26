@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import sqlite3
 from datetime import UTC, datetime
-from pathlib import Path
 
 from app.db.models import AuthAuditRow
 from app.schemas.auth import AuthAuditEventRead
@@ -61,113 +59,6 @@ class AuthAuditStore:
             user_agent=row.user_agent,
             detail=row.detail,
             created_at=row.created_at,
-        )
-
-
-class SQLiteAuthAuditStore:
-    """SQLite audit trail used when the application falls back to local storage."""
-
-    def __init__(self, database_path: Path) -> None:
-        self.database_path = database_path
-        self._initialize()
-
-    def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.database_path, timeout=10)
-        connection.row_factory = sqlite3.Row
-        return connection
-
-    def _initialize(self) -> None:
-        with self._connect() as connection:
-            connection.execute(
-                """
-                CREATE TABLE IF NOT EXISTS auth_audit_events (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    event TEXT NOT NULL,
-                    outcome TEXT NOT NULL,
-                    username TEXT NOT NULL,
-                    user_id TEXT,
-                    actor_id TEXT,
-                    ip_address TEXT NOT NULL,
-                    user_agent TEXT NOT NULL,
-                    detail TEXT NOT NULL,
-                    created_at TEXT NOT NULL
-                )
-                """
-            )
-            connection.execute(
-                "CREATE INDEX IF NOT EXISTS idx_auth_audit_created_at "
-                "ON auth_audit_events(created_at DESC)"
-            )
-
-    def record(
-        self,
-        *,
-        event: str,
-        outcome: str,
-        username: str,
-        user_id: str | None,
-        actor_id: str | None,
-        ip_address: str,
-        user_agent: str,
-        detail: str = "",
-    ) -> AuthAuditEventRead:
-        created_at = datetime.now(UTC)
-        with self._connect() as connection:
-            cursor = connection.execute(
-                """
-                INSERT INTO auth_audit_events
-                (event, outcome, username, user_id, actor_id, ip_address,
-                 user_agent, detail, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    event,
-                    outcome,
-                    username.strip().lower(),
-                    user_id,
-                    actor_id,
-                    ip_address[:64],
-                    user_agent[:500],
-                    detail,
-                    created_at.isoformat(),
-                ),
-            )
-            event_id = int(cursor.lastrowid)
-        return AuthAuditEventRead(
-            id=event_id,
-            event=event,
-            outcome=outcome,
-            username=username.strip().lower(),
-            user_id=user_id,
-            actor_id=actor_id,
-            ip_address=ip_address[:64],
-            user_agent=user_agent[:500],
-            detail=detail,
-            created_at=created_at,
-        )
-
-    def list(self, limit: int = 100) -> list[AuthAuditEventRead]:
-        with self._connect() as connection:
-            rows = connection.execute(
-                "SELECT * FROM auth_audit_events ORDER BY created_at DESC LIMIT ?",
-                (limit,),
-            ).fetchall()
-        return [self._from_row(row) for row in rows]
-
-    @staticmethod
-    def _from_row(row: sqlite3.Row) -> AuthAuditEventRead:
-        created_at = datetime.fromisoformat(str(row["created_at"]))
-        return AuthAuditEventRead(
-            id=int(row["id"]),
-            event=str(row["event"]),
-            outcome=str(row["outcome"]),
-            username=str(row["username"]),
-            user_id=str(row["user_id"]) if row["user_id"] else None,
-            actor_id=str(row["actor_id"]) if row["actor_id"] else None,
-            ip_address=str(row["ip_address"]),
-            user_agent=str(row["user_agent"]),
-            detail=str(row["detail"]),
-            created_at=created_at,
         )
 
 

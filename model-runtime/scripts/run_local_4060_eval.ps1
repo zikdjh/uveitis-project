@@ -7,6 +7,7 @@ param(
     [int]$MaxNewTokens = 32,
     [int]$ImagePixels = 65536,
     [int]$MaxSamples = 0,
+    [int]$SamplesPerClass = 0,
     [switch]$Overwrite
 )
 
@@ -34,6 +35,9 @@ if (-not (Test-Path -LiteralPath $evaluator)) {
 if (-not (Test-Path -LiteralPath (Join-Path $adapter "adapter_config.json"))) {
     throw "Adapter not found: $adapter"
 }
+if ($MaxSamples -gt 0 -and $SamplesPerClass -gt 0) {
+    throw "MaxSamples and SamplesPerClass are mutually exclusive"
+}
 
 $env:BNB_CUDA_VERSION = "128"
 $env:PYTHONUTF8 = "1"
@@ -54,6 +58,10 @@ foreach ($task in $Tasks) {
 if ($MaxSamples -gt 0) {
     $arguments += "--max-samples"
     $arguments += "$MaxSamples"
+}
+if ($SamplesPerClass -gt 0) {
+    $arguments += "--samples-per-class"
+    $arguments += "$SamplesPerClass"
 }
 if ($Overwrite) {
     $arguments += "--overwrite"

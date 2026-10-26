@@ -26,7 +26,7 @@
   <p class="doc-summary">系统边界、训练与运行目录、当前状态和启动方式</p>
   <p class="doc-source">规范入口：<code>README.md</code></p>
   <article class="html-body">
-<p>开源多模态模型 + 专项训练 + RAG 知识增强，决策模型作为按进度启用的补充方案；FastAPI + React 三端系统（公开端 / 医生端 / 管理员端）。项目性质：非商用科研原型，输出仅作辅助参考、不构成诊断。</p>
+<p>Qwen3.5-4B 微调判断 + 可选 RAG、决策模型、网络搜索和外部 API 总结，所有增强组件均可独立降级；FastAPI + React 三端系统（公开端 / 医生端 / 管理员端）。项目性质：非商用科研原型，输出仅作辅助参考、不构成诊断。</p>
 <h2>目录结构</h2>
 <pre><code class="language-text">uveitis-project/
 ├── README.md                  本文件
@@ -68,11 +68,12 @@
 <li>[x] 训练结果快照已按 run 和评估阶段归档，索引见 <code>docs/2026-10-26-training-assets-index.html</code></li>
 <li>[x] M1 前后端基础框架：病例建档、影像上传、分析任务、医生复核、管理概览</li>
 <li>[x] 鉴权与权限体系：医生/管理员角色、双令牌无感刷新、CSRF、账号管理、登录限流与审计；见 <code>docs/2026-10-26-auth-access-control.html</code></li>
-<li>[x] SQLite 病例持久化与本地影像存储</li>
+<li>[x] PostgreSQL 病例、账号、审计与服务配置持久化</li>
 <li>[x] 核心模型适配边界与演示模式</li>
 <li>[x] zvec 嵌入式知识库适配层：文档写入、过滤检索与本地持久化</li>
 <li>[x] BGE-M3 通过 ModelScope 下载到本地，使用 CPU 生成 1024 维向量</li>
 <li>[x] zvec 检索使用本地 BGE-M3，管理端展示向量数据库状态</li>
+<li>[x] 混合判断编排：Qwen 判断、RAG、补充决策、网络搜索和外部总结均为可跳过增强分支</li>
 <li>[x] 项目目录完成训练资产、运行服务和项目文档归类；索引见 <code>docs/2026-10-26-project-layout.html</code></li>
 <li>[x] 前端首轮工作区界面完善：桌面/移动端导航、账号权限概览、账号列表移动卡片化和权限页空状态</li>
 <li>[ ] 完成患者首页、病例详情、管理员概览、登录与状态页的统一视觉收口</li>
@@ -103,8 +104,10 @@
 <pre><code class="language-powershell">cd backend
 uv sync --group dev --cache-dir .uv-cache
 Copy-Item .env.example .env
-.\.venv\Scripts\uvicorn.exe app.main:app --reload --host 127.0.0.1 --port 8000
+docker compose up -d postgres redis
+.\.venv\Scripts\uvicorn.exe app.asgi:app --reload --host 127.0.0.1 --port 8000
 </code></pre>
+<p>后端只使用 PostgreSQL 持久化；<code>APP_DATABASE_URL</code> 未配置或数据库不可达时启动失败，不会回落到 SQLite。<code>APP_DATABASE_CONNECT_TIMEOUT_SECONDS</code> 默认 5 秒。<code>app.main:create_app</code> 是应用工厂，ASGI 启动入口为 <code>app.asgi:app</code>。管理员和医生分别从 <code>/admin/login</code>、<code>/login</code> 进入，两个入口在服务端分别校验角色。</p>
 <p>前端：</p>
 <pre><code class="language-powershell">cd frontend
 npm install
@@ -112,6 +115,26 @@ npm run dev
 </code></pre>
 <p>打开 <code>http://127.0.0.1:5173</code>。API 文档位于 <code>http://127.0.0.1:8000/docs</code>。</p>
 <p>默认 <code>APP_MODEL_MODE=mock</code>，只验证业务链路，不生成临床结论。核心路径先完成病例结构化、影像理解、证据检索与医生复核；接入相应服务后切换为 <code>remote</code>。补充决策模型由 <code>APP_DECISION_ENABLED=false</code> 默认关闭，不作为核心流程的前置条件。</p>
+<h2>混合判断链路</h2>
+<p><code>APP_MODEL_MODE=remote</code> 后，病例分析按以下顺序运行，每个增强组件都有独立超时和异常边界：</p>
+<pre><code class="language-text">病例结构化 -&gt; 影像预处理
+  -&gt; Qwen3.5-4B 微调判断（可选）
+  -&gt; RAG 证据检索（可选）
+  -&gt; 补充决策模型（可选）
+  -&gt; 网络搜索辅助（可选）
+  -&gt; 外部 API 总结（可选）
+  -&gt; 安全校验 -&gt; 报告整理 -&gt; 医生复核
+</code></pre>
+<ul>
+<li>Qwen3.5-4B 只输出受限标签、结构化发现和置信度，不生成最终临床报告。</li>
+<li>RAG 使用本地 BGE-M3 和 zvec；索引为空、模型缺失或检索失败时直接跳过。</li>
+<li>网络搜索支持 Tavily、Brave Search、Serper、Google Programmable Search (CSE)、Bing Web Search、Exa、Perplexity 和自建 SearXNG；管理员可调整尝试顺序并逐项检查，单个提供方失败后继续下一个，全部失败只跳过搜索分支。默认不把主诉发送给外部搜索。</li>
+<li>补充决策模型保持默认关闭，待真实脱敏病例、医生确认标签和独立评测齐备后启用。</li>
+<li>外部总结支持 OpenAI Responses、OpenAI Chat Completions 和 Anthropic Messages 三种接口，调用时使用管理员在服务配置页保存的地址、模型与密钥；默认不发送原始影像、主诉和病史，不可用时使用确定性回退摘要。</li>
+<li>外部服务配置由管理员维护；医生只能读取是否启用，不能读取或修改凭据。API Key 使用 AES-GCM 加密保存，接口响应只返回“是否已配置”，永不回传原文。</li>
+<li>任一增强组件失败都只写 <code>failed</code> 或 <code>skipped</code>，病例仍进入 <code>awaiting_review</code>，不会阻断医生复核。</li>
+</ul>
+<p>外部服务的操作性配置在管理端“服务配置”页维护，包括接口协议、API 地址、模型、密钥、搜索服务商顺序和临床文本发送开关。运行时始终读取数据库中的管理员配置，不把环境变量作为外部 API 或网络搜索的运营配置入口；部署文件只保留启动主密钥 <code>APP_INTEGRATION_SECRET_KEY</code>。不要将第三方 API Key 提交到仓库。环境变量样例位于仓库的 <code>backend/.env.example</code>。外部 API 启用前需要完成数据处理和合规评估；项目 MIT License 只覆盖代码，不覆盖第三方数据、影像、模型权重或外部 API 内容。</p>
 <h2>本地 BGE-M3</h2>
 <p>模型通过 ModelScope 固定来源 <code>BAAI/bge-m3</code> 下载到 <code>backend/models/bge-m3/</code>。该目录已加入 <code>.gitignore</code>，不随代码提交。首次启动 API 时不加载模型，第一次写入知识或执行文本检索时才加载权重并常驻 CPU。</p>
 <pre><code class="language-powershell">cd backend
@@ -138,6 +161,8 @@ APP_BGE_M3_MAX_LENGTH=1024
 APP_DECISION_SERVICE_URL=
 </code></pre>
 <p>达到启用门槛后，再配置决策服务地址并设置 <code>APP_DECISION_ENABLED=true</code>。管理端会区分核心模型与补充模型；未启用时分析记录明确标记为“跳过”，流程直接进入安全校验与医生复核。决策模型只能提供补充建议，最终结论仍由医生复核。</p>
+<h2>开源协议</h2>
+<p>本项目采用 MIT License，详见 <a href="https://github.com/zikdjh/uveitis-project/blob/main/LICENSE">LICENSE</a>。</p>
 
   </article>
 </main>

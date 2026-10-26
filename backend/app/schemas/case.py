@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -58,6 +58,22 @@ class Evidence(BaseModel):
     score: float = Field(ge=0, le=1)
 
 
+class WebEvidence(BaseModel):
+    title: str
+    url: str
+    snippet: str = ""
+    provider: str
+    score: float | None = Field(default=None, ge=0, le=1)
+
+
+class ComponentResult(BaseModel):
+    key: str
+    label: str
+    status: StepStatus
+    detail: str = ""
+    latency_ms: int = Field(default=0, ge=0)
+
+
 class AnalysisResult(BaseModel):
     status: Literal["queued", "running", "completed", "failed"]
     model_mode: Literal["mock", "remote"]
@@ -68,6 +84,11 @@ class AnalysisResult(BaseModel):
     urgency: Literal["unknown", "low", "medium", "high"] = "unknown"
     recommendations: list[str] = Field(default_factory=list)
     evidence: list[Evidence] = Field(default_factory=list)
+    web_evidence: list[WebEvidence] = Field(default_factory=list)
+    component_results: list[ComponentResult] = Field(default_factory=list)
+    summary: str = ""
+    external_summary_used: bool = False
+    external_payload: dict[str, Any] = Field(default_factory=dict)
     confidence: float = Field(default=0, ge=0, le=1)
     safety_flags: list[str] = Field(default_factory=list)
     started_at: datetime

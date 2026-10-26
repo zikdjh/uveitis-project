@@ -7,15 +7,21 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.main import create_app
+from app.db.audit import MemoryAuthAuditStore
+from app.db.users import MemoryUserStore
+from app.services.redis_store import MemorySessionStore
 from app.services.knowledge import KnowledgeStore
 
 
 def main() -> None:
     root = Path(__file__).parent.parent / ".zvec-test-data" / uuid4().hex
     app = create_app(
-        database_path=root / "test.db",
         upload_dir=root / "uploads",
         vector_dir=root / "vectors",
+        use_environment_database=False,
+        user_store=MemoryUserStore(),
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=MemorySessionStore(),
     )
     settings = app.state.settings.model_copy(
         update={"vector_dimension": 4, "vector_provider": "memory"}

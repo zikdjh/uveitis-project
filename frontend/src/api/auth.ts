@@ -9,6 +9,8 @@ export type Permission =
   | "knowledge:write"
   | "system:read"
   | "system:manage"
+  | "integration:read"
+  | "integration:manage"
   | "user:read"
   | "user:manage"
   | "audit:read";
@@ -50,6 +52,16 @@ export function login(input: {
   password: string;
 }): Promise<{ user: User; expires_at: string }> {
   return request("/api/v1/auth/login", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function adminLogin(input: {
+  username: string;
+  password: string;
+}): Promise<{ user: User; expires_at: string }> {
+  return request("/api/v1/auth/admin/login", {
     method: "POST",
     body: JSON.stringify(input),
   });

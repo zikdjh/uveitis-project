@@ -52,7 +52,9 @@ async function send(path: string, init?: RequestInit): Promise<Response> {
 }
 
 function canAttemptRefresh(path: string): boolean {
-  return !path.includes("/auth/login") && !path.includes("/auth/refresh");
+  return !path.endsWith("/auth/login")
+    && !path.endsWith("/auth/admin/login")
+    && !path.includes("/auth/refresh");
 }
 
 async function performRefresh(): Promise<boolean> {
@@ -83,7 +85,11 @@ export async function authorizedFetch(
       response = await send(path, init);
     }
   }
-  if (response.status === 401 && !path.includes("/auth/login")) {
+  if (
+    response.status === 401
+    && !path.endsWith("/auth/login")
+    && !path.endsWith("/auth/admin/login")
+  ) {
     window.dispatchEvent(new Event("auth:unauthorized"));
   }
   return response;

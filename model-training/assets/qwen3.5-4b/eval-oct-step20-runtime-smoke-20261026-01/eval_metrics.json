@@ -1,0 +1,103 @@
+{
+  "status": "ok",
+  "adapter_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\local-4060-oct-focus-cont-20261025-01\\best_adapter",
+  "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "selection_sha256": "77a65218744fe84896bb06d7d216bdb9b2329fc06e2de90bdba428dcf9a6a0ee",
+  "tasks": {
+    "oct_aux_4class": {
+      "samples": 16,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "json_valid_rate": 1.0,
+      "per_class": {
+        "CNV": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 4
+        },
+        "DME": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 4
+        },
+        "DRUSEN": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 4
+        },
+        "NORMAL": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 4
+        }
+      },
+      "confusion_matrix": {
+        "CNV": {
+          "CNV": 4,
+          "DME": 0,
+          "DRUSEN": 0,
+          "NORMAL": 0
+        },
+        "DME": {
+          "CNV": 0,
+          "DME": 4,
+          "DRUSEN": 0,
+          "NORMAL": 0
+        },
+        "DRUSEN": {
+          "CNV": 0,
+          "DME": 0,
+          "DRUSEN": 4,
+          "NORMAL": 0
+        },
+        "NORMAL": {
+          "CNV": 0,
+          "DME": 0,
+          "DRUSEN": 0,
+          "NORMAL": 4
+        }
+      },
+      "errors": 0
+    }
+  },
+  "rows": 16,
+  "sampling": {
+    "mode": "balanced_per_class",
+    "samples_per_class": 4,
+    "rows": 16,
+    "available_label_counts": {
+      "oct_aux_4class::CNV": 250,
+      "oct_aux_4class::DME": 250,
+      "oct_aux_4class::DRUSEN": 250,
+      "oct_aux_4class::NORMAL": 250
+    },
+    "selected_label_counts": {
+      "oct_aux_4class::CNV": 4,
+      "oct_aux_4class::DME": 4,
+      "oct_aux_4class::DRUSEN": 4,
+      "oct_aux_4class::NORMAL": 4
+    }
+  },
+  "evaluated_label_counts": {
+    "oct_aux_4class::CNV": 4,
+    "oct_aux_4class::DME": 4,
+    "oct_aux_4class::DRUSEN": 4,
+    "oct_aux_4class::NORMAL": 4
+  },
+  "generation": {
+    "max_new_tokens": 32,
+    "image_pixels": 65536,
+    "do_sample": false
+  },
+  "started_at": "2026-10-26T05:56:00.991798+00:00",
+  "finished_at": "2026-10-26T05:57:04.054061+00:00",
+  "elapsed_seconds": 63.00039240000115,
+  "peak_allocated_gib": 3.233283042907715,
+  "peak_reserved_gib": 3.310546875,
+  "note": "Only the frozen manifest test split was evaluated. 01 is not patient-isolated; 03 contains prototype/augmentation relationships. Human review remains required."
+}

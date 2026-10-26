@@ -318,7 +318,27 @@
 <li>验证日志：<code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/validation_metrics.jsonl</code></li>
 <li>本地 checkpoint、最终 adapter、重复 processor 和 <code>training_state.pt</code> 已于 2026-10-26 清理；最佳 adapter 与验证指标保留。</li>
 </ul>
-<p>下一步应以第 20 步 adapter 对冻结测试集做全量生成式评估。若 OCT 测试集仍出现 CNV/DRUSEN 混淆，应优先检查这两类在训练与测试中的患者、来源和图像分布，而不是继续提高训练步数。</p>
+<h2>2026-10-26 同源冻结测试与选型</h2>
+<ul>
+<li>第 100 步基线和第 20 步候选都已完成 <code>oct_aux_4class</code> 冻结测试集 <code>1,000/1,000</code> 条，生成错误均为 <code>0</code>。</li>
+<li>两份 <code>selection_sha256</code> 均为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。</li>
+<li>第 100 步基线 macro-F1 <code>0.918252</code>；第 20 步候选 macro-F1 <code>0.947245</code>；提升 <code>+0.028993</code>，超过 <code>0.02</code> 门槛。</li>
+<li>候选的主要改善来自 CNV F1 <code>+0.063220</code> 和 DRUSEN F1 <code>+0.065101</code>；DME 和 NORMAL 有轻微下降，需保留在限制说明中。</li>
+<li>选型决定为 <code>promote_step20_candidate</code>，证据见 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/selection_decision.json</code>。</li>
+<li>该决定只确认研究型运行候选，不代表患者隔离外部验证或临床部署批准。</li>
+</ul>
+<p>下一步应冻结第 20 步 adapter、模型卡、指标文件和运行读取路径。错误来源分析和四类均衡推理 smoke 已完成：53 条错误主要集中在 <code>NORMAL-&gt;DRUSEN</code>、<code>DRUSEN-&gt;CNV</code> 和 <code>CNV-&gt;DME</code>，后续实验应优先检查这些类别的患者、来源和图像分布，而不是继续提高训练步数。</p>
+<h2>2026-10-26 第二阶段受控复核</h2>
+<ul>
+<li>复核目标：从已选定的第 20 步 adapter 初始化，保持图像像素 65,536、最大序列 256、梯度累积 4 和 OCT 任务权重 4，只改变学习率。</li>
+<li>第一批 <code>local-4060-oct-stage2-20261026-01</code> 使用学习率 <code>5e-6</code>，目标 30 步，每 5 步验证；第 5、10 步验证 macro-F1 都是 <code>0.867725</code>，低于入口 <code>0.873358</code>，连续两次未改善后在第 10 步早停。</li>
+<li>第二批 <code>local-4060-oct-stage2b-20261026-01</code> 只把学习率提高到 <code>1e-5</code>，数据切分和调度哈希保持不变；结果仍为 macro-F1 <code>0.867725</code>，OCT macro-F1 <code>0.774603</code>，同样在第 10 步早停。</li>
+<li>两轮实验的 validation JSON 有效率均为 <code>100%</code>；峰值分配显存约 <code>5.452397 GiB</code>，峰值保留显存 <code>5.69140625 GiB</code>，8 GB 设备没有 OOM。</li>
+<li>实验最佳点都停留在初始化第 0 步，没有生成可替代第 20 步候选的 adapter。因此决定为 <code>retain_step20_candidate</code>，不运行新的冻结测试提升门槛，也不覆盖运行候选。</li>
+<li>这次复核还修正了选择键记录：初始化验证与后续 checkpoint 统一使用“总 Macro-F1 → JSON 有效率 → loss”，避免把 OCT 子任务 F1 写入 JSON 有效率字段。</li>
+</ul>
+<p>证据：<code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>；训练摘要分别位于两个 run 的 <code>training_summary.json</code>。</p>
+<p>结论：当前数据、任务权重和 8 GB 配置下，继续同路线增加步数没有收益。后续应先检查 CNV/DRUSEN 错误来源、来源组分布和患者隔离状况，或者把工作重心切到冻结第 20 步证据与受控推理 smoke。</p>
   </article>
 </main>
 <footer class="doc-footer">

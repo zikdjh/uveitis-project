@@ -49,7 +49,7 @@
 </tr>
 <tr>
 <td><code>backend/</code></td>
-<td>FastAPI、SQLite、BGE-M3 和后台测试</td>
+<td>FastAPI、PostgreSQL、BGE-M3 和后台测试</td>
 <td>代码保留；<code>.venv/</code>、<code>models/</code> 可重建</td>
 </tr>
 <tr>
@@ -225,7 +225,7 @@
 <li>Modal 训练、评估和训练子集构建脚本语法检查通过。</li>
 <li>当前两份 <code>best_adapter</code>、完整冻结评估结果和第 100 步断点文件均通过存在性复核。</li>
 <li>清理后没有训练或评估进程，RTX 4060 显存占用为 <code>0 MiB</code>。</li>
-<li><code>backend/tests/test_health.py</code> 在测试收集阶段需要连接 <code>127.0.0.1:5432</code> PostgreSQL；当前 <code>.env</code> 对应的本地数据库不可用，连接在 131 秒后超时。该失败与文件整理无关，未修改数据库配置。</li>
+<li>后端将 ASGI 启动入口与应用工厂分离；测试通过内存仓储运行，不再在导入或收集阶段连接 PostgreSQL。已移除 SQLite 运行实现和 SQLite 测试适配器，后端测试为 24 项通过。</li>
 </ul>
   </article>
 </main>

@@ -1,0 +1,98 @@
+{
+  "downloaded_on": "2026-10-26",
+  "proxy": "http://127.0.0.1:7890",
+  "datasets": [
+    {
+      "dataset": "14_open_uwf700",
+      "title": "Open ultrawidefield fundus image dataset with disease diagnosis and clinical image quality assessment",
+      "source_page": "https://figshare.com/articles/dataset/Open_UWF_700/26936446",
+      "source_url": "https://ndownloader.figshare.com/files/49014559",
+      "doi": "10.6084/m9.figshare.26936446",
+      "license": "CC BY 4.0",
+      "archive_size_bytes": 9018811972,
+      "archive_md5": "ddee42dc99792545654a65413c0fdb6f",
+      "archive_removed_after_extraction": true,
+      "extracted_files": 703,
+      "images": 700,
+      "classes": {
+        "AMD": 100,
+        "DR": 100,
+        "Healthy": 100,
+        "PM": 100,
+        "RD": 100,
+        "RVO": 100,
+        "Uveitis": 100
+      },
+      "metadata_files": [
+        "Demographics of the participants.xlsx",
+        "Ground Truth.xlsx",
+        "Individual Quality Assessment.xlsx"
+      ],
+      "usage_note": "The Uveitis subset contains 100 images. Other classes are not uveitis subtypes."
+    },
+    {
+      "dataset": "15_zenodo_tb_uveitis_ifn",
+      "title": "Type 1 interferon-inducible gene expression in QuantiFERON Gold TB-positive uveitis",
+      "source_page": "https://zenodo.org/records/4984559",
+      "doi": "10.5061/dryad.8jk03jd",
+      "license": "CC0",
+      "file": "tb_uveitis_ifn_gene_signature.xlsx",
+      "file_size_bytes": 52469,
+      "file_md5": "80eb66a2366191722db807bf9a9a5ee1",
+      "sheets": [
+        "Sheet1",
+        "Sheet2"
+      ],
+      "usage_note": "Clinical laboratory variables for TB uveitis risk stratification; not an image dataset."
+    },
+    {
+      "dataset": "16_zenodo_vitreous_classification",
+      "title": "Comprehensive analysis of vitreous specimens for uveitis classification",
+      "source_page": "https://zenodo.org/records/4966416",
+      "doi": "10.5061/dryad.597ch",
+      "license": "CC0",
+      "file": "vitreous_uveitis_classification.xlsx",
+      "file_size_bytes": 74836,
+      "file_md5": "d7301fb3ec819a1a4584c2900e74fc44",
+      "sheets": [
+        "CD4CD8",
+        "CD4",
+        "CD8",
+        "CD19",
+        "visual acuity",
+        "CD4CD8 comparison",
+        "CD4 comparison",
+        "CD8 comparison",
+        "CD19 comparison",
+        "conficence interval"
+      ],
+      "usage_note": "Laboratory and visual acuity variables from a prospective multicentre uveitis classification study."
+    },
+    {
+      "dataset": "17_zenodo_dm_anterior_uveitis",
+      "title": "Association Between Diabetes Mellitus, Glycemic Control, and Undifferentiated Anterior Uveitis in Thai Patients",
+      "source_pages": [
+        "https://zenodo.org/records/21808930",
+        "https://zenodo.org/records/23054920"
+      ],
+      "dois": [
+        "10.5281/zenodo.21808930",
+        "10.5281/zenodo.23054920"
+      ],
+      "license": "CC BY 4.0",
+      "files": [
+        {
+          "name": "diabetes_anterior_uveitis.xlsx",
+          "size_bytes": 70307,
+          "md5": "8ae0d3544d4f78804f4f3e05556d4494"
+        },
+        {
+          "name": "diabetes_anterior_uveitis_raw_data.pdf",
+          "size_bytes": 202557,
+          "md5": "8ebc5cc3c45f7c18e6c4642614528604"
+        }
+      ],
+      "usage_note": "Retrospective cross-sectional real-world clinical data; endpoint differs from the main uveitis image classification task."
+    }
+  ]
+}

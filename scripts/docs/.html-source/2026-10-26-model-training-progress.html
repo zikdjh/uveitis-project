@@ -32,8 +32,12 @@
 <ul>
   <li>主模型确定为 Qwen3.5-4B，使用 4-bit NF4 QLoRA，在本机 RTX 4060 Laptop 8 GB 上训练和评估。</li>
   <li>当前有两个工作 adapter：第 100 步分组续训基线，以及第 20 步 OCT 聚焦续训候选。</li>
-  <li>第 20 步 OCT 候选已经完成 <code>oct_aux_4class</code> 冻结测试集 1,000/1,000 条评估；第 100 步基线的同一评估只完成 145/1,000 条。</li>
-  <li>当前尚未提升候选，也尚未发布临床模型。是否切换运行 adapter，要等两份完整评估结果按同一清单和同一解析规则比较后再决定。</li>
+  <li>两组 adapter 均已完成 <code>oct_aux_4class</code> 冻结测试集 1,000/1,000 条评估；第 20 步候选 macro-F1 为 <code>0.947245</code>，第 100 步基线为 <code>0.918252</code>，提升 <code>+0.028993</code>，已通过选型门槛。</li>
+  <li>第 20 步候选之后的第二阶段受控复核已完成：<code>5e-6</code> 与 <code>1e-5</code> 两组都在第 10 步早停，最佳点仍是初始化时的第 20 步 adapter，因此没有新的提升候选。</li>
+  <li>第三阶段高分率假设已判负：<code>131,072</code> 像素输入使验证降到 macro-F1 <code>0.832019</code>、OCT <code>0.736058</code>，低于低分辨率第 20 步候选，实验在第 6 步早停。</li>
+  <li>错误来源已复核：第 20 步候选的 53 条错误中，<code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条；相对第 100 步基线，DRUSEN 纠正 38 条是主要收益，同时 CNV 退化 6 条、NORMAL 退化 4 条。</li>
+  <li>受控推理 smoke 已完成：第 20 步候选在四类各 4 条上正确 16/16，JSON 有效率 100%，峰值保留显存 <code>3.31 GiB</code>；该结果只证明链路可用，不作为泛化精度。</li>
+  <li>选型决定是保留第 20 步研究型运行候选；当前尚未冻结交付，也尚未发布临床模型。</li>
   <li>本阶段没有新增 Modal GPU 计量；本地训练继续受 8 GB 显存和训练预算双重约束。</li>
 </ul>
 
@@ -48,7 +52,7 @@
     <tr><td>训练输入</td><td><code>model-training/datasets/training/manifest.csv</code></td><td>清单记录 16,638 张图像，训练/验证/测试划分为 14,734 / 177 / 1,727。</td></tr>
     <tr><td>实际分组训练行</td><td>可用 12,156 行；训练 12,101 行、验证 55 行；训练/验证组为 5,184 / 33</td><td>从清单中排除了 71 行测试重叠或缺少患者隔离的行；训练没有读取测试图片。</td></tr>
     <tr><td>OCT 冻结测试</td><td>1,000 条，四类各 250 条</td><td>使用同一冻结 selection 清单评估两个 adapter。</td></tr>
-    <tr><td>主要训练配置</td><td>图像像素 65,536，最大序列 256，梯度累积 4，周期验证</td><td>8 GB 显存下已验证的配置，不再向上扩大。</td></tr>
+    <tr><td>主要训练配置</td><td>图像像素 65,536，最大序列 256，梯度累积 4，周期验证</td><td>8 GB 显存下已验证的低分辨率配置；131,072 像素受控测试无收益，运行配置继续使用 65,536。</td></tr>
     <tr><td>决策模型</td><td>Intern-Decision-4B，默认关闭</td><td>缺少真实脱敏病例、医生确认标签和独立评测集前不训练、不进入主流程。</td></tr>
   </tbody>
 </table>
@@ -72,6 +76,27 @@
       <td>第 20 步</td>
       <td>准确率 0.836364；任务平均 macro-F1 0.873358；OCT macro-F1 0.790476；JSON 有效率 100%</td>
       <td>约 1,203 秒；峰值保留 <code>5.691 GiB</code>；adapter SHA256 <code>00ebeb2c...</code></td>
+    </tr>
+    <tr>
+      <td><code>local-4060-oct-stage2-20261026-01</code></td>
+      <td>10/30 步后早停</td>
+      <td>第 0 步（初始化）</td>
+      <td>macro-F1 0.867725；OCT macro-F1 0.774603；JSON 有效率 100%</td>
+      <td>约 503 秒；峰值保留 <code>5.691 GiB</code>；未提升</td>
+    </tr>
+    <tr>
+      <td><code>local-4060-oct-stage2b-20261026-01</code></td>
+      <td>10/30 步后早停</td>
+      <td>第 0 步（初始化）</td>
+      <td>macro-F1 0.867725；OCT macro-F1 0.774603；JSON 有效率 100%</td>
+      <td>约 494 秒；峰值保留 <code>5.691 GiB</code>；未提升</td>
+    </tr>
+    <tr>
+      <td><code>local-4060-oct-stage3-hires-20261026-01</code></td>
+      <td>6/10 步后早停</td>
+      <td>第 2 步</td>
+      <td>macro-F1 0.832019；OCT macro-F1 0.736058；JSON 有效率 100%</td>
+      <td>约 624 秒；峰值保留 <code>5.689 GiB</code>；高分率假设未通过</td>
     </tr>
   </tbody>
 </table>
@@ -100,10 +125,11 @@
 
 <h3>第 100 步分组续训基线</h3>
 <ul>
-  <li>状态：未完成，已完成 145/1,000 条。</li>
-  <li>断点：<code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/predictions.partial.jsonl</code>。</li>
-  <li>停止时 145 条全部位于 CNV 区块，基线正确 141/145，只能作为未完成快照。</li>
-  <li>恢复评估时必须复用第 20 步的同一冻结 selection 清单，不添加覆盖参数。</li>
+  <li>状态：<code>ok</code>，1,000/1,000 条完成，生成错误 0。</li>
+  <li>准确率 <code>0.918</code>，macro-F1 <code>0.918252</code>，严格 JSON 有效率 <code>100%</code>。</li>
+  <li>评估耗时约 <code>2,013</code> 秒；峰值保留显存 <code>3.310546875 GiB</code>。</li>
+  <li>selection SHA256：<code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>，与第 20 步一致。</li>
+  <li>历史信息：本次从 145/1,000 断点续跑；停止时 145 条全部位于 CNV 区块，不得单独作为选型依据。</li>
 </ul>
 
 <h2>选型门槛</h2>
@@ -114,6 +140,53 @@
   <li>不满足门槛时保留第 100 步基线 adapter，不延长当前 OCT 聚焦训练，不通过增加步数掩盖数据或标签问题。</li>
   <li>即使通过冻结测试，也必须保留数据限制：01 缺少患者隔离，03 存在增强/原型关系，13 的组键包含标签。</li>
 </ol>
+<p>2026-10-26 已完成同源比较：第 20 步候选相对第 100 步基线的 OCT macro-F1 提升 <code>+0.028993</code>，JSON 有效率均为 <code>100%</code>，满足提升门槛。选型决定为 <code>promote_step20_candidate</code>，结构化证据见 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/selection_decision.json</code>。该决定只用于研究型运行候选，不等于临床发布。</p>
+
+<h2>第二阶段受控复核</h2>
+<table>
+  <thead>
+    <tr><th>Run</th><th style="text-align:right">学习率</th><th style="text-align:right">目标步数</th><th style="text-align:right">实际完成</th><th>第 5、10 步验证</th><th>结论</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>local-4060-oct-stage2-20261026-01</code></td><td style="text-align:right"><code>5e-6</code></td><td style="text-align:right">30</td><td style="text-align:right">10</td><td>macro-F1 0.867725；OCT 0.774603；JSON 100%</td><td>连续两次未改善，保留第 20 步候选</td></tr>
+    <tr><td><code>local-4060-oct-stage2b-20261026-01</code></td><td style="text-align:right"><code>1e-5</code></td><td style="text-align:right">30</td><td style="text-align:right">10</td><td>macro-F1 0.867725；OCT 0.774603；JSON 100%</td><td>连续两次未改善，保留第 20 步候选</td></tr>
+  </tbody>
+</table>
+<p>第 20 步入口验证为 macro-F1 <code>0.873358</code>、OCT macro-F1 <code>0.791503</code>、JSON 有效率 <code>100%</code>。两条学习率都没有超过该入口，且实验 <code>final_adapter</code> 没有经过冻结测试提升门槛，所以决定为 <code>retain_step20_candidate</code>。完整记录见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>。</p>
+<p>这表明在当前数据切分、任务权重和 8 GB 配置下，简单延长步骤没有收益。错误来源分析和受控推理 smoke 已完成，后续若要继续实验，应先针对 NORMAL/DRUSEN 和 CNV/DME 提出明确的数据假设；不应继续提高同配置训练步数。</p>
+
+<h2>第三阶段高分率复核</h2>
+<table>
+  <thead>
+    <tr><th>Run</th><th style="text-align:right">图像像素</th><th style="text-align:right">学习率</th><th style="text-align:right">实际完成</th><th>验证结果</th><th>结论</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>local-4060-oct-stage3-hires-20261026-01</code></td><td style="text-align:right">131,072</td><td style="text-align:right"><code>2.5e-6</code></td><td style="text-align:right">6</td><td>初始化 0.826256 / 0.718769；最佳第 2 步 0.832019 / 0.736058；JSON 100%</td><td>第 4 步持平、第 6 步回落，连续两次未改善后早停</td></tr>
+  </tbody>
+</table>
+<p>该实验用于检验“提高图像分辨率可改善 CNV/DRUSEN 边界信息”的假设。高分率输入使初始化验证和训练最佳点都低于低分辨率第 20 步候选，说明当前数据和处理链路下简单提高输出像素不会带来收益。结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage3-20261026-01/stage3_decision.json</code>。</p>
+
+<h2>错误来源分析</h2>
+<p>分析只读取现有冻结预测和 manifest，不重新推理、不使用测试行训练。1,000 条测试全部来自 <code>13_zhanglab_oct</code>，总体准确率 <code>0.947</code>、macro-F1 <code>0.947245</code>、JSON 有效率 <code>100%</code>。</p>
+<table>
+  <thead>
+    <tr><th>错误方向</th><th style="text-align:right">数量</th><th>说明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>NORMAL-&gt;DRUSEN</code></td><td style="text-align:right">18</td><td>正常样本被误报为玻璃膜疣</td></tr>
+    <tr><td><code>DRUSEN-&gt;CNV</code></td><td style="text-align:right">14</td><td>玻璃膜疣被升级为脉络膜新生血管</td></tr>
+    <tr><td><code>CNV-&gt;DME</code></td><td style="text-align:right">8</td><td>CNV 被误判为糖尿病黄斑水肿</td></tr>
+    <tr><td><code>CNV-&gt;DRUSEN</code></td><td style="text-align:right">4</td><td>CNV 被降级为玻璃膜疣</td></tr>
+    <tr><td><code>DME-&gt;DRUSEN</code></td><td style="text-align:right">4</td><td>DME 被误判为玻璃膜疣</td></tr>
+    <tr><td><code>DME-&gt;CNV</code></td><td style="text-align:right">3</td><td>DME 被误判为 CNV</td></tr>
+    <tr><td>其他</td><td style="text-align:right">2</td><td><code>CNV-&gt;NORMAL</code> 与 <code>DRUSEN-&gt;NORMAL</code> 各 1 条</td></tr>
+  </tbody>
+</table>
+<p>685 个患者/来源组中有 50 组出现错误，前 10 个错误组占全部错误约 <code>24.53%</code>。第 20 步候选相对第 100 步基线的逐类变化为：DRUSEN 纠正 38 条、CNV 退化 6 条、NORMAL 退化 4 条、DME 纠正 3 条且退化 2 条。总体提升几乎全部来自 DRUSEN 修正，但仍需处理 CNV/NORMAL 的退化。</p>
+
+<h2>受控推理 smoke</h2>
+<p>评估器新增按 <code>task + label</code> 的确定性抽样，第 20 步候选使用 <code>65,536</code> 像素、每类 4 条共 16 条。结果为 16/16 正确、JSON 有效率 <code>100%</code>、生成错误 0，四类混淆矩阵全部落在对角线。selection SHA256 为 <code>77a65218744fe84896bb06d7d216bdb9b2329fc06e2de90bdba428dcf9a6a0ee</code>。</p>
+<p>adapter 加载后分配显存 <code>3.114870 GiB</code>，峰值分配 <code>3.233283 GiB</code>，峰值保留 <code>3.310547 GiB</code>，总耗时约 63 秒。该 smoke 说明本机 8 GB 链路、四类输入和结构化输出可运行；16 条样本不足以说明准确率、超时边界或临床可用性。证据位于 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-runtime-smoke-20261026-01/</code>。</p>
 
 <h2>11.10 前训练排期</h2>
 <table>
@@ -121,10 +194,10 @@
     <tr><th>日期</th><th>训练交付</th><th>判定条件</th></tr>
   </thead>
   <tbody>
-    <tr><td>10-26 至 10-27</td><td>续跑第 100 步基线冻结评估，核对断点和 selection 哈希。</td><td>两份评估均达到 1,000 条且无生成错误。</td></tr>
-    <tr><td>10-28</td><td>完成基线与候选的 accuracy、macro-F1、各类别 F1 和混淆矩阵比较，记录选型决定。</td><td>按 0.02 提升门槛和 JSON 有效率决定提升或保留基线。</td></tr>
+    <tr><td>10-26 至 10-27</td><td>完成第 100 步基线冻结评估、核对 selection 哈希，并完成受控后续训练复核、错误来源分析和受控推理 smoke。</td><td>已完成：两份评估均达到 1,000 条且无生成错误；阶段二、阶段三均无提升候选；错误来源和四类推理链路已记录。</td></tr>
+    <tr><td>10-28</td><td>完成基线与候选的 accuracy、macro-F1、各类别 F1 和混淆矩阵比较，记录选型决定。</td><td>提前完成：第 20 步候选提升 0.028993，超过 0.02 门槛。</td></tr>
     <tr><td>10-29 至 10-31</td><td>冻结选定 adapter，补齐模型卡、指标文件和运行侧读取路径。</td><td>模型运行服务能定位基座、adapter 和指标文件。</td></tr>
-    <tr><td>11-01 至 11-03</td><td>完成受控推理 smoke，检查显存、超时、结构化输出和错误回退。</td><td>本地推理输出带版本信息，失败时不写入业务结论。</td></tr>
+    <tr><td>11-01 至 11-03</td><td>把已验证的本地推理能力接入运行服务，检查请求超时、结构化输出和错误回退。</td><td>本地 smoke 已提前完成；剩余验收是服务级请求和失败处理。</td></tr>
     <tr><td>11-04 至 11-06</td><td>对错误样本做来源和类别分析；只在证据明确且预算可控时做一次小型聚焦实验。</td><td>不以 token loss 选模型，不扩大 8 GB 显存配置。</td></tr>
     <tr><td>11-07 至 11-08</td><td>整理最终模型证据、指纹、复现命令和数据限制。</td><td>训练、验证、冻结测试和运行读取四类证据齐全。</td></tr>
     <tr><td>11-09 至 11-10</td><td>冻结训练交付，整理决策模型门槛和后续研究清单。</td><td>不新增未验证模型，不改变 11.10 基线。</td></tr>
@@ -142,7 +215,9 @@
 <h2>风险与边界</h2>
 <ul>
   <li>55 条内部验证样本不足以证明泛化；第 20 步候选的验证提升必须由完整冻结测试复核。</li>
-  <li>第 100 步基线仍未完成，当前不能宣布第 20 步候选全面更优。</li>
+  <li>第 20 步候选在冻结 OCT 测试集上优于第 100 步基线，但该测试集仍不是患者隔离外部验证。</li>
+  <li>第二阶段受控复核没有改善验证指标，说明继续增加同配置训练步数收益不足；后续若要试验，必须先提出明确的数据或错误类型假设。</li>
+  <li>第 20 步候选的提升主要来自 DRUSEN 修正，CNV 和 NORMAL 存在退化；不能把总体 macro-F1 提升解释为四类均衡改善。</li>
   <li>训练数据包含来源重叠、增强图和缺少患者 ID 的情况，不能把当前指标解释为临床效果。</li>
   <li>补充决策模型缺少真实决策标签和独立评测集，11.10 前默认不启动训练。</li>
   <li>最终交付是“可复现的研究型训练产物”，不是经过临床验证的诊断系统。</li>

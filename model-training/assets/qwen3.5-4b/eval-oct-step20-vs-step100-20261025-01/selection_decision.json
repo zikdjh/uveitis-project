@@ -1,0 +1,44 @@
+{
+  "status": "selected",
+  "decided_at": "2026-10-26T04:30:57.751895+00:00",
+  "task": "oct_aux_4class",
+  "selection_sha256": "84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a",
+  "rows_per_adapter": 1000,
+  "selected": {
+    "run_id": "local-4060-oct-focus-cont-20261025-01",
+    "step": 20,
+    "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+    "adapter_dir": "model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter"
+  },
+  "baseline": {
+    "run_id": "local-4060-grouped-cont-20261025-01",
+    "step": 100,
+    "adapter_sha256": "517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a",
+    "adapter_dir": "model-training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter"
+  },
+  "comparison": {
+    "selected_accuracy": 0.947,
+    "baseline_accuracy": 0.918,
+    "delta_accuracy": 0.029,
+    "selected_macro_f1": 0.9472447307516584,
+    "baseline_macro_f1": 0.9182517052346422,
+    "delta_macro_f1": 0.0289930255170162,
+    "selected_json_valid_rate": 1.0,
+    "baseline_json_valid_rate": 1.0,
+    "macro_f1_threshold": 0.02,
+    "json_valid_rate_threshold": 0.99,
+    "passed": true
+  },
+  "per_class_f1_delta": {
+    "CNV": 0.0632198727866598,
+    "DME": -0.0018276699612823,
+    "DRUSEN": 0.0651013919370381,
+    "NORMAL": -0.0105214926943507
+  },
+  "decision": "promote_step20_candidate",
+  "limitations": [
+    "The OCT test set is not a patient-isolated external validation set.",
+    "Dataset 01 is not patient-isolated and dataset 03 contains prototype or augmentation relationships.",
+    "Human review remains required before any clinical use."
+  ]
+}

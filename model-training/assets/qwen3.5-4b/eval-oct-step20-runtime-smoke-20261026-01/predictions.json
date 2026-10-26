@@ -1,0 +1,146 @@
+[
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-1032178-1.jpeg",
+    "expected": "CNV",
+    "predicted": "CNV",
+    "raw": "{\"label\":\"CNV\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 3.528896399999212
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-1034361-1.jpeg",
+    "expected": "CNV",
+    "predicted": "CNV",
+    "raw": "{\"label\":\"CNV\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.718301299999439
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-1034361-2.jpeg",
+    "expected": "CNV",
+    "predicted": "CNV",
+    "raw": "{\"label\":\"CNV\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.4042804000018805
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-1052341-1.jpeg",
+    "expected": "CNV",
+    "predicted": "CNV",
+    "raw": "{\"label\":\"CNV\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.279328100001294
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DME/DME-1029576-1.jpeg",
+    "expected": "DME",
+    "predicted": "DME",
+    "raw": "{\"label\":\"DME\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.8323658000008436
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DME/DME-1029576-2.jpeg",
+    "expected": "DME",
+    "predicted": "DME",
+    "raw": "{\"label\":\"DME\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.604171700000734
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DME/DME-1029576-3.jpeg",
+    "expected": "DME",
+    "predicted": "DME",
+    "raw": "{\"label\":\"DME\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.471230999999534
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DME/DME-1029576-4.jpeg",
+    "expected": "DME",
+    "predicted": "DME",
+    "raw": "{\"label\":\"DME\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.508508400002029
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DRUSEN/DRUSEN-1021298-1.jpeg",
+    "expected": "DRUSEN",
+    "predicted": "DRUSEN",
+    "raw": "{\"label\":\"DRUSEN\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 3.025084600001719
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DRUSEN/DRUSEN-11129-1.jpeg",
+    "expected": "DRUSEN",
+    "predicted": "DRUSEN",
+    "raw": "{\"label\":\"DRUSEN\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.036866200000077
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DRUSEN/DRUSEN-11129-2.jpeg",
+    "expected": "DRUSEN",
+    "predicted": "DRUSEN",
+    "raw": "{\"label\":\"DRUSEN\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.159526299998106
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DRUSEN/DRUSEN-11129-3.jpeg",
+    "expected": "DRUSEN",
+    "predicted": "DRUSEN",
+    "raw": "{\"label\":\"DRUSEN\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.4053233999984514
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-100980-1.jpeg",
+    "expected": "NORMAL",
+    "predicted": "NORMAL",
+    "raw": "{\"label\":\"NORMAL\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.2162043999996968
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-100980-2.jpeg",
+    "expected": "NORMAL",
+    "predicted": "NORMAL",
+    "raw": "{\"label\":\"NORMAL\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.2751308000006247
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-107349-1.jpeg",
+    "expected": "NORMAL",
+    "predicted": "NORMAL",
+    "raw": "{\"label\":\"NORMAL\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.3849517999988166
+  },
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-1256555-1.jpeg",
+    "expected": "NORMAL",
+    "predicted": "NORMAL",
+    "raw": "{\"label\":\"NORMAL\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.868306799999118
+  }
+]
