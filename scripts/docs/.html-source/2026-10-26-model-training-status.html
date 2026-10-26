@@ -65,8 +65,16 @@
 <td><code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code>，第 20 步，已通过冻结测试选型</td>
 </tr>
 <tr>
+<td>第二阶段受控复核</td>
+<td><code>local-4060-oct-stage2-20261026-01</code>（<code>5e-6</code>）和 <code>local-4060-oct-stage2b-20261026-01</code>（<code>1e-5</code>）均在 10 步早停，未超过第 20 步候选</td>
+</tr>
+<tr>
+<td>第三阶段高分率复核</td>
+<td><code>local-4060-oct-stage3-hires-20261026-01</code> 使用 <code>131,072</code> 像素，6 步后早停；最佳第 2 步 macro-F1 <code>0.832019</code>、OCT <code>0.736058</code>，未超过第 20 步候选</td>
+</tr>
+<tr>
 <td>最近正式本地训练</td>
-<td><code>local-4060-oct-focus-cont-20261025-01</code>，50 步后早停，最佳验证步 20</td>
+<td><code>local-4060-oct-stage3-hires-20261026-01</code>，6 步后早停，高分率最佳点仍显著低于第 20 步低分辨率候选</td>
 </tr>
 <tr>
 <td>当前冻结测试评估</td>
@@ -74,7 +82,7 @@
 </tr>
 <tr>
 <td>本地中间产物</td>
-<td>2026-10-26 已清理；仅保留两组当前 best adapter、指标和冻结评估断点</td>
+<td>2026-10-26 已清理旧 smoke/中间 checkpoint、第二/第三阶段实验权重；指标、摘要和决策文件保留，所有实验 adapter 均不作为运行候选</td>
 </tr>
 <tr>
 <td>补充决策模型</td>
@@ -82,7 +90,7 @@
 </tr>
 <tr>
 <td>活跃训练容器</td>
-<td>无；第 100 步基线冻结评估已于 2026-10-26 12:31 完成，评估进程结束</td>
+<td>无；第三阶段高分率复核和冻结评估均已结束，RTX 4060 已释放</td>
 </tr>
 <tr>
 <td>本机控制环境</td>
@@ -117,6 +125,11 @@
 <p><strong>2026-10-26 12:12：</strong>累计进度达到 <code>546/1000</code>，剩余 <code>454</code> 条；本次约 <code>2.30 秒/条</code>，峰值保留显存保持 <code>3.31 GiB</code>，GPU 占用约 <code>4.39 GiB</code>，温度 <code>68°C</code>。</p>
 <p><strong>2026-10-26 12:22：</strong>累计进度达到 <code>805/1000</code>，剩余 <code>195</code> 条；运行速度约 <code>2.29 秒/条</code>，峰值保留显存保持 <code>3.31 GiB</code>，GPU 占用约 <code>4.54 GiB</code>，温度 <code>68°C</code>。</p>
 <p><strong>2026-10-26 12:31：</strong>第 100 步基线冻结评估达到 <code>1000/1000</code>，状态 <code>ok</code>。基线 accuracy <code>0.918</code>、macro-F1 <code>0.918252</code>、JSON 有效率 <code>100%</code>；第 20 步候选 accuracy <code>0.947</code>、macro-F1 <code>0.947245</code>、JSON 有效率 <code>100%</code>。候选提升 <code>+0.028993</code>，超过 <code>0.02</code> 门槛，选型决定记录为 <code>promote_step20_candidate</code>。</p>
+<p><strong>2026-10-26 12:49–12:57：</strong>第二阶段第一批从第 20 步候选初始化，学习率 <code>5e-6</code>、OCT 任务权重 4、梯度累积 4，目标 30 步，每 5 步验证。第 5、10 步验证 macro-F1 均为 <code>0.867725</code>，低于入口 <code>0.873358</code>，连续两次未改善后早停；峰值保留显存 <code>5.69140625 GiB</code>。</p>
+<p><strong>2026-10-26 12:58–13:06：</strong>第二批使用相同数据切分和调度，仅将学习率调整为 <code>1e-5</code>。第 5、10 步验证仍为 <code>0.867725</code>，JSON 有效率保持 <code>100%</code>，再次在第 10 步早停。两轮都没有产生新的最佳 checkpoint，因此保留第 20 步候选，不提升实验 <code>final_adapter</code>。</p>
+<p>结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>。后续若要继续，应先分析 CNV/DRUSEN 错误来源和患者/来源分布，而不是继续增加同配置训练步数。</p>
+<p><strong>2026-10-26 13:15–13:26：</strong>第三阶段从第 20 步候选初始化，图像输入预算提高到 <code>131,072</code> 像素，学习率 <code>2.5e-6</code>、OCT 任务权重 4、每 2 步验证。高分率初始化验证为 macro-F1 <code>0.826256</code>、OCT <code>0.718769</code>；最佳第 2 步为 <code>0.832019</code> / <code>0.736058</code>，第 4 步持平，第 6 步回落后连续两次未改善并早停。峰值保留显存 <code>5.689453125 GiB</code>，总耗时约 <code>623.54</code> 秒。</p>
+<p>第三阶段没有产生提升候选，不执行冻结测试提升门槛。结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage3-20261026-01/stage3_decision.json</code>；运行候选继续使用低分辨率第 20 步 adapter。</p>
 <h2>2026-10-25 停止点</h2>
 <p>今日工作已停止，当前没有训练或评估进程，RTX 4060 显存占用已回落到 <code>0 MiB</code>。冻结测试集评估的完整进度、指标、配对快照和恢复命令见 <code>reports/qwen3.5-4B-progress-20261025-stop.md</code>。</p>
 <ul>

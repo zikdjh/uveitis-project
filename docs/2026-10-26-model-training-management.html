@@ -49,10 +49,10 @@
     └── qwen3.5-4b/             adapter、指标、评估和训练快照
 </code></pre>
 <p>完整数据集、训练子集、基座和产物均位于 <code>model-training/</code> 内，不再依赖根级 junction。模型运行侧只读取这些文件，不复制权重。</p>
-<p><code>models/qwen/Qwen3.5-4B/</code> 是本地基座副本，当前 14 个模型文件、9,342,907,469 字节（不含单独的 <code>pull-manifest.json</code>），包含两份 safetensors 分片、索引、配置和 tokenizer。它不替代 Modal 上的 <code>uveitis-models</code>；正式训练仍从 Modal 卷加载基座。</p>
+<p><code>models/qwen/Qwen3.5-4B/</code> 是本地基座副本，当前 14 个模型文件、9,342,907,469 字节（不含单独的 <code>pull-manifest.json</code>），包含两份 safetensors 分片、索引、配置和 tokenizer。它不替代 Modal 上的 <code>uveitis-models</code>；本地正式训练直接使用本地副本，Modal 卷仍是远端备份和训练恢复来源。</p>
 <p>本地加载需要支持 <code>qwen3_5</code> 架构的 Transformers。项目训练脚本固定使用 <code>50e35cc0ca18ec19b80653690de553e6decf74f5</code>；后端当前的 Transformers 4.51.3 不识别该架构，不能直接用它加载这个模型目录。本地校验清单见 <code>models/qwen/Qwen3.5-4B/pull-manifest.json</code>。</p>
 <p>本地 4060 使用独立的 <code>model-training/.venv-local/</code>，其中是 CUDA 12.8 的 PyTorch 和 Transformers 5.20.2，不使用 <code>backend/.venv</code> 的 CPU PyTorch。该环境已完成 4-bit NF4、bfloat16、LoRA 前向/反向、optimizer step、周期验证和可恢复正式训练实测；状态见 <code>docs/2026-10-26-model-training-status.html</code>，产物索引见 <code>assets/README.md</code>。</p>
-<p>2026-10-26 已清理本地 smoke run、中间 checkpoint、<code>training_state.pt</code>、重复 processor 和非当前 final adapter。当前只保留两组 best adapter、训练指标和冻结评估断点；完整 checkpoint 与优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</p>
+<p>2026-10-26 已清理旧 smoke run、历史中间 checkpoint、<code>training_state.pt</code>、实验权重和重复 processor。当前保留两组工作 adapter、第二/第三阶段的指标、摘要和决策文件，以及冻结评估断点；实验 <code>best_adapter</code> / <code>final_adapter</code> 不作为运行候选，完整 checkpoint 与优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</p>
 <h2>当前训练路线</h2>
 <ul>
 <li>主模型：Qwen3.5-4B，4-bit QLoRA，本地 RTX 4060 单卡训练。</li>
@@ -65,6 +65,8 @@
 <li>发布状态：第 20 步候选和基线均已完成 1,000 条同源 OCT 冻结测试；候选 macro-F1 <code>0.947245</code>，基线 <code>0.918252</code>，提升 <code>+0.028993</code>，通过 <code>0.02</code> 选型门槛。当前尚未作为临床模型发布。</li>
 <li>11.10 前收口条件：冻结第 20 步候选 adapter、模型卡、指标文件和运行读取路径，并保留数据来源及患者隔离限制。</li>
 </ul>
+<p>2026-10-26 已完成第二阶段受控复核：分别从第 20 步候选初始化，以 <code>5e-6</code> 和 <code>1e-5</code> 学习率、OCT 任务权重 4 训练 30 步上限。两次运行都在第 10 步因连续两次验证未改善而早停；第 5、10 步验证 macro-F1 为 <code>0.867725</code>，低于入口的 <code>0.873358</code>，JSON 有效率仍为 <code>100%</code>。因此没有产生新的提升候选，运行候选继续保留第 20 步 adapter，第二阶段 final adapter 不提升、不覆盖。结构化记录见 <code>assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>。</p>
+<p>2026-10-26 已启动并完成第三阶段受控复核：从同一条第 20 步候选出发，将图像输入预算由 <code>65,536</code> 提高到 <code>131,072</code> 像素，学习率降到 <code>2.5e-6</code>，每 2 步验证。高分率入口验证只有 macro-F1 <code>0.826256</code>、OCT macro-F1 <code>0.718769</code>；第 2、4 步最佳为 <code>0.832019</code> / <code>0.736058</code>，第 6 步回落并在连续两次未改善后早停。高分率显著低于低分辨率入口，因此没有产生提升候选，也不执行冻结测试提升门槛。结构化记录见 <code>assets/qwen3.5-4b/eval-oct-stage3-20261026-01/stage3_decision.json</code>。</p>
 <h2>常用命令</h2>
 <p>所有命令从项目根目录运行。</p>
 <pre><code class="language-powershell"># 构建训练子集
@@ -95,6 +97,13 @@ $env:UV_RUN_ID = &quot;qwen4b-stage1-20261025-01&quot;
 .\model-training\scripts\run_local_4060_formal.ps1 `
   -RunId local-4060-formal-20261025-01 -Steps 500 -GradAccum 4 `
   -ValidationEvery 25 -SaveEvery 25 -LearningRate 2.5e-5
+
+# 从选定 adapter 初始化的受控续训；先运行 -DryRun 核对切分和调度
+.\model-training\scripts\run_local_4060_formal.ps1 `
+  -RunId local-4060-oct-stage2-20261026-01 -Steps 30 -GradAccum 4 `
+  -ValidationEvery 5 -SaveEvery 10 -EarlyStopPatience 2 -LearningRate 5e-6 `
+  -InitAdapter 'model-training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
+  -TaskWeights 'oct_aux_4class=4' -DryRun
 
 # 中断后续训；仅在已从 Modal 恢复 checkpoints/ 和 training_state.pt 后使用
 .\model-training\scripts\run_local_4060_formal.ps1 `

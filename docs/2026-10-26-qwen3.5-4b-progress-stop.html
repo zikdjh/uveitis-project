@@ -26,15 +26,15 @@
   <p class="doc-summary">本地训练、内部验证、冻结测试进度与恢复方式</p>
   <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-qwen3.5-4b-progress-stop.html</code></p>
   <article class="html-body">
-<p>停止日期：2026-10-25</p>
+<p>原始停止日期：2026-10-25；最后更新：2026-10-26。</p>
 <h2>本轮结论</h2>
 <ul>
 <li>今日训练和评估均在本地 RTX 4060 Laptop 8 GB 上执行，没有启动 Modal GPU，新增 Modal 消耗为 <code>$0.00</code>。</li>
 <li>分组续训 <code>local-4060-grouped-cont-20261025-01</code> 已完成 150/150 步，最佳 checkpoint 为第 100 步。</li>
 <li>OCT 聚焦续训 <code>local-4060-oct-focus-cont-20261025-01</code> 已完成 50/50 步并触发早停，最佳 checkpoint 为第 20 步。</li>
 <li>第 20 步候选已完成 <code>oct_aux_4class</code> 冻结测试集的全部 1,000 条生成式评估。</li>
-<li>第 100 步基线的同一评估只完成 145/1,000 条，已按要求在 <code>2026-10-25 23:51</code> 左右停止。断点文件已保留，可继续运行，不会重复已完成样本。</li>
-<li>当前没有训练或评估进程，GPU 显存占用已回落到 <code>0 MiB</code>。</li>
+<li>第 100 步基线的同一评估在 2026-10-25 停在 145/1,000 条，并于 2026-10-26 完成剩余 855 条。</li>
+<li>2026-10-26 又执行了两组第二阶段受控复核：<code>5e-6</code> 和 <code>1e-5</code> 均在 10 步早停，没有产生新的提升候选；当前没有训练或评估进程，GPU 已释放。</li>
 </ul>
 <h2>训练与内部验证</h2>
 <h3>分组续训</h3>
@@ -184,8 +184,41 @@
 <li>候选引入新错误：<code>4</code>，其中 CNV 错判为 DRUSEN <code>3</code> 条、错判为 NORMAL <code>1</code> 条</li>
 </ul>
 <p>完成全部 1,000 条后，第 20 步候选相对第 100 步基线的 OCT macro-F1 提升 <code>0.028993</code>，超过 <code>0.02</code> 门槛，因此选型决定为 <code>promote_step20_candidate</code>。结构化证据见 <code>selection_decision.json</code>。</p>
+<h2>2026-10-26 第二阶段受控复核</h2>
+<p>第二阶段从第 20 步候选初始化，目标是确认在同一数据和 8 GB 配置下，较小学习率、OCT 任务权重 4 的短程续训是否能继续提升验证指标。</p>
+<table>
+<thead>
+<tr>
+<th>Run</th>
+<th style="text-align:right">学习率</th>
+<th style="text-align:right">目标步数</th>
+<th style="text-align:right">实际步数</th>
+<th>第 5、10 步验证</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>local-4060-oct-stage2-20261026-01</code></td>
+<td style="text-align:right"><code>5e-6</code></td>
+<td style="text-align:right">30</td>
+<td style="text-align:right">10</td>
+<td>macro-F1 <code>0.867725</code>；OCT macro-F1 <code>0.774603</code>；JSON <code>100%</code></td>
+<td>连续两次未改善，保留第 20 步候选</td>
+</tr>
+<tr>
+<td><code>local-4060-oct-stage2b-20261026-01</code></td>
+<td style="text-align:right"><code>1e-5</code></td>
+<td style="text-align:right">30</td>
+<td style="text-align:right">10</td>
+<td>macro-F1 <code>0.867725</code>；OCT macro-F1 <code>0.774603</code>；JSON <code>100%</code></td>
+<td>连续两次未改善，保留第 20 步候选</td>
+</tr>
+</tbody>
+</table>
+<p>第 20 步入口验证为 macro-F1 <code>0.873358</code>、OCT macro-F1 <code>0.791503</code>。两组实验的最佳点都停留在初始化第 0 步，全部峰值保留显存均为 <code>5.69140625 GiB</code>。结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>，决定为 <code>retain_step20_candidate</code>。</p>
 <h2>恢复方式</h2>
-<p>从项目根目录执行以下命令即可从第 145 条断点继续。不要添加 <code>-Overwrite</code>。</p>
+<p>以下命令是 2026-10-26 历史断点恢复方式，基线补全已经完成，除非重新做可复现实验，否则不需要再次执行。不要添加 <code>-Overwrite</code>。</p>
 <pre><code class="language-powershell">powershell -NoProfile -ExecutionPolicy Bypass -File `
   'model-training\scripts\run_local_4060_eval.ps1' `
   -AdapterDir 'model-training\artifacts\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
@@ -203,9 +236,10 @@
 <h2>选型与下一步</h2>
 <ul>
 <li>第 20 步候选已通过门槛，作为下一阶段的运行候选，不再继续延长当前 OCT 聚焦训练。</li>
+<li>第二阶段 <code>5e-6</code>、<code>1e-5</code> 两轮均已验证没有提升；同配置增加步数不再是有效下一步。</li>
 <li>第 100 步基线保留为同源对照，不作为运行候选覆盖。</li>
 <li>即使通过冻结测试集，01 仍属于非患者隔离数据；03 存在原型或增强图关系；13 的组键包含标签，少数患者 ID 可能跨标签出现。上述限制使其不能作为临床泛化证明。</li>
-<li>下一项训练侧工作：冻结第 20 步 adapter、模型卡、指标文件和运行读取路径，并准备受控推理 smoke。</li>
+<li>下一项训练侧工作：冻结第 20 步 adapter、模型卡、指标文件和运行读取路径，并准备受控推理 smoke；若要继续实验，先提出明确的数据或错误类型假设。</li>
 <li>在独立患者级测试集和医生复核完成前，不发布临床决策模型。</li>
 </ul>
   </article>

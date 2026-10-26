@@ -7,6 +7,7 @@ param(
     [int]$ValidationGroupsPerClass = 3,
     [int]$ValidationEvery = 25,
     [int]$SaveEvery = 25,
+    [int]$EarlyStopPatience = 3,
     [double]$LearningRate = 2.5e-5,
     [string]$InitAdapter = "",
     [string[]]$TaskWeights = @(),
@@ -43,6 +44,9 @@ if ($MaxLength -lt 128 -or $MaxLength -gt 1024) {
 if ($LearningRate -le 0 -or $LearningRate -gt 0.001) {
     throw "LearningRate must be greater than 0 and at most 0.001."
 }
+if ($EarlyStopPatience -lt 1 -or $EarlyStopPatience -gt 20) {
+    throw "EarlyStopPatience must be between 1 and 20."
+}
 
 $env:BNB_CUDA_VERSION = "128"
 $env:PYTHONUTF8 = "1"
@@ -61,6 +65,7 @@ try {
         "--validation-groups-per-class", "$ValidationGroupsPerClass",
         "--validation-every", "$ValidationEvery",
         "--save-every", "$SaveEvery",
+        "--early-stop-patience", "$EarlyStopPatience",
         "--learning-rate", "$LearningRate"
     )
     if ($Resume) {
