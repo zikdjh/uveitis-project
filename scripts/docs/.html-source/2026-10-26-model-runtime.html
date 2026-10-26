@@ -36,7 +36,7 @@
 <p>模型基座和训练产物位于 <code>model-training/</code>，运行服务只读取，不在本目录复制权重。</p>
 <h2>健康检查</h2>
 <pre><code class="language-powershell">cd model-runtime
-..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 </code></pre>
 <p>打开 <code>http://127.0.0.1:8010/health</code>。返回 <code>ready</code> 表示基座目录和 adapter 文件均可定位；返回 <code>degraded</code> 表示路径缺失，服务本身仍可启动。<code>/v1/models</code> 提供感知模型、adapter 和补充决策模型的角色索引。</p>
 <h2>本地评估</h2>

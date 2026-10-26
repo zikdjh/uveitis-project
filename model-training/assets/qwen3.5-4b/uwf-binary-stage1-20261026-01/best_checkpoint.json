@@ -1,0 +1,13 @@
+{
+  "step": 50,
+  "validation_loss": 0.04278537709462015,
+  "validation_macro_f1": 0.6761363636363636,
+  "validation_json_valid_rate": 1.0,
+  "selection_score": [
+    0.6761363636363636,
+    1.0,
+    -0.04278537709462015
+  ],
+  "checkpoint_dir": "model-training\\assets\\qwen3.5-4b\\uwf-binary-stage1-20261026-01\\checkpoints\\step-000050",
+  "adapter_sha256": "097d4293eb0e008460a3d798b73fee042df592373122c983e60fec23f31c9d3e"
+}

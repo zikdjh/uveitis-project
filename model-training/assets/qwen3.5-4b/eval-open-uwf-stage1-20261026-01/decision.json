@@ -1,0 +1,115 @@
+{
+  "status": "ok",
+  "decision": "retain_oct_step20_candidate",
+  "decision_date": "2026-10-26",
+  "scope": "Open UWF 700 research experiments on local RTX 4060",
+  "source": {
+    "dataset": "14_open_uwf700",
+    "doi": "10.6084/m9.figshare.26936446",
+    "license": "CC BY 4.0",
+    "license_scope": "research and commercial use with attribution",
+    "images": 700,
+    "patient_groups": 602,
+    "group_key_policy": "14_open_uwf700:<diagnosis>:<Patient ID>"
+  },
+  "data_contracts": {
+    "open_uwf_7class": {
+      "manifest": "model-training/datasets/tasks/open_uwf_7class/manifest.csv",
+      "manifest_sha256": "6a89bb38a603aafb5bf263b76dbc26dccac6d8010f384189590863808d498178",
+      "rows": 700,
+      "split_rows": {"train": 503, "validation": 107, "test": 90},
+      "patient_groups": {"train": 431, "validation": 93, "test": 78},
+      "cross_split_patient_groups": 0,
+      "missing_images": 0,
+      "duplicate_image_content": 0
+    },
+    "open_uwf_uveitis_binary": {
+      "manifest": "model-training/datasets/tasks/open_uwf_uveitis_binary/manifest.csv",
+      "manifest_sha256": "bacc37ed9c37676570a4e4f49036b60fe472e7a86fb7b537387a734551c2b253",
+      "rows": 700,
+      "split_rows": {"train": 503, "validation": 107, "test": 90},
+      "label_rows": {"non_uveitis": 600, "uveitis": 100},
+      "negative_cohorts": ["AMD", "DR", "Healthy", "PM", "RD", "RVO"],
+      "cross_split_patient_groups": 0,
+      "missing_images": 0,
+      "duplicate_image_content": 0
+    }
+  },
+  "experiments": {
+    "uwf_7class": {
+      "run_id": "uwf-stage1-20261026-01",
+      "target_steps": 60,
+      "completed_steps": 60,
+      "best_step": 60,
+      "validation_accuracy": 0.2222222222222222,
+      "validation_macro_f1": 0.21428571428571427,
+      "validation_uveitis_f1": 0.0,
+      "json_valid_rate": 1.0,
+      "peak_allocated_gib": 5.452396869659424,
+      "peak_reserved_gib": 5.689453125,
+      "best_adapter_sha256": "8a26edbb4715e2b28f580fba7b67d1feb17c23e9e6c85c120a1ddab98ee0aa16",
+      "outcome": "not_usable"
+    },
+    "uwf_uveitis_binary": {
+      "run_id": "uwf-binary-stage1-20261026-01",
+      "target_steps": 60,
+      "completed_steps": 60,
+      "best_step": 50,
+      "learning_rate": 1e-05,
+      "grad_accum": 4,
+      "image_pixels": 16384,
+      "train_rows": 484,
+      "validation_rows": 19,
+      "train_patient_groups": 415,
+      "validation_accuracy": 0.6842105263157895,
+      "validation_macro_f1": 0.6761363636363636,
+      "validation_uveitis_recall": 1.0,
+      "validation_non_uveitis_recall": 0.45454545454545453,
+      "json_valid_rate": 1.0,
+      "peak_allocated_gib": 5.452396869659424,
+      "peak_reserved_gib": 5.697265625,
+      "best_adapter_sha256": "097d4293eb0e008460a3d798b73fee042df592373122c983e60fec23f31c9d3e",
+      "final_adapter_sha256": "e3181937e976d38366c6186d8c3765e5e32f5d415d7e6fd6b94d22da9c4716da"
+    }
+  },
+  "single_use_test": {
+    "run_id": "uwf-binary-eval-test-20261026-01",
+    "adapter": "uwf-binary-stage1-20261026-01/best_adapter",
+    "rows": 90,
+    "patient_groups": 78,
+    "label_rows": {"non_uveitis": 82, "uveitis": 8},
+    "accuracy": 0.37777777777777777,
+    "macro_f1": 0.3382352941176471,
+    "json_valid_rate": 1.0,
+    "confusion_matrix": {
+      "non_uveitis": {"non_uveitis": 28, "uveitis": 54},
+      "uveitis": {"non_uveitis": 2, "uveitis": 6}
+    },
+    "non_uveitis_precision": 0.9333333333333333,
+    "non_uveitis_recall": 0.34146341463414637,
+    "uveitis_precision": 0.1,
+    "uveitis_recall": 0.75,
+    "peak_allocated_gib": 3.414961338043213,
+    "peak_reserved_gib": 3.55078125,
+    "policy": "Single evaluation of the validation-selected adapter. These outputs are frozen and must not be used for further tuning."
+  },
+  "cost": {
+    "modal_gpu_started": false,
+    "modal_gpu_cost_usd": 0.0,
+    "hardware": "NVIDIA GeForce RTX 4060 Laptop GPU, 8188 MiB"
+  },
+  "runtime_candidate": {
+    "adapter": "model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter",
+    "step": 20,
+    "task": "oct_aux_4class",
+    "status": "unchanged"
+  },
+  "conclusions": [
+    "The local 8 GB GPU is sufficient for 4B QLoRA with the tested configuration; the limiting factor is data quality and generalization, not memory.",
+    "The 7-class UWF task is not usable at 60 steps.",
+    "The binary UWF adapter overfit the validation panel and collapsed toward positive predictions on the single-use test split.",
+    "Neither UWF adapter should replace the OCT step-20 runtime candidate.",
+    "Do not tune from the frozen test outputs; the next training attempt needs more patient-isolated data, doctor-confirmed labels, and a composition-aware negative cohort."
+  ],
+  "clinical_status": "research_only_not_validated"
+}

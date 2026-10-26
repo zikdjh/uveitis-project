@@ -426,6 +426,7 @@ def check_layout() -> None:
         for path in ROOT.rglob("*.md")
         if "node_modules" not in path.parts
         and ".venv" not in path.as_posix()
+        and ".uv-cache-local" not in path.parts
         and not path.relative_to(ROOT).as_posix().startswith(
             "model-training/datasets/extracted/"
         )

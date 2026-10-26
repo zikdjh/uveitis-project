@@ -32,7 +32,7 @@
 <li>OCT 候选：<code>local-4060-oct-focus-cont-20261025-01/best_adapter</code></li>
 <li>冻结评估：<code>eval-oct-step20-vs-step100-20261025-01/</code></li>
 </ul>
-<p>当前运行服务默认索引 OCT 候选，但只做路径和文件状态检查。切换 adapter 时设置 <code>MODEL_RUNTIME_ADAPTER_DIR</code>，不需要移动权重文件。</p>
+<p>当前运行服务默认索引 OCT 候选，并通过 <code>POST /v1/judge</code> 执行真实本地推理。切换 adapter 时设置 <code>MODEL_RUNTIME_ADAPTER_DIR</code>，不需要移动权重文件。</p>
 
   </article>
 </main>

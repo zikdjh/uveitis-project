@@ -344,8 +344,20 @@
 <li>用人工问题-证据对评估 Recall@k。</li>
 </ol>
 <p>当前下载内容主要是图像，尚不能直接形成可靠的医学 RAG 语料。</p>
+<h2>Open UWF 700 已生成任务</h2>
+<table>
+  <thead>
+    <tr><th>任务</th><th>清单</th><th>样本与切分</th><th>使用边界</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>7 类</td><td><code>model-training/datasets/tasks/open_uwf_7class/manifest.csv</code></td><td>700；train 503 / validation 107 / test 90</td><td>AMD、DR、Healthy、PM、RD、RVO、Uveitis；60 步试验不可用，不晋级</td></tr>
+    <tr><td>葡萄膜炎二分类</td><td><code>model-training/datasets/tasks/open_uwf_uveitis_binary/manifest.csv</code></td><td>uveitis 100、non_uveitis 600；同一患者隔离切分</td><td>研究代理任务；单次测试已冻结，不与临床“排除炎症”等价</td></tr>
+  </tbody>
+</table>
+<p>源 Patient ID 在不同诊断队列中会复用，因此键固定为 <code>14_open_uwf700:&lt;diagnosis&gt;:&lt;Patient ID&gt;</code>。二分类 negative 仅覆盖 AMD、DR、Healthy、PM、RD、RVO；若要增强特异性，应优先增加异质性、医生确认的炎症阴性样本，而不是继续降低测试门槛。</p>
 <h2>6. 推荐的训练顺序</h2>
 <ol>
+<li>在 Open UWF 700 上先建立按诊断与 Patient ID 组合的患者组键，再生成 7 类和葡萄膜炎二分类清单；不按图像切分。</li>
 <li>从目录生成 <code>vision_uv</code>、<code>vision_aux</code>、<code>vision_oct_aux</code> 清单，并记录图像路径、标签、来源、患者组、原始 split 和是否重复。</li>
 <li>对 01、02、03 做 SHA256 去重和相似图检查，固定一份不参与训练的 holdout。</li>
 <li>训练三个独立的小型分类基线：OCT 四分类、Toxo 二分类、眼病五分类。</li>
