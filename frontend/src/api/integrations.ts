@@ -79,6 +79,22 @@ export type IntegrationUpdate = Partial<{
   expected_revision: number;
 }>;
 
+export type IntegrationTestResult = {
+  ok: boolean;
+  detail: string;
+  latency_ms: number;
+  provider: string | null;
+  attempts: number;
+};
+
+export type IntegrationTestBatchResult = {
+  ok: boolean;
+  succeeded: number;
+  failed: number;
+  skipped: number;
+  items: IntegrationTestResult[];
+};
+
 export function getIntegrationConfig(): Promise<IntegrationConfig> {
   return request<IntegrationConfig>("/api/v1/admin/integrations");
 }
@@ -94,9 +110,22 @@ export function testIntegration(input: {
   kind: "summary" | "search";
   provider?: SearchProvider;
   query?: string;
-}): Promise<{ ok: boolean; detail: string; latency_ms: number }> {
-  return request("/api/v1/admin/integrations/test", {
+}): Promise<IntegrationTestResult> {
+  return request<IntegrationTestResult>("/api/v1/admin/integrations/test", {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export function testSearchProviders(input: {
+  providers: SearchProvider[];
+  query?: string;
+}): Promise<IntegrationTestBatchResult> {
+  return request<IntegrationTestBatchResult>(
+    "/api/v1/admin/integrations/test-search-batch",
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
 }

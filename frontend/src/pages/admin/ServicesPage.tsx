@@ -1,30 +1,46 @@
 import {
-  AlertCircle,
-  ArrowDown,
-  ArrowUp,
-  CheckCircle2,
-  Globe2,
-  KeyRound,
-  LoaderCircle,
-  PlugZap,
-  RefreshCw,
-  Save,
-  Search,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+  ApiOutlined,
+  KeyOutlined,
+  ReloadOutlined,
+  SaveOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  ConfigProvider,
+  Form,
+  Input,
+  InputNumber,
+  Pagination,
+  Row,
+  Select,
+  Space,
+  Spin,
+  Switch,
+  Tag,
+  Tooltip,
+  Typography,
+  message,
+} from "antd";
 import { useEffect, useMemo, useState } from "react";
 
 import {
   getIntegrationConfig,
   testIntegration,
+  testSearchProviders,
   updateIntegrationConfig,
   type IntegrationConfig,
+  type IntegrationTestBatchResult,
   type IntegrationUpdate,
   type SearchProvider,
   type SummaryProtocol,
 } from "@/api/integrations";
 
+const { Text, Title } = Typography;
+const PROVIDERS_PER_PAGE = 4;
 const providerOrderSeed: SearchProvider[] = [
   "tavily",
   "brave",
@@ -112,11 +128,7 @@ const providers: ProviderDescriptor[] = [
     configuredField: "perplexity_api_key_configured",
     hintField: "perplexity_api_key_hint",
   },
-  {
-    id: "searxng",
-    name: "SearXNG",
-    detail: "自建元搜索",
-  },
+  { id: "searxng", name: "SearXNG", detail: "自建元搜索" },
 ];
 
 const secretFields: SecretField[] = [
@@ -130,17 +142,6 @@ const secretFields: SecretField[] = [
   "perplexity_api_key",
 ];
 
-const clearFieldBySecret = {
-  summary_api_key: "clear_summary_api_key",
-  tavily_api_key: "clear_tavily_api_key",
-  brave_search_api_key: "clear_brave_search_api_key",
-  serper_api_key: "clear_serper_api_key",
-  google_cse_api_key: "clear_google_cse_api_key",
-  bing_search_api_key: "clear_bing_search_api_key",
-  exa_api_key: "clear_exa_api_key",
-  perplexity_api_key: "clear_perplexity_api_key",
-} as const;
-
 type Draft = {
   summaryEnabled: boolean;
   summaryProtocol: SummaryProtocol;
@@ -153,7 +154,6 @@ type Draft = {
   googleCseId: string;
   searxngBaseUrl: string;
   secrets: Record<SecretField, string>;
-  clearSecrets: Record<SecretField, boolean>;
   providerOrder: SearchProvider[];
   providerEnabled: Record<SearchProvider, boolean>;
 };
@@ -164,37 +164,21 @@ const protocolLabels: Record<SummaryProtocol, string> = {
   anthropic_messages: "Anthropic Messages",
 };
 
-const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-function completeProviderOrder(order: SearchProvider[]): SearchProvider[] {
-  const unique = [...new Set(order)].filter((item) =>
-    providerOrderSeed.includes(item),
-  );
+function completeProviderOrder(order: SearchProvider[]) {
+  const unique = [...new Set(order)].filter((item) => providerOrderSeed.includes(item));
   return [...unique, ...providerOrderSeed.filter((item) => !unique.includes(item))];
 }
 
-function emptySecretDraft<T extends string | boolean>(value: T) {
-  return Object.fromEntries(secretFields.map((field) => [field, value])) as Record<
-    SecretField,
-    T
-  >;
-}
-
-function emptyProviderFlags(value: boolean) {
-  return Object.fromEntries(
-    providerOrderSeed.map((provider) => [provider, value]),
-  ) as Record<SearchProvider, boolean>;
+function emptySecretDraft() {
+  return Object.fromEntries(secretFields.map((field) => [field, ""])) as Record<SecretField, string>;
 }
 
 function draftFromConfig(config: IntegrationConfig): Draft {
   const providerOrder = completeProviderOrder(config.search_provider_order);
-  const enabled = emptyProviderFlags(false);
-  for (const provider of providerOrder) enabled[provider] = true;
+  const providerEnabled = Object.fromEntries(
+    providerOrderSeed.map((provider) => [provider, false]),
+  ) as Record<SearchProvider, boolean>;
+  for (const provider of providerOrder) providerEnabled[provider] = true;
   return {
     summaryEnabled: config.summary_enabled,
     summaryProtocol: config.summary_protocol,
@@ -206,14 +190,13 @@ function draftFromConfig(config: IntegrationConfig): Draft {
     webSearchMaxResults: config.web_search_max_results,
     googleCseId: config.google_cse_id,
     searxngBaseUrl: config.searxng_base_url,
-    secrets: emptySecretDraft(""),
-    clearSecrets: emptySecretDraft(false),
+    secrets: emptySecretDraft(),
     providerOrder,
-    providerEnabled: enabled,
+    providerEnabled,
   };
 }
 
-function buildUpdate(draft: Draft, revision: number): IntegrationUpdate {
+function buildUpdate(draft: Draft, revision: number) {
   const payload: IntegrationUpdate = {
     summary_enabled: draft.summaryEnabled,
     summary_protocol: draft.summaryProtocol,
@@ -234,55 +217,46 @@ function buildUpdate(draft: Draft, revision: number): IntegrationUpdate {
   for (const field of secretFields) {
     const value = draft.secrets[field].trim();
     if (value) dynamicPayload[field] = value;
-    if (draft.clearSecrets[field]) {
-      dynamicPayload[clearFieldBySecret[field]] = true;
-    }
   }
   return payload;
 }
 
-function isProviderConfigured(
-  config: IntegrationConfig,
-  provider: ProviderDescriptor,
-) {
+function isProviderConfigured(config: IntegrationConfig, provider: ProviderDescriptor) {
   if (provider.id === "searxng") return Boolean(config.searxng_base_url.trim());
-  const configured = provider.configuredField
-    ? Boolean(config[provider.configuredField])
-    : false;
-  if (provider.id === "google_cse") {
-    return configured && Boolean(config.google_cse_id.trim());
-  }
+  const configured = provider.configuredField ? Boolean(config[provider.configuredField]) : false;
+  if (provider.id === "google_cse") return configured && Boolean(config.google_cse_id.trim());
   return configured;
 }
 
-export default function ServicesPage() {
+export default function AntdServicesPage() {
   const [config, setConfig] = useState<IntegrationConfig | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
+  const [searchChecks, setSearchChecks] = useState<IntegrationTestBatchResult | null>(null);
+  const [providerPage, setProviderPage] = useState(1);
+  const [credentialEditor, setCredentialEditor] = useState<SearchProvider | null>(null);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const configuredProviders = useMemo(
-    () =>
-      config
-        ? providers.filter((provider) => isProviderConfigured(config, provider))
-            .length
-        : 0,
+    () => config ? providers.filter((provider) => isProviderConfigured(config, provider)).length : 0,
     [config],
   );
 
   async function load() {
     setLoading(true);
     setError(null);
-    setNotice(null);
     try {
       const loaded = await getIntegrationConfig();
       setConfig(loaded);
       setDraft(draftFromConfig(loaded));
       setDirty(false);
+      setSearchChecks(null);
+      setProviderPage(1);
+      setCredentialEditor(null);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "服务配置加载失败");
     } finally {
@@ -294,10 +268,15 @@ export default function ServicesPage() {
     void load();
   }, []);
 
+  useEffect(() => {
+    if (!draft) return;
+    const pageCount = Math.ceil(draft.providerOrder.length / PROVIDERS_PER_PAGE);
+    setProviderPage((current) => Math.min(current, Math.max(pageCount, 1)));
+  }, [draft]);
+
   function changeDraft(updater: (current: Draft) => Draft) {
-    setDraft((current) => (current ? updater(current) : current));
+    setDraft((current) => current ? updater(current) : current);
     setDirty(true);
-    setNotice(null);
   }
 
   function setSecret(field: SecretField, value: string) {
@@ -307,42 +286,26 @@ export default function ServicesPage() {
     }));
   }
 
-  function setClearSecret(field: SecretField, checked: boolean) {
-    changeDraft((current) => ({
-      ...current,
-      secrets: checked
-        ? { ...current.secrets, [field]: "" }
-        : current.secrets,
-      clearSecrets: { ...current.clearSecrets, [field]: checked },
-    }));
-  }
-
   function moveProvider(index: number, direction: -1 | 1) {
     changeDraft((current) => {
       const target = index + direction;
       if (target < 0 || target >= current.providerOrder.length) return current;
       const providerOrder = [...current.providerOrder];
-      [providerOrder[index], providerOrder[target]] = [
-        providerOrder[target],
-        providerOrder[index],
-      ];
+      [providerOrder[index], providerOrder[target]] = [providerOrder[target], providerOrder[index]];
       return { ...current, providerOrder };
     });
   }
 
-  async function persistDraft(showNotice = true) {
+  async function persistDraft(showSuccess = true) {
     if (!draft || !config) return null;
     setSaving(true);
     setError(null);
-    if (showNotice) setNotice(null);
     try {
-      const updated = await updateIntegrationConfig(
-        buildUpdate(draft, config.revision),
-      );
+      const updated = await updateIntegrationConfig(buildUpdate(draft, config.revision));
       setConfig(updated);
       setDraft(draftFromConfig(updated));
       setDirty(false);
-      if (showNotice) setNotice(`配置已保存，版本 ${updated.revision}。`);
+      if (showSuccess) void messageApi.success(`配置已保存，版本 ${updated.revision}。`);
       return updated;
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "服务配置保存失败");
@@ -356,13 +319,41 @@ export default function ServicesPage() {
     if (dirty && !(await persistDraft(false))) return;
     setTesting("summary");
     setError(null);
-    setNotice(null);
     try {
       const result = await testIntegration({ kind: "summary" });
       if (!result.ok) throw new Error(result.detail);
-      setNotice(`${result.detail}，耗时 ${result.latency_ms} ms。`);
+      void messageApi.success(`${result.detail}，耗时 ${result.latency_ms} ms。`);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "外部总结检查失败");
+    } finally {
+      setTesting(null);
+    }
+  }
+
+  async function checkSearchProviders() {
+    const savedConfig = dirty ? await persistDraft(false) : config;
+    if (!savedConfig) return;
+    const savedProviders = savedConfig.search_provider_order.filter((providerId) => {
+      const provider = providers.find((item) => item.id === providerId);
+      return provider ? isProviderConfigured(savedConfig, provider) : false;
+    });
+    if (!savedProviders.length) {
+      setSearchChecks(null);
+      setError("没有已配置连接凭据的搜索服务商");
+      return;
+    }
+    setTesting("search-all");
+    setError(null);
+    try {
+      const result = await testSearchProviders({ providers: savedProviders, query: "uveitis clinical guideline" });
+      setSearchChecks(result);
+      if (result.succeeded > 0) {
+        void messageApi.success(`搜索 API 检查完成：${result.succeeded} 家可用，${result.failed} 家不可用。`);
+      } else {
+        setError("搜索 API 检查完成，但没有服务商可用；请先配置至少一个服务商的凭据。");
+      }
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "搜索 API 检查失败");
     } finally {
       setTesting(null);
     }
@@ -372,15 +363,10 @@ export default function ServicesPage() {
     if (dirty && !(await persistDraft(false))) return;
     setTesting(provider);
     setError(null);
-    setNotice(null);
     try {
-      const result = await testIntegration({
-        kind: "search",
-        provider,
-        query: "uveitis clinical guideline",
-      });
+      const result = await testIntegration({ kind: "search", provider, query: "uveitis clinical guideline" });
       if (!result.ok) throw new Error(result.detail);
-      setNotice(`${result.detail}，耗时 ${result.latency_ms} ms。`);
+      void messageApi.success(`${result.detail}，耗时 ${result.latency_ms} ms。`);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "搜索服务检查失败");
     } finally {
@@ -390,434 +376,356 @@ export default function ServicesPage() {
 
   if (loading && !config) {
     return (
-      <section className="page">
-        <div className="panel loading-panel">
-          <LoaderCircle className="spin" size={22} />
-          <span>正在读取服务配置</span>
-        </div>
+      <section className="page antd-services-page antd-services-loading">
+        <Spin size="large" tip="正在读取服务配置"><div className="antd-services-loading-box" /></Spin>
       </section>
     );
   }
 
   if (!config || !draft) {
     return (
-      <section className="page">
-        <div className="page-heading">
-          <div><h1>服务配置</h1></div>
-          <button className="button secondary" type="button" onClick={() => void load()}>
-            <RefreshCw size={16} /> 重新读取
-          </button>
-        </div>
-        <div className="notice error-notice" role="alert">
-          <AlertCircle size={17} /> {error ?? "服务配置不可用"}
-        </div>
+      <section className="page antd-services-page">
+        <Card><Alert type="error" showIcon message={error ?? "服务配置不可用"} action={<Button icon={<ReloadOutlined />} onClick={() => void load()}>重新读取</Button>} /></Card>
       </section>
     );
   }
 
-  const summaryConfigured =
-    config.summary_api_key_configured &&
-    Boolean(config.summary_base_url.trim()) &&
-    Boolean(config.summary_model.trim());
-  const summaryActive = summaryConfigured && draft.summaryEnabled;
-  const searchActive = draft.webSearchEnabled;
+  const visibleProviderIds = draft.providerOrder.slice((providerPage - 1) * PROVIDERS_PER_PAGE, providerPage * PROVIDERS_PER_PAGE);
+  const busy = saving || testing !== null;
 
   return (
-    <section className="page integration-page">
-      <div className="page-heading">
-        <div>
-          <h1>服务配置</h1>
-          <p className="page-lead">外部模型与网络搜索凭据由管理员统一维护。</p>
+    <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
+      {contextHolder}
+      <section className="page antd-services-page">
+        <div className="antd-services-titlebar">
+          <div>
+            <Title level={2}>服务配置</Title>
+            {dirty && <Tag color="gold">修改尚未保存</Tag>}
+          </div>
+          <Space wrap>
+            <Button icon={<ReloadOutlined />} loading={loading} disabled={saving || testing !== null} onClick={() => void load()}>
+              重新读取
+            </Button>
+            <Button type="primary" icon={<SaveOutlined />} loading={saving} disabled={testing !== null || !dirty} onClick={() => void persistDraft()}>
+              {dirty ? "保存配置" : "配置已保存"}
+            </Button>
+          </Space>
         </div>
-        <div className="heading-actions">
-          <button
-            className="button secondary"
-            type="button"
-            onClick={() => void load()}
-            disabled={loading || saving || testing !== null}
-          >
-            <RefreshCw size={16} className={loading ? "spin" : ""} /> 重新读取
-          </button>
-          <button
-            className="button primary"
-            type="button"
-            onClick={() => void persistDraft()}
-            disabled={saving || testing !== null}
-          >
-            {saving ? <LoaderCircle className="spin" size={16} /> : <Save size={16} />}
-            {saving ? "保存中" : "保存配置"}
-          </button>
-        </div>
-      </div>
 
-      <div className="integration-status-strip">
-        <div>
-          <span className={`status-dot ${summaryActive ? "online" : "offline"}`} />
-          <span>外部总结</span>
-          <strong>{summaryConfigured ? "已配置" : "未完成"}</strong>
-        </div>
-        <div>
-          <span className={`status-dot ${searchActive ? "online" : "offline"}`} />
-          <span>网络搜索</span>
-          <strong>{configuredProviders} / {providers.length} 家</strong>
-        </div>
-        <div>
-          <ShieldCheck size={15} />
-          <span>配置版本</span>
-          <strong>v{config.revision}</strong>
-        </div>
-        {config.updated_at && (
-          <time dateTime={config.updated_at}>
-            {dateFormatter.format(new Date(config.updated_at))}
-          </time>
+        {error && (
+          <Alert
+            className="antd-services-alert"
+            type="error"
+            showIcon
+            closable
+            message={error}
+            onClose={() => setError(null)}
+          />
         )}
-      </div>
 
-      {error && (
-        <div className="notice error-notice" role="alert">
-          <AlertCircle size={17} /> {error}
-        </div>
-      )}
-      {notice && (
-        <div className="notice success-notice">
-          <CheckCircle2 size={17} /> {notice}
-        </div>
-      )}
-      {dirty && !error && (
-        <div className="notice draft-notice">
-          <span className="draft-dot" /> 当前修改尚未保存
-        </div>
-      )}
-
-      <section className="panel integration-section">
-        <div className="section-heading integration-section-heading">
-          <div>
-            <span className="section-kicker"><Sparkles size={14} /> 外部模型</span>
-            <h2>总结 API</h2>
-            <span>{protocolLabels[draft.summaryProtocol]}</span>
-          </div>
-          <button
-            className="button secondary compact-button"
-            type="button"
-            onClick={() => void checkSummary()}
-            disabled={saving || testing !== null}
-          >
-            {testing === "summary" ? <LoaderCircle className="spin" size={15} /> : <PlugZap size={15} />}
-            {testing === "summary" ? "检查中" : "检查配置"}
-          </button>
-        </div>
-
-        <div className="integration-field-grid">
-          <label>
-            接口协议
-            <select
-              value={draft.summaryProtocol}
-              onChange={(event) => changeDraft((current) => ({
-                ...current,
-                summaryProtocol: event.target.value as SummaryProtocol,
-              }))}
-            >
-              {(Object.keys(protocolLabels) as SummaryProtocol[]).map((protocol) => (
-                <option value={protocol} key={protocol}>{protocolLabels[protocol]}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            模型名称
-            <input
-              value={draft.summaryModel}
-              onChange={(event) => changeDraft((current) => ({
-                ...current,
-                summaryModel: event.target.value,
-              }))}
-              maxLength={200}
-              autoComplete="off"
-              placeholder="model-id"
-            />
-          </label>
-          <label className="span-2">
-            API 地址
-            <input
-              value={draft.summaryBaseUrl}
-              onChange={(event) => changeDraft((current) => ({
-                ...current,
-                summaryBaseUrl: event.target.value,
-              }))}
-              type="url"
-              maxLength={1000}
-              autoComplete="off"
-              placeholder="https://api.example.com/v1"
-            />
-          </label>
-          <SecretInput
-            id="summary-api-key"
-            label="API Key"
-            configured={config.summary_api_key_configured}
-            hint={config.summary_api_key_hint}
-            value={draft.secrets.summary_api_key}
-            clearChecked={draft.clearSecrets.summary_api_key}
-            onChange={(value) => setSecret("summary_api_key", value)}
-            onClear={(checked) => setClearSecret("summary_api_key", checked)}
-          />
-          <div className="summary-switches">
-            <Toggle
-              checked={draft.summaryEnabled}
-              onChange={(checked) => changeDraft((current) => ({
-                ...current,
-                summaryEnabled: checked,
-              }))}
-              label="启用外部总结"
-            />
-            <Toggle
-              checked={draft.summaryIncludeClinicalText}
-              onChange={(checked) => changeDraft((current) => ({
-                ...current,
-                summaryIncludeClinicalText: checked,
-              }))}
-              label="发送主诉与病史"
-            />
-          </div>
-        </div>
-        <div className="integration-boundary-note">
-          <ShieldCheck size={16} />
-          <span>原始影像不会发送至外部总结接口。</span>
-        </div>
-      </section>
-
-      <section className="panel integration-section search-config-section">
-        <div className="section-heading integration-section-heading">
-          <div>
-            <span className="section-kicker"><Search size={14} /> 检索增强</span>
-            <h2>网络搜索 API</h2>
-            <span>按顺序尝试已保存且可用的服务商</span>
-          </div>
-          <Toggle
-            checked={draft.webSearchEnabled}
-            onChange={(checked) => changeDraft((current) => ({
-              ...current,
-              webSearchEnabled: checked,
-            }))}
-            label="启用搜索"
-            compact
-          />
-        </div>
-
-        <div className="search-control-grid">
-          <label>
-            最大结果数
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={draft.webSearchMaxResults}
-              onChange={(event) => changeDraft((current) => ({
-                ...current,
-                webSearchMaxResults: Math.max(1, Math.min(10, Number(event.target.value) || 1)),
-              }))}
-            />
-          </label>
-          <Toggle
-            checked={draft.webSearchIncludeComplaint}
-            onChange={(checked) => changeDraft((current) => ({
-              ...current,
-              webSearchIncludeComplaint: checked,
-            }))}
-            label="搜索词包含主诉"
-          />
-        </div>
-
-        <div className="provider-list-heading">
-          <div>
-            <h3>服务商与尝试顺序</h3>
-            <span>{config.search_provider_order.length} 个已保存顺序项</span>
-          </div>
-          <Globe2 size={19} />
-        </div>
-
-        <div className="provider-list">
-          {draft.providerOrder.map((providerId, index) => {
-            const provider = providers.find((item) => item.id === providerId);
-            if (!provider) return null;
-            const savedConfigured = isProviderConfigured(config, provider);
-            return (
-              <div
-                className={`provider-row${draft.providerEnabled[providerId] ? "" : " excluded"}`}
-                key={providerId}
-              >
-                <div className="provider-row-heading">
-                  <div className="provider-identity">
-                    <span className="provider-order">{String(index + 1).padStart(2, "0")}</span>
-                    <div><strong>{provider.name}</strong><small>{provider.detail}</small></div>
-                    <span className={`credential-state ${savedConfigured ? "ready" : ""}`}>
-                      {savedConfigured ? "已保存" : "未配置"}
-                    </span>
-                  </div>
-                  <div className="provider-controls">
-                    <label className="provider-included">
-                      <input
-                        type="checkbox"
-                        checked={draft.providerEnabled[providerId]}
-                        onChange={(event) => changeDraft((current) => ({
-                          ...current,
-                          providerEnabled: {
-                            ...current.providerEnabled,
-                            [providerId]: event.target.checked,
-                          },
-                        }))}
-                      />
-                      <span>参与</span>
-                    </label>
-                    <button
-                      className="icon-button"
-                      type="button"
-                      title="上移"
-                      aria-label={`将 ${provider.name} 上移`}
-                      disabled={index === 0 || saving || testing !== null}
-                      onClick={() => moveProvider(index, -1)}
-                    ><ArrowUp size={15} /></button>
-                    <button
-                      className="icon-button"
-                      type="button"
-                      title="下移"
-                      aria-label={`将 ${provider.name} 下移`}
-                      disabled={index === draft.providerOrder.length - 1 || saving || testing !== null}
-                      onClick={() => moveProvider(index, 1)}
-                    ><ArrowDown size={15} /></button>
-                    <button
-                      className="button secondary compact-button"
-                      type="button"
-                      onClick={() => void checkProvider(providerId)}
-                      disabled={saving || testing !== null || !savedConfigured}
-                    >
-                      {testing === providerId ? <LoaderCircle className="spin" size={14} /> : <PlugZap size={14} />}
-                      检查
-                    </button>
-                  </div>
-                </div>
-
-                <div className="provider-fields">
-                  {provider.secret && provider.configuredField && provider.hintField && (
-                    <SecretInput
-                      id={`${provider.id}-api-key`}
-                      label="API Key"
-                      configured={Boolean(config[provider.configuredField])}
-                      hint={String(config[provider.hintField] ?? "")}
-                      value={draft.secrets[provider.secret]}
-                      clearChecked={draft.clearSecrets[provider.secret]}
-                      onChange={(value) => setSecret(provider.secret!, value)}
-                      onClear={(checked) => setClearSecret(provider.secret!, checked)}
+        <Card
+          id="summary-api"
+          className="antd-service-card"
+          title={<span className="antd-service-heading"><ApiOutlined /> 总结 API</span>}
+          extra={
+            <Space wrap>
+              <Tag>{protocolLabels[draft.summaryProtocol]}</Tag>
+              <Button size="small" loading={testing === "summary"} disabled={busy} onClick={() => void checkSummary()}>
+                检查连接
+              </Button>
+            </Space>
+          }
+        >
+          <div className="antd-service-section">
+            <Text strong>连接参数</Text>
+            <Form layout="vertical" requiredMark={false}>
+              <Form.Item label="API 地址">
+                <Input
+                  value={draft.summaryBaseUrl}
+                  onChange={(event) => changeDraft((current) => ({
+                    ...current,
+                    summaryBaseUrl: event.target.value,
+                  }))}
+                  maxLength={1000}
+                  placeholder="https://api.example.com/v1"
+                />
+              </Form.Item>
+              <Row gutter={[16, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="接口协议">
+                    <Select
+                      value={draft.summaryProtocol}
+                      options={(Object.keys(protocolLabels) as SummaryProtocol[]).map((protocol) => ({
+                        value: protocol,
+                        label: protocolLabels[protocol],
+                      }))}
+                      onChange={(value: SummaryProtocol) => changeDraft((current) => ({
+                        ...current,
+                        summaryProtocol: value,
+                      }))}
                     />
-                  )}
-                  {provider.id === "google_cse" && (
-                    <label>
-                      搜索引擎 ID
-                      <input
-                        value={draft.googleCseId}
-                        onChange={(event) => changeDraft((current) => ({
-                          ...current,
-                          googleCseId: event.target.value,
-                        }))}
-                        maxLength={300}
-                        autoComplete="off"
-                        placeholder="cx"
-                      />
-                    </label>
-                  )}
-                  {provider.id === "searxng" && (
-                    <label>
-                      实例地址
-                      <input
-                        value={draft.searxngBaseUrl}
-                        onChange={(event) => changeDraft((current) => ({
-                          ...current,
-                          searxngBaseUrl: event.target.value,
-                        }))}
-                        type="url"
-                        maxLength={1000}
-                        autoComplete="off"
-                        placeholder="https://search.example.com"
-                      />
-                    </label>
-                  )}
-                </div>
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="模型名称">
+                    <Input
+                      value={draft.summaryModel}
+                      onChange={(event) => changeDraft((current) => ({
+                        ...current,
+                        summaryModel: event.target.value,
+                      }))}
+                      maxLength={200}
+                      placeholder="model-id"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+          </div>
+          <div className="antd-service-section">
+            <Form layout="vertical" requiredMark={false}>
+              <Form.Item label="API Key" className="antd-secret-field">
+                <Input.Password
+                  prefix={<KeyOutlined />}
+                  value={draft.secrets.summary_api_key}
+                  onChange={(event) => setSecret("summary_api_key", event.target.value)}
+                  placeholder={config.summary_api_key_configured ? config.summary_api_key_hint || "已配置" : "输入密钥"}
+                  autoComplete="new-password"
+                  maxLength={4000}
+                />
+              </Form.Item>
+            </Form>
+            <Space wrap size={10}>
+              <Switch
+                checked={draft.summaryEnabled}
+                onChange={(checked) => changeDraft((current) => ({ ...current, summaryEnabled: checked }))}
+                checkedChildren="启用"
+                unCheckedChildren="停用"
+              />
+              <Text>启用外部总结</Text>
+              <Switch
+                checked={draft.summaryIncludeClinicalText}
+                onChange={(checked) => changeDraft((current) => ({ ...current, summaryIncludeClinicalText: checked }))}
+              />
+              <Text>发送主诉与病史</Text>
+            </Space>
+          </div>
+        </Card>
+
+        <Card
+          id="search-api"
+          className="antd-service-card"
+          title={<span className="antd-service-heading"><SearchOutlined /> 网络搜索 API</span>}
+          extra={
+            <Space wrap>
+              <Button
+                size="small"
+                loading={testing === "search-all"}
+                disabled={busy || configuredProviders === 0}
+                title={configuredProviders === 0 ? "请先配置至少一个搜索服务商" : undefined}
+                onClick={() => void checkSearchProviders()}
+              >
+                测试全部
+              </Button>
+              <Switch
+                checked={draft.webSearchEnabled}
+                onChange={(checked) => changeDraft((current) => ({ ...current, webSearchEnabled: checked }))}
+                checkedChildren="启用"
+                unCheckedChildren="关闭"
+              />
+            </Space>
+          }
+        >
+          <div className="antd-service-section">
+            <Text strong>检索参数</Text>
+            <Form layout="vertical" requiredMark={false}>
+              <Form.Item label="最大结果数">
+                <InputNumber
+                  className="antd-max-results"
+                  min={1}
+                  max={10}
+                  value={draft.webSearchMaxResults}
+                  onChange={(value) => changeDraft((current) => ({
+                    ...current,
+                    webSearchMaxResults: value ?? 1,
+                  }))}
+                />
+              </Form.Item>
+            </Form>
+          </div>
+
+          <div className="antd-service-section antd-complaint-option">
+            <Switch
+              checked={draft.webSearchIncludeComplaint}
+              onChange={(checked) => changeDraft((current) => ({ ...current, webSearchIncludeComplaint: checked }))}
+            />
+            <Text>搜索词包含主诉</Text>
+          </div>
+
+          {searchChecks && (
+            <div className="antd-service-section">
+              <div className="antd-test-summary">
+                <Text strong>连通性测试结果</Text>
+                <Text type="secondary">{searchChecks.succeeded} 家成功 · {searchChecks.failed} 家失败</Text>
+                <Button type="link" size="small" onClick={() => setSearchChecks(null)}>收起</Button>
               </div>
-            );
-          })}
-        </div>
+              <Space direction="vertical" size={6} className="antd-test-results">
+                {searchChecks.items.map((item, index) => (
+                  <Alert
+                    key={item.provider ?? index}
+                    showIcon
+                    type={item.ok ? "success" : "error"}
+                    message={providers.find((provider) => provider.id === item.provider)?.name ?? item.provider}
+                    description={`${item.detail} · ${item.latency_ms} ms`}
+                  />
+                ))}
+              </Space>
+            </div>
+          )}
+
+          <div className="antd-provider-heading">
+            <Text strong>服务商与尝试顺序</Text>
+            <Text type="secondary">按顺序尝试，不可用时跳过</Text>
+          </div>
+
+          <div className="antd-provider-list">
+            {visibleProviderIds.map((providerId) => {
+              const provider = providers.find((item) => item.id === providerId);
+              if (!provider) return null;
+              const index = draft.providerOrder.indexOf(providerId);
+              const savedConfigured = isProviderConfigured(config, provider);
+              const participating = draft.providerEnabled[providerId];
+              const credentialOpen = credentialEditor === providerId;
+              return (
+                <Card
+                  className={`antd-provider-card${participating ? "" : " inactive"}`}
+                  size="small"
+                  key={providerId}
+                >
+                  <div className="antd-provider-row">
+                    <div className="antd-provider-meta">
+                      <span className="antd-provider-index">{String(index + 1).padStart(2, "0")}</span>
+                      <Space size={7} wrap>
+                        <Text strong>{provider.name}</Text>
+                        <Text type="secondary" className="antd-provider-detail">{provider.detail}</Text>
+                        <Tag color={savedConfigured ? "green" : "default"}>{savedConfigured ? "已配置" : "未配置"}</Tag>
+                      </Space>
+                    </div>
+                    <Space size={6} wrap>
+                      <Space size={6}>
+                        <Switch
+                          size="small"
+                          checked={participating}
+                          onChange={(checked) => changeDraft((current) => ({
+                            ...current,
+                            providerEnabled: { ...current.providerEnabled, [providerId]: checked },
+                          }))}
+                        />
+                        <Text>参与</Text>
+                      </Space>
+                      <Button
+                        size="small"
+                        disabled={index === 0 || busy}
+                        aria-label={`${provider.name} 上移`}
+                        onClick={() => moveProvider(index, -1)}
+                      >
+                        上移
+                      </Button>
+                      <Button
+                        size="small"
+                        disabled={index === draft.providerOrder.length - 1 || busy}
+                        aria-label={`${provider.name} 下移`}
+                        onClick={() => moveProvider(index, 1)}
+                      >
+                        下移
+                      </Button>
+                      <Tooltip title={credentialOpen ? "收起连接凭据" : "配置连接凭据"}>
+                        <Button
+                          size="small"
+                          type={credentialOpen ? "primary" : "default"}
+                          icon={<KeyOutlined />}
+                          aria-label={`${credentialOpen ? "收起" : "配置"} ${provider.name} 连接凭据`}
+                          aria-expanded={credentialOpen}
+                          onClick={() => setCredentialEditor((current) =>
+                            current === providerId ? null : providerId
+                          )}
+                        />
+                      </Tooltip>
+                      <Button
+                        size="small"
+                        loading={testing === providerId}
+                        disabled={busy || !savedConfigured}
+                        onClick={() => void checkProvider(providerId)}
+                      >
+                        检查
+                      </Button>
+                    </Space>
+                  </div>
+
+                  {credentialOpen && (
+                    <Form layout="vertical" requiredMark={false} className="antd-provider-form">
+                      {provider.secret && provider.configuredField && provider.hintField && (
+                        <Form.Item label="API Key">
+                          <Input.Password
+                            id={`${provider.id}-api-key`}
+                            prefix={<KeyOutlined />}
+                            value={draft.secrets[provider.secret]}
+                            onChange={(event) => setSecret(provider.secret!, event.target.value)}
+                            placeholder={
+                              Boolean(config[provider.configuredField])
+                                ? String(config[provider.hintField] ?? "") || "已配置"
+                                : "输入密钥"
+                            }
+                            autoComplete="new-password"
+                            maxLength={4000}
+                          />
+                        </Form.Item>
+                      )}
+                      {provider.id === "google_cse" && (
+                        <Form.Item label="搜索引擎 ID">
+                          <Input
+                            value={draft.googleCseId}
+                            onChange={(event) => changeDraft((current) => ({
+                              ...current,
+                              googleCseId: event.target.value,
+                            }))}
+                            maxLength={300}
+                            placeholder="cx"
+                          />
+                        </Form.Item>
+                      )}
+                      {provider.id === "searxng" && (
+                        <Form.Item label="实例地址">
+                          <Input
+                            value={draft.searxngBaseUrl}
+                            onChange={(event) => changeDraft((current) => ({
+                              ...current,
+                              searxngBaseUrl: event.target.value,
+                            }))}
+                            maxLength={1000}
+                            placeholder="https://search.example.com"
+                          />
+                        </Form.Item>
+                      )}
+                    </Form>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+
+          <div className="antd-provider-pagination">
+            <Pagination
+              current={providerPage}
+              pageSize={PROVIDERS_PER_PAGE}
+              total={draft.providerOrder.length}
+              showSizeChanger={false}
+              showTotal={(total) => `共 ${total} 家`}
+              onChange={setProviderPage}
+            />
+          </div>
+        </Card>
       </section>
-    </section>
-  );
-}
-
-function SecretInput({
-  id,
-  label,
-  configured,
-  hint,
-  value,
-  clearChecked,
-  onChange,
-  onClear,
-}: {
-  id: string;
-  label: string;
-  configured: boolean;
-  hint: string;
-  value: string;
-  clearChecked: boolean;
-  onChange: (value: string) => void;
-  onClear: (checked: boolean) => void;
-}) {
-  return (
-    <div className="secret-field">
-      <label htmlFor={id}>{label}</label>
-      <div className="secret-input-wrap">
-        <KeyRound size={15} aria-hidden="true" />
-        <input
-          id={id}
-          type="password"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={configured ? hint || "已配置" : "输入密钥"}
-          autoComplete="new-password"
-          maxLength={4000}
-          disabled={clearChecked}
-        />
-      </div>
-      {configured && (
-        <label className="clear-secret">
-          <input
-            type="checkbox"
-            checked={clearChecked}
-            onChange={(event) => onClear(event.target.checked)}
-          />
-          <span>清除已保存密钥</span>
-        </label>
-      )}
-    </div>
-  );
-}
-
-function Toggle({
-  checked,
-  onChange,
-  label,
-  compact = false,
-}: {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  label: string;
-  compact?: boolean;
-}) {
-  return (
-    <label className={`toggle-control${compact ? " compact" : ""}`}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-      <span className="toggle-track" aria-hidden="true"><span /></span>
-      <span>{label}</span>
-    </label>
+    </ConfigProvider>
   );
 }
