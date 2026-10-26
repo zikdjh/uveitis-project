@@ -35,10 +35,14 @@
   <li>两组 adapter 均已完成 <code>oct_aux_4class</code> 冻结测试集 1,000/1,000 条评估；第 20 步候选 macro-F1 为 <code>0.947245</code>，第 100 步基线为 <code>0.918252</code>，提升 <code>+0.028993</code>，已通过选型门槛。</li>
   <li>第 20 步候选之后的第二阶段受控复核已完成：<code>5e-6</code> 与 <code>1e-5</code> 两组都在第 10 步早停，最佳点仍是初始化时的第 20 步 adapter，因此没有新的提升候选。</li>
   <li>第三阶段高分率假设已判负：<code>131,072</code> 像素输入使验证降到 macro-F1 <code>0.832019</code>、OCT <code>0.736058</code>，低于低分辨率第 20 步候选，实验在第 6 步早停。</li>
+  <li>第四阶段训练集困难组加权已完成：24 个 OCT 患者组按类别平衡加权后训练 3 步早停，loss 小幅下降但 macro-F1 与 OCT 保持 <code>0.873358</code> / <code>0.791503</code>，不产生提升候选。</li>
+  <li>第五阶段新患者组轮换已完成：<code>group_offset=50</code> 后 138 个 OCT 训练组与初始批次零重叠，实际训练 15 步后早停；第 15 步 macro-F1 / OCT 退化到 <code>0.867725</code> / <code>0.774603</code>，不产生提升候选。</li>
+  <li>Open UWF 700 的本地试验已完成：7 类训练 60 步后验证 macro-F1 仅 <code>0.214286</code>，葡萄膜炎 F1 为 0；二分类最佳验证 macro-F1 <code>0.676136</code>，但单次患者隔离测试仅 <code>0.338235</code>，其中 54/82 个阴性样本被误报为阳性。</li>
+  <li>UWF 实验不改变运行候选：第 20 步 OCT adapter 仍是唯一研究型运行候选，UWF adapter 只保留为审计证据，不接入主链路。单次测试结果已经冻结，不用于继续调参。</li>
   <li>错误来源已复核：第 20 步候选的 53 条错误中，<code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条；相对第 100 步基线，DRUSEN 纠正 38 条是主要收益，同时 CNV 退化 6 条、NORMAL 退化 4 条。</li>
-  <li>受控推理 smoke 已完成：第 20 步候选在四类各 4 条上正确 16/16，JSON 有效率 100%，峰值保留显存 <code>3.31 GiB</code>；该结果只证明链路可用，不作为泛化精度。</li>
+  <li>受控推理 smoke 和真实运行服务烟测已完成：第 20 步候选在四类各 4 条上正确 16/16，JSON 有效率 100%；真实 <code>/v1/judge</code> 冷启动约 22 秒、修正后热请求 <code>3.363</code> 秒，单图峰值保留显存 <code>3.355469 GiB</code>。单张训练图返回 DRUSEN 且置信度为 0，不能作为准确率证据。</li>
   <li>选型决定是保留第 20 步研究型运行候选；当前尚未冻结交付，也尚未发布临床模型。</li>
-  <li>本阶段没有新增 Modal GPU 计量；本地训练继续受 8 GB 显存和训练预算双重约束。</li>
+  <li>第二至第五阶段均未启动 Modal GPU，新增 Modal 计量为 <code>$0.00</code>；本地训练继续受 8 GB 显存和训练预算双重约束。</li>
 </ul>
 
 <h2>模型与数据版本</h2>
@@ -97,6 +101,20 @@
       <td>第 2 步</td>
       <td>macro-F1 0.832019；OCT macro-F1 0.736058；JSON 有效率 100%</td>
       <td>约 624 秒；峰值保留 <code>5.689 GiB</code>；高分率假设未通过</td>
+    </tr>
+    <tr>
+      <td><code>local-4060-oct-stage4-difficulty-20261026-01</code></td>
+      <td>3/8 步后早停</td>
+      <td>第 1 步</td>
+      <td>macro-F1 0.873358；OCT macro-F1 0.791503；JSON 有效率 100%</td>
+      <td>约 889 秒；峰值保留 <code>5.689 GiB</code>；困难组加权未提升</td>
+    </tr>
+    <tr>
+      <td><code>local-4060-oct-stage5-newgroups-20261026-01</code></td>
+      <td>15/50 步后早停</td>
+      <td>第 1 步</td>
+      <td>第 1、5、10 步 macro-F1 0.873358、OCT 0.791503；第 15 步 0.867725 / 0.774603；JSON 100%</td>
+      <td>约 691 秒；峰值保留 <code>5.691 GiB</code>；新组轮换未提升</td>
     </tr>
   </tbody>
 </table>
@@ -166,6 +184,66 @@
 </table>
 <p>该实验用于检验“提高图像分辨率可改善 CNV/DRUSEN 边界信息”的假设。高分率输入使初始化验证和训练最佳点都低于低分辨率第 20 步候选，说明当前数据和处理链路下简单提高输出像素不会带来收益。结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage3-20261026-01/stage3_decision.json</code>。</p>
 
+<h2>第四阶段困难组复核</h2>
+<table>
+  <thead>
+    <tr><th>项目</th><th>配置或结果</th><th>判定</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>困难组来源</td><td>仅训练集；<code>12,101</code> 条样本、<code>5,184</code> 组；冻结测试图像未读取</td><td>数据隔离审计通过</td></tr>
+    <tr><td>入选组</td><td>OCT 四类各 6 个患者组，共 24 组；权重 2</td><td>避免困难组被单一类别占满</td></tr>
+    <tr><td>训练配置</td><td><code>1e-6</code>；OCT 任务权重 4；图像像素 65,536；序列 256；梯度累积 4；每步验证</td><td>保持已验证的 8 GB 配置</td></tr>
+    <tr><td>实际完成</td><td>3 步后早停</td><td>没有产生分类指标提升</td></tr>
+    <tr><td>验证结果</td><td>macro-F1 <code>0.8733582322</code>；OCT <code>0.7915032680</code>；JSON 有效率 100%</td><td>四步检查全部持平入口</td></tr>
+    <tr><td>显存与费用</td><td>峰值分配 <code>5.452 GiB</code>；峰值保留 <code>5.689 GiB</code>；Modal <code>$0.00</code></td><td>满足本地 8 GB 约束</td></tr>
+  </tbody>
+</table>
+<p>第 1 步 teacher-forced loss 从 <code>0.0350562277</code> 降至 <code>0.0350383057</code>，但生成式分类结果完全未变；第 2、3 步 loss 回升并触发早停。实验 <code>best_adapter</code> 只是在同一 macro-F1 下 loss 略低的排序结果，不应覆盖已验证的第 20 步运行候选。完整记录见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage4-20261026-01/stage4_decision.json</code>。</p>
+<p>本阶段同时暴露了筛选验证的限制：55 条中只有 33 个患者组，而 OCT 的 34 条包含 CNV 8、DME 5、DRUSEN 18、NORMAL 3。该集合可用于快速剔除明显退化的实验，但不足以支持更细的类别收益判断。下一轮训练必须等待患者隔离验证数据或明确的数据/标签修正，不再重复困难组短程加权。</p>
+
+<h2>第五阶段新患者组复核</h2>
+<table>
+  <thead>
+    <tr><th>项目</th><th>配置或结果</th><th>判定</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>调度修正</td><td><code>group_offset=50</code>；初始批次与偏移批次各 138 个 OCT 组，重叠 0</td><td>成功避免重复回放首批患者组</td></tr>
+    <tr><td>类别覆盖</td><td>前 50 步计划：CNV 35、DME 35、DRUSEN 33、NORMAL 35</td><td>训练组轮换后类别曝光仍基本均衡</td></tr>
+    <tr><td>训练配置</td><td><code>1e-6</code>；OCT 任务权重 4；图像像素 65,536；序列 256；梯度累积 4；每 5 步验证</td><td>保持已验证的 8 GB 配置</td></tr>
+    <tr><td>实际完成</td><td>15/50 步后早停</td><td>第 15 步指标退化并触发连续三次未改善</td></tr>
+    <tr><td>验证结果</td><td>第 1、5、10 步 <code>0.8733582322</code> / <code>0.7915032680</code>；第 15 步 <code>0.8677248677</code> / <code>0.7746031746</code>；JSON 100%</td><td>没有产生分类指标提升</td></tr>
+    <tr><td>显存与费用</td><td>峰值分配 <code>5.452 GiB</code>；峰值保留 <code>5.691 GiB</code>；耗时约 691 秒；Modal <code>$0.00</code></td><td>满足本地 8 GB 约束</td></tr>
+  </tbody>
+</table>
+<p>该实验证明患者组偏移能够覆盖新的训练患者，但没有证明模型泛化改善。实验 <code>best_adapter</code> 是第 1 步同分下 loss 略低的排序结果，<code>final_adapter</code> 也不是交付产物，两者均不应覆盖第 20 步运行候选。完整记录见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage5-20261026-01/stage5_decision.json</code>。</p>
+<p>至此，同配置续训、高分率、困难组加权和新患者组轮换均已受控复核。下一步不再增加同一 55 条筛选面板上的短程实验；先取得患者隔离验证数据或医生复核的明确标签修正，再决定是否训练。</p>
+
+<h2>Open UWF 700 本地试验</h2>
+<p>本轮补充使用免费可商用的 Open UWF 700（CC BY 4.0，DOI <code>10.6084/m9.figshare.26936446</code>），在本地 RTX 4060 上完成 7 类与葡萄膜炎二分类两项研究实验。图像直接从 <code>model-training/datasets/extracted/14_open_uwf700/</code> 读取，没有复制新增约 24 GB 图像。源 Patient ID 在不同诊断队列中会复用，因此患者组键固定为 <code>14_open_uwf700:&lt;diagnosis&gt;:&lt;Patient ID&gt;</code>。</p>
+<table>
+  <thead>
+    <tr><th>数据契约</th><th>规模与切分</th><th>审计结果</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>7 类任务</td><td>700 张；train 503 / validation 107 / test 90</td><td>431 / 93 / 78 个患者组；跨切分组 0，缺图 0，重复内容 0</td></tr>
+    <tr><td>葡萄膜炎二分类</td><td>uveitis 100、non_uveitis 600；train 503 / validation 107 / test 90</td><td>源验证集标签为阳性 12、阴性 95；源测试集为阳性 8、阴性 82</td></tr>
+    <tr><td>清单指纹</td><td>7 类 <code>6a89bb38...8d498178</code></td><td>二分类 <code>bacc37ed...551c2b253</code>，两条清单均已复核</td></tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+    <tr><th>实验</th><th>验证结果</th><th>测试与判定</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>uwf-stage1-20261026-01</code></td><td>60/60 步；最佳 step 60；accuracy <code>0.2222</code>、macro-F1 <code>0.214286</code></td><td>未执行测试；葡萄膜炎 F1 为 0，判定不可用</td></tr>
+    <tr><td><code>uwf-binary-stage1-20261026-01</code></td><td>60/60 步；最佳 step 50；accuracy <code>0.684211</code>、macro-F1 <code>0.676136</code>；葡萄膜炎召回 <code>1.00</code>，非葡萄膜炎召回 <code>0.4545</code></td><td>已执行一次 90 条患者隔离测试；accuracy <code>0.377778</code>、macro-F1 <code>0.338235</code>；54 个阴性样本误报阳性</td></tr>
+    <tr><td>显存与费用</td><td>训练峰值分配 <code>5.452 GiB</code>、峰值保留 <code>5.697 GiB</code>；测试峰值保留 <code>3.551 GiB</code></td><td>本地 8 GB 可完成 4B QLoRA；Modal 新增费用 <code>$0.00</code></td></tr>
+  </tbody>
+</table>
+<p>二分类测试的葡萄膜炎召回为 <code>0.75</code>，但 precision 只有 <code>0.10</code>；非葡萄膜炎 precision 为 <code>0.933</code>、recall 为 <code>0.341</code>。验证集与测试集的显著差距说明当前小样本训练面板不能作为泛化依据。测试集已消耗一次，后续不得以这 90 条输出选择 checkpoint、学习率或其他超参数。二分类也不能解释为“临床排除了全部非葡萄膜炎炎症疾病”，negative 组只覆盖 AMD、DR、Healthy、PM、RD 和 RVO。</p>
+<p>结构化决策见 <code>model-training/assets/qwen3.5-4b/eval-open-uwf-stage1-20261026-01/decision.json</code>。结论是保留第 20 步 OCT 候选，UWF 二分类 adapter 只作为研究实验；下一轮训练应先增加按患者隔离的阳性数据、医生确认标签、异质性阴性样本和独立外部验证集。</p>
+<p>为避免任务集合扩展后重新抽取验证面板，正式二分类训练的验证选择已固化为 <code>model-training/datasets/tasks/open_uwf_uveitis_binary/validation_split.json</code>。该快照只包含训练清单中的验证键，不含测试行；训练器会核对 manifest 哈希、任务集合、行集合和验证 selection SHA256。显式回放 DryRun 得到 <code>484</code> 训练、<code>19</code> 验证、<code>415/16</code> 患者组，验证哈希与调度哈希均和正式训练记录一致。</p>
+
 <h2>错误来源分析</h2>
 <p>分析只读取现有冻结预测和 manifest，不重新推理、不使用测试行训练。1,000 条测试全部来自 <code>13_zhanglab_oct</code>，总体准确率 <code>0.947</code>、macro-F1 <code>0.947245</code>、JSON 有效率 <code>100%</code>。</p>
 <table>
@@ -187,6 +265,8 @@
 <h2>受控推理 smoke</h2>
 <p>评估器新增按 <code>task + label</code> 的确定性抽样，第 20 步候选使用 <code>65,536</code> 像素、每类 4 条共 16 条。结果为 16/16 正确、JSON 有效率 <code>100%</code>、生成错误 0，四类混淆矩阵全部落在对角线。selection SHA256 为 <code>77a65218744fe84896bb06d7d216bdb9b2329fc06e2de90bdba428dcf9a6a0ee</code>。</p>
 <p>adapter 加载后分配显存 <code>3.114870 GiB</code>，峰值分配 <code>3.233283 GiB</code>，峰值保留 <code>3.310547 GiB</code>，总耗时约 63 秒。该 smoke 说明本机 8 GB 链路、四类输入和结构化输出可运行；16 条样本不足以说明准确率、超时边界或临床可用性。证据位于 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-runtime-smoke-20261026-01/</code>。</p>
+<p>随后完成真实运行服务烟测：<code>POST /v1/judge</code> 加载 4-bit NF4 基座和第 20 步 adapter，冷启动约 22 秒，8 个并发请求经串行锁保护全部返回 HTTP 200，无 OOM。运行端预处理修正为“原图通过解码尺寸保护后直接交给 processor”，与训练/评估一致；复测热请求 <code>3.363</code> 秒，峰值保留 <code>3.355469 GiB</code>。证据位于 <code>model-training/assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code>。</p>
+<p>该复测使用一张标签为 CNV 的训练图，模型返回 DRUSEN、置信度 0、impression 为空。它说明输出结构、路径约束、adapter 读取和 GPU 链路可用，但也说明当前置信度不可用于自动阈值或临床分诊。业务侧必须固定要求医生复核，且不能把单图错误包装成准确率结论。</p>
 
 <h2>11.10 前训练排期</h2>
 <table>
@@ -194,11 +274,11 @@
     <tr><th>日期</th><th>训练交付</th><th>判定条件</th></tr>
   </thead>
   <tbody>
-    <tr><td>10-26 至 10-27</td><td>完成第 100 步基线冻结评估、核对 selection 哈希，并完成受控后续训练复核、错误来源分析和受控推理 smoke。</td><td>已完成：两份评估均达到 1,000 条且无生成错误；阶段二、阶段三均无提升候选；错误来源和四类推理链路已记录。</td></tr>
+    <tr><td>10-26 至 10-27</td><td>完成第 100 步基线冻结评估、核对 selection 哈希，并完成受控后续训练复核、困难组复核、新患者组轮换、错误来源分析和受控推理 smoke。</td><td>已完成：两份评估均达到 1,000 条且无生成错误；阶段二至阶段五均无提升候选；错误来源和四类推理链路已记录。</td></tr>
     <tr><td>10-28</td><td>完成基线与候选的 accuracy、macro-F1、各类别 F1 和混淆矩阵比较，记录选型决定。</td><td>提前完成：第 20 步候选提升 0.028993，超过 0.02 门槛。</td></tr>
-    <tr><td>10-29 至 10-31</td><td>冻结选定 adapter，补齐模型卡、指标文件和运行侧读取路径。</td><td>模型运行服务能定位基座、adapter 和指标文件。</td></tr>
-    <tr><td>11-01 至 11-03</td><td>把已验证的本地推理能力接入运行服务，检查请求超时、结构化输出和错误回退。</td><td>本地 smoke 已提前完成；剩余验收是服务级请求和失败处理。</td></tr>
-    <tr><td>11-04 至 11-06</td><td>对错误样本做来源和类别分析；只在证据明确且预算可控时做一次小型聚焦实验。</td><td>不以 token loss 选模型，不扩大 8 GB 显存配置。</td></tr>
+    <tr><td>10-29 至 10-31</td><td>冻结选定 adapter，补齐模型卡、指标文件和运行侧读取路径。</td><td>模型运行服务能定位基座、adapter、指标文件和证据快照。</td></tr>
+    <tr><td>11-01 至 11-03</td><td>完成运行服务与业务分析任务的回写、上传目录、超时和失败恢复联调。</td><td>真实服务级 HTTP 请求、失败降级、8 并发和业务回写均有证据。</td></tr>
+    <tr><td>11-04 至 11-06</td><td>优先获取患者隔离验证数据或医生复核标签；没有新数据假设时不再启动重复短程实验。</td><td>不以 token loss 选模型，不扩大 8 GB 显存配置。</td></tr>
     <tr><td>11-07 至 11-08</td><td>整理最终模型证据、指纹、复现命令和数据限制。</td><td>训练、验证、冻结测试和运行读取四类证据齐全。</td></tr>
     <tr><td>11-09 至 11-10</td><td>冻结训练交付，整理决策模型门槛和后续研究清单。</td><td>不新增未验证模型，不改变 11.10 基线。</td></tr>
   </tbody>
@@ -217,8 +297,14 @@
   <li>55 条内部验证样本不足以证明泛化；第 20 步候选的验证提升必须由完整冻结测试复核。</li>
   <li>第 20 步候选在冻结 OCT 测试集上优于第 100 步基线，但该测试集仍不是患者隔离外部验证。</li>
   <li>第二阶段受控复核没有改善验证指标，说明继续增加同配置训练步数收益不足；后续若要试验，必须先提出明确的数据或错误类型假设。</li>
+  <li>第四阶段困难组加权仍没有提高分类指标；OCT 筛选验证仅 34 条且类别分布不均，不能据 loss 的微小变化提升实验 adapter。</li>
+  <li>第五阶段证明 138 个新训练组可被调度覆盖，但 15 步验证没有改善，第 15 步还出现退化；组覆盖不等于泛化。</li>
+  <li>Open UWF 二分类在验证集与单次测试集之间存在明显落差，说明小规模验证面板容易高估效果；测试输出只可用于报告，不可用于调参。</li>
+  <li>UWF 的 negative 组没有覆盖全部非葡萄膜炎炎症疾病，不能把二分类结果表述成临床排除结论。</li>
   <li>第 20 步候选的提升主要来自 DRUSEN 修正，CNV 和 NORMAL 存在退化；不能把总体 macro-F1 提升解释为四类均衡改善。</li>
+  <li>真实运行服务在单张 CNV 训练图上返回 DRUSEN、置信度 0、impression 为空；置信度字段尚不能用于自动阈值、自动分诊或排除诊断。</li>
   <li>训练数据包含来源重叠、增强图和缺少患者 ID 的情况，不能把当前指标解释为临床效果。</li>
+  <li>下一训练门槛是患者隔离验证数据或明确标签修正，而不是继续增加 epoch、图像像素、训练组权重或训练组偏移。</li>
   <li>补充决策模型缺少真实决策标签和独立评测集，11.10 前默认不启动训练。</li>
   <li>最终交付是“可复现的研究型训练产物”，不是经过临床验证的诊断系统。</li>
 </ul>

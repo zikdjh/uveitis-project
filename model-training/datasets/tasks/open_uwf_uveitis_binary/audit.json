@@ -1,0 +1,30 @@
+{
+  "status": "ok",
+  "task": "uwf_uveitis_binary",
+  "source_manifest": "model-training\\datasets\\tasks\\open_uwf_7class\\manifest.csv",
+  "images": 700,
+  "labels": [
+    "non_uveitis",
+    "uveitis"
+  ],
+  "split_counts": {
+    "test": 90,
+    "train": 503,
+    "validation": 107
+  },
+  "label_split_counts": {
+    "test::non_uveitis": 82,
+    "test::uveitis": 8,
+    "train::non_uveitis": 423,
+    "train::uveitis": 80,
+    "validation::non_uveitis": 95,
+    "validation::uveitis": 12
+  },
+  "patient_groups": 602,
+  "source_patient_group_assignments_changed": false,
+  "cross_split_patient_groups": 0,
+  "images_copied": false,
+  "images_read": false,
+  "frozen_test_images_read": false,
+  "note": "Non-uveitis includes AMD, DR, healthy, pathologic myopia, retinal detachment, and RVO. This is a research proxy task, not clinical exclusion of all non-uveitic inflammatory disease."
+}

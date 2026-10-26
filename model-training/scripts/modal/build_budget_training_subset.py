@@ -16,6 +16,8 @@ import csv
 import hashlib
 import json
 import shutil
+import xml.etree.ElementTree as ET
+import zipfile
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,7 +27,10 @@ from typing import Iterable
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png"}
 UV_DATASETS = ("01_uveitis_oct", "02_toxofundus", "03_eye_five_class")
 OCT_AUX_NAME = "13_zhanglab_oct"
+UWF_NAME = "14_open_uwf700"
 RFMID_SPLITS = ("Training_set", "Validation_set", "Test_set")
+UWF_LABELS = ("AMD", "DR", "Healthy", "PM", "RD", "RVO", "Uveitis")
+XLSX_NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 
 
 @dataclass(frozen=True)
@@ -261,6 +266,97 @@ def collect_zhang(source: Path, per_class: int) -> list[ImageRecord]:
                         source_group=f"13_zhanglab:{class_dir.name}",
                         source_split=split_name,
                         split="train" if split_name == "train" else "test",
+                        source=path,
+                        relative_path=path.relative_to(source).as_posix(),
+                    )
+                )
+    return records
+
+
+def read_first_xlsx_rows(path: Path) -> list[list[str]]:
+    """Read one XLSX sheet without adding pandas/openpyxl to the data build."""
+    with zipfile.ZipFile(path) as archive:
+        shared: list[str] = []
+        if "xl/sharedStrings.xml" in archive.namelist():
+            root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
+            for item in root.findall("m:si", XLSX_NS):
+                shared.append(
+                    "".join(
+                        node.text or ""
+                        for node in item.findall(".//m:t", XLSX_NS)
+                    )
+                )
+        sheet = ET.fromstring(archive.read("xl/worksheets/sheet1.xml"))
+        rows: list[list[str]] = []
+        for row in sheet.findall(".//m:row", XLSX_NS):
+            values: list[str] = []
+            for cell in row.findall("m:c", XLSX_NS):
+                value = cell.find("m:v", XLSX_NS)
+                inline = cell.find("m:is/m:t", XLSX_NS)
+                if cell.get("t") == "s" and value is not None:
+                    values.append(shared[int(value.text or "")])
+                elif inline is not None:
+                    values.append(inline.text or "")
+                else:
+                    values.append(value.text or "" if value is not None else "")
+            rows.append(values)
+    return rows
+
+
+def collect_open_uwf(source: Path) -> list[ImageRecord]:
+    """Add the 7-class UWF task with diagnosis-scoped patient groups."""
+    root = source / UWF_NAME
+    demographics = root / "Demographics of the participants.xlsx"
+    image_root = root / "Original UWF Image"
+    rows = read_first_xlsx_rows(demographics)
+    headers = [value.strip() for value in rows[0]]
+    required = {"Image ID", "Patient ID", "Diagnosis"}
+    missing_columns = sorted(required - set(headers))
+    if missing_columns:
+        raise ValueError(
+            f"Open UWF demographics missing columns: {missing_columns}"
+        )
+    images = {path.name: path for path in image_files(image_root)}
+    metadata: dict[str, dict[str, str]] = {}
+    for raw in rows[1:]:
+        padded = [*raw, *("" for _ in range(len(headers) - len(raw)))]
+        record = {
+            key: value.strip()
+            for key, value in zip(headers, padded, strict=False)
+        }
+        metadata[record["Image ID"]] = record
+    if len(metadata) != 700 or set(metadata) != set(images):
+        raise ValueError("Open UWF image and demographics inventories differ")
+
+    groups: dict[str, dict[str, list[Path]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    group_by_path: dict[Path, str] = {}
+    for image_name, record in metadata.items():
+        label = record["Diagnosis"]
+        path = images[image_name]
+        if label not in UWF_LABELS or path.parent.name != label:
+            raise ValueError(f"Unexpected Open UWF label for {image_name}")
+        group = f"{UWF_NAME}:{label}:{record['Patient ID']}"
+        groups[label][group].append(path)
+        group_by_path[path] = group
+
+    records: list[ImageRecord] = []
+    for label in UWF_LABELS:
+        for group, paths in sorted(groups[label].items()):
+            bucket = int(
+                stable_rank(group, "open-uwf-patient-groups")[:8], 16
+            )
+            split = "test" if bucket % 10 == 0 else "train"
+            for path in sorted(paths, key=lambda item: item.name):
+                records.append(
+                    ImageRecord(
+                        dataset=UWF_NAME,
+                        task="uwf_7class",
+                        label=label,
+                        source_group=group,
+                        source_split="",
+                        split=split,
                         source=path,
                         relative_path=path.relative_to(source).as_posix(),
                     )
@@ -536,6 +632,7 @@ def main() -> None:
     records.extend(collect_02(source))
     records.extend(collect_03(source))
     records.extend(collect_zhang(source, args.zhang_per_class))
+    records.extend(collect_open_uwf(source))
     rfmid_records, rfmid_labels = collect_rfmid(source)
     records.extend(rfmid_records)
     odir_records, odir_metadata = collect_odir(source, args.odir_train)

@@ -233,6 +233,121 @@ def test_summary_protocol_adapters(tmp_path) -> None:
     assert requests[2].headers["anthropic-version"] == "2023-06-01"
 
 
+def test_summary_connection_probe_uses_selected_protocol() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path.endswith("/responses"):
+            return httpx.Response(200, json={"output_text": "OK"})
+        if request.url.path.endswith("/messages"):
+            return httpx.Response(200, json={"content": [{"type": "text", "text": "OK"}]})
+        return httpx.Response(200, json={"choices": [{"message": {"content": "OK"}}]})
+
+    settings = Settings(model_mode="remote")
+    for protocol, base_url in (
+        ("openai_responses", "https://summary.local/v1"),
+        ("openai_chat_completions", "https://summary.local/v1"),
+        ("anthropic_messages", "https://summary.local/v1"),
+    ):
+        store = _store()
+        store.update(
+            IntegrationUpdate(
+                summary_enabled=True,
+                summary_protocol=protocol,
+                summary_base_url=base_url,
+                summary_model="probe-model",
+                summary_api_key="probe-key",
+            ),
+            actor_id="admin",
+        )
+        integrations = OptionalIntegrations(
+            settings,
+            config_store=store,
+            client_factory=lambda **kwargs: httpx.Client(
+                transport=httpx.MockTransport(handler), **kwargs
+            ),
+        )
+        result = integrations.test_summary()
+        assert result.ok is True, result.detail
+        assert result.detail == "连接成功，模型 probe-model 已返回响应"
+        assert result.attempts == 1
+    assert len(requests) == 3
+    assert requests[0].url.path.endswith("/responses")
+    assert requests[1].url.path.endswith("/chat/completions")
+    assert requests[2].url.path.endswith("/messages")
+
+
+def test_summary_connection_probe_reports_unreachable_service() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(503, json={"error": "unavailable"})
+
+    store = _store()
+    store.update(
+        IntegrationUpdate(
+            summary_enabled=True,
+            summary_protocol="openai_chat_completions",
+            summary_base_url="https://summary.local/v1",
+            summary_model="probe-model",
+            summary_api_key="probe-key",
+        ),
+        actor_id="admin",
+    )
+    integrations = OptionalIntegrations(
+        Settings(model_mode="remote"),
+        config_store=store,
+        client_factory=lambda **kwargs: httpx.Client(
+            transport=httpx.MockTransport(handler), **kwargs
+        ),
+    )
+    result = integrations.test_summary()
+    assert result.ok is False
+    assert "连接失败" in result.detail
+    assert "503" in result.detail
+
+
+def test_search_connection_probe_stops_after_first_available_provider() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.host == "api.search.brave.com":
+            return httpx.Response(200, json={"web": {"results": []}})
+        if request.url.host == "api.tavily.com":
+            return httpx.Response(
+                200,
+                json={"results": [{"title": "Guideline", "url": "https://example.test/g", "content": "evidence"}]},
+            )
+        return httpx.Response(
+            503,
+            json={"error": "unavailable"},
+        )
+
+    store = _store()
+    store.update(
+        IntegrationUpdate(
+            web_search_enabled=True,
+            web_search_max_results=5,
+            search_provider_order=["brave", "tavily"],
+            brave_search_api_key="brave-key",
+            tavily_api_key="tavily-key",
+        ),
+        actor_id="admin",
+    )
+    integrations = OptionalIntegrations(
+        Settings(model_mode="remote"),
+        config_store=store,
+        client_factory=lambda **kwargs: httpx.Client(
+            transport=httpx.MockTransport(handler), **kwargs
+        ),
+    )
+    result = integrations.test_search()
+    assert result.ok is True, result.detail
+    assert result.provider == "tavily"
+    assert result.attempts == 2
+    assert len(requests) == 2
+
+
 def test_search_provider_adapters() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         host = request.url.host

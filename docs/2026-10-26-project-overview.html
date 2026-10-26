@@ -98,7 +98,8 @@
 <h2>本地启动</h2>
 <p>模型运行服务（可选；先启动再让后端连接）：</p>
 <pre><code class="language-powershell">cd model-runtime
-..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\model-training\datasets\training').Path
+..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 </code></pre>
 <p>后端（Windows PowerShell）：</p>
 <pre><code class="language-powershell">cd backend

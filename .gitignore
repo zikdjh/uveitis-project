@@ -5,6 +5,7 @@
 .npm-cache/
 .uv-cache/
 .uv-cache-local/
+.venv-runtime-smoke/
 .tmp-local/
 __pycache__/
 *.py[cod]
@@ -34,6 +35,9 @@ backend/.pytest-temp*/
 backend/.test-tmp/
 backend/pytest-cache-files-*/
 backend/.uv-cache/
+model-runtime/.test-tmp/
+model-runtime/.tmp-test/
+model-runtime/pytest-cache-files-*/
 frontend/.npm-cache/
 scripts/ui-check-20261025/*.png
 docs/Uv*.csv
@@ -45,6 +49,11 @@ model-training/datasets/extracted/*/
 !model-training/datasets/extracted/manifests/
 !model-training/datasets/extracted/manifests/**
 model-training/datasets/training/data/
+!model-training/datasets/tasks/
+!model-training/datasets/tasks/**/
+model-training/datasets/tasks/**/*.jpg
+model-training/datasets/tasks/**/*.jpeg
+model-training/datasets/tasks/**/*.png
 **/processor/tokenizer.json
 *.partial.*
 *.safetensors

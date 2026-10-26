@@ -1,0 +1,126 @@
+{
+  "run_id": "uwf-stage1-20261026-01",
+  "status": "ok",
+  "started_at": "2026-10-26T11:59:04.135034+00:00",
+  "mode": "local_stage1_grouped_generative_qlora",
+  "model_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\model-training\\datasets\\tasks\\open_uwf_7class\\manifest.csv",
+  "manifest_sha256": "6a89bb38a603aafb5bf263b76dbc26dccac6d8010f384189590863808d498178",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "total_memory_gib": 7.99560546875,
+    "compute_capability": [
+      8,
+      9
+    ]
+  },
+  "configuration": {
+    "quantization": "4-bit NF4, bfloat16 compute, double quant",
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "gradient_checkpointing": true,
+    "image_pixels": 16384,
+    "max_length": 256,
+    "target_steps": 60,
+    "grad_accum": 4,
+    "learning_rate": 2.5e-05,
+    "validation_every": 10,
+    "save_every": 10,
+    "early_stop_patience": 3,
+    "seed": 20261025,
+    "checkpoint_selection": "task_mean_macro_f1_then_json_rate_then_loss",
+    "task_weights": {
+      "uwf_7class": 1,
+      "eye_five_class": 1,
+      "oct_uveitis_4class": 1,
+      "oct_aux_4class": 1,
+      "fundus_toxo_binary": 1
+    },
+    "selected_tasks": [
+      "eye_five_class",
+      "fundus_toxo_binary",
+      "oct_aux_4class",
+      "oct_uveitis_4class",
+      "uwf_7class"
+    ],
+    "difficulty_manifest": {},
+    "group_offset": 0,
+    "init_adapter": null
+  },
+  "split": {
+    "train_rows": 485,
+    "validation_rows": 18,
+    "train_groups": 417,
+    "validation_groups": 14,
+    "validation_selection_sha256": "d5bc0f2441f77857c8550ea07a72ea7be422448b59bbcc6c6f95b937dec9ac09",
+    "schedule_sha256": "eb6b03ea17e7cf446b6cb5e09a05bdd28b5a816a7915a493f1d25617ddb2c91a",
+    "class_exposures": {
+      "uwf_7class::AMD": 34,
+      "uwf_7class::DR": 35,
+      "uwf_7class::Healthy": 34,
+      "uwf_7class::PM": 34,
+      "uwf_7class::RD": 34,
+      "uwf_7class::RVO": 34,
+      "uwf_7class::Uveitis": 35
+    },
+    "test_intersection_audit": {
+      "policy": "13=label+patient_id; 03=label+stem_with_aug_prefix_removed; 02=image_path; 01=excluded",
+      "datasets": {
+        "14_open_uwf700": {
+          "train_rows": 503,
+          "eligible_rows": 503,
+          "excluded_rows": 0,
+          "test_rows": 90,
+          "train_groups": 431,
+          "eligible_groups": 431,
+          "test_groups": 78,
+          "shared_train_test_groups": 0
+        }
+      },
+      "excluded_rows": 0,
+      "exclusion_counts": {},
+      "eligible_rows": 503,
+      "eligible_groups": 431,
+      "eligible_test_group_overlap": 0,
+      "test_images_read": false
+    }
+  },
+  "after_load": {
+    "allocated_gib": 4.309648036956787,
+    "reserved_gib": 5.529296875,
+    "trainable_parameters": 10616832,
+    "resumed_from_step": 0,
+    "initialization_adapter": null,
+    "initialization_validation": null
+  },
+  "completed_steps": 60,
+  "truncated_reason": "target_steps",
+  "best_step": 60,
+  "best_validation_loss": 0.14305150219135815,
+  "best_validation_macro_f1": 0.21428571428571427,
+  "best_validation_json_valid_rate": 1.0,
+  "selection_score": [
+    0.21428571428571427,
+    1.0,
+    -0.14305150219135815
+  ],
+  "last_gradient_norm": 0.8327003717422485,
+  "final_adapter": {
+    "directory": "model-training\\assets\\qwen3.5-4b\\uwf-stage1-20261026-01\\final_adapter",
+    "sha256": "8a26edbb4715e2b28f580fba7b67d1feb17c23e9e6c85c120a1ddab98ee0aa16"
+  },
+  "best_adapter": {
+    "directory": "model-training\\assets\\qwen3.5-4b\\uwf-stage1-20261026-01\\best_adapter",
+    "sha256": "8a26edbb4715e2b28f580fba7b67d1feb17c23e9e6c85c120a1ddab98ee0aa16"
+  },
+  "peak_allocated_gib": 5.452396869659424,
+  "peak_reserved_gib": 5.689453125,
+  "final_memory": {
+    "allocated_gib": 4.4046196937561035,
+    "reserved_gib": 5.689453125,
+    "peak_allocated_gib": 5.452396869659424,
+    "peak_reserved_gib": 5.689453125
+  },
+  "total_seconds": 943.0007281000001,
+  "finished_at": "2026-10-26T12:14:47.136044+00:00"
+}

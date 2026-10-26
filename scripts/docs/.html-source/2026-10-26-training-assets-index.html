@@ -64,6 +64,9 @@
 <li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：当前冻结评估基线，第 100 步。</li>
 <li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：当前 OCT 候选，第 20 步。</li>
 <li><code>eval-oct-step20-vs-step100-20261025-01/</code>：两个 adapter 的同集冻结评估、候选完整结果和基线断点。</li>
+<li><code>uwf-stage1-20261026-01/</code>、<code>uwf-binary-stage1-20261026-01/</code>：Open UWF 7 类与二分类的指标、切分和实验 adapter；均不作为运行候选。</li>
+<li><code>uwf-binary-eval-test-20261026-01/</code>：二分类 adapter 的唯一一次 90 条患者隔离测试；输出冻结，不用于调参。</li>
+<li><code>eval-open-uwf-stage1-20261026-01/decision.json</code>：UWF 数据复核、验证/测试差距和“保留第 20 步 OCT 候选”的结构化决定。</li>
 </ul>
 <h2>参考材料</h2>
 <p><code>reference/</code> 保存 24 GB GPU 云价格表的 HTML 和 XLSX。价格是历史调研快照，使用前应核对供应商当前报价。</p>

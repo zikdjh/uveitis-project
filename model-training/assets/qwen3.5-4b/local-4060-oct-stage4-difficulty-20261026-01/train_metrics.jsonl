@@ -1,0 +1,3 @@
+{"time": "2026-10-26T10:05:45.597436+00:00", "step": 1, "mean_loss": 0.0006691148737445474, "gradient_norm": 0.014974640682339668, "step_seconds": 8.429708600000595, "samples": 4, "peak_allocated_gib": 5.452396869659424, "peak_reserved_gib": 5.689453125}
+{"time": "2026-10-26T10:08:59.911580+00:00", "step": 2, "mean_loss": 0.0007356164896918926, "gradient_norm": 0.02321486920118332, "step_seconds": 194.31300080000074, "samples": 4, "peak_allocated_gib": 5.452396869659424, "peak_reserved_gib": 5.689453125}
+{"time": "2026-10-26T10:12:51.976331+00:00", "step": 3, "mean_loss": 0.005541800172068179, "gradient_norm": 0.23532584309577942, "step_seconds": 232.0651281999999, "samples": 4, "peak_allocated_gib": 5.452396869659424, "peak_reserved_gib": 5.689453125}

@@ -1,0 +1,114 @@
+{
+  "status": "completed_no_promotion",
+  "decided_at": "2026-10-26T10:41:35Z",
+  "objective": "Test whether advancing to later, previously unsampled training patient groups improves the selected OCT candidate.",
+  "hypothesis": {
+    "statement": "Previous continuations replayed the opening patient groups. Rotating the per-class schedule by 50 should expose new training groups while preserving label balance and the frozen test boundary.",
+    "result": "Not supported. New groups reduced training loss at some steps but did not improve generated-label macro-F1; the first declined validation check triggered early stopping."
+  },
+  "base_adapter": {
+    "run_id": "local-4060-oct-focus-cont-20261025-01",
+    "step": 20,
+    "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f"
+  },
+  "schedule_audit": {
+    "group_offset": 50,
+    "baseline_oct_groups": 138,
+    "offset_oct_groups": 138,
+    "overlap_groups": 0,
+    "new_groups": 138,
+    "oct_exposures_first_50_steps": {
+      "CNV": 35,
+      "DME": 35,
+      "DRUSEN": 33,
+      "NORMAL": 35
+    },
+    "validation_selection_sha256": "b58be38480a47892fcb7f5eef5b1d1ab904abb0f7eb4979d2422c392d62c7ef8",
+    "test_images_read": false
+  },
+  "run": {
+    "run_id": "local-4060-oct-stage5-newgroups-20261026-01",
+    "summary_path": "model-training/assets/qwen3.5-4b/local-4060-oct-stage5-newgroups-20261026-01/training_summary.json",
+    "image_pixels": 65536,
+    "max_length": 256,
+    "grad_accum": 4,
+    "learning_rate": 1e-06,
+    "target_steps": 50,
+    "completed_steps": 15,
+    "truncated_reason": "early_stopping",
+    "validation_every": 5,
+    "early_stop_patience": 3,
+    "schedule_sha256": "09928a1a3d74a48a655e34db2b25b1bcefa1d7ac587c20abf1c09e9f6d6f785b",
+    "initial_validation": {
+      "step": 0,
+      "loss": 0.0350562277181201,
+      "macro_f1": 0.8733582321817616,
+      "oct_macro_f1": 0.7915032679738563,
+      "json_valid_rate": 1.0
+    },
+    "best_step": 1,
+    "best_validation_loss": 0.03498317706127471,
+    "best_validation_macro_f1": 0.8733582321817616,
+    "best_validation_oct_macro_f1": 0.7915032679738563,
+    "best_validation_json_valid_rate": 1.0,
+    "validation_points": [
+      {
+        "step": 0,
+        "loss": 0.0350562277181201,
+        "macro_f1": 0.8733582321817616,
+        "oct_macro_f1": 0.7915032679738563
+      },
+      {
+        "step": 1,
+        "loss": 0.03498317706127471,
+        "macro_f1": 0.8733582321817616,
+        "oct_macro_f1": 0.7915032679738563
+      },
+      {
+        "step": 5,
+        "loss": 0.03515917119531713,
+        "macro_f1": 0.8733582321817616,
+        "oct_macro_f1": 0.7915032679738563
+      },
+      {
+        "step": 10,
+        "loss": 0.03525056632080867,
+        "macro_f1": 0.8733582321817616,
+        "oct_macro_f1": 0.7915032679738563
+      },
+      {
+        "step": 15,
+        "loss": 0.03517666954655645,
+        "macro_f1": 0.8677248677248676,
+        "oct_macro_f1": 0.7746031746031745
+      }
+    ],
+    "last_validation_confusion_shift": {
+      "DRUSEN_to_CNV": {
+        "before": 4,
+        "after": 5,
+        "delta": 1
+      }
+    },
+    "best_adapter_sha256": "7d21b0055cd8b18bbd2107067320e4d9a749ecdc9e9ce6df747afc88f4a44c44",
+    "final_adapter_sha256": "bac025686c05d674a3972a2d007b41005face910d4d1fd9efee20da6e93d89fd",
+    "peak_allocated_gib": 5.452396869659424,
+    "peak_reserved_gib": 5.69140625,
+    "total_seconds": 690.956025499996,
+    "modal_gpu_cost_usd": 0
+  },
+  "decision": "retain_step20_candidate",
+  "reason": [
+    "The first step lowered loss to 0.0349831771 but task macro-F1 and OCT macro-F1 remained exactly at the entry values.",
+    "Steps 5 and 10 also held exactly while loss rose, so the best checkpoint remained an unchanged classification result.",
+    "Step 15 declined to macro-F1 0.8677248677 and OCT 0.7746031746; the new-groups run then triggered early stopping.",
+    "The Stage-5 best_adapter is not a meaningful promotion and the final adapter is not a deployment artifact."
+  ],
+  "limitations": [
+    "The 55-row validation screen covers 33 groups and cannot reliably identify small class-level gains.",
+    "Successful group rotation proves that new training patients were scheduled; it does not prove improved generalization.",
+    "Frozen test images were not read during training or schedule selection.",
+    "The experiment is a research result, not patient-isolated external validation or clinical evidence."
+  ],
+  "next_step": "Do not start another same-panel continuation. Freeze the step-20 research candidate and obtain patient-isolated validation or clinician-reviewed labels before another training round."
+}

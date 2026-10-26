@@ -80,7 +80,8 @@ uveitis-project/
 
 ```powershell
 cd model-runtime
-..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\model-training\datasets\training').Path
+..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
 后端（Windows PowerShell）：

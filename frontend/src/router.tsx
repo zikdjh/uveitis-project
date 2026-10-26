@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import PatientShell from "@/components/PatientShell";
@@ -14,7 +15,6 @@ import AdminCaseDetailPage from "@/pages/admin/CaseDetailPage";
 import AccessPage from "@/pages/admin/AccessPage";
 import AdminCasesPage from "@/pages/admin/CasesPage";
 import AdminKnowledgePage from "@/pages/admin/KnowledgePage";
-import ServicesPage from "@/pages/admin/ServicesPage";
 import CaseLayout from "@/pages/doctor/CaseLayout";
 import CaseListPage from "@/pages/doctor/CaseListPage";
 import {
@@ -28,6 +28,8 @@ import {
 import KnowledgePage from "@/pages/doctor/KnowledgePage";
 import ReviewQueuePage from "@/pages/doctor/ReviewQueuePage";
 import WorkbenchPage from "@/pages/doctor/WorkbenchPage";
+
+const ServicesPage = lazy(() => import("@/pages/admin/ServicesPage"));
 
 const router = createBrowserRouter([
   {
@@ -81,7 +83,7 @@ const router = createBrowserRouter([
           { path: "cases", element: <AdminCasesPage /> },
           { path: "cases/:caseId", element: <AdminCaseDetailPage /> },
           { path: "knowledge", element: <AdminKnowledgePage /> },
-          { path: "services", element: <ServicesPage /> },
+          { path: "services", element: <Suspense fallback={<div className="page-loading" />}><ServicesPage /></Suspense> },
           { path: "access", element: <AccessPage /> },
           { path: "security", element: <SecurityPage /> },
         ],

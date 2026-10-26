@@ -28,28 +28,40 @@ from pathlib import Path
 
 from local_qwen4b_smoke import (
     ARTIFACTS_ROOT,
-    MANIFEST_PATH,
     MODEL_DIR,
     PHASE1_TASKS,
     ROOT,
     MemoryMonitor,
     _build_prompt,
     _encode_example,
-    _image_path,
+    _image_path as _image_path_from_smoke,
     _sha256,
     _write_json,
 )
 
 
 DEFAULT_SEED = 20261025
+DEFAULT_MANIFEST_PATH = (
+    ROOT / "model-training" / "datasets" / "training" / "manifest.csv"
+)
+UWF_SOURCE_ROOT = (
+    ROOT / "model-training" / "datasets" / "extracted" / "14_open_uwf700"
+)
 
 
-def _load_phase1_train_rows() -> list[dict]:
-    with MANIFEST_PATH.open("r", encoding="utf-8", newline="") as handle:
+def _image_path(row: dict) -> Path:
+    """Resolve staged images, including the task-local Open UWF manifest."""
+    if row.get("dataset") == "14_open_uwf700":
+        return UWF_SOURCE_ROOT / row["source_image"]
+    return _image_path_from_smoke(row)
+
+
+def _load_phase1_train_rows(manifest_path: Path) -> list[dict]:
+    with manifest_path.open("r", encoding="utf-8", newline="") as handle:
         rows = [
             dict(row)
             for row in csv.DictReader(handle)
-            if row["split"] == "train" and row["task"] in PHASE1_TASKS
+            if row["split"] == "train"
         ]
     if not rows:
         raise ValueError("No phase-one train rows found")
@@ -61,12 +73,12 @@ def _load_phase1_train_rows() -> list[dict]:
     return rows
 
 
-def _load_phase1_test_rows() -> list[dict]:
-    with MANIFEST_PATH.open("r", encoding="utf-8", newline="") as handle:
+def _load_phase1_test_rows(manifest_path: Path) -> list[dict]:
+    with manifest_path.open("r", encoding="utf-8", newline="") as handle:
         rows = [
             dict(row)
             for row in csv.DictReader(handle)
-            if row["split"] == "test" and row["task"] in PHASE1_TASKS
+            if row["split"] == "test"
         ]
     if not rows:
         raise ValueError("No phase-one test rows found")
@@ -92,6 +104,8 @@ def _group_key(row: dict) -> str:
         return f"02:{source_image}"
     if dataset == "01_uveitis_oct":
         return f"01:{row['source_group']}"
+    if dataset == "14_open_uwf700":
+        return f"14:{row['source_group']}"
     return f"{dataset}:{row['source_group']}:{source_image}"
 
 
@@ -234,15 +248,27 @@ def _class_balanced_schedule(
     grad_accum: int,
     seed: int,
     task_weights: dict[str, int] | None = None,
+    group_weights: dict[str, int] | None = None,
+    group_offset: int = 0,
 ) -> list[dict]:
-    """Balance task labels while rotating across whole groups."""
+    """Balance task labels while rotating across whole groups.
+
+    ``group_offset`` advances each class's group rotation without changing the
+    rows or the short-cycle balance. It lets a fresh run from an adapter see
+    later training groups instead of replaying the same opening exposures.
+    """
     total = steps * grad_accum
-    task_weights = task_weights or {task: 1 for task in PHASE1_TASKS}
+    task_weights = task_weights or {
+        task: 1 for task in PHASE1_TASKS
+    }
+    group_weights = group_weights or {}
     unknown_tasks = set(task_weights) - PHASE1_TASKS
     if unknown_tasks:
         raise ValueError(f"Unknown task weights: {sorted(unknown_tasks)}")
     if any(weight < 1 for weight in task_weights.values()):
         raise ValueError("Task weights must be positive integers")
+    if group_offset < 0:
+        raise ValueError("Group offset must be non-negative")
     buckets: dict[tuple[str, str], dict[str, list[dict]]] = defaultdict(
         lambda: defaultdict(list)
     )
@@ -277,11 +303,12 @@ def _class_balanced_schedule(
             group_keys = list(groups)
             weight = task_weights.get(key[0], 1)
             for repeat in range(weight):
-                ordinal = cycle * weight + repeat
+                ordinal = cycle * weight + repeat + group_offset
                 group_key = group_keys[ordinal % len(group_keys)]
                 group_rows = groups[group_key]
                 row_index = (ordinal // len(group_keys)) % len(group_rows)
-                cycle_rows.append(group_rows[row_index])
+                repeats = group_weights.get(group_key, 1)
+                cycle_rows.extend([group_rows[row_index]] * repeats)
         rng.shuffle(cycle_rows)
         schedule.extend(cycle_rows)
         cycle += 1
@@ -304,6 +331,43 @@ def _parse_task_weights(values: list[str]) -> dict[str, int]:
             raise ValueError("Task weight must be between 1 and 8")
         weights[task] = weight
     return weights
+
+
+def _load_group_weights(path: Path | None) -> tuple[dict[str, int], dict]:
+    if path is None:
+        return {}, {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("status") != "ok":
+        raise ValueError("Difficulty manifest is not complete")
+    if payload.get("test_images_read") is not False:
+        raise ValueError("Difficulty manifest must prove test images stayed unread")
+    entries = payload.get("groups")
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("Difficulty manifest has no groups")
+    weights: dict[str, int] = {}
+    for entry in entries:
+        group_key = entry.get("group_key")
+        weight = entry.get("weight")
+        if not isinstance(group_key, str) or not group_key:
+            raise ValueError("Difficulty manifest contains an invalid group key")
+        if not isinstance(weight, int) or not 2 <= weight <= 3:
+            raise ValueError("Difficulty group weights must be integers from 2 to 3")
+        if group_key in weights:
+            raise ValueError(f"Duplicate difficulty group: {group_key}")
+        weights[group_key] = weight
+    record = {
+        "path": str(path.resolve()),
+        "sha256": _sha256(path),
+        "source_run": payload.get("source_run"),
+        "adapter_sha256": payload.get("adapter_sha256"),
+        "validation_selection_sha256": payload.get(
+            "validation_selection_sha256"
+        ),
+        "groups": len(weights),
+        "max_weight": max(weights.values()),
+        "test_images_read": False,
+    }
+    return weights, record
 
 
 def _selection_record(rows: list[dict]) -> list[dict]:
@@ -656,6 +720,20 @@ def _load_init_adapter(model, adapter_dir: Path) -> dict:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", default="local-4060-grouped-cont-20261025-01")
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=DEFAULT_MANIFEST_PATH,
+        help="Training manifest; use a task-local manifest for isolated tasks.",
+    )
+    parser.add_argument(
+        "--split-snapshot",
+        type=Path,
+        help=(
+            "Explicit validation-selection snapshot. It must match the active "
+            "manifest, selected tasks, and record the exact validation rows."
+        ),
+    )
     parser.add_argument("--steps", type=int, default=150)
     parser.add_argument("--grad-accum", type=int, default=4)
     parser.add_argument("--image-pixels", type=int, default=65_536)
@@ -666,6 +744,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--validation-every", type=int, default=25)
     parser.add_argument("--save-every", type=int, default=25)
     parser.add_argument("--early-stop-patience", type=int, default=3)
+    parser.add_argument(
+        "--group-offset",
+        type=int,
+        default=0,
+        help="Rotate the per-class group schedule to later training groups.",
+    )
     parser.add_argument("--monitor-seconds", type=float, default=1.0)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument(
@@ -679,6 +763,26 @@ def _parse_args() -> argparse.Namespace:
         default=[],
         metavar="TASK=WEIGHT",
         help="Repeat a task this many times per schedule cycle (1-8).",
+    )
+    parser.add_argument(
+        "--difficulty-manifest",
+        type=Path,
+        help="Training-only group weights produced by mine_train_difficulty.py.",
+    )
+    parser.add_argument(
+        "--task",
+        action="append",
+        default=[],
+        metavar="TASK",
+        help=(
+            "Restrict local training to named phase-one tasks. Repeat for "
+            "multiple tasks; defaults to every phase-one task."
+        ),
+    )
+    parser.add_argument(
+        "--metric-task",
+        default="oct_aux_4class",
+        help="Task reported in the after-load diagnostic.",
     )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
@@ -695,24 +799,91 @@ def main() -> None:
         raise ValueError("--image-pixels must be between 4096 and 451584")
     if not 128 <= args.max_length <= 1024:
         raise ValueError("--max-length must be between 128 and 1024")
-    if not MODEL_DIR.is_dir() or not MANIFEST_PATH.is_file():
+    manifest_path = args.manifest.resolve()
+    if not MODEL_DIR.is_dir() or not manifest_path.is_file():
         raise FileNotFoundError("Local model or manifest is missing")
+    selected_tasks = set(args.task) if args.task else set(PHASE1_TASKS)
+    unknown_tasks = sorted(selected_tasks - PHASE1_TASKS)
+    if unknown_tasks:
+        raise ValueError(f"Unknown training tasks: {unknown_tasks}")
+    if args.metric_task not in selected_tasks:
+        args.metric_task = sorted(selected_tasks)[0]
     task_weights = _parse_task_weights(args.task_weight)
 
-    all_train = _load_phase1_train_rows()
-    all_test = _load_phase1_test_rows()
-    eligible_rows, split_audit = _audit_train_test_groups(all_train, all_test)
-    train_rows, validation_rows = _split_validation(
-        eligible_rows,
-        validation_groups_per_class=args.validation_groups_per_class,
-        seed=args.seed,
+    all_train = _load_phase1_train_rows(manifest_path)
+    all_test = _load_phase1_test_rows(manifest_path)
+    selected_train = [row for row in all_train if row["task"] in selected_tasks]
+    selected_test = [row for row in all_test if row["task"] in selected_tasks]
+    if not selected_train or not selected_test:
+        raise ValueError("Selected tasks must have train and test rows")
+    eligible_rows, split_audit = _audit_train_test_groups(
+        selected_train,
+        selected_test,
     )
+    split_snapshot = None
+    if args.split_snapshot:
+        snapshot_path = args.split_snapshot.resolve()
+        snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        snapshot_manifest_value = Path(snapshot.get("manifest", ""))
+        snapshot_manifest = (
+            snapshot_manifest_value
+            if snapshot_manifest_value.is_absolute()
+            else ROOT / snapshot_manifest_value
+        ).resolve()
+        if snapshot_manifest != manifest_path:
+            raise ValueError("Split snapshot manifest does not match --manifest")
+        if snapshot.get("manifest_sha256") != _sha256(manifest_path):
+            raise ValueError("Split snapshot manifest hash does not match")
+        if snapshot.get("selected_tasks") != sorted(selected_tasks):
+            raise ValueError("Split snapshot tasks do not match selected tasks")
+        validation_keys = set(snapshot.get("validation_rows", []))
+        if not validation_keys:
+            raise ValueError("Split snapshot has no validation rows")
+        eligible_by_key = {_row_key(row): row for row in eligible_rows}
+        missing = sorted(validation_keys - set(eligible_by_key))
+        if missing:
+            raise ValueError(
+                f"Split snapshot references unavailable rows: {missing[:3]}"
+            )
+        validation_rows = [eligible_by_key[key] for key in validation_keys]
+        train_rows = [
+            row for key, row in eligible_by_key.items() if key not in validation_keys
+        ]
+        if _rows_sha256(validation_rows) != snapshot.get(
+            "validation_selection_sha256"
+        ):
+            raise ValueError("Split snapshot validation hash does not match")
+        split_snapshot = {
+            "path": str(snapshot_path),
+            "sha256": _sha256(snapshot_path),
+            "validation_selection_sha256": snapshot[
+                "validation_selection_sha256"
+            ],
+        }
+    else:
+        train_rows, validation_rows = _split_validation(
+            eligible_rows,
+            validation_groups_per_class=args.validation_groups_per_class,
+            seed=args.seed,
+        )
+    group_weights, difficulty_record = _load_group_weights(
+        args.difficulty_manifest
+    )
+    train_groups = {_group_key(row) for row in train_rows}
+    unknown_groups = sorted(set(group_weights) - train_groups)
+    if unknown_groups:
+        raise ValueError(
+            "Difficulty manifest contains groups outside the training split: "
+            f"{unknown_groups[:5]}"
+        )
     schedule = _class_balanced_schedule(
         train_rows,
         steps=args.steps,
         grad_accum=args.grad_accum,
         seed=args.seed,
         task_weights=task_weights,
+        group_weights=group_weights,
+        group_offset=args.group_offset,
     )
     class_counts = Counter(
         f"{row['task']}::{row['label']}" for row in schedule
@@ -730,6 +901,10 @@ def main() -> None:
         "schedule_sha256": _rows_sha256(schedule),
         "schedule_exposures": len(schedule),
         "task_weights": task_weights,
+        "selected_tasks": sorted(selected_tasks),
+        "group_offset": args.group_offset,
+        "difficulty_groups": difficulty_record,
+        "split_snapshot": split_snapshot,
         "class_exposures": dict(sorted(class_counts.items())),
         "validation_rows_detail": _selection_record(validation_rows),
         "test_intersection_audit": split_audit,
@@ -780,6 +955,8 @@ def main() -> None:
                 grad_accum=args.grad_accum,
                 seed=args.seed,
                 task_weights=task_weights,
+                group_weights=group_weights,
+                group_offset=args.group_offset,
             )
             if _rows_sha256(previous_schedule) != previous_split["schedule_sha256"]:
                 raise ValueError(
@@ -837,8 +1014,8 @@ def main() -> None:
         "started_at": started_at.isoformat(),
         "mode": "local_stage1_grouped_generative_qlora",
         "model_dir": str(MODEL_DIR),
-        "manifest": str(MANIFEST_PATH),
-        "manifest_sha256": _sha256(MANIFEST_PATH),
+        "manifest": str(manifest_path),
+        "manifest_sha256": _sha256(manifest_path),
         "gpu": {
             "name": torch.cuda.get_device_name(0),
             "total_memory_gib": torch.cuda.get_device_properties(0).total_memory
@@ -861,6 +1038,10 @@ def main() -> None:
             "seed": args.seed,
             "checkpoint_selection": "task_mean_macro_f1_then_json_rate_then_loss",
             "task_weights": task_weights,
+            "selected_tasks": sorted(selected_tasks),
+            "difficulty_manifest": difficulty_record,
+            "split_snapshot": split_snapshot,
+            "group_offset": args.group_offset,
             "init_adapter": (
                 str(args.init_adapter.resolve()) if args.init_adapter else None
             ),
@@ -1022,8 +1203,9 @@ def main() -> None:
                     "loss": initialization_validation["loss"],
                     "accuracy": initialization_validation["accuracy"],
                     "macro_f1": initialization_validation["macro_f1"],
-                    "oct_macro_f1": initialization_validation["per_task"][
-                        "oct_aux_4class"
+                    "metric_task": args.metric_task,
+                    "metric_macro_f1": initialization_validation["per_task"][
+                        args.metric_task
                     ]["macro_f1"],
                     "json_valid_rate": initialization_validation[
                         "json_valid_rate"

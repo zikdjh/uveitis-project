@@ -29,6 +29,8 @@ PHASE1_TASKS = {
     "fundus_toxo_binary",
     "eye_five_class",
     "oct_aux_4class",
+    "uwf_7class",
+    "uwf_uveitis_binary",
 }
 
 TASK_LABELS = {
@@ -47,6 +49,8 @@ TASK_LABELS = {
         "Uveitis",
     ],
     "oct_aux_4class": ["CNV", "DME", "DRUSEN", "NORMAL"],
+    "uwf_7class": ["AMD", "DR", "Healthy", "PM", "RD", "RVO", "Uveitis"],
+    "uwf_uveitis_binary": ["non_uveitis", "uveitis"],
 }
 
 

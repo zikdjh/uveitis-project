@@ -1,0 +1,212 @@
+{
+  "steps": 60,
+  "grad_accum": 4,
+  "train_rows": 485,
+  "validation_rows": 18,
+  "train_groups": 417,
+  "validation_groups": 14,
+  "validation_selection_sha256": "d5bc0f2441f77857c8550ea07a72ea7be422448b59bbcc6c6f95b937dec9ac09",
+  "schedule_sha256": "eb6b03ea17e7cf446b6cb5e09a05bdd28b5a816a7915a493f1d25617ddb2c91a",
+  "schedule_exposures": 240,
+  "task_weights": {
+    "uwf_7class": 1,
+    "eye_five_class": 1,
+    "oct_uveitis_4class": 1,
+    "oct_aux_4class": 1,
+    "fundus_toxo_binary": 1
+  },
+  "selected_tasks": [
+    "eye_five_class",
+    "fundus_toxo_binary",
+    "oct_aux_4class",
+    "oct_uveitis_4class",
+    "uwf_7class"
+  ],
+  "group_offset": 0,
+  "difficulty_groups": {},
+  "class_exposures": {
+    "uwf_7class::AMD": 34,
+    "uwf_7class::DR": 35,
+    "uwf_7class::Healthy": 34,
+    "uwf_7class::PM": 34,
+    "uwf_7class::RD": 34,
+    "uwf_7class::RVO": 34,
+    "uwf_7class::Uveitis": 35
+  },
+  "validation_rows_detail": [
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "PM",
+      "source_group": "14_open_uwf700:PM:217",
+      "group_key": "14:14_open_uwf700:PM:217",
+      "image": "data/PM-013.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "AMD",
+      "source_group": "14_open_uwf700:AMD:61",
+      "group_key": "14:14_open_uwf700:AMD:61",
+      "image": "data/AMD-018.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "PM",
+      "source_group": "14_open_uwf700:PM:210",
+      "group_key": "14:14_open_uwf700:PM:210",
+      "image": "data/PM-006.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "Healthy",
+      "source_group": "14_open_uwf700:Healthy:511",
+      "group_key": "14:14_open_uwf700:Healthy:511",
+      "image": "data/Healthy-008.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "RD",
+      "source_group": "14_open_uwf700:RD:483",
+      "group_key": "14:14_open_uwf700:RD:483",
+      "image": "data/RD-080.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "AMD",
+      "source_group": "14_open_uwf700:AMD:97",
+      "group_key": "14:14_open_uwf700:AMD:97",
+      "image": "data/AMD-086.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "DR",
+      "source_group": "14_open_uwf700:DR:12",
+      "group_key": "14:14_open_uwf700:DR:12",
+      "image": "data/DR-023.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "Healthy",
+      "source_group": "14_open_uwf700:Healthy:516",
+      "group_key": "14:14_open_uwf700:Healthy:516",
+      "image": "data/Healthy-013.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "RD",
+      "source_group": "14_open_uwf700:RD:431",
+      "group_key": "14:14_open_uwf700:RD:431",
+      "image": "data/RD-028.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "Uveitis",
+      "source_group": "14_open_uwf700:Uveitis:369",
+      "group_key": "14:14_open_uwf700:Uveitis:369",
+      "image": "data/Uveitis-066.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "RVO",
+      "source_group": "14_open_uwf700:RVO:186",
+      "group_key": "14:14_open_uwf700:RVO:186",
+      "image": "data/RVO-082.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "DR",
+      "source_group": "14_open_uwf700:DR:43",
+      "group_key": "14:14_open_uwf700:DR:43",
+      "image": "data/DR-081.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "RVO",
+      "source_group": "14_open_uwf700:RVO:174",
+      "group_key": "14:14_open_uwf700:RVO:174",
+      "image": "data/RVO-070.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "AMD",
+      "source_group": "14_open_uwf700:AMD:97",
+      "group_key": "14:14_open_uwf700:AMD:97",
+      "image": "data/AMD-087.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "Uveitis",
+      "source_group": "14_open_uwf700:Uveitis:363",
+      "group_key": "14:14_open_uwf700:Uveitis:363",
+      "image": "data/Uveitis-060.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "DR",
+      "source_group": "14_open_uwf700:DR:12",
+      "group_key": "14:14_open_uwf700:DR:12",
+      "image": "data/DR-024.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "AMD",
+      "source_group": "14_open_uwf700:AMD:61",
+      "group_key": "14:14_open_uwf700:AMD:61",
+      "image": "data/AMD-017.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_7class",
+      "label": "DR",
+      "source_group": "14_open_uwf700:DR:43",
+      "group_key": "14:14_open_uwf700:DR:43",
+      "image": "data/DR-080.jpg"
+    }
+  ],
+  "test_intersection_audit": {
+    "policy": "13=label+patient_id; 03=label+stem_with_aug_prefix_removed; 02=image_path; 01=excluded",
+    "datasets": {
+      "14_open_uwf700": {
+        "train_rows": 503,
+        "eligible_rows": 503,
+        "excluded_rows": 0,
+        "test_rows": 90,
+        "train_groups": 431,
+        "eligible_groups": 431,
+        "test_groups": 78,
+        "shared_train_test_groups": 0
+      }
+    },
+    "excluded_rows": 0,
+    "exclusion_counts": {},
+    "eligible_rows": 503,
+    "eligible_groups": 431,
+    "eligible_test_group_overlap": 0,
+    "test_images_read": false
+  },
+  "note": "Whole groups are held out. 01 is excluded because it has no patient IDs and every source group overlaps test. 13 uses label plus patient ID to avoid splitting a label of the same patient while preserving multi-label patients. 03 is grouped by label and augmentation-stripped stem; 02 has no patient metadata, so each image remains its own group.",
+  "schedule_history": [
+    {
+      "steps": 60,
+      "grad_accum": 4,
+      "schedule_exposures": 240,
+      "schedule_sha256": "eb6b03ea17e7cf446b6cb5e09a05bdd28b5a816a7915a493f1d25617ddb2c91a"
+    }
+  ]
+}

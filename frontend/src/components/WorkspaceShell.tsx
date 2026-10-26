@@ -170,11 +170,6 @@ export default function WorkspaceShell({ mode }: { mode: WorkspaceMode }) {
             <span>退出登录</span>
           </button>
         </div>
-
-        <div className="sidebar-foot">
-          <ShieldCheck size={15} />
-          <span>医疗结论由医生复核</span>
-        </div>
       </aside>
 
       <button
@@ -211,11 +206,6 @@ export default function WorkspaceShell({ mode }: { mode: WorkspaceMode }) {
         </header>
 
         <main className="app-main"><Outlet /></main>
-
-        <footer className="app-footer">
-          <span>线上内容不能替代面诊或眼科检查。</span>
-          <span>Uveitis Aid · 临床辅助记录</span>
-        </footer>
       </div>
     </div>
   );
