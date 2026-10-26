@@ -1,6 +1,0 @@
-{
-  "loss": 0.027431930393807608,
-  "evaluated": 96,
-  "skipped": 0,
-  "note": "Generation and task-level macro-F1 belong in the evaluator."
-}

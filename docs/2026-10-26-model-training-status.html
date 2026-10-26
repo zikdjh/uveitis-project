@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>训练状态 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-progress-tracking.html">上一份</a>
+    <a href="2026-10-26-model-training-progress.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>训练</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>训练状态</h1>
+  <p class="doc-summary">当前模型、数据、checkpoint、预算和硬件状态</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-model-training-status.html</code></p>
+  <article class="html-body">
+<p>更新日期：2026-10-26</p>
+<h2>当前状态</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主模型</td>
+<td>Qwen3.5-4B</td>
+</tr>
+<tr>
+<td>本地基座</td>
+<td><code>model-training/models/qwen/Qwen3.5-4B/</code>，14 个模型文件，9.34 GB</td>
+</tr>
+<tr>
+<td>训练方式</td>
+<td>4-bit NF4 QLoRA，本地 RTX 4060 Laptop</td>
+</tr>
+<tr>
+<td>训练数据</td>
+<td><code>model-training/datasets/training/manifest.csv</code>，16,638 张图像</td>
+</tr>
+<tr>
+<td>数据划分</td>
+<td>train 14,734 / validation 177 / test 1,727</td>
+</tr>
+<tr>
+<td>当前冻结评估基线</td>
+<td><code>model-training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code>，第 100 步</td>
+</tr>
+<tr>
+<td>当前 OCT 候选</td>
+<td><code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code>，第 20 步</td>
+</tr>
+<tr>
+<td>最近正式本地训练</td>
+<td><code>local-4060-oct-focus-cont-20261025-01</code>，50 步后早停，最佳验证步 20</td>
+</tr>
+<tr>
+<td>当前冻结测试评估</td>
+<td>第 20 步候选 OCT 1,000 条已完成；第 100 步基线在 145/1,000 处停止，可断点续跑</td>
+</tr>
+<tr>
+<td>本地中间产物</td>
+<td>2026-10-26 已清理；仅保留两组当前 best adapter、指标和冻结评估断点</td>
+</tr>
+<tr>
+<td>补充决策模型</td>
+<td>默认关闭，等待真实决策数据与医生审核</td>
+</tr>
+<tr>
+<td>活跃训练容器</td>
+<td>无；本机评估进程已于 2026-10-25 23:51 左右停止，GPU 已释放</td>
+</tr>
+<tr>
+<td>本机控制环境</td>
+<td>Python 3.11.17、Modal 1.6.2，预检 18/18 通过</td>
+</tr>
+<tr>
+<td>远端依赖探测</td>
+<td>固定提交镜像可识别 <code>qwen3_5</code>、processor 和 AutoModel；无 GPU 探测成功</td>
+</tr>
+<tr>
+<td>本地 CUDA 环境</td>
+<td>RTX 4060 Laptop 8 GB，PyTorch 2.8.0+cu128，CUDA 可用</td>
+</tr>
+<tr>
+<td>本地 4B 冒烟训练</td>
+<td>已完成 1 步和连续 3 步 4-bit QLoRA 前向、反向、AdamW 更新</td>
+</tr>
+<tr>
+<td>本地 20 步短训</td>
+<td><code>local-4060-short-20261025-01</code> 完成，20/20 optimizer steps，23.7 秒</td>
+</tr>
+<tr>
+<td>本地正式训练显存</td>
+<td>峰值分配 <code>5.45 GiB</code>，峰值保留 <code>5.69 GiB</code>，设备总显存 <code>8.00 GiB</code></td>
+</tr>
+</tbody>
+</table>
+<p>本轮正式训练全程在本地 RTX 4060 执行，新增 Modal GPU 计量为 <code>$0.00</code>。此前的 Modal 执行账目仍以控制台账单为准，不由本地训练改变。</p>
+<h2>2026-10-25 停止点</h2>
+<p>今日工作已停止，当前没有训练或评估进程，RTX 4060 显存占用已回落到 <code>0 MiB</code>。冻结测试集评估的完整进度、指标、配对快照和恢复命令见 <code>2026-10-26-qwen3.5-4b-progress-stop.html</code>。</p>
+<ul>
+<li>第 20 步 OCT 候选：<code>oct_aux_4class</code> 冻结测试集 <code>1000/1000</code> 已完成，状态 <code>ok</code>，准确率 <code>0.947</code>，macro-F1 <code>0.947245</code>，JSON 有效率 <code>100%</code>。</li>
+<li>第 100 步基线：同一测试集已完成 <code>145/1000</code>，断点保存在 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/predictions.partial.jsonl</code>。</li>
+<li>停止时的 145 条全部属于 CNV 区块；第 100 步基线为 <code>141/145</code>，第 20 步候选为 <code>137/145</code>。该快照样本不完整，不能作为最终选型结论。</li>
+</ul>
+<h2>2026-10-26 目录整理</h2>
+<ul>
+<li>删除 <code>.uv-cache</code>、<code>backend/.uv-cache</code>、<code>.cache</code>、<code>.npm-cache</code>、<code>.tmp-local</code>、pytest 缓存和项目代码 <code>__pycache__</code>。</li>
+<li>删除根目录及 <code>frontend/node_modules</code>、<code>frontend/dist</code>；后续需要前端开发时重新执行 <code>npm install</code> 和构建命令。</li>
+<li>删除 smoke run、预检 run、中间 checkpoint、<code>training_state.pt</code>、重复 <code>processor/</code> 和非当前 <code>final_adapter</code>，本地训练产物由约 <code>4.55 GiB</code> 降到约 <code>83 MiB</code>。</li>
+<li>保留 <code>local-4060-grouped-cont-20261025-01/best_adapter</code>、<code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>、训练指标和冻结测试断点。</li>
+<li>本地 <code>-Resume</code> 所需的 checkpoint 和 optimizer state 已不在本机；如需续训，先从 Modal <code>uveitis-runs</code> 恢复对应 run。</li>
+<li>本轮预计回收约 <code>15.67 GiB</code>；清理后没有训练或评估进程，RTX 4060 显存占用为 <code>0 MiB</code>。</li>
+</ul>
+<p>本地基座已从 Modal <code>uveitis-models</code> 拉取完成，两份掩码权重分片均通过 safetensors 头校验。本地正式训练直接读取 <code>model-training/models/qwen/Qwen3.5-4B/</code>，不需要启动 Modal 容器。</p>
+<p>本地正式训练已完成，并从第 300、375、450 步继续受控续训。最终目标为 <code>500</code> 个优化步、梯度累积 <code>4</code>（共 2,000 次样本曝光），图像像素上限 <code>65,536</code>、最大序列长度 <code>256</code>。首次训练耗时 <code>1,310.02</code> 秒，400 步扩展续训 485.62 秒，450 步低学习率续训 425.22 秒，500 步低学习率续训 317.50 秒；四次本地运行累计约 <code>2,538.36</code> 秒（42.31 分钟）。</p>
+<p>前 375 步的最佳验证损失为第 150 步的 <code>0.0261653</code>。第 400、425 步在低学习率续训中分别为 <code>0.0542480</code>、<code>0.0446721</code>；第 450 步降至 <code>0.0254597</code>，首次优于原最佳值。第 475、500 步分别为 <code>0.0272464</code>、<code>0.0260542</code>，均未超过第 450 步，因此发布候选保持为第 450 步的 <code>best_adapter</code>，SHA256 为 <code>8820450d565b5c139d9b0bda228b4375e2ed5b3af7c87670d8637069a0384b3e</code>。</p>
+<p>训练划分固定为 12,159 条训练行和 68 条分层验证行。300、400、450、500 步调度逐级保留为完整前缀；15 个任务标签类别在 500 步计划中各曝光 133–134 次。验证文件 SHA256 为 <code>f0f08cdd3f2dbcd194f925cf75283ebc67fb164d15b0dbac868bf26916b3aa34</code>；300、400、450、500 步调度 SHA256 分别为 <code>47ac1b54a1b74ddc54044471d555fa59ebdcd0b6ca164ffad039bda69a4f60cd</code>、<code>208ac912d1e9c28c3412c9d138c65c41e387e8c7487f9bf7daf0c93209f1c5bd</code>、<code>6d9cdd25f25a1f1839515678b0e60a2e25fc43122d38edc64c35eca57200e724</code>、<code>04f1bd3793be7469639e125b8e5f13c6a9e031b7f8fb0d0bcbc3c9b749e3a12a</code>。450 和 500 步续训学习率为 <code>2.5e-5</code>，此前为 <code>1e-4</code>。</p>
+<p>第 450 步最佳 adapter 约 <code>40.54 MiB</code>，对应 checkpoint 为 <code>checkpoints/step-000450/</code>。前一个第 150 步最佳 adapter 的 SHA256 为 <code>03bb2cbc09facd88b4b8a292691533225245b07cc494fa6fe9f8f3d72c7c572a</code>，已由新最佳覆盖。上述历史 checkpoint、<code>training_state.pt</code> 和非当前 <code>best_adapter</code> 已于 2026-10-26 从本地清理，需要时从 Modal <code>uveitis-runs</code> 恢复。旧最佳曾完成本地 4-bit 基座装载验证，processor 为 <code>Qwen3VLProcessor</code>。</p>
+<p>这是第一阶段 LoRA 训练结果，不是已通过临床验证的模型。当前验证仅使用生成式验证损失；尚缺少冻结 test 集上的 F1/AUC、亚组评估和医生复核。01/03 数据缺少患者 ID，指标不能视为跨患者泛化；少数类别存在过采样，过拟合风险仍在。</p>
+<h2>本地 4060 验证</h2>
+<p>本地隔离环境位于 <code>model-training/.venv-local/</code>，版本锁定在 <code>environment/requirements-local-cuda.txt</code> 和 <code>environment/runtime.lock.json</code>。<code>bitsandbytes</code> 在 Windows 上通过 <code>BNB_CUDA_VERSION=128</code> 加载 CUDA 12.8 后端，已实际完成 4-bit 量化往返和 GPU 运算。</p>
+<p>已完成六次独立冒烟运行和一次 20 步短训，结果均为 <code>ok</code>：</p>
+<table>
+<thead>
+<tr>
+<th>Run</th>
+<th style="text-align:right">样本/步数</th>
+<th style="text-align:right">图像 token 上限</th>
+<th style="text-align:right">最大序列</th>
+<th style="text-align:right">峰值分配显存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>local-4060-smoke-20261025-01</code></td>
+<td style="text-align:right">1 / 1</td>
+<td style="text-align:right">16,384 px</td>
+<td style="text-align:right">256</td>
+<td style="text-align:right">5.45 GiB</td>
+</tr>
+<tr>
+<td><code>local-4060-smoke-20261025-02</code></td>
+<td style="text-align:right">3 / 3</td>
+<td style="text-align:right">65,536 px</td>
+<td style="text-align:right">256</td>
+<td style="text-align:right">5.45 GiB</td>
+</tr>
+<tr>
+<td><code>local-4060-smoke-20261025-03</code></td>
+<td style="text-align:right">1 / 1</td>
+<td style="text-align:right">200,704 px</td>
+<td style="text-align:right">512</td>
+<td style="text-align:right">5.51 GiB</td>
+</tr>
+<tr>
+<td><code>local-4060-smoke-20261025-04</code></td>
+<td style="text-align:right">1 / 1</td>
+<td style="text-align:right">262,144 px</td>
+<td style="text-align:right">640</td>
+<td style="text-align:right">5.75 GiB</td>
+</tr>
+<tr>
+<td><code>local-4060-smoke-20261025-05</code></td>
+<td style="text-align:right">1 / 1</td>
+<td style="text-align:right">451,584 px</td>
+<td style="text-align:right">1024</td>
+<td style="text-align:right">6.47 GiB</td>
+</tr>
+<tr>
+<td><code>local-4060-short-20261025-01</code></td>
+<td style="text-align:right">20 / 20</td>
+<td style="text-align:right">65,536 px</td>
+<td style="text-align:right">256</td>
+<td style="text-align:right">5.45 GiB</td>
+</tr>
+</tbody>
+</table>
+<p>冒烟运行原始记录保存 <code>smoke_metrics.json</code> 和周期显存采样 <code>memory_monitor.jsonl</code>。2026-10-26 已删除冒烟 adapter、processor 和中间 checkpoint，只保留小型指标文件。完整 4B 权重未修改；当前正式评估基线为 <code>local-4060-grouped-cont-20261025-01/best_adapter</code>，OCT 候选为 <code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>。</p>
+<p>本地正式训练已验证 <code>--image-pixels 65536 --max-length 256 --grad-accum 4</code> 配置。由于 8 GB 显存仅余约 2.3 GiB，不能沿用 L40S 的 <code>448×448 + 1024 tokens + 较大 batch</code> 配置。当前 <code>causal_conv1d</code> 和 <code>flash-linear-attention</code> 使用参考实现，速度较慢，但不影响已通过的正确性验证。</p>
+<p>正式本地训练单步约 <code>4.0–6.0 秒</code>，验证约 <code>21–27 秒</code>。周期 checkpoint 和 <code>training_state.pt</code> 已于 2026-10-26 从本地清理，当前不能直接使用 <code>-Resume</code>。需要续训时，先从 Modal <code>uveitis-runs</code> 恢复对应 run 的 <code>checkpoints/</code> 和 <code>training_state.pt</code>，再使用原调度运行 <code>run_local_4060_formal.ps1 -Resume</code>。</p>
+<p>本次安装遗留的 <code>.tmp-local/</code> 已通过提权清理删除；它不包含训练数据、模型或 adapter。CUDA 环境和当前 two-best-adapter 训练产物未受影响。</p>
+<h2>训练前检查</h2>
+<ul>
+<li>确认 <code>model-training/datasets/training/manifest.csv</code> 可定位全部图像。</li>
+<li>确认数据清单哈希、任务分布和排除项与本次 run 配置一致。</li>
+<li>确认 <code>uveitis-data</code>、<code>uveitis-models</code>、<code>uveitis-runs</code> 均有预期内容。</li>
+<li>确认当前预算和允许运行时长；不要使用常驻 GPU 服务。</li>
+<li>设置唯一 <code>UV_RUN_ID</code>，保留 config、指标、checkpoint、评估和 model card。</li>
+<li>用 <code>model-training/scripts/launch_training.ps1 -DryRun</code> 检查参数；确认后再去掉 <code>-DryRun</code>。</li>
+</ul>
+<h2>训练后检查</h2>
+<ul>
+<li>将 best adapter 与对应 checkpoint 分开记录，不把最后一步 adapter 自动当成最佳模型。</li>
+<li>提交 Volume，保存训练指标、验证指标和固定 holdout 结果。</li>
+<li>更新 <code>2026-10-25-training-cost-ledger-modal.html</code>。</li>
+<li>将小型评估快照放入 <code>model-training/assets/qwen3.5-4b/&lt;run-id&gt;/</code>。</li>
+<li>记录是否触发停止条件、累计消耗和未完成事项。</li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>训练状态 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

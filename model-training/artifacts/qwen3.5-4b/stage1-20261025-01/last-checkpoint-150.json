@@ -1,7 +1,0 @@
-{
-  "checkpoint_dir": "/runs/qwen3.5-4b/qwen4b-stage1-20261025-01/checkpoints/step-000150",
-  "optimizer_step": 150,
-  "processed_samples": 600,
-  "skipped_samples": 0,
-  "attempted_samples": 600
-}

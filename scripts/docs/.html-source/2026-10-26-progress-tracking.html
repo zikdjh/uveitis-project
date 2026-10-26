@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>项目进度与模型训练进度跟踪 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-project-development-progress.html">上一份</a>
+    <a href="2026-10-26-model-training-progress.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>项目跟踪</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>项目进度与模型训练进度跟踪</h1>
+  <p class="doc-summary">滚动记录项目交付、训练评估、验收检查点和风险状态的统一跟踪页</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-progress-tracking.html</code></p>
+  <article class="html-body">
+<p>跟踪基线日期：2026-10-26。项目目标收口日期：2026-11-10。</p>
+<p>本页是项目开发与模型训练的统一滚动跟踪入口。详细背景分别见 <a href="2026-10-26-project-development-progress.html">项目开发进度与 11.10 收口计划</a>和 <a href="2026-10-26-model-training-progress.html">模型训练进度与 11.10 收口计划</a>；执行细节和恢复命令继续以各专项文档为准。</p>
+
+<h2>跟踪看板</h2>
+<table>
+  <thead>
+    <tr><th>跟踪项</th><th>当前状态</th><th>下一检查点</th><th>判定依据</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>项目工程交付</td><td>进行中，约 72%</td><td>10-28：界面和文档第一轮冻结</td><td>患者端、医生端、管理员端可用；鉴权和病例流程可演示</td></tr>
+    <tr><td>模型训练</td><td>评估收口</td><td>10-27：补齐第 100 步冻结测试</td><td>两组 adapter 存在；第 20 步候选已完成，基线未完成</td></tr>
+    <tr><td>模型运行集成</td><td>部分完成</td><td>11-01：分析链路接入模型运行服务</td><td>当前只有健康检查和资产定位，真实推理未接入</td></tr>
+    <tr><td>端到端验收</td><td>未开始</td><td>11-04：完成登录至复核的联调</td><td>需要连续流程证据，不接受单页孤岛演示</td></tr>
+    <tr><td>最终冻结</td><td>未开始</td><td>11-10：冻结接口、adapter、文档和限制说明</td><td>项目完成定义为工程收口，不等同临床验证</td></tr>
+  </tbody>
+</table>
+
+<h2>项目开发跟踪</h2>
+<table>
+  <thead>
+    <tr><th>ID</th><th>工作项</th><th>状态</th><th>当前结果</th><th>下一检查点</th><th>证据入口</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>P-01</td><td>数据整理与清单</td><td>完成</td><td>数据集解压、结构重组、文件清单和归档清理完成；训练 manifest 可定位。</td><td>11-08 前冻结版本</td><td>数据集索引、归档清理记录</td></tr>
+    <tr><td>P-02</td><td>鉴权与权限</td><td>完成并可演示</td><td>双 Token 刷新、CSRF、角色权限、账号管理、会话撤销和审计已落地。</td><td>11-02 端到端回归</td><td>鉴权与权限体系文档</td></tr>
+    <tr><td>P-03</td><td>前端工作区外壳</td><td>完成第一轮</td><td>桌面分组导航、移动抽屉、工作区身份和账号权限页已收口。</td><td>10-28 移动端复核</td><td>项目开发进度文档</td></tr>
+    <tr><td>P-04</td><td>剩余页面视觉统一</td><td>进行中</td><td>患者首页、病例详情、管理员概览、登录和状态页待统一加载、错误、空状态和响应式布局。</td><td>10-28 截图验收</td><td>项目开发进度文档</td></tr>
+    <tr><td>P-05</td><td>模型运行接入</td><td>进行中</td><td>运行服务可检查基座和 adapter 路径；分析任务仍未切换到真实推理。</td><td>11-01 请求契约和回写</td><td>模型运行服务、评估说明</td></tr>
+    <tr><td>P-06</td><td>端到端联调</td><td>未开始</td><td>需要串联登录、刷新、角色、病例、上传、分析、复核和知识检索。</td><td>11-04 全流程验收</td><td>项目开发进度文档</td></tr>
+    <tr><td>P-07</td><td>部署与交付</td><td>待收口</td><td>已有本地启动和 Docker Compose 基础，尚未执行完整部署验收。</td><td>11-08 环境回滚检查</td><td>项目总览、运行手册</td></tr>
+    <tr><td>P-08</td><td>补充决策模型</td><td>暂缓</td><td>主流程保持 <code>APP_DECISION_ENABLED=false</code>，等待真实决策数据和独立评测。</td><td>11-03 门槛复核</td><td>模型训练进度文档</td></tr>
+  </tbody>
+</table>
+
+<h2>模型训练跟踪</h2>
+<table>
+  <thead>
+    <tr><th>ID</th><th>训练项</th><th>状态</th><th>当前结果</th><th>下一检查点</th><th>证据</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>T-01</td><td>Qwen3.5-4B 基座准备</td><td>完成</td><td>本地基座约 9.34 GB，14 个模型文件；4-bit QLoRA 前向、反向和优化器更新已验证。</td><td>冻结运行读取路径</td><td><code>model-training/models/qwen/Qwen3.5-4B/</code></td></tr>
+    <tr><td>T-02</td><td>分组续训</td><td>完成</td><td>150/150 步；最佳第 100 步；55 条验证任务平均 macro-F1 0.865804，OCT macro-F1 0.768841。</td><td>作为基线完成同源冻结测试</td><td><code>local-4060-grouped-cont-20261025-01</code></td></tr>
+    <tr><td>T-03</td><td>OCT 聚焦续训</td><td>完成</td><td>50/50 步后早停；最佳第 20 步；55 条验证任务平均 macro-F1 0.873358，OCT macro-F1 0.790476。</td><td>等待完整基线比较</td><td><code>local-4060-oct-focus-cont-20261025-01</code></td></tr>
+    <tr><td>T-04</td><td>第 20 步候选冻结测试</td><td>完成</td><td>1,000/1,000 条；OCT accuracy 0.947，macro-F1 0.947245，JSON 有效率 100%。</td><td>作为候选保留，不单独宣布优胜</td><td><code>eval-oct-.../step20/eval_metrics.json</code></td></tr>
+    <tr><td>T-05</td><td>第 100 步基线冻结测试</td><td>进行中</td><td>已完成 145/1,000 条；停止时 145 条全部在 CNV 区块，不能作为最终结论。</td><td>10-27 前达到 1,000/1,000</td><td><code>eval-oct-.../step100/predictions.partial.jsonl</code></td></tr>
+    <tr><td>T-06</td><td>adapter 选型</td><td>等待中</td><td>只有候选相对基线的 OCT macro-F1 至少提升 0.02，且 JSON 有效率不低于 99%，才考虑提升。</td><td>10-28 记录提升或保留决定</td><td>两份同源 <code>eval_manifest.json</code></td></tr>
+    <tr><td>T-07</td><td>本地推理 smoke</td><td>未开始</td><td>需要检查模型运行服务的结构化输出、显存、超时和失败回退。</td><td>11-03 受控推理记录</td><td>模型评估与推理说明</td></tr>
+    <tr><td>T-08</td><td>决策模型门槛复核</td><td>暂缓</td><td>缺少真实脱敏病例、医生处置标签、独立测试集和稳定评测。</td><td>11-03 决定是否进入后续研究</td><td>模型训练进度文档</td></tr>
+  </tbody>
+</table>
+
+<h2>关键指标跟踪</h2>
+<table>
+  <thead>
+    <tr><th>指标</th><th>第 100 步基线</th><th>第 20 步候选</th><th>当前判定</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>内部验证准备</td><td>第 100 步</td><td>第 20 步</td><td>候选由小验证集筛出，不能替代冻结测试</td></tr>
+    <tr><td>任务平均 macro-F1</td><td>0.865804</td><td>0.873358</td><td>候选暂高，但样本只有 55 条</td></tr>
+    <tr><td>OCT 内部验证 macro-F1</td><td>0.768841</td><td>0.790476</td><td>提升 +0.021635，待冻结测试确认</td></tr>
+    <tr><td>OCT 冻结测试 macro-F1</td><td>待完成</td><td>0.947245</td><td>暂不能做完整比较</td></tr>
+    <tr><td>严格 JSON 有效率</td><td>100%</td><td>100%</td><td>均满足结构化输出要求</td></tr>
+    <tr><td>峰值保留显存</td><td>5.691 GiB</td><td>3.311 GiB（评估）</td><td>满足本地 8 GB 约束</td></tr>
+  </tbody>
+</table>
+
+<h2>检查点日历</h2>
+<table>
+  <thead>
+    <tr><th>日期</th><th>项目检查点</th><th>训练检查点</th><th>通过条件</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>10-26</td><td>两份进度文档和跟踪页建立，目录状态同步</td><td>核对训练产物和第 100 步断点</td><td>文档构建和链接检查通过</td></tr>
+    <tr><td>10-27</td><td>剩余界面开始收口</td><td>完成第 100 步 1,000 条冻结评估</td><td>无生成错误，selection 哈希一致</td></tr>
+    <tr><td>10-28</td><td>界面、文档和运行边界第一轮冻结</td><td>完成基线与候选比较，记录选型决定</td><td>设计验收通过；选型有书面依据</td></tr>
+    <tr><td>11-01</td><td>模型运行接入后端分析任务</td><td>冻结 adapter 并完成运行路径检查</td><td>请求、超时、回退和结果回写可演示</td></tr>
+    <tr><td>11-04</td><td>完成端到端联调和移动端回归</td><td>完成受控推理 smoke</td><td>病例全流程无阻断，错误状态可恢复</td></tr>
+    <tr><td>11-07</td><td>性能和可访问性复核</td><td>整理错误样本、指标和限制</td><td>无阻断问题，证据可复现</td></tr>
+    <tr><td>11-10</td><td>冻结工程交付与已知限制</td><td>冻结模型卡、adapter 和研究结论</td><td>文档、指纹、指标和验收记录齐备</td></tr>
+  </tbody>
+</table>
+
+<h2>风险跟踪</h2>
+<table>
+  <thead>
+    <tr><th>风险</th><th>等级</th><th>当前处理</th><th>责任人</th><th>复审日期</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>第 100 步基线冻结评估未完成</td><td>高</td><td>优先续跑，禁止在没有完整同源比较时提升候选。</td><td>训练执行</td><td>10-27</td></tr>
+    <tr><td>真实模型推理未接入分析链路</td><td>高</td><td>先固定请求契约和 adapter 读取路径，再做端到端联调。</td><td>后端与运行集成</td><td>11-01</td></tr>
+    <tr><td>前端剩余页面未统一</td><td>中</td><td>按工作区外壳已有规范逐页收口，使用桌面和移动截图验收。</td><td>前端执行</td><td>10-28</td></tr>
+    <tr><td>数据患者隔离和增强图限制</td><td>高</td><td>在所有交付文档中保留限制，不将指标表述为临床泛化。</td><td>数据与训练</td><td>11-07</td></tr>
+    <tr><td>本地 8 GB 显存上限</td><td>中</td><td>保持已验证配置，不扩大图像分辨率、序列长度或 batch。</td><td>训练执行</td><td>11-07</td></tr>
+    <tr><td>决策模型数据不足</td><td>中</td><td>默认关闭，不占用 11.10 主路径。</td><td>项目决策</td><td>11-03</td></tr>
+  </tbody>
+</table>
+
+<h2>决策记录</h2>
+<table>
+  <thead>
+    <tr><th>日期</th><th>决定</th><th>依据</th><th>状态</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>2026-10-25</td><td>停止当天训练和评估，保留第 20 步候选结果及第 100 步断点。</td><td>避免继续消耗本地时间；第 100 步尚未完成同源比较。</td><td>已执行</td></tr>
+    <tr><td>2026-10-26</td><td>项目按 2026-11-10 工程收口；不把当前 adapter 作为临床模型发布。</td><td>缺少患者级独立验证和医生复核。</td><td>生效</td></tr>
+    <tr><td>2026-10-26</td><td>补充决策模型继续暂缓。</td><td>缺少真实脱敏病例、医生标签和独立评测集。</td><td>待门槛复核</td></tr>
+  </tbody>
+</table>
+
+<h2>更新规则</h2>
+<ol>
+  <li>每次完成一个检查点，更新对应行的状态、日期、指标和证据路径；不删除历史决定。</li>
+  <li>训练指标必须同时记录 adapter SHA256、数据清单哈希、评估选择哈希和 JSON 有效率。</li>
+  <li>项目状态变化只在有构建、截图、评估文件或验收记录时标记为完成。</li>
+  <li>11.10 前若发现关键路径超期，优先缩减非关键功能，不降低鉴权、病例流程和数据边界要求。</li>
+</ol>
+
+<h2>相关文档</h2>
+<ul>
+  <li><a href="2026-10-26-project-development-progress.html">项目开发进度与 11.10 收口计划</a></li>
+  <li><a href="2026-10-26-model-training-progress.html">模型训练进度与 11.10 收口计划</a></li>
+  <li><a href="2026-10-26-model-training-status.html">训练状态</a></li>
+  <li><a href="2026-10-26-qwen3.5-4b-progress-stop.html">Qwen3.5-4B 训练进度与停止点</a></li>
+  <li><a href="2026-10-26-auth-access-control.html">系统鉴权与权限体系</a></li>
+  <li><a href="2026-10-26-model-runtime-evaluation.html">模型评估与推理说明</a></li>
+</ul>
+
+<p><strong>状态口径：</strong>“完成”表示已有可复查的代码、文档或指标证据；“进行中”表示本轮已开始但尚未达到验收条件；“暂缓”表示当前不占用 11.10 主路径。跟踪页不替代临床验证，也不把模型输出表述为诊断结论。</p>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>项目进度与模型训练进度跟踪 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

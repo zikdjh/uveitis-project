@@ -7,64 +7,80 @@
 ```text
 uveitis-project/
 ├── README.md                  本文件
-├── PROJECT_LAYOUT.md          当前目录、占用和清理说明
+├── docs/2026-10-26-project-layout.html 项目目录索引
 ├── docs/                      项目文档与训练记录
 │   ├── index.html              浏览器文档入口
+│   ├── 2026-10-26-model-training-status.html 当前训练状态
 │   ├── 2026-10-25-training-cost-ledger-modal.html  Modal 训练消耗与结果
-│   └── 2026-10-25-training-budget-plan-modal-l40s.html 训练预算计划
-├── datasets/                  数据集存放区
-│   ├── raw/                   新下载压缩包的临时暂存区
-│   ├── extracted/             完整解压数据集与 manifests/ 清单
-│   └── training/              Modal 训练精简包、标签与 manifest
-├── artifacts/                 本地训练结果快照和参考材料
-│   └── qwen3.5-4b/            训练产物的物理目录，经 model-training/artifacts 链接访问
+│   ├── 2026-10-25-training-budget-plan-modal-l40s.html 训练预算计划
+│   └── 2026-10-26-model-runtime-evaluation.html 评估与推理说明
+├── model-runtime/             模型运行服务、评估与部署入口
+│   ├── app/                   模型健康检查 API
+│   ├── code/                  本地评估代码
+│   ├── scripts/               运行脚本
+│   └── assets/                运行资产索引
 ├── model-training/            模型训练统一管理入口
-│   ├── code/training/         Qwen QLoRA、评估和 Modal Volume 代码
+│   ├── code/training/         Qwen QLoRA 和 Modal 训练代码
 │   ├── scripts/modal/         训练子集与 Volume 同步脚本
-│   ├── docs/                  训练计划、预算和消耗记录
-│   ├── data/training/         训练数据的物理目录，经 model-training/data 链接访问
-│   └── artifacts/             本地产物入口
-├── outputs/                   临时运行输出，稳定结果归档到 artifacts/
+│   ├── datasets/raw/          新下载压缩包的临时暂存区
+│   ├── datasets/extracted/    完整解压数据集与 manifests/ 清单
+│   ├── datasets/training/     训练数据与 manifest
+│   ├── models/                Qwen 基座
+│   └── assets/                训练产物与评估快照
+├── outputs/                   临时运行输出说明
 ├── scripts/
 │   ├── datasets/              数据集清单校验与维护脚本
 │   └── research/              浏览器检索脚本存档（.mjs，按任务日期归档）
 ├── backend/                   FastAPI 业务服务
 ├── frontend/                  React 三端
-└── ai-services/
-    ├── training/              模型训练代码与配置
-    ├── inference/             推理服务（vLLM 部署）
-    └── rag-kb/                RAG 知识库构建与检索
+└── ai-services/              预留的 AI 服务扩展目录
 ```
 
-## 当前状态（2026-10-25）
+## 当前状态（2026-10-26）
+
+目标工程收口日期：**2026-11-10**。统一跟踪见 `docs/2026-10-26-progress-tracking.html`；项目开发进度见 `docs/2026-10-26-project-development-progress.html`，模型训练进度见 `docs/2026-10-26-model-training-progress.html`。
 
 - [x] 数据集调研：国内开源眼科数据集梳理、许可逐项核验（见 docs/ 调研文档）
 - [x] 项目计划书与模型训练计划书（v1.0，12 周里程碑 A–E 训练方案）
 - [x] 葡萄膜炎 OCT 75 图、五分类 2,298 图、ToxoFundus 592 文件下载并校验
-- [x] 数据集已重新下载、解压并整理（2026-10-25），索引见 `docs/2026-10-25-dataset-index.html`
-- [x] 训练结果快照已按 run 和评估阶段归档，索引见 `docs/2026-10-25-artifacts-index.html`
+- [x] 数据集已重新下载、解压并整理（2026-10-25），索引见 `docs/2026-10-26-dataset-index.html`
+- [x] 训练结果快照已按 run 和评估阶段归档，索引见 `docs/2026-10-26-training-assets-index.html`
 - [x] M1 前后端基础框架：病例建档、影像上传、分析任务、医生复核、管理概览
+- [x] 鉴权与权限体系：医生/管理员角色、双令牌无感刷新、CSRF、账号管理、登录限流与审计；见 `docs/2026-10-26-auth-access-control.html`
 - [x] SQLite 病例持久化与本地影像存储
 - [x] 核心模型适配边界与演示模式
 - [x] zvec 嵌入式知识库适配层：文档写入、过滤检索与本地持久化
 - [x] BGE-M3 通过 ModelScope 下载到本地，使用 CPU 生成 1024 维向量
 - [x] zvec 检索使用本地 BGE-M3，管理端展示向量数据库状态
-- [ ] 接入 Qwen3.5-4B 推理服务
+- [x] 项目目录完成训练资产、运行服务和项目文档归类；索引见 `docs/2026-10-26-project-layout.html`
+- [x] 前端首轮工作区界面完善：桌面/移动端导航、账号权限概览、账号列表移动卡片化和权限页空状态
+- [ ] 完成患者首页、病例详情、管理员概览、登录与状态页的统一视觉收口
+- [ ] 将模型运行 API 从健康检查接入完整影像推理链路
+- [ ] 完成 11.10 前工程验收：端到端流程、移动端检查、模型运行集成和文档冻结
 - [ ] 决策模型补充路径：根据项目进度、真实标注与评测结果决定是否启用
 
 ## 使用说明
 
 - HTML 文档统一从 `docs/index.html` 进入；文件名采用 `YYYY-MM-DD-kebab-case.html`。
 - 模型训练统一从站点内的“模型训练管理”页或 `model-training/README.md` 管理；训练任务、数据入口和产物入口都从这里查找。
-- 本页 HTML 版本为 [`2026-10-25-project-overview.html`](2026-10-25-project-overview.html)。
+- 模型运行、评估与部署统一从站点内的“模型运行服务”页或 `model-runtime/README.md` 管理。
+- 鉴权、角色权限、账号维护和会话安全统一见 [`2026-10-26-auth-access-control.html`](docs/2026-10-26-auth-access-control.html)。
+- 本页 HTML 版本为 [`2026-10-26-project-overview.html`](docs/2026-10-26-project-overview.html)。
 - 文档总索引：[`docs/index.html`](docs/index.html)。
-- 13 份项目 Markdown 已生成对应 HTML，原始 Markdown 保留；重建命令为 `.\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py`。
-- 数据集重新下载后先放 `datasets/raw/`；解压、核验后按 `datasets/extracted/<数据集名>/` 组织，并清理已展开的临时 ZIP。
-- 训练评估和验证快照放入 `artifacts/qwen3.5-4b/<run-id>/`，管理入口为 `model-training/artifacts/qwen3.5-4b/`；完整 adapter 和优化器状态仍以 Modal `uveitis-runs` 为真相源。
-- 训练子集位于 `datasets/training/`；逐文件数据清单位于 `datasets/extracted/manifests/`，已删除归档的来源账本也在那里。
+- 专题文档统一使用 HTML；除目录级 `README.md` 外，不保留专题 Markdown。重建与校验命令为 `.\model-training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py`。
+- 数据集重新下载后先放 `model-training/datasets/raw/`；解压、核验后按 `model-training/datasets/extracted/<数据集名>/` 组织，并清理已展开的临时 ZIP。
+- 训练评估和验证快照放入 `model-training/assets/qwen3.5-4b/<run-id>/`；模型运行与评估入口统一在 `model-runtime/`；完整 adapter 和优化器状态仍以 Modal `uveitis-runs` 为真相源。
+- 训练子集位于 `model-training/datasets/training/`；逐文件数据清单位于 `model-training/datasets/extracted/manifests/`，已删除归档的来源账本也在那里。
 - 检索脚本仅供归档复用，运行方式见各子目录内 round-*.mjs（ego-browser 环境）。
 
 ## 本地启动
+
+模型运行服务（可选；先启动再让后端连接）：
+
+```powershell
+cd model-runtime
+..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+```
 
 后端（Windows PowerShell）：
 

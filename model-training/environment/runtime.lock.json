@@ -4,7 +4,7 @@
   "local_controller": {
     "python": "3.11.17",
     "modal": "1.6.2",
-    "venv": ".venv-modal",
+    "venv": "model-training/.venv-modal",
     "requirements": "model-training/environment/requirements-modal.txt"
   },
   "local_cuda_training": {
@@ -47,9 +47,9 @@
     }
   },
   "data": {
-    "manifest": "datasets/training/manifest.csv",
+    "manifest": "model-training/datasets/training/manifest.csv",
     "manifest_sha256": "0BA7F4F9F56A411BBEF43836E8453CC2A10C52B7D86B7CA86A071E7233E91580",
-    "summary": "datasets/training/summary.json",
+    "summary": "model-training/datasets/training/summary.json",
     "summary_sha256": "7634E9EAB952F638E304170DA04CD1F38614333E947B8CF8FE88F2F961A0A406",
     "rows": 16638,
     "splits": {
@@ -114,9 +114,9 @@
     "continuation_learning_rate": 2.5e-05,
     "extended_schedule_sha256": "04f1bd3793be7469639e125b8e5f13c6a9e031b7f8fb0d0bcbc3c9b749e3a12a",
     "schedule_history_verified": true,
-    "final_adapter": "artifacts/qwen3.5-4b/local-4060-formal-20261025-01/final_adapter",
+    "final_adapter": "model-training/assets/qwen3.5-4b/local-4060-formal-20261025-01/final_adapter",
     "final_adapter_sha256": "2d5f02d78b30a4bfb6ef639ae28f8b14e32b26eabe0e7185dee44ccad0cb1e59",
-    "best_adapter": "artifacts/qwen3.5-4b/local-4060-formal-20261025-01/best_adapter",
+    "best_adapter": "model-training/assets/qwen3.5-4b/local-4060-formal-20261025-01/best_adapter",
     "best_adapter_sha256": "8820450d565b5c139d9b0bda228b4375e2ed5b3af7c87670d8637069a0384b3e",
     "previous_best_step": 150,
     "previous_best_adapter_sha256": "03bb2cbc09facd88b4b8a292691533225245b07cc494fa6fe9f8f3d72c7c572a",

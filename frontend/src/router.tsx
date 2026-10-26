@@ -7,8 +7,10 @@ import AdminPage from "@/pages/AdminPage";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import PrivacyPage from "@/pages/PrivacyPage";
+import SecurityPage from "@/pages/SecurityPage";
 import { ForbiddenPage, NotFoundPage } from "@/pages/StatusPages";
 import AdminCaseDetailPage from "@/pages/admin/CaseDetailPage";
+import AccessPage from "@/pages/admin/AccessPage";
 import AdminCasesPage from "@/pages/admin/CasesPage";
 import AdminKnowledgePage from "@/pages/admin/KnowledgePage";
 import ServicesPage from "@/pages/admin/ServicesPage";
@@ -61,6 +63,7 @@ const router = createBrowserRouter([
           },
           { path: "reviews", element: <ReviewQueuePage /> },
           { path: "knowledge", element: <KnowledgePage /> },
+          { path: "security", element: <SecurityPage /> },
         ],
       },
     ],
@@ -77,6 +80,8 @@ const router = createBrowserRouter([
           { path: "cases/:caseId", element: <AdminCaseDetailPage /> },
           { path: "knowledge", element: <AdminKnowledgePage /> },
           { path: "services", element: <ServicesPage /> },
+          { path: "access", element: <AccessPage /> },
+          { path: "security", element: <SecurityPage /> },
         ],
       },
     ],

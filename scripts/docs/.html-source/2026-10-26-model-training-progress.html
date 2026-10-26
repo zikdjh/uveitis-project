@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>模型训练进度与 11.10 收口计划 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-model-training-status.html">上一份</a>
+    <a href="2026-10-26-qwen3.5-4b-progress-stop.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>训练</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>模型训练进度与 11.10 收口计划</h1>
+  <p class="doc-summary">Qwen3.5-4B 本地训练、冻结评估、选型门槛和后续排期</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-model-training-progress.html</code></p>
+  <article class="html-body">
+<p>文档日期：2026-10-26。模型训练工程目标收口日期：2026-11-10。</p>
+
+<h2>当前结论</h2>
+<ul>
+  <li>主模型确定为 Qwen3.5-4B，使用 4-bit NF4 QLoRA，在本机 RTX 4060 Laptop 8 GB 上训练和评估。</li>
+  <li>当前有两个工作 adapter：第 100 步分组续训基线，以及第 20 步 OCT 聚焦续训候选。</li>
+  <li>第 20 步 OCT 候选已经完成 <code>oct_aux_4class</code> 冻结测试集 1,000/1,000 条评估；第 100 步基线的同一评估只完成 145/1,000 条。</li>
+  <li>当前尚未提升候选，也尚未发布临床模型。是否切换运行 adapter，要等两份完整评估结果按同一清单和同一解析规则比较后再决定。</li>
+  <li>本阶段没有新增 Modal GPU 计量；本地训练继续受 8 GB 显存和训练预算双重约束。</li>
+</ul>
+
+<h2>模型与数据版本</h2>
+<table>
+  <thead>
+    <tr><th>项目</th><th>当前值</th><th>说明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>主模型</td><td>Qwen3.5-4B</td><td>本地基座位于 <code>model-training/models/qwen/Qwen3.5-4B/</code>。</td></tr>
+    <tr><td>训练方式</td><td>4-bit NF4、bfloat16 compute、双量化、LoRA r=8、alpha=16</td><td>适配 RTX 4060 Laptop 8 GB。</td></tr>
+    <tr><td>训练输入</td><td><code>model-training/datasets/training/manifest.csv</code></td><td>清单记录 16,638 张图像，训练/验证/测试划分为 14,734 / 177 / 1,727。</td></tr>
+    <tr><td>实际分组训练行</td><td>可用 12,156 行；训练 12,101 行、验证 55 行；训练/验证组为 5,184 / 33</td><td>从清单中排除了 71 行测试重叠或缺少患者隔离的行；训练没有读取测试图片。</td></tr>
+    <tr><td>OCT 冻结测试</td><td>1,000 条，四类各 250 条</td><td>使用同一冻结 selection 清单评估两个 adapter。</td></tr>
+    <tr><td>主要训练配置</td><td>图像像素 65,536，最大序列 256，梯度累积 4，周期验证</td><td>8 GB 显存下已验证的配置，不再向上扩大。</td></tr>
+    <tr><td>决策模型</td><td>Intern-Decision-4B，默认关闭</td><td>缺少真实脱敏病例、医生确认标签和独立评测集前不训练、不进入主流程。</td></tr>
+  </tbody>
+</table>
+
+<h2>已完成训练</h2>
+<table>
+  <thead>
+    <tr><th>Run</th><th>训练量</th><th>最佳点</th><th>55 条验证结果</th><th>资源</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>local-4060-grouped-cont-20261025-01</code></td>
+      <td>150/150 步</td>
+      <td>第 100 步</td>
+      <td>准确率 0.800；任务平均 macro-F1 0.865804；OCT macro-F1 0.768841；JSON 有效率 100%</td>
+      <td>约 1,881 秒；峰值保留 <code>5.691 GiB</code>；adapter SHA256 <code>517ef19f...</code></td>
+    </tr>
+    <tr>
+      <td><code>local-4060-oct-focus-cont-20261025-01</code></td>
+      <td>50/50 步，验证后早停</td>
+      <td>第 20 步</td>
+      <td>准确率 0.836364；任务平均 macro-F1 0.873358；OCT macro-F1 0.790476；JSON 有效率 100%</td>
+      <td>约 1,203 秒；峰值保留 <code>5.691 GiB</code>；adapter SHA256 <code>00ebeb2c...</code></td>
+    </tr>
+  </tbody>
+</table>
+<p>第 20 步相比第 100 步的内部验证 OCT macro-F1 提升 <code>+0.021635</code>，但 55 条验证样本量很小，只能用于候选筛选。训练日志中的 token loss 只作为次级指标，不能替代分任务分类指标。</p>
+
+<h2>冻结测试集评估</h2>
+<h3>第 20 步 OCT 候选</h3>
+<ul>
+  <li>状态：<code>ok</code>，1,000/1,000 条完成，生成错误 0。</li>
+  <li>准确率 <code>0.947</code>，macro-F1 <code>0.947245</code>，严格 JSON 有效率 <code>100%</code>。</li>
+  <li>评估耗时约 2,795 秒，峰值保留显存 <code>3.310546875 GiB</code>。</li>
+  <li>Adapter SHA256：<code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code>。</li>
+</ul>
+<table>
+  <thead>
+    <tr><th>类别</th><th style="text-align:right">精确率</th><th style="text-align:right">召回率</th><th style="text-align:right">F1</th><th style="text-align:right">支持数</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>CNV</td><td style="text-align:right">0.933071</td><td style="text-align:right">0.948</td><td style="text-align:right">0.940476</td><td style="text-align:right">250</td></tr>
+    <tr><td>DME</td><td style="text-align:right">0.968127</td><td style="text-align:right">0.972</td><td style="text-align:right">0.970060</td><td style="text-align:right">250</td></tr>
+    <tr><td>DRUSEN</td><td style="text-align:right">0.900383</td><td style="text-align:right">0.940</td><td style="text-align:right">0.919765</td><td style="text-align:right">250</td></tr>
+    <tr><td>NORMAL</td><td style="text-align:right">0.991453</td><td style="text-align:right">0.928</td><td style="text-align:right">0.958678</td><td style="text-align:right">250</td></tr>
+  </tbody>
+</table>
+<p>当前主要错误是 DRUSEN 被预测为 CNV，以及 NORMAL 被预测为 DRUSEN。该结果来自 13 号 OCT 测试集，不能直接外推到葡萄膜炎 OCT 或真实患者。</p>
+
+<h3>第 100 步分组续训基线</h3>
+<ul>
+  <li>状态：未完成，已完成 145/1,000 条。</li>
+  <li>断点：<code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/predictions.partial.jsonl</code>。</li>
+  <li>停止时 145 条全部位于 CNV 区块，基线正确 141/145，只能作为未完成快照。</li>
+  <li>恢复评估时必须复用第 20 步的同一冻结 selection 清单，不添加覆盖参数。</li>
+</ul>
+
+<h2>选型门槛</h2>
+<ol>
+  <li>先把第 100 步基线的同一冻结测试集补到 <code>1,000/1,000</code>，并确认 <code>eval_summary.json</code> 状态为 <code>ok</code>。</li>
+  <li>两份 <code>eval_manifest.json</code> 的 selection SHA256 必须一致，均为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。</li>
+  <li>只有当第 20 步候选相对第 100 步基线的 OCT macro-F1 至少提升 <code>0.02</code>，且 JSON 有效率不低于 <code>99%</code>，才继续把第 20 步作为运行候选。</li>
+  <li>不满足门槛时保留第 100 步基线 adapter，不延长当前 OCT 聚焦训练，不通过增加步数掩盖数据或标签问题。</li>
+  <li>即使通过冻结测试，也必须保留数据限制：01 缺少患者隔离，03 存在增强/原型关系，13 的组键包含标签。</li>
+</ol>
+
+<h2>11.10 前训练排期</h2>
+<table>
+  <thead>
+    <tr><th>日期</th><th>训练交付</th><th>判定条件</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>10-26 至 10-27</td><td>续跑第 100 步基线冻结评估，核对断点和 selection 哈希。</td><td>两份评估均达到 1,000 条且无生成错误。</td></tr>
+    <tr><td>10-28</td><td>完成基线与候选的 accuracy、macro-F1、各类别 F1 和混淆矩阵比较，记录选型决定。</td><td>按 0.02 提升门槛和 JSON 有效率决定提升或保留基线。</td></tr>
+    <tr><td>10-29 至 10-31</td><td>冻结选定 adapter，补齐模型卡、指标文件和运行侧读取路径。</td><td>模型运行服务能定位基座、adapter 和指标文件。</td></tr>
+    <tr><td>11-01 至 11-03</td><td>完成受控推理 smoke，检查显存、超时、结构化输出和错误回退。</td><td>本地推理输出带版本信息，失败时不写入业务结论。</td></tr>
+    <tr><td>11-04 至 11-06</td><td>对错误样本做来源和类别分析；只在证据明确且预算可控时做一次小型聚焦实验。</td><td>不以 token loss 选模型，不扩大 8 GB 显存配置。</td></tr>
+    <tr><td>11-07 至 11-08</td><td>整理最终模型证据、指纹、复现命令和数据限制。</td><td>训练、验证、冻结测试和运行读取四类证据齐全。</td></tr>
+    <tr><td>11-09 至 11-10</td><td>冻结训练交付，整理决策模型门槛和后续研究清单。</td><td>不新增未验证模型，不改变 11.10 基线。</td></tr>
+  </tbody>
+</table>
+
+<h2>实验预算与硬件约束</h2>
+<ul>
+  <li>当前阶段优先使用本地 RTX 4060；本机训练无新增 Modal GPU 费用。</li>
+  <li>8 GB 显存下继续使用图像像素 65,536、最大序列 256、梯度累积 4 的已验证配置。</li>
+  <li>任何 Modal 训练必须先在预算文档中确认额度，再使用 <code>launch_training.ps1</code> 的显式预算闸门，不启动无界常驻 GPU 服务。</li>
+  <li>冻结评估或推理出现显存不足时，降低评估 batch 或分段续跑，不用降低 JSON 有效率和分任务指标作为代价。</li>
+</ul>
+
+<h2>风险与边界</h2>
+<ul>
+  <li>55 条内部验证样本不足以证明泛化；第 20 步候选的验证提升必须由完整冻结测试复核。</li>
+  <li>第 100 步基线仍未完成，当前不能宣布第 20 步候选全面更优。</li>
+  <li>训练数据包含来源重叠、增强图和缺少患者 ID 的情况，不能把当前指标解释为临床效果。</li>
+  <li>补充决策模型缺少真实决策标签和独立评测集，11.10 前默认不启动训练。</li>
+  <li>最终交付是“可复现的研究型训练产物”，不是经过临床验证的诊断系统。</li>
+</ul>
+
+<h2>相关入口</h2>
+<ul>
+  <li><a href="2026-10-26-model-training-status.html">训练状态</a>：当前模型、checkpoint、显存、预算和停止点。</li>
+  <li><a href="2026-10-26-qwen3.5-4b-progress-stop.html">Qwen3.5-4B 训练进度与停止点</a>：训练和冻结评估明细。</li>
+  <li><a href="2026-10-26-qwen3.5-4b-training-review.html">Qwen3.5-4B 训练审核</a>：分组续训、数据审计和验证结果。</li>
+  <li><a href="2026-10-26-training-assets-index.html">训练产物索引</a>：adapter、指标、评估和保存约定。</li>
+  <li><a href="2026-10-26-model-runtime-evaluation.html">模型评估与推理说明</a>：本地评估、冻结测试和推理边界。</li>
+  <li><a href="2026-10-25-training-budget-plan-modal-l40s.html">Modal L40S 预算排期</a>和<a href="2026-10-25-training-cost-ledger-modal.html">Modal 训练消耗清单</a>：历史预算与实际消耗。</li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>模型训练进度与 11.10 收口计划 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

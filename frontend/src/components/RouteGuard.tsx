@@ -15,6 +15,15 @@ export default function RouteGuard({ roles }: { roles: UserRole[] }) {
       .finally(() => setChecked(true));
   }, []);
 
+  useEffect(() => {
+    function handleUnauthorized() {
+      setUser(null);
+    }
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
+  }, []);
+
   if (!checked) return <div className="route-loading">正在确认账号状态</div>;
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;

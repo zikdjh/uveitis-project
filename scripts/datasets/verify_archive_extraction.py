@@ -13,7 +13,7 @@ from pathlib import Path, PurePosixPath
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DATASETS = PROJECT_ROOT / "datasets"
+DATASETS = PROJECT_ROOT / "model-training" / "datasets"
 EXTRACTED = DATASETS / "extracted"
 TRAINING = DATASETS / "training"
 EXTRACTED_MANIFEST = EXTRACTED / "manifests/extracted-files.csv"

@@ -1,0 +1,10 @@
+[project]
+name = "uveitis-model-runtime"
+version = "0.1.0"
+description = "Local and remote model runtime for the uveitis research prototype"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "fastapi==0.115.12",
+  "uvicorn[standard]==0.34.2",
+  "pydantic==2.10.6",
+]

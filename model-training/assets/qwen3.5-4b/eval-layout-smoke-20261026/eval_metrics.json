@@ -1,0 +1,44 @@
+{
+  "status": "ok",
+  "adapter_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\local-4060-grouped-cont-20261025-01\\best_adapter",
+  "adapter_sha256": "517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a",
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "selection_sha256": "126db710058195d109874fd9091186af23a5a9d8daa34fe9780fca8fc34276ec",
+  "tasks": {
+    "oct_aux_4class": {
+      "samples": 1,
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "json_valid_rate": 1.0,
+      "per_class": {
+        "CNV": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1
+        }
+      },
+      "confusion_matrix": {
+        "CNV": {
+          "CNV": 1
+        }
+      },
+      "errors": 0
+    }
+  },
+  "rows": 1,
+  "evaluated_label_counts": {
+    "oct_aux_4class::CNV": 1
+  },
+  "generation": {
+    "max_new_tokens": 32,
+    "image_pixels": 65536,
+    "do_sample": false
+  },
+  "started_at": "2026-10-25T16:33:02.081462+00:00",
+  "finished_at": "2026-10-25T16:33:27.011521+00:00",
+  "elapsed_seconds": 24.885950899973977,
+  "peak_allocated_gib": 3.233283042907715,
+  "peak_reserved_gib": 3.310546875,
+  "note": "Only the frozen manifest test split was evaluated. 01 is not patient-isolated; 03 contains prototype/augmentation relationships. Human review remains required."
+}

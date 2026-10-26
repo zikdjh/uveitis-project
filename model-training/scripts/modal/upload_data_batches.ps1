@@ -1,5 +1,5 @@
 param(
-    [string]$ModalExe = "$PSScriptRoot\..\..\.venv-modal\Scripts\modal.exe",
+    [string]$ModalExe = "$PSScriptRoot\..\..\..\model-training\.venv-modal\Scripts\modal.exe",
     [string]$Staging = "$PSScriptRoot\..\..\datasets\training",
     [string]$Volume = "uveitis-data"
 )

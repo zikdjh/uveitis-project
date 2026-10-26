@@ -13,8 +13,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-$python = Join-Path $root ".venv-modal\Scripts\python.exe"
-$modal = Join-Path $root ".venv-modal\Scripts\modal.exe"
+$python = Join-Path $root "model-training\.venv-modal\Scripts\python.exe"
+$modal = Join-Path $root "model-training\.venv-modal\Scripts\modal.exe"
 $doctor = Join-Path $root "model-training\environment\doctor.py"
 $trainer = Join-Path $root "model-training\code\training\modal_qwen4b_train.py"
 

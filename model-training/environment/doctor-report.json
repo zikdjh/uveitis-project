@@ -3,7 +3,7 @@
     {
       "name": "local Python is the Modal controller venv",
       "ok": true,
-      "detail": "D:\\temp\\gpt\\uveitis-project\\.venv-modal\\Scripts\\python.exe"
+      "detail": "D:\\temp\\gpt\\uveitis-project\\model-training\\.venv-modal\\Scripts\\python.exe"
     },
     {
       "name": "local Python version",
@@ -13,7 +13,7 @@
     {
       "name": "Modal CLI",
       "ok": true,
-      "detail": "D:\\temp\\gpt\\uveitis-project\\.venv-modal\\Scripts\\modal.exe"
+      "detail": "D:\\temp\\gpt\\uveitis-project\\model-training\\.venv-modal\\Scripts\\modal.exe"
     },
     {
       "name": "Modal client version",
@@ -23,7 +23,7 @@
     {
       "name": "training manifest exists",
       "ok": true,
-      "detail": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\manifest.csv"
+      "detail": "D:\\temp\\gpt\\uveitis-project\\model-training\\datasets\\training\\manifest.csv"
     },
     {
       "name": "training manifest SHA256",
@@ -48,7 +48,7 @@
     {
       "name": "training summary exists",
       "ok": true,
-      "detail": "D:\\temp\\gpt\\uveitis-project\\datasets\\training\\summary.json"
+      "detail": "D:\\temp\\gpt\\uveitis-project\\model-training\\datasets\\training\\summary.json"
     },
     {
       "name": "training summary SHA256",

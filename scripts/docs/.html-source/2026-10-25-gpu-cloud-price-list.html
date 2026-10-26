@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>24GB 显存 GPU 云价格清单 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-23-model-trio-24gb.html">上一份</a>
+    <a href="2026-10-26-model-runtime-assets.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>参考</span>
+    <span>2026-10-25</span>
+  </div>
+  <h1>24GB 显存 GPU 云价格清单</h1>
+  <p class="doc-summary">历史云 GPU 报价快照与预算筛选参考</p>
+  <p class="doc-source">HTML 源文件：<code>model-training/assets/reference/24GB_GPU_Cloud_Price_List_2026-10-25.html</code></p>
+  <article class="html-body">
+<header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">GPU</div>
+        <div class="brand-copy">
+          <p class="brand-title">GPU 云服务器采购报价</p>
+          <p class="brand-meta">公开价格采样 · 人民币预算口径</p>
+        </div>
+      </div>
+      <button class="print-button" id="printButton" type="button" aria-label="打印或导出为 PDF">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 9V2h12v7"></path>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        <span class="print-label">打印 / 导出 PDF</span>
+      </button>
+    </div>
+  </header>
+
+
+    <section class="document-head" aria-labelledby="pageTitle">
+      <div>
+        <p class="eyebrow">GPU CLOUD PRICE LIST · 2026-10-25</p>
+        <h1 id="pageTitle">24GB 显存 GPU 云服务器报价清单</h1>
+        <p class="lede">目标配置为 1×24GB GPU、8 核 CPU、32GB 内存和 80GB 存储。以下同时列示实配差异、30 天成本、官网小时价与 72 小时样例，便于区分整机报价和仅 GPU 卡价。</p>
+      </div>
+      <div class="doc-stamp" aria-label="报价口径">
+        <strong>美元折算：1 USD = 6.6702 CNY</strong>
+        <span>挂牌价不锁价 · 以登录后的地域、库存和结算页为准</span>
+      </div>
+    </section>
+
+    <section class="summary-grid" aria-label="报价摘要">
+
+        <p class="metric-label">严格配置匹配</p>
+        <p class="metric-value">¥31,672</p>
+        <p class="metric-detail">AWS g6.2xlarge + 80GiB EBS · 30 天</p>
+
+      <article class="metric">
+        <p class="metric-label">最低可确认整机 72 小时</p>
+        <p class="metric-value">¥113.04</p>
+        <p class="metric-detail">极智算 RTX 4090 · ¥1.57/小时</p>
+      </article>
+      <article class="metric">
+        <p class="metric-label">国内最低会员月价</p>
+        <p class="metric-value">¥783.20</p>
+        <p class="metric-detail">AnyGPU RTX 3090 · 非会员 ¥890</p>
+      </article>
+      <article class="metric">
+        <p class="metric-label">海外低门槛 72 小时</p>
+        <p class="metric-value">¥283.35</p>
+        <p class="metric-detail">RunPod L4 · 12 核 / 50GB / 80GB</p>
+      </article>
+    </section>
+
+    <section class="decision-band" aria-label="采购建议">
+      <article class="decision">
+        <span class="decision-tag">严格配置优先</span>
+        <h2>AWS L4：规格匹配，算力较弱</h2>
+        <p>g6.2xlarge 为 8 vCPU、32GiB，加 80GiB EBS 后满足四项要求；L4 适合推理和轻训练，不适合直接按 RTX 4090 的算力预期使用。</p>
+      </article>
+      <article class="decision">
+        <span class="decision-tag">短时使用优先</span>
+        <h2>极智算 4090：按小时更直接</h2>
+        <p>官网 ¥1.57/小时，72 小时约 ¥113.04；实配为 15 核、60GB、100GB，高于目标。包月约 ¥1,074，与小时价分开计。</p>
+      </article>
+      <article class="decision">
+        <span class="decision-tag">国内包月优先</span>
+        <h2>AnyGPU 3090：月价最低</h2>
+        <p>会员 ¥783.20/月，实配 8 核、48GB、250GB。建议先确认能否缩减内存和存储，以及非会员续费价格。</p>
+      </article>
+    </section>
+
+    <section class="section" aria-labelledby="offersTitle">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">OFFER COMPARISON</p>
+          <h2 class="section-title" id="offersTitle">可采购方案对比</h2>
+        </div>
+        <p class="section-note">72 小时费用按官网小时价计算；月价和小时价同时公布时分别保留，避免把促销包月价反向摊成小时价。</p>
+      </div>
+
+      <div class="controls">
+        <div class="filters" role="group" aria-label="按 GPU 类型筛选">
+          <button class="filter-button" type="button" data-filter="all" aria-pressed="true">全部</button>
+          <button class="filter-button" type="button" data-filter="rtx4090" aria-pressed="false">RTX 4090</button>
+          <button class="filter-button" type="button" data-filter="l4" aria-pressed="false">L4</button>
+          <button class="filter-button" type="button" data-filter="enterprise" aria-pressed="false">企业云</button>
+        </div>
+        <div class="budget-control">
+          <label for="budgetInput">72 小时预算样例</label>
+          <div class="budget-input-wrap">
+            <span class="budget-prefix" aria-hidden="true">¥</span>
+            <input id="budgetInput" type="number" min="0" step="10" value="1000" inputmode="decimal" aria-describedby="budgetSummary">
+          </div>
+          <p class="budget-summary" id="budgetSummary" aria-live="polite"><strong id="budgetCount">0</strong> 个整机报价在样例内</p>
+        </div>
+      </div>
+
+      <div class="table-frame">
+        <div class="table-scroll">
+          <table aria-label="GPU 云服务器报价对比">
+            <thead>
+              <tr>
+                <th scope="col">供应商</th>
+                <th scope="col">GPU</th>
+                <th scope="col">实配：显存 / 内存 / 核 / 存储</th>
+                <th scope="col">30 天费用</th>
+                <th scope="col">小时价</th>
+                <th scope="col">72 小时</th>
+                <th scope="col">预算样例</th>
+                <th scope="col">说明与来源</th>
+              </tr>
+            </thead>
+            <tbody id="priceTableBody"></tbody>
+          </table>
+        </div>
+        <div class="mobile-cards" id="mobileCards"></div>
+        <div class="table-foot">
+          <p>* AutoDL 仅公开 GPU 卡价，未公开该 CPU、内存和磁盘组合的整机总价。</p>
+          <p>询价方案不计入“样例内”数量。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section lower-grid" aria-label="采购说明与来源">
+      <div class="plain-panel">
+        <div class="panel-head">
+          <h3>计价与采购口径</h3>
+          <p>比较成本时，先确认是否包含目标配置和存储。</p>
+        </div>
+        <ol class="rules-list">
+          <li>
+            <span class="rule-number">01</span>
+            <div>
+              <strong>30 天按 720 小时折算</strong>
+              <span>用于固定月租横向比较。官网同时给小时价与包月价时，两个价格分别展示。</span>
+            </div>
+          </li>
+          <li>
+            <span class="rule-number">02</span>
+            <div>
+              <strong>AWS 月费包含 80GiB EBS</strong>
+              <span>按 gp3 每 GiB 每月 0.10 美元估算，80GiB 为 8 美元/月；公网出流量、快照和税费另计。</span>
+            </div>
+          </li>
+          <li>
+            <span class="rule-number">03</span>
+            <div>
+              <strong>RunPod 月费包含 80GB 存储</strong>
+              <span>存储按每 GiB 每月 0.10 美元估算，80GiB 为 8 美元/月；镜像缓存和出网流量另计。</span>
+            </div>
+          </li>
+          <li>
+            <span class="rule-number">04</span>
+            <div>
+              <strong>AutoDL 只作卡价参考</strong>
+              <span>¥1.88/小时和 ¥1.32/小时均为 GPU 小时价，不能直接当作满足 8 核、32GB、80GB 的整机总价。</span>
+            </div>
+          </li>
+          <li>
+            <span class="rule-number">05</span>
+            <div>
+              <strong>签约前确认库存、含税专票与关机规则</strong>
+              <span>同时核对持久盘、快照、数据保留、公网流量、SLA、退款条件和续费价格。</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="plain-panel">
+        <div class="panel-head">
+          <h3>公开来源</h3>
+          <p>采样日期 2026-10-25，价格可能随地域和库存变化。</p>
+        </div>
+        <ul class="source-list">
+          <li><a href="https://www.jygpu.com/" target="_blank" rel="noopener noreferrer">极智算官网</a><small>RTX 4090 小时价与月付</small></li>
+          <li><a href="https://anygpu.cn/3090.html" target="_blank" rel="noopener noreferrer">AnyGPU 3090</a><small>会员与非会员月价、小时价</small></li>
+          <li><a href="https://aws.amazon.com/ec2/instance-types/g6/" target="_blank" rel="noopener noreferrer">AWS G6 实例</a><small>g6.2xlarge 规格</small></li>
+          <li><a href="https://aws.amazon.com/ebs/pricing/" target="_blank" rel="noopener noreferrer">AWS EBS 价格</a><small>gp3 存储单价</small></li>
+          <li><a href="https://www.runpod.io/pricing" target="_blank" rel="noopener noreferrer">RunPod 价格</a><small>L4、4090 和存储</small></li>
+          <li><a href="https://www.autodl.com/" target="_blank" rel="noopener noreferrer">AutoDL 官网</a><small>GPU 卡价</small></li>
+          <li><a href="https://cloud.tencent.com/document/product/560/19700" target="_blank" rel="noopener noreferrer">腾讯云 GPU 规格</a><small>A10 直通实例规格</small></li>
+          <li><a href="https://help.aliyun.com/zh/ecs/user-guide/gpu-accelerated-compute-optimized-and-vgpu-accelerated-instance-families-1" target="_blank" rel="noopener noreferrer">阿里云 GPU 规格</a><small>A10 分片实例规格</small></li>
+        </ul>
+      </div>
+    </section>
+
+    <aside class="method-note">
+      <strong>报价说明：</strong>本清单用于预算和供应商初筛，不代表可直接下单的锁价合同。AWS 的 L4 与 RTX 4090 属于不同算力等级；AnyGPU、极智算和 RunPod 的实际内存、CPU、存储与目标配置存在偏差。正式采购前应以登录后控制台的实时价格、库存、地域和结算规则为准。
+    </aside>
+
+    <footer class="footer">
+      <p>24GB GPU 云服务器报价清单 · 公开价格采样日 2026-10-25</p>
+      <p>币种：人民币（CNY）；美元折算汇率：1 USD = 6.6702 CNY</p>
+    </footer>
+
+
+  <noscript>
+    <p style="margin:20px;padding:14px;background:#fff1dc;color:#5f4a2b;">此页面需要启用 JavaScript 才能显示报价表格和预算判断。</p>
+  </noscript>
+
+  <script>
+    const offers = [
+      {
+        provider: "极智算",
+        gpu: "RTX 4090",
+        role: "最低可运行方案",
+        vram: "24GB",
+        ram: "60GB",
+        cpu: "15 核",
+        storage: "100GB 数据盘",
+        monthly: 1074,
+        hourly: 1.57,
+        monthlyOriginal: "¥1,074.00",
+        pricing: "整机",
+        pricingType: "full",
+        note: "官网同时公布 ¥1.57/小时和约 ¥1,074/月。实配内存高 28GB、CPU 高 7 核、存储高 20GB。",
+        source: "https://www.jygpu.com/",
+        sourceLabel: "极智算官网",
+        filter: "rtx4090"
+      },
+      {
+        provider: "AnyGPU",
+        gpu: "RTX 3090",
+        role: "国内低价备选",
+        vram: "24GB",
+        ram: "48GB",
+        cpu: "8 核",
+        storage: "50GB + 200GB",
+        monthly: 783.2,
+        hourly: 1.36,
+        monthlyOriginal: "¥783.20",
+        pricing: "会员整机",
+        pricingType: "full",
+        note: "会员月价 ¥783.20，小时价 ¥1.36；非会员 ¥890/月、¥1.55/小时。内存高 16GB，存储高 170GB。",
+        source: "https://anygpu.cn/3090.html",
+        sourceLabel: "AnyGPU 官网",
+        filter: "full"
+      },
+      {
+        provider: "AWS",
+        gpu: "NVIDIA L4",
+        role: "严格配置匹配",
+        vram: "24GB",
+        ram: "32GiB",
+        cpu: "8 vCPU",
+        storage: "80GiB EBS",
+        monthly: 31672.30152,
+        hourly: 6.52078752,
+        monthlyOriginal: "$4,748.33",
+        pricing: "按需整机",
+        pricingType: "full",
+        note: "g6.2xlarge 加 80GiB gp3 EBS，四项规格匹配。L4 算力明显低于 RTX 4090；出网流量、快照和税费另计。",
+        source: "https://aws.amazon.com/ec2/instance-types/g6/",
+        sourceLabel: "AWS 官网",
+        filter: "l4"
+      },
+      {
+        provider: "RunPod",
+        gpu: "NVIDIA L4",
+        role: "海外低门槛备选",
+        vram: "24GB",
+        ram: "50GB",
+        cpu: "12 vCPU",
+        storage: "80GB",
+        monthly: 2836.16904,
+        hourly: 3.935418,
+        monthlyOriginal: "$425.20",
+        pricing: "社区云按需",
+        pricingType: "full",
+        note: "L4 计算价 $0.59/小时，另按 80GiB 存储 $8/月计入。内存高 18GB，CPU 高 4 核。",
+        source: "https://www.runpod.io/pricing",
+        sourceLabel: "RunPod 官网",
+        filter: "l4"
+      },
+      {
+        provider: "RunPod",
+        gpu: "RTX 4090",
+        role: "海外品牌云参考",
+        vram: "24GB",
+        ram: "41GB",
+        cpu: "6 vCPU",
+        storage: "80GB",
+        monthly: 4274.26416,
+        hourly: 5.936478,
+        monthlyOriginal: "$640.80",
+        pricing: "社区云按需",
+        pricingType: "full",
+        note: "4090 计算价 $0.89/小时，另按 80GiB 存储 $8/月计入。CPU 少 2 核，内存高 9GB。",
+        source: "https://www.runpod.io/pricing",
+        sourceLabel: "RunPod 官网",
+        filter: "rtx4090"
+      },
+      {
+        provider: "AutoDL",
+        gpu: "RTX 4090",
+        role: "仅 GPU 卡价参考",
+        vram: "24GB",
+        ram: "32GB",
+        cpu: "8 核",
+        storage: "80GB",
+        monthly: 1353.6,
+        hourly: 1.88,
+        monthlyOriginal: "¥1,353.60*",
+        pricing: "仅卡价",
+        pricingType: "gpu-only",
+        note: "¥1.88 为 GPU 小时价。网站未公开该 CPU、内存和磁盘组合的整机总价，需在控制台核价。",
+        source: "https://www.autodl.com/",
+        sourceLabel: "AutoDL 官网",
+        filter: "rtx4090"
+      },
+      {
+        provider: "AutoDL",
+        gpu: "RTX 3090",
+        role: "仅 GPU 卡价参考",
+        vram: "24GB",
+        ram: "32GB",
+        cpu: "8 核",
+        storage: "80GB",
+        monthly: 950.4,
+        hourly: 1.32,
+        monthlyOriginal: "¥950.40*",
+        pricing: "仅卡价",
+        pricingType: "gpu-only",
+        note: "¥1.32 为 GPU 小时价。网站未公开该 CPU、内存和磁盘组合的整机总价，需在控制台核价。",
+        source: "https://www.autodl.com/",
+        sourceLabel: "AutoDL 官网",
+        filter: "full"
+      },
+      {
+        provider: "腾讯云",
+        gpu: "NVIDIA A10",
+        role: "企业云参考",
+        vram: "24GB",
+        ram: "116GiB",
+        cpu: "28 vCPU",
+        storage: "80GiB",
+        monthly: null,
+        hourly: null,
+        monthlyOriginal: "询价",
+        pricing: "询价",
+        pricingType: "inquiry",
+        note: "A10 直通最小规格为 28 vCPU、116GiB，没有 8 核 32GB 规格。需在价格计算器选择地域询价。",
+        source: "https://cloud.tencent.com/document/product/560/19700",
+        sourceLabel: "腾讯云规格",
+        filter: "enterprise"
+      },
+      {
+        provider: "阿里云",
+        gpu: "NVIDIA A10",
+        role: "企业云参考",
+        vram: "24GB 分片",
+        ram: "31GiB",
+        cpu: "8 vCPU",
+        storage: "80GiB",
+        monthly: null,
+        hourly: null,
+        monthlyOriginal: "询价",
+        pricing: "询价",
+        pricingType: "inquiry",
+        note: "sgn7i-vws-m4.2xlarge 为 A10 1/6 分片，不是 1 整卡 24GB；存储需另配，公开规格页未披露实时总价。",
+        source: "https://help.aliyun.com/zh/ecs/user-guide/gpu-accelerated-compute-optimized-and-vgpu-accelerated-instance-families-1",
+        sourceLabel: "阿里云规格",
+        filter: "enterprise"
+      }
+    ];
+
+    const tableBody = document.getElementById("priceTableBody");
+    const mobileCards = document.getElementById("mobileCards");
+    const budgetInput = document.getElementById("budgetInput");
+    const budgetCount = document.getElementById("budgetCount");
+    const filterButtons = [...document.querySelectorAll(".filter-button")];
+
+    const money = (value, digits = 2) =>
+      new Intl.NumberFormat("zh-CN", {
+        style: "currency",
+        currency: "CNY",
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      }).format(value);
+
+    const sourceIcon = `
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M15 3h6v6"></path>
+        <path d="M10 14 21 3"></path>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+      </svg>`;
+
+    const inquiryBadge = '<span class="badge badge-inquiry">需询价</span>';
+    const cardBadge = '<span class="badge badge-card">仅卡价</span>';
+
+    function specMarkup(item) {
+      return `
+        <div class="spec-main">${item.vram} / ${item.ram} / ${item.cpu} / ${item.storage}
+          <div class="spec-parts">
+            <span class="spec-chip">显存 ${item.vram}</span>
+            <span class="spec-chip">内存 ${item.ram}</span>
+            <span class="spec-chip">CPU ${item.cpu}</span>
+            <span class="spec-chip">存储 ${item.storage}</span>
+          </div>
+        </div>`;
+    }
+
+    function priceMarkup(item) {
+      if (item.pricingType === "inquiry") {
+        return `<span class="price">询价</span><span class="price-sub">未公开实时总价</span>`;
+      }
+      const autoClass = item.pricingType === "gpu-only" ? " price-auto" : "";
+      return `
+        <span class="price${autoClass}">${money(item.monthly)}</span>
+        <span class="price-detail">按 720 小时折算</span>
+        <span class="price-sub">${item.monthlyOriginal}</span>`;
+    }
+
+    function hourlyMarkup(item) {
+      if (item.pricingType === "inquiry") {
+        return `<span class="price">询价</span>`;
+      }
+      const autoClass = item.pricingType === "gpu-only" ? " price-auto" : "";
+      return `<span class="price${autoClass}">${money(item.hourly)}</span>${item.pricingType === "gpu-only" ? '<span class="price-sub">仅 GPU 卡价</span>' : ""}`;
+    }
+
+    function renderTable() {
+      tableBody.innerHTML = offers.map((item, index) => {
+        const hasPrice = item.hourly !== null;
+        return `
+          <tr class="price-row" data-filter="${item.filter}" data-hourly="${hasPrice ? item.hourly : ""}" data-pricing-type="${item.pricingType}" data-provider="${item.provider}" data-gpu="${item.gpu}" data-role="${item.role}">
+            <td>
+              <div class="provider">
+                <span class="provider-index">${String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <span class="provider-name">${item.provider}</span>
+                  <span class="provider-role">${item.role}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="gpu-name">${item.gpu}</span>
+              <span class="price-sub">${item.pricing}</span>
+            </td>
+            <td>${specMarkup(item)}</td>
+            <td>${priceMarkup(item)}</td>
+            <td>${hourlyMarkup(item)}</td>
+            <td class="budget-cell">${hasPrice ? `<span class="price budget-72">${money(item.hourly * 72)}</span>` : inquiryBadge}</td>
+            <td class="budget-cell">${hasPrice ? '<span class="badge badge-wait">待判断</span>' : inquiryBadge}</td>
+            <td>
+              <div class="note">
+                ${item.note}
+                ${item.pricingType === "gpu-only" ? `<br>${cardBadge}` : ""}
+                <br>
+                <a class="source-link" href="${item.source}" target="_blank" rel="noopener noreferrer">${item.sourceLabel}${sourceIcon}</a>
+              </div>
+            </td>
+          </tr>`;
+      }).join("");
+    }
+
+    function renderMobileCards() {
+      mobileCards.innerHTML = offers.map((item) => {
+        const hasPrice = item.hourly !== null;
+        return `
+          <article class="mobile-card" data-filter="${item.filter}" data-hourly="${hasPrice ? item.hourly : ""}" data-pricing-type="${item.pricingType}" data-provider="${item.provider}" data-gpu="${item.gpu}" data-role="${item.role}">
+            <div class="mobile-card-head">
+              <div>
+                <h3 class="mobile-provider">${item.provider}</h3>
+                <p class="mobile-gpu">${item.gpu} · ${item.pricing}</p>
+                <p class="mobile-role">${item.role}</p>
+              </div>
+              ${hasPrice ? '<span class="badge badge-wait budget-badge">待判断</span>' : inquiryBadge}
+            </div>
+            <div class="mobile-spec">${item.vram} / ${item.ram} / ${item.cpu} / ${item.storage}</div>
+            <div class="mobile-prices">
+              <div class="mobile-price">
+                <span class="mobile-price-label">30 天费用</span>
+                <span class="mobile-price-value">${hasPrice ? money(item.monthly) : "询价"}</span>
+              </div>
+              <div class="mobile-price">
+                <span class="mobile-price-label">小时价</span>
+                <span class="mobile-price-value">${hasPrice ? money(item.hourly) : "询价"}</span>
+              </div>
+              <div class="mobile-price">
+                <span class="mobile-price-label">72 小时</span>
+                <span class="mobile-price-value budget-72">${hasPrice ? money(item.hourly * 72) : "询价"}</span>
+              </div>
+              <div class="mobile-price">
+                <span class="mobile-price-label">原始报价</span>
+                <span class="mobile-price-value">${item.monthlyOriginal}</span>
+              </div>
+            </div>
+            <div class="mobile-note">
+              <p>${item.note}</p>
+              ${item.pricingType === "gpu-only" ? `<p style="margin-top:5px">${cardBadge}</p>` : ""}
+            </div>
+            <div class="mobile-source">
+              <a class="source-link" href="${item.source}" target="_blank" rel="noopener noreferrer">${item.sourceLabel}${sourceIcon}</a>
+            </div>
+          </article>`;
+      }).join("");
+    }
+
+    function setBadge(element, text, className) {
+      element.textContent = text;
+      element.className = `badge ${className}`;
+    }
+
+    function updateBudget() {
+      const budget = Number(budgetInput.value);
+      const validBudget = Number.isFinite(budget) && budget > 0;
+      let within = 0;
+      const countedWholeMachines = new Set();
+
+      document.querySelectorAll(".price-row, .mobile-card").forEach((row) => {
+        const hourly = Number(row.dataset.hourly);
+        const pricingType = row.dataset.pricingType;
+        if (!row.dataset.hourly || pricingType === "inquiry") return;
+
+        const total72 = hourly * 72;
+        const badge = row.querySelector(".budget-badge") || row.querySelectorAll(".badge")[0];
+        row.classList.remove("is-over");
+
+        if (!validBudget) {
+          setBadge(badge, "待定", "badge-wait");
+          return;
+        }
+
+        if (total72 <= budget) {
+          const machineKey = `${row.dataset.provider}|${row.dataset.gpu}|${row.dataset.role}`;
+          if (pricingType !== "gpu-only" && !countedWholeMachines.has(machineKey)) {
+            countedWholeMachines.add(machineKey);
+            within += 1;
+          }
+          setBadge(badge, pricingType === "gpu-only" ? "卡价内" : "样例内", "badge-ok");
+        } else {
+          row.classList.add("is-over");
+          setBadge(badge, pricingType === "gpu-only" ? "卡价超出" : "超出", "badge-over");
+        }
+      });
+
+      budgetCount.textContent = validBudget ? String(within) : "0";
+    }
+
+    function setFilter(filter) {
+      filterButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.filter === filter));
+      });
+
+      document.querySelectorAll(".price-row, .mobile-card").forEach((row) => {
+        row.hidden = filter !== "all" && row.dataset.filter !== filter;
+      });
+    }
+
+    renderTable();
+    renderMobileCards();
+    updateBudget();
+
+    budgetInput.addEventListener("input", updateBudget);
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => setFilter(button.dataset.filter));
+    });
+    document.getElementById("printButton").addEventListener("click", () => window.print());
+  </script>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>24GB 显存 GPU 云价格清单 · 2026-10-25</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

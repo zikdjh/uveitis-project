@@ -45,13 +45,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--source",
         type=Path,
-        default=Path("datasets/extracted"),
+        default=Path("model-training/datasets/extracted"),
         help="Extracted dataset root.",
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("datasets/training"),
+        default=Path("model-training/datasets/training"),
         help="Local training staging directory to upload.",
     )
     parser.add_argument(

@@ -18,7 +18,12 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     database_url: str = ""
     redis_url: str = "redis://127.0.0.1:6380/0"
-    session_ttl_seconds: int = 8 * 60 * 60
+    access_token_ttl_seconds: int = 15 * 60
+    refresh_token_ttl_seconds: int = 30 * 24 * 60 * 60
+    refresh_rotation_grace_seconds: int = 30
+    login_max_attempts: int = 5
+    login_window_seconds: int = 15 * 60
+    trust_proxy_headers: bool = False
     cookie_secure: bool = False
     bootstrap_admin_username: str = ""
     bootstrap_admin_password: str = ""

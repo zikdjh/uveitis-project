@@ -1,1 +1,0 @@
-{"time": "2026-10-25T14:33:20.069546+00:00", "step": 1, "mean_loss": 0.003235263633541763, "gradient_norm": 0.07571940124034882, "step_seconds": 4.529389600007562, "samples": 4, "peak_allocated_gib": 5.452396869659424, "peak_reserved_gib": 5.689453125}

@@ -1,6 +1,0 @@
-{
-  "checkpoint_dir": "/runs/qwen3.5-4b/qwen4b-stage1-20261025-01/checkpoints/step-000050",
-  "optimizer_step": 50,
-  "processed_samples": 200,
-  "note": "Backfilled after the 50-step checkpoint was verified on the volume."
-}

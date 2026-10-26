@@ -10,10 +10,9 @@
 <body>
 <a class="doc-skip" href="#doc-content">跳到正文</a>
 <header class="doc-nav">
-  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
   <nav aria-label="文档导航">
-    <a href="2026-10-25-document-catalog.html">文档索引</a>
-    <a href="2026-10-25-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
     <a href="2026-10-23-training-plan-modal-l40s.html">上一份</a>
     <a href="2026-10-25-training-budget-plan-modal-l40s.html">下一份</a>
   </nav>
@@ -25,10 +24,13 @@
   </div>
   <h1>Modal 训练消耗清单</h1>
   <p class="doc-summary">实际账单、资源消耗、训练结果和预算依据</p>
-  <p class="doc-source">Markdown 源文件：<code>model-training/docs/training-cost-ledger-modal-20261025.md</code></p>
-  <article class="markdown-body">
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-25-training-cost-ledger-modal.html</code></p>
+  <article class="html-body">
 <p>核对日期：2026-10-25（Asia/Shanghai）</p>
-<h2 id="1-当前结论">1. 当前结论</h2>
+<blockquote>
+<p>2026-10-25 补充：用户随后要求切换到本地 RTX 4060 正式训练。<code>local-4060-formal-20261025-01</code> 已完成 300 步，并续训至 500 步；新增 Modal GPU 费用 <code>$0.00</code>。本文以下 Modal 账目保留为历史记录，不从用户额度中再次扣减。</p>
+</blockquote>
+<h2>1. 当前结论</h2>
 <ul>
 <li>主线：Qwen3.5-4B，L40S QLoRA 第一阶段。</li>
 <li>最佳恢复点：<code>/runs/qwen3.5-4b/qwen4b-stage1-20261025-01/checkpoints/step-000100</code>。</li>
@@ -37,7 +39,55 @@
 <li>Intern-Decision-4B：当前不训练；先补足真实病例、医生确认标签和独立测试集。</li>
 <li>当前没有活跃容器；本轮训练 app 均已处于 <code>stopped</code> 状态。</li>
 </ul>
-<h2 id="2-本月实际账单">2. 本月实际账单</h2>
+<h2>1.1 本地正式训练补充</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Run</td>
+<td><code>local-4060-formal-20261025-01</code></td>
+</tr>
+<tr>
+<td>设备</td>
+<td>RTX 4060 Laptop，8 GiB</td>
+</tr>
+<tr>
+<td>完成步数</td>
+<td>500 / 500</td>
+</tr>
+<tr>
+<td>最佳验证步</td>
+<td>450</td>
+</tr>
+<tr>
+<td>最佳验证损失</td>
+<td>0.02545971898293561</td>
+</tr>
+<tr>
+<td>峰值保留显存</td>
+<td>5.69140625 GiB</td>
+</tr>
+<tr>
+<td>训练耗时</td>
+<td>四次运行合计约 42.3 分钟</td>
+</tr>
+<tr>
+<td>新增 Modal GPU 费用</td>
+<td><strong>$0.00</strong></td>
+</tr>
+<tr>
+<td>历史最佳步</td>
+<td>第 450 步；本地该 run 的 adapter 和 checkpoint 已于 2026-10-26 清理，完整版本在 Modal <code>uveitis-runs</code></td>
+</tr>
+</tbody>
+</table>
+<p>该结果只有训练与生成式验证损失，不代表临床有效性；冻结 test 集 F1/AUC、亚组评估和医生复核仍未完成。本机已确认无训练进程残留，GPU 显存已释放。</p>
+<h2>2. 本月实际账单</h2>
 <p>Modal CLI 的 <code>billing summary --for 2026-10 --json</code> 显示：</p>
 <table>
 <thead>
@@ -102,7 +152,7 @@
 </table>
 <p>这组结果说明：累计会先把额度当作抵扣使用；不能把“已计量 $18.91”直接理解为现金账单，也不能据此推算下月可用的 $30。用户应查看当前团队/个人账期余额；本清单按用户给出的 <strong>本月 $14 + 下月 $30 可用额度</strong> 排期，但实际余额仍需在每次启动前核对。</p>
 <p>本轮 focus01 实验从用户给出的可用额度 <code>$13</code> 出发，阶段性新增计量约 <strong>$0.55</strong>（$18.93187695 到 $19.48187695），低于预设的 <code>$3</code> 实验上限。明细中的临时应用包含短程训练、分离评估、自动评估失败和一次续训拉起；这已经反映在汇总里，不能只按训练步数估算。Modal CLI 的累计计量仍不等于可用余额，最终以账期 credit 为准。</p>
-<h2 id="3-l40s-单价与实测资源">3. L40S 单价与实测资源</h2>
+<h2>3. L40S 单价与实测资源</h2>
 <p>本项目使用的保守组合价：</p>
 <table>
 <thead>
@@ -135,7 +185,7 @@
 <li>71 样本正式评估约 <code>89.3 秒</code>；40 样本配对评估约 <code>40.5 秒</code>。</li>
 <li>4 样本默认 <code>best_adapter/</code> 加载 smoke 约 <code>11.8 秒</code>，返回 4/4 合法 JSON；这一步产生分钟级 L40S 费用，并确认了最终部署路径。</li>
 </ul>
-<h2 id="4-正式-qwen3-5-4b-训练结果">4. 正式 Qwen3.5-4B 训练结果</h2>
+<h2>4. 正式 Qwen3.5-4B 训练结果</h2>
 <p>Run：<code>qwen4b-stage1-20261025-01</code></p>
 <table>
 <thead>
@@ -161,7 +211,7 @@
 </table>
 <p>训练在 150 步后停止，原因是验证损失已经回升，不是“还有额度就继续跑”。正式训练配置为 <code>max_pixels=448×448</code>、<code>max_length=1024</code>、micro-batch 1、梯度累积 4、LoRA r=8 / alpha=16、4-bit NF4。</p>
 <p>卷中旧 <code>train_summary.json</code> 对应较早的 51 步测试，不能作为正式 run 的最终摘要；正式最佳结果应以各步 <code>validation-step-*.json</code>、<code>checkpoint.json</code> 和 <code>best_checkpoint.json</code> 为准。<code>last_checkpoint.json</code> 指向最后一次第 150 步，<code>best_checkpoint.json</code> 指向第 100 步。</p>
-<h2 id="5-固定同集合评估">5. 固定同集合评估</h2>
+<h2>5. 固定同集合评估</h2>
 <p>40 样本零样本基线与 step 100 adapter 使用相同抽样规则和选择指纹。样本仍很小，不能替代完整测试集。</p>
 <table>
 <thead>
@@ -215,7 +265,7 @@
 <pre><code class="language-text">/runs/qwen3.5-4b/qwen4b-stage1-20261025-01/paired40/
 </code></pre>
 <p><code>best_adapter/</code> 的 4 样本 smoke 结果另存于同 run 的 <code>deployment_smoke/</code>，仅证明可加载和输出格式，不作为精度评估。</p>
-<h3 id="5-1-2026-10-25-focus01-短程实验">5.1 2026-10-25 focus01 短程实验</h3>
+<h3>5.1 2026-10-25 focus01 短程实验</h3>
 <p>新 run：<code>qwen4b-focus01-20261025-02</code>，从旧 run 的 step 100 热启动，不覆盖旧 run。数据只从 train 行按 400 次曝光采样，01 为 140 次：Panuveitis 50、Intermediate+Posterior 44、Normal 24、RRD-PVR 22；02 为 80、03 为 100、13 为 80。固定 40 样本的选择指纹为：</p>
 <pre><code class="language-text">1ac1697d151a100c8ad4b906253804a055df0fd5e6bb06a2d64a44b886c6e549
 </code></pre>
@@ -277,7 +327,7 @@
 <li>新 step 20 adapter 已复制到该实验 run 的 <code>best_adapter/</code>，并保留 <code>paired40-step-000020/</code> 指标与预测。正式部署仍指向旧 run 的 step 100，<strong>没有自动覆盖</strong>；是否提升需要独立样本或医生复核。由于这是很小的同数据集测试集，继续使用它也作为检查点选择会产生明显的选择偏差，因此不建议直接晋升。</li>
 <li>训练函数内的自动子进程评估不稳定，续训时还把评估进程异常计入样本异常并确实继续生成到 step 35；这些旁路 checkpoint 只作诊断，不再作为候选。下一次只应“训练 checkpoint → 容器结束 → 容器外评估”。</li>
 </ul>
-<h3 id="5-2-2026-10-25-受控长训练与-step-250">5.2 2026-10-25 受控长训练与 step 250</h3>
+<h3>5.2 2026-10-25 受控长训练与 step 250</h3>
 <p>从 step 35 恢复一条 cyclic focus01 训练，使用原 L40S/8 CPU/64 GiB 配置、micro-batch 1、梯度累积 4、<code>448x448</code>、<code>1024</code> token。前一段以 <code>5e-5</code> 学习率运行到 step 250；之后从 step 250 用 <code>2.5e-5</code> 继续到 step 313，并在 step 300 验证退化后主动终止。</p>
 <table>
 <thead>
@@ -344,8 +394,8 @@
 </ul>
 <p>本地 RTX 4060 Laptop GPU 为 8,188 MiB，空闲约 7,956 MiB。按远程峰值看似满足训练条件，但这只是容量判断，不等于本地训练已验证。本轮结束时本地 venv 仍缺 PyTorch、bitsandbytes 等依赖，数据集也未映射为训练器所需的相对路径，因此没有启动本地接管。</p>
 <p>本轮最终 <code>metered_cost</code> 为 <code>$20.35187695</code>，从起点新增 <strong>$0.87</strong>。该增量包含一次优化前作用域失败、训练 checkpoint、step 250 的一次固定评估和最终计费落账。没有活跃容器；剩余额度按用户给定 <code>$13</code> 口径估算约 <code>$12.13</code>。本轮因验证退化主动停止，未继续消耗剩余额度。</p>
-<h2 id="6-模型训练时间与数据集规划">6. 模型训练时间与数据集规划</h2>
-<h3 id="6-1-qwen3-5-4b-优先">6.1 Qwen3.5-4B（优先）</h3>
+<h2>6. 模型训练时间与数据集规划</h2>
+<h3>6.1 Qwen3.5-4B（优先）</h3>
 <p><strong>当前阶段已经完成，不再用第 150 步继续训练。</strong> 下一次 4B 训练必须由新数据或新目标触发，例如补充 01 的类别样本、按患者/来源分组切分、提高难例覆盖。没有这些前置条件时，续训只会继续消耗额度。</p>
 <table>
 <thead>
@@ -374,7 +424,7 @@
 <li>下一阶段：沿用专项 holdout，新增去重后的 ODIR 眼底泛化和 RFMiD 2；各任务使用独立提示和标签空间。</li>
 <li>不使用 03 的 SMOTE 合成样本作为临床测试证据；不使用 ODIR 的类别替代葡萄膜炎判断。</li>
 </ul>
-<h3 id="6-2-qwen3-5-2b-对照-不排默认时间">6.2 Qwen3.5-2B（对照，不排默认时间）</h3>
+<h3>6.2 Qwen3.5-2B（对照，不排默认时间）</h3>
 <p>当前不训练。理由是 4B 已在 L40S 完成闭环，且本地 4060 的 8 GiB 显存也不足以把 2B 的“完整训练”当作无风险承诺。只有出现明确的低显存部署需求、需要验证 2B 能否保持可接受精度，或 4B 推理成本成为实际瓶颈时，才增加短程对照：</p>
 <table>
 <thead>
@@ -391,7 +441,7 @@
 </tbody>
 </table>
 <p>若要从现有专项数据重新做一次完整对照，建议再预留 <code>3.0 小时 / $8.52</code>；在没有对照问题时不启动。</p>
-<h3 id="6-3-intern-decision-4b-条件补充-不排默认训练">6.3 Intern-Decision-4B（条件补充，不排默认训练）</h3>
+<h3>6.3 Intern-Decision-4B（条件补充，不排默认训练）</h3>
 <p>只有同时具备至少 300 个脱敏病例、每个病例有医生确认的处置标签、80 个验证和 80 个独立测试病例、按患者切分并统一 <code>choice/score/noul</code> schema，才进入训练。当前数据门槛未通过，所以默认不训练。</p>
 <p>满足门槛后：</p>
 <table>
@@ -412,7 +462,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="7-11-月预算排期">7. 11 月预算排期</h2>
+<h2>7. 11 月预算排期</h2>
 <p>按下月可用 $30 规划，给 4B 优先、Decision 条件预留，并保留故障缓冲：</p>
 <table>
 <thead>
@@ -457,7 +507,7 @@
 </tbody>
 </table>
 <p>如果 Decision 门槛不通过，<code>$5.68</code> 不花；可转为 4B 的补充评估或保留。2B 不占用默认预算。</p>
-<h2 id="8-模型如何保存">8. 模型如何保存</h2>
+<h2>8. 模型如何保存</h2>
 <p>QLoRA 训练保存的是“冻结基座 + LoRA adapter”，不是每次复制整份 4B 模型。正式产物保存为：</p>
 <pre><code class="language-text">best_adapter/
   adapter_config.json
@@ -478,7 +528,7 @@ checkpoints/step-000100/
 </code></pre>
 <p>推理时从模型卷加载 <code>/models/qwen/Qwen3.5-4B</code>，再挂载 <code>best_adapter/</code>。续训时使用 <code>checkpoints/step-000100/</code> 及其 <code>training_state.pt</code>。不要把 <code>training_state.pt</code> 交给 PEFT，也不要用旧的 <code>final_adapter/</code> 代替正式部署权重。</p>
 <p>如果部署确实要求单目录自包含模型，必须在<strong>未量化的基座权重</strong>上 merge adapter，再按部署格式另行量化。不能直接在 4-bit NF4 权重上 merge；merge 后仍需保留原基座、adapter、config、数据 manifest 哈希和评估记录。merge 模型只是派生产物，不是训练的唯一真相源。</p>
-<h2 id="9-启动前检查">9. 启动前检查</h2>
+<h2>9. 启动前检查</h2>
 <ol>
 <li>先查看 Modal 当前账期余额，确认可用额度，不只看累计计量。</li>
 <li>数据或评估协议有实质变化才启动 4B 长训练；否则先做错误分析。</li>
@@ -487,12 +537,11 @@ checkpoints/step-000100/
 <li><code>$30</code> 预算下不要未经重新排期就同时按默认预算加入 Decision 的评估项。</li>
 <li>训练结束确认没有活跃容器；GPU 不常驻。</li>
 </ol>
-
   </article>
 </main>
 <footer class="doc-footer">
   <span>Modal 训练消耗清单 · 2026-10-25</span>
-  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
 </footer>
 </body>
 </html>

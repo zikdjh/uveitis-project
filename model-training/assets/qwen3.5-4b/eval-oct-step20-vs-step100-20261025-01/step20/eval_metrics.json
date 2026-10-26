@@ -1,0 +1,86 @@
+{
+  "status": "ok",
+  "adapter_dir": "D:\\temp\\gpt\\uveitis-project\\artifacts\\qwen3.5-4b\\local-4060-oct-focus-cont-20261025-01\\best_adapter",
+  "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+  "manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "selection_sha256": "84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a",
+  "tasks": {
+    "oct_aux_4class": {
+      "samples": 1000,
+      "accuracy": 0.947,
+      "macro_f1": 0.9472447307516584,
+      "json_valid_rate": 1.0,
+      "per_class": {
+        "CNV": {
+          "precision": 0.9330708661417323,
+          "recall": 0.948,
+          "f1": 0.9404761904761905,
+          "support": 250
+        },
+        "DME": {
+          "precision": 0.9681274900398407,
+          "recall": 0.972,
+          "f1": 0.9700598802395209,
+          "support": 250
+        },
+        "DRUSEN": {
+          "precision": 0.9003831417624522,
+          "recall": 0.94,
+          "f1": 0.9197651663405088,
+          "support": 250
+        },
+        "NORMAL": {
+          "precision": 0.9914529914529915,
+          "recall": 0.928,
+          "f1": 0.9586776859504132,
+          "support": 250
+        }
+      },
+      "confusion_matrix": {
+        "CNV": {
+          "CNV": 237,
+          "DME": 8,
+          "DRUSEN": 4,
+          "NORMAL": 1
+        },
+        "DME": {
+          "CNV": 3,
+          "DME": 243,
+          "DRUSEN": 4,
+          "NORMAL": 0
+        },
+        "DRUSEN": {
+          "CNV": 14,
+          "DME": 0,
+          "DRUSEN": 235,
+          "NORMAL": 1
+        },
+        "NORMAL": {
+          "CNV": 0,
+          "DME": 0,
+          "DRUSEN": 18,
+          "NORMAL": 232
+        }
+      },
+      "errors": 0
+    }
+  },
+  "rows": 1000,
+  "evaluated_label_counts": {
+    "oct_aux_4class::CNV": 250,
+    "oct_aux_4class::DME": 250,
+    "oct_aux_4class::DRUSEN": 250,
+    "oct_aux_4class::NORMAL": 250
+  },
+  "generation": {
+    "max_new_tokens": 32,
+    "image_pixels": 65536,
+    "do_sample": false
+  },
+  "started_at": "2026-10-25T14:59:26.766855+00:00",
+  "finished_at": "2026-10-25T15:46:02.233795+00:00",
+  "elapsed_seconds": 2795.4097661999986,
+  "peak_allocated_gib": 3.242013931274414,
+  "peak_reserved_gib": 3.310546875,
+  "note": "Only the frozen manifest test split was evaluated. 01 is not patient-isolated; 03 contains prototype/augmentation relationships. Human review remains required."
+}
