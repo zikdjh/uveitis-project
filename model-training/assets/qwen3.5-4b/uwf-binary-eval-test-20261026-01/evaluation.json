@@ -1,0 +1,89 @@
+{
+  "status": "ok",
+  "run_id": "uwf-binary-eval-test-20261026-01",
+  "task": "uwf_uveitis_binary",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\model-training\\datasets\\tasks\\open_uwf_uveitis_binary\\manifest.csv",
+  "manifest_sha256": "bacc37ed9c37676570a4e4f49036b60fe472e7a86fb7b537387a734551c2b253",
+  "adapter": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\uwf-binary-stage1-20261026-01\\best_adapter",
+  "adapter_sha256": "097d4293eb0e008460a3d798b73fee042df592373122c983e60fec23f31c9d3e",
+  "test_rows_read": 90,
+  "test_label_counts": {
+    "non_uveitis": 82,
+    "uveitis": 8
+  },
+  "patient_groups": 78,
+  "image_pixels": 16384,
+  "max_length": 256,
+  "metrics": {
+    "loss": 0.05525867216702965,
+    "evaluated": 90,
+    "errors": [],
+    "rows": 90,
+    "accuracy": 0.37777777777777777,
+    "macro_f1": 0.3382352941176471,
+    "json_valid_rate": 1.0,
+    "per_class": {
+      "non_uveitis": {
+        "precision": 0.9333333333333333,
+        "recall": 0.34146341463414637,
+        "f1": 0.5,
+        "support": 82
+      },
+      "uveitis": {
+        "precision": 0.1,
+        "recall": 0.75,
+        "f1": 0.17647058823529413,
+        "support": 8
+      }
+    },
+    "confusion_matrix": {
+      "non_uveitis": {
+        "non_uveitis": 28,
+        "uveitis": 54
+      },
+      "uveitis": {
+        "non_uveitis": 2,
+        "uveitis": 6
+      }
+    },
+    "per_task": {
+      "uwf_uveitis_binary": {
+        "samples": 90,
+        "accuracy": 0.37777777777777777,
+        "macro_f1": 0.3382352941176471,
+        "json_valid_rate": 1.0,
+        "per_class": {
+          "non_uveitis": {
+            "precision": 0.9333333333333333,
+            "recall": 0.34146341463414637,
+            "f1": 0.5,
+            "support": 82
+          },
+          "uveitis": {
+            "precision": 0.1,
+            "recall": 0.75,
+            "f1": 0.17647058823529413,
+            "support": 8
+          }
+        },
+        "confusion_matrix": {
+          "non_uveitis": {
+            "non_uveitis": 28,
+            "uveitis": 54
+          },
+          "uveitis": {
+            "non_uveitis": 2,
+            "uveitis": 6
+          }
+        }
+      }
+    }
+  },
+  "peak_allocated_gib": 3.414961338043213,
+  "peak_reserved_gib": 3.55078125,
+  "total_seconds": 329.2096385,
+  "started_at": "2026-10-26T12:33:45.164960+00:00",
+  "finished_at": "2026-10-26T12:39:14.374975+00:00",
+  "policy": "Single evaluation of the validation-selected adapter. Do not tune hyperparameters or checkpoints from these test outputs.",
+  "clinical_status": "research_only_not_validated"
+}

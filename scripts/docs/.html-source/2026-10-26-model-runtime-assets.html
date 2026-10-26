@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>模型运行资产索引 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-gpu-cloud-price-list.html">上一份</a>
+    <a href="2026-10-26-project-overview.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>运行</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>模型运行资产索引</h1>
+  <p class="doc-summary">运行 adapter、冻结评估结果和路径读取约定</p>
+  <p class="doc-source">规范入口：<code>model-runtime/assets/README.md</code></p>
+  <article class="html-body">
+<p>运行资产不复制权重，统一从 <code>model-training/assets/qwen3.5-4b/</code> 读取。</p>
+<ul>
+<li>冻结评估基线：<code>local-4060-grouped-cont-20261025-01/best_adapter</code></li>
+<li>OCT 候选：<code>local-4060-oct-focus-cont-20261025-01/best_adapter</code></li>
+<li>冻结评估：<code>eval-oct-step20-vs-step100-20261025-01/</code></li>
+</ul>
+<p>当前运行服务默认索引 OCT 候选，并通过 <code>POST /v1/judge</code> 执行真实本地推理。切换 adapter 时设置 <code>MODEL_RUNTIME_ADAPTER_DIR</code>，不需要移动权重文件。</p>
+
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>模型运行资产索引 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

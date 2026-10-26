@@ -14,7 +14,7 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 
-from app.core.security import require_role
+from app.core.security import require_permission
 from app.schemas.case import (
     CaseCreate,
     CaseImage,
@@ -23,6 +23,7 @@ from app.schemas.case import (
     ImageKind,
     ReviewUpdate,
 )
+from app.schemas.auth import Permission
 from app.services.analysis import AnalysisService
 
 
@@ -69,7 +70,7 @@ def sync_review_queue(app) -> None:
 
 @router.post("", response_model=CaseRead, status_code=201)
 def create_case(payload: CaseCreate, request: Request) -> CaseRead:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.CASE_WRITE)
     case_id = str(uuid4())
     now = datetime.now(UTC)
     case = CaseRead(
@@ -89,13 +90,13 @@ def create_case(payload: CaseCreate, request: Request) -> CaseRead:
 
 @router.get("", response_model=list[CaseRead])
 def list_cases(request: Request, limit: int = 100) -> list[CaseRead]:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.CASE_READ)
     return request.app.state.case_store.list(limit=min(max(limit, 1), 200))
 
 
 @router.get("/{case_id}", response_model=CaseRead)
 def get_case(case_id: str, request: Request) -> CaseRead:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.CASE_READ)
     return _get_case(request, case_id)
 
 
@@ -106,7 +107,7 @@ async def upload_images(
     files: Annotated[list[UploadFile], File(description="病例影像")],
     kind: Annotated[ImageKind, Form()] = "fundus",
 ) -> CaseRead:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.CASE_WRITE)
     case = _get_case(request, case_id)
     if not files:
         raise HTTPException(status_code=422, detail="请选择影像文件")
@@ -160,7 +161,7 @@ async def upload_images(
 
 @router.get("/{case_id}/images/{image_id}")
 def get_image(case_id: str, image_id: str, request: Request) -> FileResponse:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.CASE_READ)
     case = _get_case(request, case_id)
     image = next((item for item in case.images if item.id == image_id), None)
     if image is None:
@@ -175,7 +176,7 @@ def get_image(case_id: str, image_id: str, request: Request) -> FileResponse:
 def analyze_case(
     case_id: str, request: Request, background_tasks: BackgroundTasks
 ) -> CaseRead:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.CASE_WRITE)
     case = _get_case(request, case_id)
     if case.status == "analyzing":
         raise HTTPException(status_code=409, detail="该病例正在分析")
@@ -191,7 +192,7 @@ def analyze_case(
 
 @router.patch("/{case_id}/review", response_model=CaseRead)
 def review_case(case_id: str, payload: ReviewUpdate, request: Request) -> CaseRead:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.CASE_REVIEW)
     case = _get_case(request, case_id)
     if case.analysis is None or case.analysis.status != "completed":
         raise HTTPException(status_code=409, detail="分析尚未完成，暂不能复核")

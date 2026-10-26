@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>模型评估与推理说明 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-model-runtime-assets.html">上一份</a>
+    <a href="2026-10-26-outputs-guide.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>运行</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>模型评估与推理说明</h1>
+  <p class="doc-summary">本地评估、冻结测试、显存限制与推理边界</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-model-runtime-evaluation.html</code></p>
+  <article class="html-body">
+<p>更新日期：2026-10-26</p>
+<p>本页说明 Qwen3.5-4B 原型如何从训练产物进入本地评估，以及当前运行服务实际具备的能力边界。训练流程、基座、数据和 adapter 统一位于 <code>model-training/</code>；本目录只管理运行、评估和部署。</p>
+<h2>当前能力</h2>
+<ul>
+<li><code>model-runtime/app/</code> 提供基座、adapter 健康检查，并通过 <code>POST /v1/judge</code> 执行 Qwen3.5-4B 结构化辅助观察；结果固定要求医生复核，不构成完整诊断。</li>
+<li><code>model-runtime/code/local_qwen4b_eval.py</code> 支持冻结测试集生成式评估、严格 JSON 解析、分任务指标、按类别均衡抽样、预测保存和中断续跑。</li>
+<li><code>model-runtime/scripts/run_local_4060_eval.ps1</code> 是 Windows 本地入口。</li>
+<li>运行侧只读取训练产物，不复制基座权重，也不修改训练记录。</li>
+</ul>
+<p>2026-10-26 已完成第 20 步候选的 16 条四类均衡受控推理 smoke，并完成真实 <code>POST /v1/judge</code> 本地烟测。服务使用 4-bit NF4 基座和 adapter，首次请求约 22 秒，热请求约 2.4–3.6 秒。本轮未启动 Modal，也未新增 Modal 费用。</p>
+<h2>运行资产</h2>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>冻结评估基线</td>
+<td><code>model-training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code></td>
+</tr>
+<tr>
+<td>OCT 候选</td>
+<td><code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code></td>
+</tr>
+<tr>
+<td>冻结同集评估</td>
+<td><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/</code></td>
+</tr>
+<tr>
+<td>错误来源分析</td>
+<td><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code></td>
+</tr>
+<tr>
+<td>受控推理 smoke</td>
+<td><code>model-training/assets/qwen3.5-4b/eval-oct-step20-runtime-smoke-20261026-01/</code></td>
+</tr>
+<tr>
+<td>本地基座</td>
+<td><code>model-training/models/qwen/Qwen3.5-4B/</code></td>
+</tr>
+<tr>
+<td>真实运行烟测证据</td>
+<td><code>model-training/assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code></td>
+</tr>
+<tr>
+<td>训练 manifest</td>
+<td><code>model-training/datasets/training/manifest.csv</code></td>
+</tr>
+</tbody>
+</table>
+<p>第 20 步 OCT 候选和同一冻结选择的第 100 步基线均已完成 1,000/1,000 条评估。第 20 步候选准确率 <code>0.947</code>、macro-F1 <code>0.947245</code>；第 100 步基线准确率 <code>0.918</code>、macro-F1 <code>0.918252</code>；两组严格 JSON 有效率均为 <code>100%</code>，selection SHA256 均为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。</p>
+<p>错误来源分析显示主要错误为 <code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条。685 个患者/来源组中有 50 组出现错误，前 10 个错误组占全部错误约 <code>24.53%</code>。相对第 100 步基线，DRUSEN 纠正 38 条是主要收益，但 CNV 退化 6 条、NORMAL 退化 4 条；后续检查应聚焦这些类别边界，而不是盲目增加训练步数。</p>
+<p>受控推理 smoke 使用第 20 步 adapter、<code>65,536</code> 像素、每类 4 条共 16 条，结果为 16/16 正确、JSON 有效率 <code>100%</code>、生成错误 0，selection SHA256 为 <code>77a65218744fe84896bb06d7d216bdb9b2329fc06e2de90bdba428dcf9a6a0ee</code>。该样本量只用于检查链路和四类覆盖，不代表准确率或泛化性能。</p>
+<p>这些数字来自单一冻结测试集的原型评估，不是临床验证结论，也不代表跨医院、跨设备或患者独立队列上的泛化性能。</p>
+<h2>健康检查</h2>
+<p>从项目根目录使用已验证的 CUDA 运行环境启动服务。首次有效请求才加载 4-bit 基座与 adapter，因此冷启动超时应高于普通 API：</p>
+<pre><code class="language-powershell">cd model-runtime
+$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\model-training\datasets\training').Path
+$env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
+..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+</code></pre>
+<p>在 <code>model-runtime</code> 目录检查健康状态并发送一个受控请求。以下请求使用训练图像检查链路，不能作为准确率证据：</p>
+<pre><code class="language-powershell">Invoke-RestMethod http://127.0.0.1:8010/health
+Invoke-RestMethod http://127.0.0.1:8010/v1/models
+
+$body = @{
+  task = 'oct_aux_4class'
+  case = @{
+    case_id = 'runtime-smoke'
+    images = @(@{
+      id = 'CNV-1016042-142'
+      kind = 'oct'
+      local_path = (Resolve-Path '..\model-training\datasets\training\data\13_zhanglab_oct\13_zhanglab\ZhangLabData\CellData\OCT\train\CNV\CNV-1016042-142.jpeg').Path
+    })
+  }
+} | ConvertTo-Json -Depth 6
+
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8010/v1/judge `
+  -Method Post `
+  -Headers @{'X-Internal-Service-Token'='replace-with-shared-token'} `
+  -ContentType 'application/json' `
+  -Body $body
+</code></pre>
+<p><code>ready</code> 表示基座和 adapter 文件可定位；<code>degraded</code> 表示路径缺失。响应包含标签、发现、置信度、adapter SHA256、时延、生成截断标志与显存峰值，并固定带 <code>requires_human_review=true</code>、<code>research_use_only=true</code>。<code>/v1/models</code> 仍只是模型角色索引，不表示临床部署。</p>
+<h2>本地评估</h2>
+<p>先用每类 4 条验证均衡评估和四类输出：</p>
+<pre><code class="language-powershell">.\model-runtime\scripts\run_local_4060_eval.ps1 `
+  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
+  -OutputDir 'model-training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
+  -Tasks 'oct_aux_4class' -SamplesPerClass 4
+</code></pre>
+<p><code>-SamplesPerClass N</code> 按 <code>task + label</code> 确定性取前 N 条；<code>-MaxSamples N</code> 仍是按排序取前 N 条。两者互斥，实际抽样模式和各类数量会写入结果清单。</p>
+<p>续跑冻结基线时，输出目录必须指向原评估目录，且不要添加 <code>-Overwrite</code>：</p>
+<pre><code class="language-powershell">powershell -NoProfile -ExecutionPolicy Bypass -File `
+  'model-runtime\scripts\run_local_4060_eval.ps1' `
+  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
+  -OutputDir 'model-training\assets\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01\step100' `
+  -Tasks 'oct_aux_4class'
+</code></pre>
+<p>评估器只读取冻结测试图像和 manifest 元数据，不参与训练、学习率调整或 checkpoint 选择。不要把测试结果回写训练标签。</p>
+<h2>本地硬件边界</h2>
+<p>RTX 4060 Laptop 8 GB 已完成 4-bit NF4 QLoRA 训练实测，正式训练峰值分配 <code>5.45 GiB</code>、峰值保留 <code>5.69 GiB</code>。训练配置限制为图像像素 <code>65,536</code>、最大序列 <code>256</code>、micro-batch 1、梯度累积 4。</p>
+<p>真实运行服务的常驻 NVIDIA 占用约 <code>3.5 GiB</code>，单图推理峰值分配 <code>3.275485 GiB</code>、峰值保留 <code>3.355469 GiB</code>；8 个并发请求经串行保护全部返回 HTTP 200，最慢约 14 秒，无 OOM。并发数字包含排队时间，不是吞吐量指标。加载基座、adapter 和 processor 仍要求无其他大型 GPU 进程占用显存；推理和训练不应在同一 GPU 并行执行。</p>
+<p>服务端图像预处理与训练/评估保持一致：原图通过解码像素上限保护后直接交给 processor，由 processor 按图像像素预算缩放。显存峰值字段是本次进程自上次请求以来的 PyTorch 峰值统计，不替代系统级 GPU 监控。</p>
+<p>预处理修正后的复测请求耗时 <code>3.363 秒</code>、峰值保留 <code>3.355469 GiB</code>，adapter SHA256 不变。该请求读取一张标签为 CNV 的训练图，模型返回 DRUSEN，置信度为 0、impression 为空；因此当前输出可用于检查运行链路和结构化契约，不能作为分类准确率或置信度可信度的证据。</p>
+<h2>输出约定</h2>
+<p>评估结果包含 <code>eval_manifest.json</code>、<code>eval_metrics.json</code>、<code>eval_summary.json</code> 和逐样本预测文件。中断时保留 <code>.partial.jsonl</code>，下一次从已有预测继续。正式结果必须保留 adapter 指纹、manifest 指纹、selection 指纹、抽样模式与类别数、任务集合、样本数、运行耗时和显存峰值。</p>
+<p>模型运行侧的临时结果放入 <code>model-runtime/</code> 或 <code>outputs/</code>；需要长期保留的评估证据应归档到 <code>model-training/assets/qwen3.5-4b/&lt;run-id&gt;/</code>，并在训练产物索引中登记。</p>
+<h2>推理边界</h2>
+<p>当前模型是科研原型，只能输出辅助观察和结构化候选，不构成诊断、治疗或用药建议。接入业务链路前仍需完成：</p>
+<ul>
+<li>冻结测试集完整评估与错误来源分析。</li>
+<li>患者级或来源级独立验证。</li>
+<li>医生复核、拒答和升级规则。</li>
+<li>API 输入脱敏、审计日志和模型版本锁定。</li>
+</ul>
+<p>补充决策模型仍默认关闭。只有真实脱敏病例、医生确认标签、独立测试集和增益证据齐备后，才进入条件实验。</p>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>模型评估与推理说明 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

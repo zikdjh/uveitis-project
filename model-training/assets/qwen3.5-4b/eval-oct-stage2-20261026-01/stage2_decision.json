@@ -1,0 +1,104 @@
+{
+  "status": "completed_no_promotion",
+  "decided_at": "2026-10-26T05:06:40.548834+00:00",
+  "objective": "Continue OCT-focused QLoRA from the selected step-20 adapter without overwriting it.",
+  "base_adapter": {
+    "run_id": "local-4060-oct-focus-cont-20261025-01",
+    "step": 20,
+    "adapter_dir": "model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter",
+    "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+    "validation_macro_f1": 0.8733582321817616,
+    "validation_oct_macro_f1": 0.7915032679738563,
+    "validation_json_valid_rate": 1.0
+  },
+  "runs": [
+    {
+      "run_id": "local-4060-oct-stage2-20261026-01",
+      "learning_rate": 5e-06,
+      "target_steps": 30,
+      "completed_steps": 10,
+      "truncated_reason": "early_stopping",
+      "best_step": 0,
+      "best_validation_macro_f1": 0.8733582321817616,
+      "best_validation_oct_macro_f1": 0.7915032679738563,
+      "best_validation_json_valid_rate": 1.0,
+      "validation_points": [
+        {
+          "step": 0,
+          "loss": 0.0350562277181201,
+          "macro_f1": 0.8733582321817616,
+          "oct_macro_f1": 0.7915032679738563,
+          "json_valid_rate": 1.0
+        },
+        {
+          "step": 5,
+          "loss": 0.0359883960120152,
+          "macro_f1": 0.8677248677248676,
+          "oct_macro_f1": 0.7746031746031745,
+          "json_valid_rate": 1.0
+        },
+        {
+          "step": 10,
+          "loss": 0.037008703978129,
+          "macro_f1": 0.8677248677248676,
+          "oct_macro_f1": 0.7746031746031745,
+          "json_valid_rate": 1.0
+        }
+      ],
+      "peak_allocated_gib": 5.452396869659424,
+      "peak_reserved_gib": 5.69140625,
+      "total_seconds": 503.17630420000023,
+      "summary_path": "model-training/assets/qwen3.5-4b/local-4060-oct-stage2-20261026-01/training_summary.json"
+    },
+    {
+      "run_id": "local-4060-oct-stage2b-20261026-01",
+      "learning_rate": 1e-05,
+      "target_steps": 30,
+      "completed_steps": 10,
+      "truncated_reason": "early_stopping",
+      "best_step": 0,
+      "best_validation_macro_f1": 0.8733582321817616,
+      "best_validation_oct_macro_f1": 0.7915032679738563,
+      "best_validation_json_valid_rate": 1.0,
+      "validation_points": [
+        {
+          "step": 0,
+          "loss": 0.0350562277181201,
+          "macro_f1": 0.8733582321817616,
+          "oct_macro_f1": 0.7915032679738563,
+          "json_valid_rate": 1.0
+        },
+        {
+          "step": 5,
+          "loss": 0.0373432286031444,
+          "macro_f1": 0.8677248677248676,
+          "oct_macro_f1": 0.7746031746031745,
+          "json_valid_rate": 1.0
+        },
+        {
+          "step": 10,
+          "loss": 0.0392092617541493,
+          "macro_f1": 0.8677248677248676,
+          "oct_macro_f1": 0.7746031746031745,
+          "json_valid_rate": 1.0
+        }
+      ],
+      "peak_allocated_gib": 5.452396869659424,
+      "peak_reserved_gib": 5.69140625,
+      "total_seconds": 493.6992267000005,
+      "summary_path": "model-training/assets/qwen3.5-4b/local-4060-oct-stage2b-20261026-01/training_summary.json"
+    }
+  ],
+  "decision": "retain_step20_candidate",
+  "reason": [
+    "Both stage-2 learning rates triggered early stopping after two validation checks without improvement.",
+    "The best checkpoint remains the initialization adapter at step 0, equivalent to the selected step-20 adapter.",
+    "Validation macro-F1 fell from 0.8733582321817616 to 0.8677248677248676, while JSON validity stayed at 1.0.",
+    "No frozen-test promotion gate was rerun because neither stage-2 run produced a better validation candidate."
+  ],
+  "limitations": [
+    "The 55-row validation set is small and only suitable for checkpoint screening.",
+    "The frozen OCT test set is not a patient-isolated external validation set.",
+    "The stage-2 final adapters are experiment outputs, not promoted deployment artifacts."
+  ]
+}

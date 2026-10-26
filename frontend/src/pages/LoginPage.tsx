@@ -16,12 +16,12 @@ export default function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      const { user } = await login({
+      await login({
         username: String(form.get("username") ?? ""),
         password: String(form.get("password") ?? ""),
       });
       const from = (location.state as { from?: string } | null)?.from;
-      navigate(from || (user.role === "admin" ? "/admin" : "/doctor/workbench"), {
+      navigate(from?.startsWith("/doctor") ? from : "/doctor/workbench", {
         replace: true,
       });
     } catch (reason) {
@@ -40,7 +40,7 @@ export default function LoginPage() {
         </Link>
         <div className="login-heading">
           <LockKeyhole size={21} />
-          <div><h1>医务人员登录</h1><p>病例资料仅对授权医生与管理员开放。</p></div>
+          <div><h1>医生登录</h1><p>病例资料仅对授权医生开放。</p></div>
         </div>
         {error && <div className="notice error-notice" role="alert"><AlertCircle size={17} /> {error}</div>}
         <form className="login-form" onSubmit={(event) => void handleSubmit(event)}>
@@ -51,7 +51,7 @@ export default function LoginPage() {
             登录
           </button>
         </form>
-        <Link className="login-back" to="/">返回患者指南</Link>
+        <Link className="login-back" to="/admin/login">管理员入口</Link>
       </section>
     </main>
   );

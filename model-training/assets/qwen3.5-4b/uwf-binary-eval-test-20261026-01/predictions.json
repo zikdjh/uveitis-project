@@ -1,0 +1,632 @@
+[
+  {
+    "image": "data/AMD-010.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/AMD-011.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/AMD-019.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/AMD-096.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/AMD-097.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-009.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-010.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-013.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-014.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-032.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-033.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-047.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-048.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-063.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-064.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-069.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-070.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-076.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-077.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-078.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-079.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-082.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/DR-083.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-004.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-012.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-021.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-024.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-029.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-031.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-033.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-034.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-036.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-046.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-060.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-068.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-079.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-085.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-090.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-092.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-097.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Healthy-098.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-002.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-005.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-012.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-032.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-049.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-057.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-059.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-064.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-072.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-076.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-089.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/PM-091.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-006.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-012.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-020.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-022.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-023.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-032.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-033.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-037.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-041.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-077.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-079.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-085.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-086.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-089.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RD-093.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-011.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-031.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-034.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-038.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-047.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-048.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-050.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-054.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-055.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-060.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-065.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-083.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-092.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/RVO-093.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "non_uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Uveitis-003.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Uveitis-023.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Uveitis-027.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Uveitis-042.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Uveitis-044.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Uveitis-054.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Uveitis-070.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "uveitis",
+    "predicted": "non_uveitis",
+    "raw": "{\"label\":\"non_uveitis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/Uveitis-079.jpg",
+    "task": "uwf_uveitis_binary",
+    "expected": "uveitis",
+    "predicted": "uveitis",
+    "raw": "{\"label\":\"uveitis\",\"requires_human_review\":true}\n"
+  }
+]

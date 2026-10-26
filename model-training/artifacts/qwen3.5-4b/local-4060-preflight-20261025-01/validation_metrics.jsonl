@@ -1,2 +1,0 @@
-{"loss": 0.1491325584183334, "evaluated": 68, "errors": [], "rows": 68, "per_task": {"eye_five_class": 25, "oct_uveitis_4class": 13, "oct_aux_4class": 20, "fundus_toxo_binary": 10}, "step": 1, "elapsed_seconds": 14.027996000018902}
-{"loss": 0.15961621125547132, "evaluated": 68, "errors": [], "rows": 68, "per_task": {"eye_five_class": 25, "oct_uveitis_4class": 13, "oct_aux_4class": 20, "fundus_toxo_binary": 10}, "step": 2, "elapsed_seconds": 14.242016400006833}

@@ -1,0 +1,11 @@
+[
+  {
+    "task": "oct_aux_4class",
+    "dataset": "13_zhanglab_oct",
+    "image": "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-1032178-1.jpeg",
+    "expected": "CNV",
+    "predicted": "CNV",
+    "raw": "{\"label\":\"CNV\",\"requires_human_review\":true}\n",
+    "elapsed_seconds": 2.8826945000037085
+  }
+]

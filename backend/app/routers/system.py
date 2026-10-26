@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request
 
-from app.core.security import require_role
+from app.core.security import require_permission
+from app.schemas.auth import Permission
 from app.schemas.case import ModelService, SystemOverview
 
 
@@ -9,7 +10,7 @@ router = APIRouter(prefix="/api/v1/system", tags=["system"])
 
 @router.get("/overview", response_model=SystemOverview)
 def overview(request: Request) -> SystemOverview:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.SYSTEM_READ)
     return SystemOverview(
         stats=request.app.state.case_store.stats(),
         model_mode=request.app.state.settings.model_mode,
@@ -32,7 +33,7 @@ def overview(request: Request) -> SystemOverview:
 
 @router.get("/infrastructure")
 def infrastructure(request: Request) -> dict[str, bool]:
-    require_role(request, "admin")
+    require_permission(request, Permission.SYSTEM_MANAGE)
     case_store = request.app.state.case_store
     return {
         "postgres": (

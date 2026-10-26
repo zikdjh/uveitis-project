@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 TARGET = ROOT / "model-training" / "models" / "qwen" / "Qwen3.5-4B"
-MODAL = ROOT / ".venv-modal" / "Scripts" / "modal.exe"
+MODAL = ROOT / "model-training" / ".venv-modal" / "Scripts" / "modal.exe"
 
 
 def verify(target: Path) -> dict[str, object]:

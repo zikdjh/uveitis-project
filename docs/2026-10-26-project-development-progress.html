@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>项目开发进度与 11.10 收口计划 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-project-layout.html">上一份</a>
+    <a href="2026-10-26-progress-tracking.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>项目</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>项目开发进度与 11.10 收口计划</h1>
+  <p class="doc-summary">三端开发、鉴权、数据集、模型运行集成的阶段状态和验收排期</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-project-development-progress.html</code></p>
+  <article class="html-body">
+<p>文档日期：2026-10-26。目标工程收口日期：2026-11-10。</p>
+
+<h2>结论摘要</h2>
+<p>项目已经从数据集调研和环境验证，进入“可演示业务链路、鉴权与权限体系、本地模型训练、界面和模型运行集成收口”阶段。工程交付综合估算约 <strong>72%</strong>，这是按可演示功能、集成程度和证据完整度做的排期估算，不是模型质量或临床验证结论。</p>
+<p>当前最重要的收口路径是：先冻结文档和界面规范，再把模型运行 API 接入分析链路，同时完成冻结测试集基线评估。补充决策模型继续作为按门槛启动的方案，不占用 11.10 工程交付的关键路径。</p>
+
+<h2>阶段完成度</h2>
+<table>
+  <thead>
+    <tr><th>工作流</th><th>状态</th><th>当前判断</th><th>11.10 前目标</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>数据与训练资产</td><td>已完成大部分</td><td>180,460 个文件完成解压、清单登记和结构整理；训练 manifest 与两组 best adapter 可定位。</td><td>冻结训练数据版本、指标和选型证据。</td></tr>
+    <tr><td>后端业务与鉴权</td><td>可演示</td><td>病例、影像、分析任务、复核、知识检索、账号、角色、审计和双 Token 刷新已落地。</td><td>接入真实模型运行结果，补端到端回归。</td></tr>
+    <tr><td>前端三端</td><td>进行中</td><td>患者端、医生端和管理员端已有页面；工作区外壳、移动导航和账号权限页刚完成第一轮收口。</td><td>完成剩余页面统一，完成桌面和移动端验收。</td></tr>
+    <tr><td>模型训练</td><td>已进入评估收口</td><td>Qwen3.5-4B QLoRA 已在 RTX 4060 完成两轮本地训练；OCT 候选冻结评估完成，基线评估未完成。</td><td>完成基线评估并决定候选是否提升。</td></tr>
+    <tr><td>模型运行集成</td><td>本地链路完成</td><td>后端已建立可选增强编排：Qwen 判断、RAG、决策、搜索和外部总结可独立降级；真实 <code>/v1/judge</code> 已能加载 Qwen3.5-4B 与第 20 步 adapter，结果回写和部署验收尚未完成。</td><td>完成业务端到端回写、部署联调和失败恢复验收。</td></tr>
+    <tr><td>部署与验收</td><td>待收口</td><td>已有 Docker Compose、启动说明和本地运行路径，尚未做完整部署验收。</td><td>完成本地端到端验收和交付说明。</td></tr>
+    <tr><td>补充决策模型</td><td>默认关闭</td><td>缺少真实脱敏病例、医生确认的决策标签和独立评测集，暂不训练、不进入主流程。</td><td>仅在数据和评测门槛满足时作为后续扩展。</td></tr>
+  </tbody>
+</table>
+
+<h2>已完成</h2>
+<ul>
+  <li>数据集完成下载、解压、嵌套压缩包处理、逐文件清单登记和归档清理；训练数据与原始数据边界已分离。</li>
+  <li>项目目录完成重组：训练统一放入 <code>model-training/</code>，运行与评估统一放入 <code>model-runtime/</code>，专题文档统一输出为 HTML。</li>
+  <li>FastAPI 后端完成病例建档、影像上传、分析任务、医生复核、PostgreSQL 持久化和本地影像读取。</li>
+  <li>鉴权与权限体系完成双 Token 无感刷新、访问令牌/刷新令牌轮换、CSRF、登录限流、账号管理、会话撤销和鉴权审计。</li>
+  <li>医生与管理员使用独立登录页和管理员专用登录 API；管理员后台只使用 PostgreSQL 持久化，应用与测试均不依赖 SQLite。</li>
+  <li>生产 ASGI 入口按应用工厂拆分：<code>app.asgi:app</code> 启动时强制要求 PostgreSQL，默认连接超时 5 秒；测试从 <code>app.main:create_app</code> 使用内存仓储，不会触发数据库连接。</li>
+  <li>管理员独立登录、角色边界和 PostgreSQL-only 持久化已完成生产构建、隔离数据库契约测试和登录冒烟；真实病例 CSV 仅保留本地并加入忽略规则。</li>
+  <li>React 三端完成公开患者首页、医生工作台、病例详情、复核队列、知识检索、运行概览和管理员账号权限页面。</li>
+  <li>工作区外壳完成桌面端分组导航和移动端抽屉导航；账号权限页完成概览指标、账号卡片化、重置密码和审计日志展示。</li>
+  <li>Qwen3.5-4B QLoRA 本地训练已完成，RTX 4060 峰值保留显存约 <code>5.69 GiB</code>，当前没有活跃训练容器。</li>
+  <li>模型训练侧已完成同源冻结评估、错误来源分析、四类均衡推理 smoke 和真实运行服务烟测；第 20 步候选单图服务推理峰值保留显存 <code>3.355469 GiB</code>。</li>
+</ul>
+
+<h2>进行中</h2>
+<ul>
+  <li><strong>界面统一：</strong>已处理工作区外壳、导航和账号权限页；患者首页、病例详情、管理员概览、登录页和状态页仍需按同一套医疗工具风格收口。</li>
+  <li><strong>模型运行集成：</strong>真实 <code>/v1/judge</code> 已读取基座和 adapter，返回结构化标签、发现、置信度、adapter 指纹和时延；预处理修正后的热请求为 <code>3.363 秒</code>，8 个并发请求均成功。还需完成分析任务结果回写、上传目录部署配置和端到端验收。</li>
+  <li><strong>冻结评估：</strong>第 20 步候选与第 100 步基线均已完成 1,000 条同源评估，候选通过选型门槛；运行侧已接通同一 adapter，但单张训练图的 DRUSEN 错误和零置信度输出不能替代独立验证。</li>
+  <li><strong>端到端验收：</strong>需要覆盖登录、无感刷新、角色切换、病例创建、影像上传、分析、复核、知识检索和错误状态的连续流程。</li>
+  <li><strong>部署收口：</strong>需要固化开发环境变量、数据库/Redis 启动顺序、模型运行端口和回滚方式。</li>
+</ul>
+
+<h2>未完成或暂缓</h2>
+<ul>
+  <li>真实模型推理已在本地运行服务中接通，但业务端仍默认使用 mock，尚未完成结果回写和真实上传目录的部署联调；当前链路不生成临床结论。</li>
+  <li>尚未完成患者级独立外部验证、医生双人复核、亚组分析和临床安全性评估。</li>
+  <li>Intern-Decision-4B 补充决策模型没有开始训练，主流程默认保持 <code>APP_DECISION_ENABLED=false</code>。</li>
+  <li>生产级密钥托管、HTTPS、跨站 Cookie 策略、长期日志保留和监控告警仍未纳入本次工程收口。</li>
+</ul>
+
+<h2>11.10 前后排期</h2>
+<table>
+  <thead>
+    <tr><th>日期</th><th>交付重点</th><th>验收证据</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>10-26 至 10-28</td><td>冻结文档与界面规范；完成患者首页、病例详情、管理员概览、登录/状态页收口。</td><td>桌面 1440px 与移动 390px 截图；无横向溢出；构建通过。</td></tr>
+    <tr><td>10-29 至 11-01</td><td>完成模型运行服务与后端分析任务的端到端回写、上传目录配置、超时、降级和部署联调。</td><td>分析任务从 mock 切到真实运行路径，并留下病例完整流程证据。</td></tr>
+    <tr><td>11-02 至 11-04</td><td>完成端到端联调和移动端回归，补齐加载、错误、未授权和空状态。</td><td>病例全流程验收记录；鉴权刷新、角色边界和知识检索回归结果。</td></tr>
+    <tr><td>11-05 至 11-07</td><td>冻结选定的第 20 步候选，整理错误边界，并通过医生复核流程检查结果展示。</td><td>两份同源评估、错误来源分析、adapter SHA256、选型记录和受控推理 smoke。</td></tr>
+    <tr><td>11-08 至 11-10</td><td>停止功能扩张，冻结 adapter、接口、文档和已知限制；完成交付说明与后续研究清单。</td><td>项目开发进度文档、模型训练进度文档、运行手册和验收结论。</td></tr>
+  </tbody>
+</table>
+
+<h2>11.10 工程验收标准</h2>
+<ol>
+  <li>医生和管理员能够在各自角色范围内登录，访问控制由后端作为唯一授权边界，前端路由只负责界面控制。</li>
+  <li>访问令牌失效时能够无感刷新；并发请求不会重复刷新；退出、改密、停用账号和角色变更会撤销旧会话。</li>
+  <li>病例可以完成建档、影像上传、分析任务、结果查看和医生复核，异常状态有明确反馈。</li>
+  <li>知识文档可以写入、检索和查看索引状态；BGE-M3 与 zvec 使用同一向量空间。</li>
+  <li>模型运行服务能从固定路径读取基座和 adapter，完成真实结构化推理和失败降级；分析任务回写后仍不把模型输出直接当作诊断。</li>
+  <li>训练侧完成基线与候选的同一冻结测试集比较，保留指标、清单哈希和 adapter 指纹；未达到门槛时不提升候选。</li>
+  <li>所有页面在桌面和移动端可操作，关键文本不重叠、不溢出，桌面和移动端构建均可复现。</li>
+  <li>文档明确标注非商用科研原型边界、数据限制和尚未完成的临床验证。</li>
+</ol>
+
+<h2>风险与处理</h2>
+<table>
+  <thead>
+    <tr><th>风险</th><th>影响</th><th>处理方式</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>错误类型不均衡</td><td>第 20 步候选总体提升主要来自 DRUSEN 修正，同时 CNV/NORMAL 有退化。</td><td>后续实验先针对 NORMAL/DRUSEN 和 CNV/DME 提出数据或训练假设，不把总体 macro-F1 当作四类均衡改善。</td></tr>
+    <tr><td>本地 8 GB 显存限制</td><td>无法使用更大图像分辨率、更长序列或更大 batch。</td><td>继续使用 65,536 图像像素、256 序列和梯度累积；不在本地扩大训练配置。</td></tr>
+    <tr><td>数据患者隔离不足</td><td>03 存在增强/原型关系，01 缺少患者 ID，13 的组键包含标签。</td><td>在所有交付文档中标注限制；冻结测试结果只作为研究证据，不作为临床泛化证明。</td></tr>
+    <tr><td>运行集成时间不足</td><td>界面完善完成但模型服务仍停留在健康检查，无法形成完整推理闭环。</td><td>先保证 adapter 路径和请求契约可验证，必要时将真实推理标记为受控演示入口。</td></tr>
+    <tr><td>决策模型数据不足</td><td>补充模型无法形成可信的临床决策评测。</td><td>默认关闭，不占用 11.10 主路径；仅在真实脱敏数据和医生标签齐备后单独立项。</td></tr>
+  </tbody>
+</table>
+
+<h2>相关入口</h2>
+<ul>
+  <li><a href="2026-10-26-project-overview.html">项目总览</a>：目录、当前状态和本地启动。</li>
+  <li><a href="2026-10-26-auth-access-control.html">系统鉴权与权限体系</a>：双 Token、角色、账号和审计边界。</li>
+  <li><a href="2026-10-26-model-training-progress.html">模型训练进度与 11.10 收口计划</a>：训练、评估和选型状态。</li>
+  <li><a href="2026-10-26-model-runtime.html">模型运行服务</a>：健康检查、评估和运行资产入口。</li>
+  <li><a href="2026-10-26-project-layout.html">项目目录索引</a>：训练、运行、数据、业务代码和证据目录边界。</li>
+</ul>
+
+<p><strong>边界说明：</strong>本项目的“完成”指工程链路可运行、文档可复现和受控演示可验收，不表示获得医疗器械注册、临床诊断资质或临床验证结论。</p>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>项目开发进度与 11.10 收口计划 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

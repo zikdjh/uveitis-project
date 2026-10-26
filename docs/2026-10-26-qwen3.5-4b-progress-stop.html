@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qwen3.5-4B 训练进度与停止点 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-model-training-progress.html">上一份</a>
+    <a href="2026-10-26-qwen3.5-4b-training-review.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>训练</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>Qwen3.5-4B 训练进度与停止点</h1>
+  <p class="doc-summary">本地训练、内部验证、冻结测试进度与恢复方式</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-qwen3.5-4b-progress-stop.html</code></p>
+  <article class="html-body">
+<p>原始停止日期：2026-10-25；最后更新：2026-10-26。</p>
+<h2>本轮结论</h2>
+<ul>
+<li>今日训练和评估均在本地 RTX 4060 Laptop 8 GB 上执行，没有启动 Modal GPU，新增 Modal 消耗为 <code>$0.00</code>。</li>
+<li>分组续训 <code>local-4060-grouped-cont-20261025-01</code> 已完成 150/150 步，最佳 checkpoint 为第 100 步。</li>
+<li>OCT 聚焦续训 <code>local-4060-oct-focus-cont-20261025-01</code> 已完成 50/50 步并触发早停，最佳 checkpoint 为第 20 步。</li>
+<li>第 20 步候选已完成 <code>oct_aux_4class</code> 冻结测试集的全部 1,000 条生成式评估。</li>
+<li>第 100 步基线的同一评估在 2026-10-25 停在 145/1,000 条，并于 2026-10-26 完成剩余 855 条。</li>
+<li>2026-10-26 又执行了两组第二阶段受控复核：<code>5e-6</code> 和 <code>1e-5</code> 均在 10 步早停，没有产生新的提升候选；当前没有训练或评估进程，GPU 已释放。</li>
+<li>错误来源分析显示 53 条错误主要集中在 <code>NORMAL-&gt;DRUSEN</code>、<code>DRUSEN-&gt;CNV</code> 和 <code>CNV-&gt;DME</code>；第 20 步相对基线的总体提升主要来自 DRUSEN 修正，CNV/NORMAL 有退化。</li>
+<li>第 20 步候选已完成四类各 4 条、共 16 条本地受控推理 smoke，结果 16/16 正确、JSON 有效率 100%、峰值保留显存 <code>3.31 GiB</code>；该结果不作为泛化精度证据。</li>
+</ul>
+<h2>训练与内部验证</h2>
+<h3>分组续训</h3>
+<ul>
+<li>Run：<code>local-4060-grouped-cont-20261025-01</code></li>
+<li>步数：150/150，状态 <code>ok</code></li>
+<li>最佳 checkpoint：第 100 步</li>
+<li>55 条分组验证集：总体准确率 <code>0.800</code>，任务平均 macro-F1 <code>0.865804</code>，严格 JSON 有效率 <code>100%</code></li>
+<li>OCT 验证 macro-F1：<code>0.768841</code></li>
+<li>最佳 adapter SHA256：<code>517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a</code></li>
+<li>保留显存峰值：<code>5.69140625 GiB</code></li>
+</ul>
+<h3>OCT 聚焦续训</h3>
+<ul>
+<li>Run：<code>local-4060-oct-focus-cont-20261025-01</code></li>
+<li>步数：50/50，完成第 50 步验证后因连续三次未改善而早停</li>
+<li>最佳 checkpoint：第 20 步</li>
+<li>55 条分组验证集：总体准确率 <code>0.836364</code>，任务平均 macro-F1 <code>0.873358</code>，严格 JSON 有效率 <code>100%</code></li>
+<li>OCT 验证 macro-F1：<code>0.790476</code></li>
+<li>相比第 100 步基线，OCT 验证 macro-F1 提升 <code>+0.021635</code></li>
+<li>验证集中 DRUSEN 错判为 CNV 从 <code>8/18</code> 降到 <code>4/18</code></li>
+<li>最佳 adapter SHA256：<code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code></li>
+<li>保留显存峰值：<code>5.69140625 GiB</code></li>
+</ul>
+<p>55 条验证集样本量很小，以上提升只用于候选筛选，不是冻结测试集或临床泛化结论。</p>
+<h2>冻结测试集评估</h2>
+<p>任务：<code>oct_aux_4class</code>，冻结测试集共 1,000 条，四类各 250 条。</p>
+<h3>第 20 步候选：已完成</h3>
+<ul>
+<li>状态：<code>ok</code></li>
+<li>行数：<code>1000</code></li>
+<li>生成错误：<code>0</code></li>
+<li>严格 JSON 有效率：<code>1.0</code></li>
+<li>总体准确率：<code>0.947</code></li>
+<li>总体 macro-F1：<code>0.9472447307516584</code></li>
+<li>冻结选择清单 SHA256：<code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code></li>
+<li>Adapter SHA256：<code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code></li>
+<li>运行耗时：<code>2795.409766</code> 秒</li>
+<li>保留显存峰值：<code>3.310546875 GiB</code></li>
+</ul>
+<p>分任务结果：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th style="text-align:right">精确率</th>
+<th style="text-align:right">召回率</th>
+<th style="text-align:right">F1</th>
+<th style="text-align:right">支持数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CNV</td>
+<td style="text-align:right">0.933071</td>
+<td style="text-align:right">0.948</td>
+<td style="text-align:right">0.940476</td>
+<td style="text-align:right">250</td>
+</tr>
+<tr>
+<td>DME</td>
+<td style="text-align:right">0.968127</td>
+<td style="text-align:right">0.972</td>
+<td style="text-align:right">0.970060</td>
+<td style="text-align:right">250</td>
+</tr>
+<tr>
+<td>DRUSEN</td>
+<td style="text-align:right">0.900383</td>
+<td style="text-align:right">0.940</td>
+<td style="text-align:right">0.919765</td>
+<td style="text-align:right">250</td>
+</tr>
+<tr>
+<td>NORMAL</td>
+<td style="text-align:right">0.991453</td>
+<td style="text-align:right">0.928</td>
+<td style="text-align:right">0.958678</td>
+<td style="text-align:right">250</td>
+</tr>
+</tbody>
+</table>
+<p>主要混淆：</p>
+<table>
+<thead>
+<tr>
+<th>真实类别</th>
+<th style="text-align:right">预测 CNV</th>
+<th style="text-align:right">预测 DME</th>
+<th style="text-align:right">预测 DRUSEN</th>
+<th style="text-align:right">预测 NORMAL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CNV</td>
+<td style="text-align:right">237</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td>DME</td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">243</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>DRUSEN</td>
+<td style="text-align:right">14</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">235</td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td>NORMAL</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">232</td>
+</tr>
+</tbody>
+</table>
+<p>第 20 步候选产物：</p>
+<ul>
+<li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_metrics.json</code></li>
+<li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_summary.json</code></li>
+<li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_manifest.json</code></li>
+<li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/predictions.json</code></li>
+</ul>
+<h3>第 100 步基线：已完成并与候选同源比较</h3>
+<ul>
+<li>状态：<code>ok</code>，<code>1000/1000</code> 条完成，生成错误 <code>0</code></li>
+<li>准确率：<code>0.918</code>；macro-F1：<code>0.9182517052346422</code>；严格 JSON 有效率：<code>1.0</code></li>
+<li>续跑起点：<code>145/1000</code>；本次完成 <code>855</code> 条，耗时 <code>2012.583</code> 秒</li>
+<li>结果文件：<code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/</code></li>
+<li>selection SHA256：<code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>，与第 20 步一致</li>
+<li>基线 adapter SHA256：<code>517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a</code></li>
+</ul>
+<p>停止时的 <code>145</code> 条都属于 CNV 区块，只能作为历史未完成快照；完整 1,000 条结果已替换该快照作为选型依据：</p>
+<ul>
+<li>基线正确：<code>141/145</code>，准确率 <code>0.972414</code></li>
+<li>第 20 步候选在同一批样本上的正确数：<code>137/145</code></li>
+<li>两模型预测发生变化的样本：<code>4</code></li>
+<li>候选修复基线错误：<code>0</code></li>
+<li>候选引入新错误：<code>4</code>，其中 CNV 错判为 DRUSEN <code>3</code> 条、错判为 NORMAL <code>1</code> 条</li>
+</ul>
+<p>完成全部 1,000 条后，第 20 步候选相对第 100 步基线的 OCT macro-F1 提升 <code>0.028993</code>，超过 <code>0.02</code> 门槛，因此选型决定为 <code>promote_step20_candidate</code>。结构化证据见 <code>selection_decision.json</code>。</p>
+<h2>2026-10-26 第二阶段受控复核</h2>
+<p>第二阶段从第 20 步候选初始化，目标是确认在同一数据和 8 GB 配置下，较小学习率、OCT 任务权重 4 的短程续训是否能继续提升验证指标。</p>
+<table>
+<thead>
+<tr>
+<th>Run</th>
+<th style="text-align:right">学习率</th>
+<th style="text-align:right">目标步数</th>
+<th style="text-align:right">实际步数</th>
+<th>第 5、10 步验证</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>local-4060-oct-stage2-20261026-01</code></td>
+<td style="text-align:right"><code>5e-6</code></td>
+<td style="text-align:right">30</td>
+<td style="text-align:right">10</td>
+<td>macro-F1 <code>0.867725</code>；OCT macro-F1 <code>0.774603</code>；JSON <code>100%</code></td>
+<td>连续两次未改善，保留第 20 步候选</td>
+</tr>
+<tr>
+<td><code>local-4060-oct-stage2b-20261026-01</code></td>
+<td style="text-align:right"><code>1e-5</code></td>
+<td style="text-align:right">30</td>
+<td style="text-align:right">10</td>
+<td>macro-F1 <code>0.867725</code>；OCT macro-F1 <code>0.774603</code>；JSON <code>100%</code></td>
+<td>连续两次未改善，保留第 20 步候选</td>
+</tr>
+</tbody>
+</table>
+<p>第 20 步入口验证为 macro-F1 <code>0.873358</code>、OCT macro-F1 <code>0.791503</code>。两组实验的最佳点都停留在初始化第 0 步，全部峰值保留显存均为 <code>5.69140625 GiB</code>。结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>，决定为 <code>retain_step20_candidate</code>。</p>
+<h2>恢复方式</h2>
+<p>以下命令是 2026-10-26 历史断点恢复方式，基线补全已经完成，除非重新做可复现实验，否则不需要再次执行。不要添加 <code>-Overwrite</code>。</p>
+<pre><code class="language-powershell">powershell -NoProfile -ExecutionPolicy Bypass -File `
+  'model-training\scripts\run_local_4060_eval.ps1' `
+  -AdapterDir 'model-training\artifacts\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
+  -OutputDir 'model-training\artifacts\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01\step100' `
+  -Tasks 'oct_aux_4class' *&gt; `
+  'model-training\artifacts\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01.step100.log'
+</code></pre>
+<p>完成后至少核对：</p>
+<ol>
+<li><code>eval_summary.json</code> 中 <code>status == &quot;ok&quot;</code>、<code>rows == 1000</code>。</li>
+<li><code>eval_metrics.json</code> 中各任务 <code>errors == 0</code>、<code>json_valid_rate == 1.0</code>。</li>
+<li>两份 <code>eval_manifest.json</code> 的 <code>selection_sha256</code> 与第 20 步完全相同，均为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。</li>
+<li>比较 OCT accuracy、macro-F1、各类别 F1，以及 CNV/DRUSEN 混淆矩阵和逐样本配对差异。</li>
+</ol>
+<h2>选型与下一步</h2>
+<ul>
+<li>第 20 步候选已通过门槛，作为下一阶段的运行候选，不再继续延长当前 OCT 聚焦训练。</li>
+<li>第二阶段 <code>5e-6</code>、<code>1e-5</code> 两轮均已验证没有提升；同配置增加步数不再是有效下一步。</li>
+<li>第 100 步基线保留为同源对照，不作为运行候选覆盖。</li>
+<li>即使通过冻结测试集，01 仍属于非患者隔离数据；03 存在原型或增强图关系；13 的组键包含标签，少数患者 ID 可能跨标签出现。上述限制使其不能作为临床泛化证明。</li>
+<li>下一项训练侧工作：冻结第 20 步 adapter、模型卡、指标文件和运行读取路径；本地受控推理 smoke 已完成，服务级超时与失败回退仍待接入验证。</li>
+<li>若要继续实验，先针对 NORMAL/DRUSEN 和 CNV/DME 错误提出明确的数据或训练假设，不再继续同配置增加步数。</li>
+<li>在独立患者级测试集和医生复核完成前，不发布临床决策模型。</li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>Qwen3.5-4B 训练进度与停止点 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

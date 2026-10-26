@@ -1,0 +1,11 @@
+{
+  "adapter_dir": "D:\\temp\\gpt\\uveitis-project\\artifacts\\qwen3.5-4b\\local-4060-oct-focus-cont-20261025-01\\best_adapter",
+  "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+  "tasks": [
+    "oct_aux_4class"
+  ],
+  "rows": 1000,
+  "selection_sha256": "84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a",
+  "partial_predictions": "predictions.partial.jsonl",
+  "output_dir": "D:\\temp\\gpt\\uveitis-project\\artifacts\\qwen3.5-4b\\eval-oct-step20-vs-step100-20261025-01\\step20"
+}

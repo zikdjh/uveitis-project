@@ -1,7 +1,0 @@
-{
-  "step": 100,
-  "validation_loss": 0.027431930393807608,
-  "checkpoint_dir": "/runs/qwen3.5-4b/qwen4b-stage1-20261025-01/checkpoints/step-000100",
-  "selection": "lowest deterministic validation loss among steps 50, 100, and 150",
-  "note": "Training was stopped after step 150; this file was corrected from the saved validation metrics."
-}

@@ -1,0 +1,13 @@
+{
+  "step": 2,
+  "validation_loss": 0.035152338141183875,
+  "validation_macro_f1": 0.8320192307692308,
+  "validation_json_valid_rate": 1.0,
+  "selection_score": [
+    0.8320192307692308,
+    1.0,
+    -0.035152338141183875
+  ],
+  "checkpoint_dir": "model-training\\assets\\qwen3.5-4b\\local-4060-oct-stage3-hires-20261026-01\\checkpoints\\step-000002",
+  "adapter_sha256": "734a67b866cf9ff04e0ee97e5e128014d7decd8f8af5abf94cf43738d13316ee"
+}

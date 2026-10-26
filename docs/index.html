@@ -9,61 +9,93 @@
 <body>
 <a class="doc-skip" href="#catalog">跳到文档目录</a>
 <header class="doc-nav">
-  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
   <nav aria-label="文档导航">
-    <a href="2026-10-25-project-overview.html">项目总览</a>
+    <a href="2026-10-26-project-overview.html">项目总览</a>
     <a href="#catalog">全部文档</a>
   </nav>
 </header>
 <main id="catalog" class="doc-page doc-catalog">
   <div class="doc-kicker">
     <span>文档</span>
-    <span>22 份</span>
+    <span>31 份</span>
   </div>
   <h1>项目文档索引</h1>
-  <p class="doc-summary">项目设计、数据集、Modal 训练记录与模型选型的统一入口。全部页面可离线打开，Markdown 源文件保留在原位置。</p>
+  <p class="doc-summary">训练、模型运行、系统设计、数据集和项目状态的离线入口。专题文档以 HTML 为最终源，目录级 README 保留为 Markdown 规范入口。</p>
   <div class="doc-catalog-head">
     <h2>文档目录</h2>
-    <p>命名格式：<code>YYYY-MM-DD-kebab-case.html</code>；文档总索引使用固定的 <code>index.html</code>。</p>
+    <p>命名格式：<code>YYYY-MM-DD-kebab-case.html</code>；总索引固定为 <code>index.html</code>。</p>
   </div>
   <section class="doc-group" id="项目">
     <h2>项目</h2>
     <ul class="doc-grid">
       <li class="doc-card">
-        <a href="2026-10-25-project-overview.html">
-          <span class="doc-card-meta">2026-10-25 · 项目</span>
+        <a href="2026-10-26-project-overview.html">
+          <span class="doc-card-meta">2026-10-26 · 项目</span>
           <strong>项目总览</strong>
-          <span>系统范围、目录、当前状态与启动方式</span>
-          <code>2026-10-25-project-overview.html</code>
+          <span>系统边界、训练与运行目录、当前状态和启动方式</span>
+          <code>2026-10-26-project-overview.html</code>
         </a>
       </li>
       <li class="doc-card">
-        <a href="2026-10-25-project-layout.html">
-          <span class="doc-card-meta">2026-10-25 · 项目</span>
+        <a href="2026-10-26-project-layout.html">
+          <span class="doc-card-meta">2026-10-26 · 项目</span>
           <strong>项目目录索引</strong>
-          <span>目录作用、占用、清理边界与验证状态</span>
-          <code>2026-10-25-project-layout.html</code>
+          <span>训练、运行、数据、业务代码和证据目录的边界</span>
+          <code>2026-10-26-project-layout.html</code>
         </a>
       </li>
       <li class="doc-card">
-        <a href="2026-10-25-outputs-guide.html">
-          <span class="doc-card-meta">2026-10-25 · 项目</span>
+        <a href="2026-10-26-project-development-progress.html">
+          <span class="doc-card-meta">2026-10-26 · 项目</span>
+          <strong>项目开发进度与 11.10 收口计划</strong>
+          <span>三端开发、鉴权、数据集、模型运行集成的阶段状态和验收排期</span>
+          <code>2026-10-26-project-development-progress.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-progress-tracking.html">
+          <span class="doc-card-meta">2026-10-26 · 项目</span>
+          <strong>项目进度与模型训练进度跟踪</strong>
+          <span>项目、训练、验收、风险和决策记录的滚动跟踪看板</span>
+          <code>2026-10-26-progress-tracking.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-outputs-guide.html">
+          <span class="doc-card-meta">2026-10-26 · 项目</span>
           <strong>运行输出说明</strong>
           <span>临时输出与长期训练证据的归档边界</span>
-          <code>2026-10-25-outputs-guide.html</code>
+          <code>2026-10-26-outputs-guide.html</code>
         </a>
       </li>
     </ul>
   </section>
-  <section class="doc-group" id="系统设计">
-    <h2>系统设计</h2>
+  <section class="doc-group" id="运行">
+    <h2>运行</h2>
     <ul class="doc-grid">
       <li class="doc-card">
-        <a href="2026-10-23-agent-execution-chain.html">
-          <span class="doc-card-meta">2026-10-23 · 系统设计</span>
-          <strong>智能体执行链路规划</strong>
-          <span>病例接入、影像感知、检索、决策和安全复核链路</span>
-          <code>2026-10-23-agent-execution-chain.html</code>
+        <a href="2026-10-26-model-runtime.html">
+          <span class="doc-card-meta">2026-10-26 · 运行</span>
+          <strong>模型运行服务</strong>
+          <span>运行 API、评估入口、资产读取边界和健康检查</span>
+          <code>2026-10-26-model-runtime.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-model-runtime-assets.html">
+          <span class="doc-card-meta">2026-10-26 · 运行</span>
+          <strong>模型运行资产索引</strong>
+          <span>运行 adapter、冻结评估结果和路径读取约定</span>
+          <code>2026-10-26-model-runtime-assets.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-model-runtime-evaluation.html">
+          <span class="doc-card-meta">2026-10-26 · 运行</span>
+          <strong>模型评估与推理说明</strong>
+          <span>本地评估、冻结测试、显存限制与推理边界</span>
+          <code>2026-10-26-model-runtime-evaluation.html</code>
         </a>
       </li>
     </ul>
@@ -72,27 +104,51 @@
     <h2>训练</h2>
     <ul class="doc-grid">
       <li class="doc-card">
-        <a href="2026-10-25-model-training-management.html">
-          <span class="doc-card-meta">2026-10-25 · 训练</span>
+        <a href="2026-10-26-model-training-management.html">
+          <span class="doc-card-meta">2026-10-26 · 训练</span>
           <strong>模型训练管理</strong>
-          <span>训练代码、脚本、数据和产物的统一入口</span>
-          <code>2026-10-25-model-training-management.html</code>
+          <span>训练代码、环境、数据、计划和产物的统一入口</span>
+          <code>2026-10-26-model-training-management.html</code>
         </a>
       </li>
       <li class="doc-card">
-        <a href="2026-10-25-model-training-status.html">
-          <span class="doc-card-meta">2026-10-25 · 训练</span>
+        <a href="2026-10-26-training-assets-index.html">
+          <span class="doc-card-meta">2026-10-26 · 训练</span>
+          <strong>训练产物索引</strong>
+          <span>当前 adapter、训练指标、冻结评估结果和保存约定</span>
+          <code>2026-10-26-training-assets-index.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-model-training-status.html">
+          <span class="doc-card-meta">2026-10-26 · 训练</span>
           <strong>训练状态</strong>
-          <span>当前模型、数据、checkpoint、预算和训练前后检查</span>
-          <code>2026-10-25-model-training-status.html</code>
+          <span>当前模型、数据、checkpoint、预算和硬件状态</span>
+          <code>2026-10-26-model-training-status.html</code>
         </a>
       </li>
       <li class="doc-card">
-        <a href="2026-10-25-artifacts-index.html">
-          <span class="doc-card-meta">2026-10-25 · 训练</span>
-          <strong>训练产物与本地快照</strong>
-          <span>Qwen3.5-4B 的运行快照、评估和权重保存约定</span>
-          <code>2026-10-25-artifacts-index.html</code>
+        <a href="2026-10-26-model-training-progress.html">
+          <span class="doc-card-meta">2026-10-26 · 训练</span>
+          <strong>模型训练进度与 11.10 收口计划</strong>
+          <span>Qwen3.5-4B 本地训练、冻结评估、选型门槛和后续排期</span>
+          <code>2026-10-26-model-training-progress.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-qwen3.5-4b-progress-stop.html">
+          <span class="doc-card-meta">2026-10-26 · 训练</span>
+          <strong>Qwen3.5-4B 训练进度与停止点</strong>
+          <span>本地训练、内部验证、冻结测试进度与恢复方式</span>
+          <code>2026-10-26-qwen3.5-4b-progress-stop.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-qwen3.5-4b-training-review.html">
+          <span class="doc-card-meta">2026-10-26 · 训练</span>
+          <strong>Qwen3.5-4B 训练审核</strong>
+          <span>分组续训、数据审计、验证结果与后续判断</span>
+          <code>2026-10-26-qwen3.5-4b-training-review.html</code>
         </a>
       </li>
       <li class="doc-card">
@@ -119,12 +175,25 @@
           <code>2026-10-25-training-budget-plan-modal-l40s.html</code>
         </a>
       </li>
+    </ul>
+  </section>
+  <section class="doc-group" id="系统设计">
+    <h2>系统设计</h2>
+    <ul class="doc-grid">
       <li class="doc-card">
-        <a href="2026-10-25-dataset-training-map.html">
-          <span class="doc-card-meta">2026-10-25 · 训练</span>
-          <strong>数据集训练映射</strong>
-          <span>影像、检索和决策任务的样本构造与验收指标</span>
-          <code>2026-10-25-dataset-training-map.html</code>
+        <a href="2026-10-23-agent-execution-chain.html">
+          <span class="doc-card-meta">2026-10-23 · 系统设计</span>
+          <strong>智能体执行链路规划</strong>
+          <span>病例接入、影像感知、检索、决策和安全复核链路</span>
+          <code>2026-10-23-agent-execution-chain.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-auth-access-control.html">
+          <span class="doc-card-meta">2026-10-26 · 系统设计</span>
+          <strong>系统鉴权与权限体系</strong>
+          <span>双令牌无感刷新、角色权限、CSRF、账号管理和审计边界</span>
+          <code>2026-10-26-auth-access-control.html</code>
         </a>
       </li>
     </ul>
@@ -133,11 +202,19 @@
     <h2>数据</h2>
     <ul class="doc-grid">
       <li class="doc-card">
-        <a href="2026-10-25-dataset-index.html">
-          <span class="doc-card-meta">2026-10-25 · 数据</span>
+        <a href="2026-10-26-dataset-training-map.html">
+          <span class="doc-card-meta">2026-10-26 · 数据</span>
+          <strong>数据集训练映射</strong>
+          <span>影像、检索和决策任务的样本构造与验收指标</span>
+          <code>2026-10-26-dataset-training-map.html</code>
+        </a>
+      </li>
+      <li class="doc-card">
+        <a href="2026-10-26-dataset-index.html">
+          <span class="doc-card-meta">2026-10-26 · 数据</span>
           <strong>数据集目录索引</strong>
           <span>已解压数据集的规模、标签、目录和清理后的结构</span>
-          <code>2026-10-25-dataset-index.html</code>
+          <code>2026-10-26-dataset-index.html</code>
         </a>
       </li>
       <li class="doc-card">
@@ -207,19 +284,19 @@
     <h2>基础设施</h2>
     <ul class="doc-grid">
       <li class="doc-card">
-        <a href="2026-10-25-modal-training-storage.html">
-          <span class="doc-card-meta">2026-10-25 · 基础设施</span>
+        <a href="2026-10-26-modal-training-storage.html">
+          <span class="doc-card-meta">2026-10-26 · 基础设施</span>
           <strong>Modal 训练存储约定</strong>
           <span>Volume 挂载、产物目录、checkpoint 与恢复方式</span>
-          <code>2026-10-25-modal-training-storage.html</code>
+          <code>2026-10-26-modal-training-storage.html</code>
         </a>
       </li>
       <li class="doc-card">
-        <a href="2026-10-25-modal-uploaded-artifacts.html">
-          <span class="doc-card-meta">2026-10-25 · 基础设施</span>
+        <a href="2026-10-26-modal-uploaded-artifacts.html">
+          <span class="doc-card-meta">2026-10-26 · 基础设施</span>
           <strong>Modal 已上传产物</strong>
           <span>训练数据卷、模型卷和训练产物卷的实际内容</span>
-          <code>2026-10-25-modal-uploaded-artifacts.html</code>
+          <code>2026-10-26-modal-uploaded-artifacts.html</code>
         </a>
       </li>
     </ul>
@@ -239,7 +316,7 @@
   </section>
 </main>
 <footer class="doc-footer">
-  <span>葡萄膜炎辅助诊断智能系统 · 13 份 Markdown 转换文档</span>
+  <span>葡萄膜炎辅助诊断智能系统 · 31 份内容页</span>
   <span>非商用科研原型，内容不构成医疗建议</span>
 </footer>
 </body>

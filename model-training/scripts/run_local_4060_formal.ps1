@@ -7,8 +7,15 @@ param(
     [int]$ValidationGroupsPerClass = 3,
     [int]$ValidationEvery = 25,
     [int]$SaveEvery = 25,
+    [int]$EarlyStopPatience = 3,
+    [int]$GroupOffset = 0,
     [double]$LearningRate = 2.5e-5,
+    [string]$Manifest = "",
+    [string]$SplitSnapshot = "",
+    [string]$MetricTask = "oct_aux_4class",
     [string]$InitAdapter = "",
+    [string]$DifficultyManifest = "",
+    [string[]]$Task = @(),
     [string[]]$TaskWeights = @(),
     [switch]$Resume,
     [switch]$DryRun
@@ -43,6 +50,12 @@ if ($MaxLength -lt 128 -or $MaxLength -gt 1024) {
 if ($LearningRate -le 0 -or $LearningRate -gt 0.001) {
     throw "LearningRate must be greater than 0 and at most 0.001."
 }
+if ($EarlyStopPatience -lt 1 -or $EarlyStopPatience -gt 20) {
+    throw "EarlyStopPatience must be between 1 and 20."
+}
+if ($GroupOffset -lt 0 -or $GroupOffset -gt 1000000) {
+    throw "GroupOffset must be between 0 and 1000000."
+}
 
 $env:BNB_CUDA_VERSION = "128"
 $env:PYTHONUTF8 = "1"
@@ -61,14 +74,34 @@ try {
         "--validation-groups-per-class", "$ValidationGroupsPerClass",
         "--validation-every", "$ValidationEvery",
         "--save-every", "$SaveEvery",
+        "--early-stop-patience", "$EarlyStopPatience",
+        "--group-offset", "$GroupOffset",
         "--learning-rate", "$LearningRate"
     )
     if ($Resume) {
         $arguments += "--resume"
     }
+    if ($Manifest) {
+        $arguments += "--manifest"
+        $arguments += $Manifest
+    }
+    if ($SplitSnapshot) {
+        $arguments += "--split-snapshot"
+        $arguments += $SplitSnapshot
+    }
+    $arguments += "--metric-task"
+    $arguments += $MetricTask
     if ($InitAdapter) {
         $arguments += "--init-adapter"
         $arguments += $InitAdapter
+    }
+    if ($DifficultyManifest) {
+        $arguments += "--difficulty-manifest"
+        $arguments += $DifficultyManifest
+    }
+    foreach ($taskName in $Task) {
+        $arguments += "--task"
+        $arguments += $taskName
     }
     foreach ($taskWeight in $TaskWeights) {
         $arguments += "--task-weight"

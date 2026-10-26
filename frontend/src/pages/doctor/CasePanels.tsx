@@ -11,6 +11,7 @@ import {
 import { type ChangeEvent, type FormEvent, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { apiUrl } from "@/api/client";
 import {
   analyzeCase,
   createCase,
@@ -118,7 +119,7 @@ export function CaseImagesPage() {
   return (
     <section className="panel">
       <div className="section-heading"><div><h2>影像</h2><span>{item.images.length} 个文件</span></div><FileImage size={20} /></div>
-      {item.images.length ? <div className="image-list case-image-list">{item.images.map((image) => <a href={image.url} target="_blank" rel="noreferrer" key={image.id}><FileImage size={18} /><span>{image.filename}</span><small>{imageKindText[image.kind]} · {(image.size_bytes / 1024 / 1024).toFixed(1)} MB</small></a>)}</div> : <div className="empty-state"><FileImage size={26} /><p>暂无影像</p><span>本病例可继续使用文本资料。</span></div>}
+      {item.images.length ? <div className="image-list case-image-list">{item.images.map((image) => <a href={apiUrl(image.url)} target="_blank" rel="noreferrer" key={image.id}><FileImage size={18} /><span>{image.filename}</span><small>{imageKindText[image.kind]} · {(image.size_bytes / 1024 / 1024).toFixed(1)} MB</small></a>)}</div> : <div className="empty-state"><FileImage size={26} /><p>暂无影像</p><span>本病例可继续使用文本资料。</span></div>}
     </section>
   );
 }
@@ -150,7 +151,7 @@ export function CaseAnalysisPage() {
     <section className="panel">
       <div className="section-heading"><div><h2>辅助分析</h2><span>分析结果须结合原始资料判断</span></div><ShieldCheck size={20} /></div>
       {error && <div className="notice error-notice">{error}</div>}
-      {item.analysis ? <><div className="analysis-summary"><div><span>状态</span><strong>{analysisText[item.analysis.status]}</strong></div><div><span>完成时间</span><strong>{item.analysis.completed_at ? new Date(item.analysis.completed_at).toLocaleString("zh-CN") : "处理中"}</strong></div></div>{item.analysis.impression ? <div className="result-box"><span>分析结论</span><p>{item.analysis.impression}</p></div> : <p className="analysis-placeholder">本次未生成临床结论，请结合原始影像和检查资料判断。</p>}{item.analysis.recommendations.length > 0 && <div className="result-box"><span>下一步建议</span><ul>{item.analysis.recommendations.map((text) => <li key={text}>{text}</li>)}</ul></div>}</> : <p className="analysis-placeholder">尚未启动辅助分析。</p>}
+      {item.analysis ? <><div className="analysis-summary"><div><span>状态</span><strong>{analysisText[item.analysis.status]}</strong></div><div><span>完成时间</span><strong>{item.analysis.completed_at ? new Date(item.analysis.completed_at).toLocaleString("zh-CN") : "处理中"}</strong></div></div>{item.analysis.impression ? <div className="result-box"><span>模型初判</span><p>{item.analysis.impression}</p></div> : <p className="analysis-placeholder">本次未生成临床结论，请结合原始影像和检查资料判断。</p>}{item.analysis.summary && <div className="result-box"><span>汇总梳理</span><p>{item.analysis.summary}</p></div>}{item.analysis.component_results.length > 0 && <div className="result-box"><span>增强链路</span><ul>{item.analysis.component_results.map((component) => <li key={component.key}>{component.label}：{componentStatusText[component.status]}{component.detail ? ` · ${component.detail}` : ""}</li>)}</ul></div>}{item.analysis.recommendations.length > 0 && <div className="result-box"><span>下一步建议</span><ul>{item.analysis.recommendations.map((text) => <li key={text}>{text}</li>)}</ul></div>}{item.analysis.web_evidence.length > 0 && <div className="result-box"><span>网络辅助来源</span><ul>{item.analysis.web_evidence.map((source) => <li key={source.url}><a className="text-link" href={source.url} target="_blank" rel="noreferrer">{source.title}</a> · {source.provider}</li>)}</ul></div>}</> : <p className="analysis-placeholder">尚未启动辅助分析。</p>}
       <div className="form-actions"><button className="button primary" type="button" disabled={busy || item.status === "analyzing"} onClick={() => void analyze()}>{busy ? <LoaderCircle className="spin" size={16} /> : <ArrowRight size={16} />} {item.analysis ? "重新分析" : "启动辅助分析"}</button></div>
     </section>
   );
@@ -211,3 +212,4 @@ function useCase() {
 }
 
 const analysisText = { queued: "等待处理", running: "处理中", completed: "分析完成", failed: "分析未完成" };
+const componentStatusText = { pending: "等待", running: "处理中", completed: "完成", skipped: "跳过", failed: "不可用" };

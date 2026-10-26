@@ -1,17 +1,20 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import PatientShell from "@/components/PatientShell";
 import RouteGuard from "@/components/RouteGuard";
 import WorkspaceShell from "@/components/WorkspaceShell";
 import AdminPage from "@/pages/AdminPage";
+import AdminLoginPage from "@/pages/AdminLoginPage";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import PrivacyPage from "@/pages/PrivacyPage";
+import SecurityPage from "@/pages/SecurityPage";
 import { ForbiddenPage, NotFoundPage } from "@/pages/StatusPages";
 import AdminCaseDetailPage from "@/pages/admin/CaseDetailPage";
+import AccessPage from "@/pages/admin/AccessPage";
 import AdminCasesPage from "@/pages/admin/CasesPage";
 import AdminKnowledgePage from "@/pages/admin/KnowledgePage";
-import ServicesPage from "@/pages/admin/ServicesPage";
 import CaseLayout from "@/pages/doctor/CaseLayout";
 import CaseListPage from "@/pages/doctor/CaseListPage";
 import {
@@ -26,6 +29,8 @@ import KnowledgePage from "@/pages/doctor/KnowledgePage";
 import ReviewQueuePage from "@/pages/doctor/ReviewQueuePage";
 import WorkbenchPage from "@/pages/doctor/WorkbenchPage";
 
+const ServicesPage = lazy(() => import("@/pages/admin/ServicesPage"));
+
 const router = createBrowserRouter([
   {
     element: <PatientShell />,
@@ -35,6 +40,7 @@ const router = createBrowserRouter([
     ],
   },
   { path: "/login", element: <LoginPage /> },
+  { path: "/admin/login", element: <AdminLoginPage /> },
   { path: "/forbidden", element: <ForbiddenPage /> },
   {
     element: <RouteGuard roles={["doctor"]} />,
@@ -61,6 +67,7 @@ const router = createBrowserRouter([
           },
           { path: "reviews", element: <ReviewQueuePage /> },
           { path: "knowledge", element: <KnowledgePage /> },
+          { path: "security", element: <SecurityPage /> },
         ],
       },
     ],
@@ -76,7 +83,9 @@ const router = createBrowserRouter([
           { path: "cases", element: <AdminCasesPage /> },
           { path: "cases/:caseId", element: <AdminCaseDetailPage /> },
           { path: "knowledge", element: <AdminKnowledgePage /> },
-          { path: "services", element: <ServicesPage /> },
+          { path: "services", element: <Suspense fallback={<div className="page-loading" />}><ServicesPage /></Suspense> },
+          { path: "access", element: <AccessPage /> },
+          { path: "security", element: <SecurityPage /> },
         ],
       },
     ],

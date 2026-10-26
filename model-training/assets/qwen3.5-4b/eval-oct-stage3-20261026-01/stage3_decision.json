@@ -1,0 +1,89 @@
+{
+  "status": "completed_no_promotion",
+  "decided_at": "2026-10-26T05:26:00Z",
+  "objective": "Test whether higher image resolution improves OCT CNV/DRUSEN discrimination from the selected step-20 adapter without overwriting it.",
+  "hypothesis": {
+    "statement": "The remaining OCT errors are dominated by DRUSEN/CNV and NORMAL/DRUSEN confusions, so increasing the processed image budget from 65536 to 131072 pixels may preserve more boundary and lesion detail.",
+    "result": "Not supported. Higher-resolution processing changed the model input distribution and reduced validation performance."
+  },
+  "base_adapter": {
+    "run_id": "local-4060-oct-focus-cont-20261025-01",
+    "step": 20,
+    "adapter_dir": "model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter",
+    "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+    "validation_macro_f1": 0.8733582321817616,
+    "validation_oct_macro_f1": 0.7915032679738563,
+    "validation_json_valid_rate": 1.0
+  },
+  "run": {
+    "run_id": "local-4060-oct-stage3-hires-20261026-01",
+    "image_pixels": 131072,
+    "learning_rate": 2.5e-06,
+    "target_steps": 10,
+    "completed_steps": 6,
+    "truncated_reason": "early_stopping",
+    "validation_every": 2,
+    "early_stop_patience": 2,
+    "task_weights": {
+      "fundus_toxo_binary": 1,
+      "eye_five_class": 1,
+      "oct_aux_4class": 4,
+      "oct_uveitis_4class": 1
+    },
+    "initial_validation": {
+      "step": 0,
+      "loss": 0.03558351186829069,
+      "macro_f1": 0.8262564499484005,
+      "oct_macro_f1": 0.7187693498452012,
+      "json_valid_rate": 1.0
+    },
+    "best_step": 2,
+    "best_validation_loss": 0.035152338141183875,
+    "best_validation_macro_f1": 0.8320192307692308,
+    "best_validation_oct_macro_f1": 0.7360576923076922,
+    "best_validation_json_valid_rate": 1.0,
+    "validation_points": [
+      {
+        "step": 0,
+        "macro_f1": 0.8262564499484005,
+        "oct_macro_f1": 0.7187693498452012,
+        "json_valid_rate": 1.0
+      },
+      {
+        "step": 2,
+        "macro_f1": 0.8320192307692308,
+        "oct_macro_f1": 0.7360576923076922,
+        "json_valid_rate": 1.0
+      },
+      {
+        "step": 4,
+        "macro_f1": 0.8320192307692308,
+        "oct_macro_f1": 0.7360576923076922,
+        "json_valid_rate": 1.0
+      },
+      {
+        "step": 6,
+        "macro_f1": 0.8262564499484005,
+        "oct_macro_f1": 0.7187693498452012,
+        "json_valid_rate": 1.0
+      }
+    ],
+    "peak_allocated_gib": 5.463277816772461,
+    "peak_reserved_gib": 5.689453125,
+    "total_seconds": 623.5413182000011,
+    "summary_path": "model-training/assets/qwen3.5-4b/local-4060-oct-stage3-hires-20261026-01/training_summary.json"
+  },
+  "decision": "retain_step20_candidate",
+  "reason": [
+    "The higher-resolution step-20 initialization validation was 0.826256 macro-F1 and 0.718769 OCT macro-F1, versus 0.873358 and 0.791503 at the verified 65536-pixel input budget.",
+    "The best higher-resolution checkpoint reached only 0.832019 macro-F1 and 0.736058 OCT macro-F1, far below the existing step-20 candidate.",
+    "Steps 2 and 4 were identical and step 6 fell back to the initialization score, so the run stopped after two validation checks without improvement.",
+    "The higher-resolution adapter is not promoted and no frozen-test promotion gate is warranted."
+  ],
+  "limitations": [
+    "The 55-row validation set is small and is used only for checkpoint screening.",
+    "The frozen OCT test set is not a patient-isolated external validation set.",
+    "Higher-resolution inference was not evaluated on the frozen test set because the candidate failed the validation screen.",
+    "The stage-3 final and best adapters are experiment outputs, not deployment artifacts."
+  ]
+}

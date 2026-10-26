@@ -1,6 +1,0 @@
-{
-  "step": 450,
-  "validation_loss": 0.02545971898293561,
-  "checkpoint_dir": "artifacts\\qwen3.5-4b\\local-4060-formal-20261025-01\\checkpoints\\step-000450",
-  "adapter_sha256": "8820450d565b5c139d9b0bda228b4375e2ed5b3af7c87670d8637069a0384b3e"
-}

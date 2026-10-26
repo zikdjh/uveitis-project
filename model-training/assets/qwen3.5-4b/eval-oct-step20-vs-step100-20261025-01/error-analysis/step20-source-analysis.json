@@ -1,0 +1,593 @@
+{
+  "status": "ok",
+  "generated_at": "2026-10-26T05:54:19.022924+00:00",
+  "candidate_predictions": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\eval-oct-step20-vs-step100-20261025-01\\step20\\predictions.json",
+  "baseline_predictions": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\eval-oct-step20-vs-step100-20261025-01\\step20\\..\\step100\\predictions.json",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\model-training\\datasets\\training\\manifest.csv",
+  "overall": {
+    "samples": 1000,
+    "accuracy": 0.947,
+    "macro_f1": 0.9472447307516584,
+    "json_valid_rate": 1.0,
+    "per_class": {
+      "CNV": {
+        "precision": 0.9330708661417323,
+        "recall": 0.948,
+        "f1": 0.9404761904761905,
+        "support": 250
+      },
+      "DME": {
+        "precision": 0.9681274900398407,
+        "recall": 0.972,
+        "f1": 0.9700598802395209,
+        "support": 250
+      },
+      "DRUSEN": {
+        "precision": 0.9003831417624522,
+        "recall": 0.94,
+        "f1": 0.9197651663405088,
+        "support": 250
+      },
+      "NORMAL": {
+        "precision": 0.9914529914529915,
+        "recall": 0.928,
+        "f1": 0.9586776859504132,
+        "support": 250
+      }
+    },
+    "confusion_matrix": {
+      "CNV": {
+        "CNV": 237,
+        "DME": 8,
+        "DRUSEN": 4,
+        "NORMAL": 1
+      },
+      "DME": {
+        "CNV": 3,
+        "DME": 243,
+        "DRUSEN": 4,
+        "NORMAL": 0
+      },
+      "DRUSEN": {
+        "CNV": 14,
+        "DME": 0,
+        "DRUSEN": 235,
+        "NORMAL": 1
+      },
+      "NORMAL": {
+        "CNV": 0,
+        "DME": 0,
+        "DRUSEN": 18,
+        "NORMAL": 232
+      }
+    }
+  },
+  "error_pairs": {
+    "NORMAL->DRUSEN": 18,
+    "DRUSEN->CNV": 14,
+    "CNV->DME": 8,
+    "CNV->DRUSEN": 4,
+    "DME->DRUSEN": 4,
+    "DME->CNV": 3,
+    "CNV->NORMAL": 1,
+    "DRUSEN->NORMAL": 1
+  },
+  "per_actual": {
+    "CNV": {
+      "samples": 250,
+      "errors": 13,
+      "confusions": {
+        "DME": 8,
+        "DRUSEN": 4,
+        "NORMAL": 1
+      }
+    },
+    "DME": {
+      "samples": 250,
+      "errors": 7,
+      "confusions": {
+        "CNV": 3,
+        "DRUSEN": 4
+      }
+    },
+    "DRUSEN": {
+      "samples": 250,
+      "errors": 15,
+      "confusions": {
+        "CNV": 14,
+        "NORMAL": 1
+      }
+    },
+    "NORMAL": {
+      "samples": 250,
+      "errors": 18,
+      "confusions": {
+        "DRUSEN": 18
+      }
+    }
+  },
+  "groups": {
+    "total": 685,
+    "with_errors": 50,
+    "clean": 635,
+    "top_10_error_share": 0.24528301886792453,
+    "largest_error_groups": [
+      {
+        "group_key": "13:CNV:patient:6552587",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 8,
+        "errors": 2,
+        "accuracy": 0.75,
+        "confusions": {
+          "CNV->DME": 2
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-6552587-4.jpeg",
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-6552587-6.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:NORMAL:patient:4480087",
+        "dataset": "13_zhanglab_oct",
+        "expected": "NORMAL",
+        "samples": 3,
+        "errors": 2,
+        "accuracy": 0.33333333333333337,
+        "confusions": {
+          "NORMAL->DRUSEN": 2
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-4480087-1.jpeg",
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-4480087-3.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:CNV:patient:9782524",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 2,
+        "errors": 2,
+        "accuracy": 0.0,
+        "confusions": {
+          "CNV->DME": 2
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-9782524-1.jpeg",
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-9782524-2.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:DRUSEN:patient:5506734",
+        "dataset": "13_zhanglab_oct",
+        "expected": "DRUSEN",
+        "samples": 8,
+        "errors": 1,
+        "accuracy": 0.875,
+        "confusions": {
+          "DRUSEN->CNV": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DRUSEN/DRUSEN-5506734-8.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:CNV:patient:3629534",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 4,
+        "errors": 1,
+        "accuracy": 0.75,
+        "confusions": {
+          "CNV->NORMAL": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-3629534-3.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:DME:patient:245643",
+        "dataset": "13_zhanglab_oct",
+        "expected": "DME",
+        "samples": 3,
+        "errors": 1,
+        "accuracy": 0.6666666666666667,
+        "confusions": {
+          "DME->CNV": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DME/DME-245643-3.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:DRUSEN:patient:3273592",
+        "dataset": "13_zhanglab_oct",
+        "expected": "DRUSEN",
+        "samples": 3,
+        "errors": 1,
+        "accuracy": 0.6666666666666667,
+        "confusions": {
+          "DRUSEN->CNV": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DRUSEN/DRUSEN-3273592-3.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:NORMAL:patient:7405074",
+        "dataset": "13_zhanglab_oct",
+        "expected": "NORMAL",
+        "samples": 3,
+        "errors": 1,
+        "accuracy": 0.6666666666666667,
+        "confusions": {
+          "NORMAL->DRUSEN": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-7405074-2.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:CNV:patient:232670",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "CNV->DRUSEN": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-232670-2.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:CNV:patient:500700",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "CNV->DRUSEN": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-500700-2.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:CNV:patient:5880159",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "CNV->DME": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-5880159-2.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:CNV:patient:8604419",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "CNV->DME": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-8604419-2.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:DRUSEN:patient:3013082",
+        "dataset": "13_zhanglab_oct",
+        "expected": "DRUSEN",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "DRUSEN->CNV": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DRUSEN/DRUSEN-3013082-1.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:DRUSEN:patient:8579684",
+        "dataset": "13_zhanglab_oct",
+        "expected": "DRUSEN",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "DRUSEN->CNV": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/DRUSEN/DRUSEN-8579684-1.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:NORMAL:patient:1839546",
+        "dataset": "13_zhanglab_oct",
+        "expected": "NORMAL",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "NORMAL->DRUSEN": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-1839546-1.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:NORMAL:patient:1860988",
+        "dataset": "13_zhanglab_oct",
+        "expected": "NORMAL",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "NORMAL->DRUSEN": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-1860988-1.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:NORMAL:patient:2640457",
+        "dataset": "13_zhanglab_oct",
+        "expected": "NORMAL",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "NORMAL->DRUSEN": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-2640457-2.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:NORMAL:patient:3063933",
+        "dataset": "13_zhanglab_oct",
+        "expected": "NORMAL",
+        "samples": 2,
+        "errors": 1,
+        "accuracy": 0.5,
+        "confusions": {
+          "NORMAL->DRUSEN": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/NORMAL/NORMAL-3063933-1.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:CNV:patient:1569",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 1,
+        "errors": 1,
+        "accuracy": 0.0,
+        "confusions": {
+          "CNV->DME": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-1569-1.jpeg"
+        ]
+      },
+      {
+        "group_key": "13:CNV:patient:2224582",
+        "dataset": "13_zhanglab_oct",
+        "expected": "CNV",
+        "samples": 1,
+        "errors": 1,
+        "accuracy": 0.0,
+        "confusions": {
+          "CNV->DRUSEN": 1
+        },
+        "images": [
+          "data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/test/CNV/CNV-2224582-1.jpeg"
+        ]
+      }
+    ]
+  },
+  "candidate_vs_baseline": {
+    "shared_samples": 1000,
+    "by_class": {
+      "CNV": {
+        "both_correct": 237,
+        "both_wrong": 7,
+        "candidate_regressed": 6
+      },
+      "DME": {
+        "both_correct": 240,
+        "both_wrong": 5,
+        "candidate_improved": 3,
+        "candidate_regressed": 2
+      },
+      "DRUSEN": {
+        "both_correct": 197,
+        "both_wrong": 15,
+        "candidate_improved": 38
+      },
+      "NORMAL": {
+        "both_correct": 232,
+        "both_wrong": 14,
+        "candidate_regressed": 4
+      }
+    },
+    "top_changed_groups": [
+      {
+        "group_key": "13:CNV:patient:9782524",
+        "net_correctness_delta": -2,
+        "candidate_improved": 0,
+        "candidate_regressed": 2,
+        "both_correct": 0,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:5506734",
+        "net_correctness_delta": 2,
+        "candidate_improved": 2,
+        "candidate_regressed": 0,
+        "both_correct": 5,
+        "both_wrong": 1
+      },
+      {
+        "group_key": "13:DRUSEN:patient:5558492",
+        "net_correctness_delta": 2,
+        "candidate_improved": 2,
+        "candidate_regressed": 0,
+        "both_correct": 0,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:5576195",
+        "net_correctness_delta": 2,
+        "candidate_improved": 2,
+        "candidate_regressed": 0,
+        "both_correct": 1,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:6322301",
+        "net_correctness_delta": 2,
+        "candidate_improved": 2,
+        "candidate_regressed": 0,
+        "both_correct": 1,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:6409462",
+        "net_correctness_delta": 2,
+        "candidate_improved": 2,
+        "candidate_regressed": 0,
+        "both_correct": 1,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:CNV:patient:2224582",
+        "net_correctness_delta": -1,
+        "candidate_improved": 0,
+        "candidate_regressed": 1,
+        "both_correct": 0,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:CNV:patient:232670",
+        "net_correctness_delta": -1,
+        "candidate_improved": 0,
+        "candidate_regressed": 1,
+        "both_correct": 1,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:CNV:patient:3629534",
+        "net_correctness_delta": -1,
+        "candidate_improved": 0,
+        "candidate_regressed": 1,
+        "both_correct": 3,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:CNV:patient:5376864",
+        "net_correctness_delta": -1,
+        "candidate_improved": 0,
+        "candidate_regressed": 1,
+        "both_correct": 0,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DME:patient:2061433",
+        "net_correctness_delta": 1,
+        "candidate_improved": 1,
+        "candidate_regressed": 0,
+        "both_correct": 2,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DME:patient:2525419",
+        "net_correctness_delta": -1,
+        "candidate_improved": 0,
+        "candidate_regressed": 1,
+        "both_correct": 0,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DME:patient:3433573",
+        "net_correctness_delta": -1,
+        "candidate_improved": 0,
+        "candidate_regressed": 1,
+        "both_correct": 0,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DME:patient:626704",
+        "net_correctness_delta": 1,
+        "candidate_improved": 1,
+        "candidate_regressed": 0,
+        "both_correct": 0,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DME:patient:943690",
+        "net_correctness_delta": 1,
+        "candidate_improved": 1,
+        "candidate_regressed": 0,
+        "both_correct": 16,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:1021298",
+        "net_correctness_delta": 1,
+        "candidate_improved": 1,
+        "candidate_regressed": 0,
+        "both_correct": 0,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:1495504",
+        "net_correctness_delta": 1,
+        "candidate_improved": 1,
+        "candidate_regressed": 0,
+        "both_correct": 2,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:1649300",
+        "net_correctness_delta": 1,
+        "candidate_improved": 1,
+        "candidate_regressed": 0,
+        "both_correct": 3,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:2099732",
+        "net_correctness_delta": 1,
+        "candidate_improved": 1,
+        "candidate_regressed": 0,
+        "both_correct": 6,
+        "both_wrong": 0
+      },
+      {
+        "group_key": "13:DRUSEN:patient:2372808",
+        "net_correctness_delta": 1,
+        "candidate_improved": 1,
+        "candidate_regressed": 0,
+        "both_correct": 0,
+        "both_wrong": 0
+      }
+    ]
+  },
+  "limitations": [
+    "This is a grouped same-source split, not patient-isolated external validation.",
+    "The source analysis uses existing frozen predictions and does not rerun inference.",
+    "A clean patient group in this split does not establish clinical generalization."
+  ]
+}

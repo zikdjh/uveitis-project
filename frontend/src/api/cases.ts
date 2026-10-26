@@ -1,4 +1,4 @@
-import { apiUrl, request } from "@/api/client";
+import { authorizedFetch, readErrorMessage, request } from "@/api/client";
 
 export type CaseStatus = "created" | "analyzing" | "awaiting_review" | "reviewed" | "failed";
 export type ImageKind = "fundus" | "ultrawide" | "oct" | "anterior" | "other";
@@ -19,6 +19,14 @@ export type PipelineStage = {
   detail: string;
 };
 
+export type ComponentResult = {
+  key: string;
+  label: string;
+  status: PipelineStage["status"];
+  detail: string;
+  latency_ms: number;
+};
+
 export type AnalysisResult = {
   status: "queued" | "running" | "completed" | "failed";
   model_mode: "mock" | "remote";
@@ -29,6 +37,17 @@ export type AnalysisResult = {
   urgency: "unknown" | "low" | "medium" | "high";
   recommendations: string[];
   evidence: Array<{ id: string; source: string; snippet: string; score: number }>;
+  web_evidence: Array<{
+    title: string;
+    url: string;
+    snippet: string;
+    provider: string;
+    score: number | null;
+  }>;
+  component_results: ComponentResult[];
+  summary: string;
+  external_summary_used: boolean;
+  external_payload: Record<string, unknown>;
   confidence: number;
   safety_flags: string[];
   started_at: string;
@@ -99,12 +118,12 @@ export async function uploadCaseImages(
   const body = new FormData();
   body.append("kind", kind);
   files.forEach((file) => body.append("files", file));
-  const response = await fetch(apiUrl(`/api/v1/cases/${caseId}/images`), {
+  const response = await authorizedFetch(`/api/v1/cases/${caseId}/images`, {
     method: "POST",
     body,
   });
   if (!response.ok) {
-    throw new Error(await readError(response));
+    throw new Error(await readErrorMessage(response));
   }
   return response.json() as Promise<CaseRecord>;
 }
@@ -118,16 +137,4 @@ export function reviewCase(caseId: string, input: ReviewInput): Promise<CaseReco
     method: "PATCH",
     body: JSON.stringify(input),
   });
-}
-
-async function readError(response: Response): Promise<string> {
-  const text = await response.text();
-  try {
-    const data = JSON.parse(text) as { detail?: string | Array<{ msg?: string }> };
-    if (typeof data.detail === "string") return data.detail;
-    if (Array.isArray(data.detail)) return data.detail.map((item) => item.msg).join("；");
-  } catch {
-    // The server may return plain text for infrastructure errors.
-  }
-  return text || `请求失败（${response.status}）`;
 }

@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "run_id": "runtime-smoke-local-4060-20261026-01",
+  "status": "ok",
+  "date": "2026-10-26",
+  "purpose": "Verify the real local Qwen3.5-4B runtime path and record resource evidence. This is not an accuracy evaluation.",
+  "runtime": {
+    "endpoint": "POST /v1/judge",
+    "host": "127.0.0.1",
+    "port": 8010,
+    "framework": "FastAPI + Uvicorn",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "gpu_total_memory_gib": 7.99560546875,
+    "cuda": "12.8",
+    "quantization": "4-bit NF4, bfloat16 compute, double quant",
+    "image_pixels": 65536,
+    "max_new_tokens": 32,
+    "inference_concurrency": "serialized by process lock"
+  },
+  "model": {
+    "name": "Qwen3.5-4B",
+    "adapter_run": "local-4060-oct-focus-cont-20261025-01",
+    "adapter_step": 20,
+    "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f"
+  },
+  "input": {
+    "dataset": "13_zhanglab_oct",
+    "split": "train",
+    "label": "CNV",
+    "path": "model-training/datasets/training/data/13_zhanglab_oct/13_zhanglab/ZhangLabData/CellData/OCT/train/CNV/CNV-1016042-142.jpeg",
+    "test_set_read": false
+  },
+  "measured": {
+    "cold_request_seconds_approx": 22.2,
+    "warm_request_seconds_min": 2.4,
+    "warm_request_seconds_max": 3.6,
+    "post_processor_fix_latency_seconds": 3.363,
+    "resident_nvidia_smi_gib_approx": 3.5,
+    "single_image_peak_allocated_gib": 3.275485,
+    "single_image_peak_reserved_gib": 3.355469,
+    "concurrent_requests": 8,
+    "concurrent_http_200": 8,
+    "concurrent_slowest_seconds_approx": 14,
+    "oom_observed": false
+  },
+  "observed_output": {
+    "label": "DRUSEN",
+    "confidence": 0.0,
+    "impression": "",
+    "note": "The successful response only proves the runtime path; the training image is labelled CNV, while this single prediction is DRUSEN with no usable confidence. It must not be used as accuracy evidence."
+  },
+  "post_fix_verification": {
+    "endpoint_status": "http_200",
+    "input_preprocessing": "original image passed to processor after decoded-pixel guard",
+    "latency_ms": 3363,
+    "truncated": false,
+    "peak_allocated_gib": 3.275485038757324,
+    "peak_reserved_gib": 3.35546875,
+    "adapter_sha256_unchanged": true,
+    "requires_human_review": true
+  },
+  "second_task_probe": {
+    "task": "oct_uveitis_4class",
+    "status": "http_200",
+    "limitation": "This task returned confidence 0 and an empty impression; it is not suitable as a confidence-bearing clinical output."
+  },
+  "limitations": [
+    "One training image is not a validation set.",
+    "Concurrent requests passed through a serialization lock and therefore measure queueing plus single-request latency.",
+    "The model is a research prototype and is not clinically validated.",
+    "End-to-end business persistence and deployment remain unverified."
+  ],
+  "cost": {
+    "modal_started": false,
+    "modal_spend_usd": 0.0
+  }
+}
