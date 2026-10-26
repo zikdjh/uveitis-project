@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>数据集训练映射 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-training-budget-plan-modal-l40s.html">上一份</a>
+    <a href="2026-10-26-modal-training-storage.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>数据</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>数据集训练映射</h1>
+  <p class="doc-summary">影像、检索和决策任务的样本构造与验收指标</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-dataset-training-map.html</code></p>
+  <article class="html-body">
+<p>整理日期：2026-10-25</p>
+<p>目标：把 <code>model-training/datasets/extracted/</code> 中的数据转换成可训练的影像分类、影像定位/分割、结构化决策和文本检索样本，用于 Qwen 多模态、Intern-Decision 与 BGE-M3。</p>
+<h2>1. 先确定训练边界</h2>
+<p>当前下载的是多来源公开影像数据，不是带完整病史、诊断依据和医生处置的病人队列。因此分三条链路：</p>
+<table>
+<thead>
+<tr>
+<th>链路</th>
+<th>训练目标</th>
+<th>现有数据支持</th>
+<th>不能直接得到</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>影像模型</td>
+<td>病种分类、病灶分割、视盘/黄斑定位、泛化表征</td>
+<td>有标签图像、部分掩膜和坐标</td>
+<td>真实影像描述、最终诊断、治疗决策</td>
+</tr>
+<tr>
+<td>决策模型</td>
+<td>输入病例摘要 + 影像描述 + 检索证据，输出结构化决策</td>
+<td>只有 ODIR 的年龄、性别和诊断关键词，样本不足</td>
+<td>症状、病程、既往史、化验、医生选择</td>
+</tr>
+<tr>
+<td>检索模型</td>
+<td>检索指南、文献、病例摘要</td>
+<td>当前下载主要是图像</td>
+<td>当前目录内没有完整文本医学语料</td>
+</tr>
+</tbody>
+</table>
+<p>结论：先训练影像分类/定位/分割；决策模型和 RAG 需要补充真实病例文本与审核通过的医学资料后再训练。</p>
+<h2>2. 训练清单划分</h2>
+<p>不要把 13 个数据集合成一个分类标签空间。建议生成以下四份清单：</p>
+<table>
+<thead>
+<tr>
+<th>清单</th>
+<th>主要数据</th>
+<th>适合任务</th>
+<th>使用方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vision_uv</code></td>
+<td>01、02、03</td>
+<td>葡萄膜炎专项分类、感染状态分类、病灶分割</td>
+<td>目标任务训练与内部测试</td>
+</tr>
+<tr>
+<td><code>vision_aux</code></td>
+<td>04、05、06、07、10</td>
+<td>眼底多病种分类、泛化表征、视盘/黄斑定位</td>
+<td>辅助预训练或多任务训练</td>
+</tr>
+<tr>
+<td><code>vision_oct_aux</code></td>
+<td>08、09、11、12、13</td>
+<td>AS-OCT 房角、青光眼、OCT 形态特征</td>
+<td>辅助预训练，不与葡萄膜炎标签合并</td>
+</tr>
+<tr>
+<td><code>rag_corpus</code> / <code>decision_sft</code></td>
+<td>待补充</td>
+<td>检索和临床决策</td>
+<td>必须在有文本来源和人工审核后建立</td>
+</tr>
+</tbody>
+</table>
+<h2>3. 逐数据集映射</h2>
+<table>
+<thead>
+<tr>
+<th>数据集</th>
+<th>实际来源</th>
+<th style="text-align:right">可用规模</th>
+<th>输入</th>
+<th>标签或监督</th>
+<th>推荐训练任务</th>
+<th>是否进入最终葡萄膜炎测试</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 葡萄膜炎 OCT</td>
+<td>75 张 OCT</td>
+<td style="text-align:right">4 类：Intermediate+Posterior Uveitis 12、Normal 28、Panuveitis 16、RRD-PVR 19</td>
+<td>OCT 图像</td>
+<td>目录名</td>
+<td>4 类分类；其中 RRD-PVR 单独保留为对照类</td>
+<td>可以，但样本少，需重复交叉验证</td>
+</tr>
+<tr>
+<td>02 ToxoFundus</td>
+<td>412 张眼底图，179 张掩膜</td>
+<td style="text-align:right">412 张分类图；144 张图可匹配掩膜</td>
+<td>眼底彩照</td>
+<td><code>healthy</code> 132、<code>toxoplasmosis</code> 280；细分 active/inactive 混合标签</td>
+<td>健康/眼弓形虫病二分类；有掩膜的子集做病灶分割</td>
+<td>可用于感染性葡萄膜炎相关的辅助任务，不能替代普通葡萄膜炎诊断</td>
+</tr>
+<tr>
+<td>03 五分类眼病</td>
+<td>2,298 张图</td>
+<td style="text-align:right">Normal 649、Cataract 544、Eyelid 525、Conjunctivitis 357、Uveitis 223</td>
+<td>前节/眼底混合图</td>
+<td>目录名</td>
+<td>五分类；Uveitis 阳性识别</td>
+<td>不建议作为独立最终测试集；可能有 SMOTE/重复来源</td>
+</tr>
+<tr>
+<td>04 ODIR-5K</td>
+<td>6,392 张图，3,358 个患者 ID</td>
+<td style="text-align:right">8 类多标签：N/D/G/C/A/H/M/O</td>
+<td>眼底彩照</td>
+<td>年龄、性别、左右眼、诊断关键词、8 位标签</td>
+<td>多标签分类、左右眼联合学习</td>
+<td>否，标签空间没有葡萄膜炎</td>
+</tr>
+<tr>
+<td>05 Fundus 1000</td>
+<td>2,000 个文件，其中 1,994 张带类别图</td>
+<td style="text-align:right">39 个原始类别；另 997 张是重复副本</td>
+<td>眼底彩照</td>
+<td>目录名</td>
+<td>多类别分类、长尾分类</td>
+<td>否，作为泛化训练/评估</td>
+</tr>
+<tr>
+<td>06 RFMiD 2</td>
+<td>训练 509、验证 177、测试 174</td>
+<td style="text-align:right">45 类多标签</td>
+<td>眼底彩照</td>
+<td>原始 CSV 的多个 0/1 标签</td>
+<td>保留原划分做多标签训练</td>
+<td>否，45 类中没有葡萄膜炎主任务标签</td>
+</tr>
+<tr>
+<td>07 ADAM</td>
+<td>训练/验证/测试</td>
+<td style="text-align:right">5,253 张图</td>
+<td>眼底彩照</td>
+<td>分类 GT、Fovea 坐标</td>
+<td>眼底分类、黄斑定位</td>
+<td>否，定位辅助</td>
+</tr>
+<tr>
+<td>08 AGE</td>
+<td>训练/验证/测试</td>
+<td style="text-align:right">8,000 张 AS-OCT</td>
+<td>AS-OCT</td>
+<td>房角分类、左右房角关键点坐标</td>
+<td>房角分类和定位</td>
+<td>否，前节 OCT 辅助</td>
+</tr>
+<tr>
+<td>09 GOALS</td>
+<td>训练/验证/测试</td>
+<td style="text-align:right">约 897 张图</td>
+<td>眼底彩照</td>
+<td>青光眼风险</td>
+<td>青光眼分类</td>
+<td>否</td>
+</tr>
+<tr>
+<td>10 PALM</td>
+<td>训练/验证/测试</td>
+<td style="text-align:right">约 4,873 张图</td>
+<td>眼底彩照</td>
+<td>多标签、Fovea 坐标</td>
+<td>多病种分类、定位</td>
+<td>否</td>
+</tr>
+<tr>
+<td>11 REFUGE 多标注</td>
+<td>训练/验证/测试</td>
+<td style="text-align:right">约 20,410 张文件</td>
+<td>眼底彩照</td>
+<td>青光眼、视盘、多标注</td>
+<td>青光眼分类、多标注学习</td>
+<td>否</td>
+</tr>
+<tr>
+<td>12 REFUGE2</td>
+<td>训练/验证/测试</td>
+<td style="text-align:right">约 4,400 张文件</td>
+<td>眼底彩照</td>
+<td>青光眼风险、Fovea 坐标</td>
+<td>青光眼分类、定位</td>
+<td>否</td>
+</tr>
+<tr>
+<td>13 ZhangLabData</td>
+<td>109,309 张 OCT；另有 5,856 张胸片</td>
+<td style="text-align:right">训练：CNV 37,205、DME 11,348、DRUSEN 8,616、NORMAL 51,140；测试每类约 250</td>
+<td>OCT</td>
+<td>目录名</td>
+<td>OCT 形态辅助分类/预训练</td>
+<td>否，必须排除胸片子目录，禁止与葡萄膜炎类别合并</td>
+</tr>
+</tbody>
+</table>
+<p>数量按当前 <code>model-training/datasets/extracted/</code> 实测；预处理副本、掩膜和重复图像都会影响“可用独立样本”的数量。原始下载 ZIP 已在完整性核验后清理，来源账本见 <code>model-training/datasets/extracted/manifests/archive-cleanup-2026-10-25.csv</code>。</p>
+<h2>4. 具体怎么构造样本</h2>
+<h3>4.1 影像分类样本</h3>
+<p>视觉语言模型建议使用统一的对话格式：</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;uv_oct_0001&quot;,
+  &quot;dataset&quot;: &quot;01_uveitis_oct&quot;,
+  &quot;image&quot;: &quot;model-training/datasets/extracted/01_uveitis_oct/.../Normal 1.jpeg&quot;,
+  &quot;modality&quot;: &quot;oct&quot;,
+  &quot;task&quot;: &quot;classification&quot;,
+  &quot;patient_group&quot;: &quot;01_uveitis_oct:source_folder&quot;,
+  &quot;split&quot;: &quot;train&quot;,
+  &quot;messages&quot;: [
+    {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;请根据这张眼科影像判断病种，只输出结构化结果。&quot;},
+    {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;{\&quot;label\&quot;:\&quot;Normal\&quot;,\&quot;confidence\&quot;:null,\&quot;requires_review\&quot;:true}&quot;}
+  ]
+}
+</code></pre>
+<p>训练时只把真实标签写进 assistant 答案。<code>confidence</code> 不应由目录名伪造；模型未经过校准前输出 <code>null</code> 或由校准集单独拟合。</p>
+<p>不同数据集的分类头规则：</p>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>标签集合</th>
+<th>训练数据</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OCT 四分类</td>
+<td>Uveitis、Panuveitis、Normal、RRD-PVR</td>
+<td>01</td>
+<td>样本很小，建议 5 折患者/来源分组交叉验证</td>
+</tr>
+<tr>
+<td>Toxo 二分类</td>
+<td>healthy、toxoplasmosis</td>
+<td>02</td>
+<td>细分 active/inactive 先保留为辅助标签，不强行扩成四个互斥类</td>
+</tr>
+<tr>
+<td>五分类</td>
+<td>Cataract、Conjunctivitis、Eyelid、Normal、Uveitis</td>
+<td>03</td>
+<td>仅做原型，先查 SMOTE 生成和重复图</td>
+</tr>
+<tr>
+<td>眼底多标签</td>
+<td>ODIR 8 类或 RFMiD 45 类</td>
+<td>04、06</td>
+<td>作为视觉表征预训练；任务头与葡萄膜炎任务分开</td>
+</tr>
+</tbody>
+</table>
+<h3>4.2 分割和定位样本</h3>
+<ul>
+<li>02 的 <code>masks/</code> 与 <code>images/</code> 按文件名匹配；当前有 144 张图像可匹配到掩膜，只对这些样本做病灶分割。</li>
+<li>02 的分类标签表有 1 个文件名差异：标签表列 <code>2809.jpg</code>，实际目录为 <code>2805.jpg</code>。生成清单时必须人工核对原数据后再建立显式映射；无法确认时排除该样本，不能静默错配。</li>
+<li>06 RFMiD 原包有 6 处标签 ID 与图像文件名不一致，且缺少可安全的一一映射依据；训练清单排除这些样本，而不是根据序号猜测配对。</li>
+<li>07、10 的 Fovea 坐标训练回归或 heatmap 定位。</li>
+<li>08、12 的关键点坐标用于房角/黄斑定位辅助。</li>
+<li>01、03、04、05、06 没有像素级病灶标注，不做伪造的分割监督。</li>
+</ul>
+<h3>4.3 患者/来源分组</h3>
+<p>切分单位不要用单张图片：</p>
+<ul>
+<li>ODIR：<code>ID</code> 是患者组，左右眼必须同属一个 split。</li>
+<li>Toxo：优先从文件名或源表恢复患者 ID；无法确认时按 <code>Source</code> 和文件名推断分组，并把无法确认的样本只放入训练集，不进入最终测试。</li>
+<li>01、03、05：没有可靠患者 ID，先按文件来源/类别做分组交叉验证；结果标记为“数据集内评估”，不能宣称患者级泛化。</li>
+<li>06、07、08、09、10、11、12：优先保留原作者的 train/validation/test。</li>
+</ul>
+<h3>4.4 去重与泄漏</h3>
+<p>当前实测：</p>
+<ul>
+<li>01 有 1 组完全相同的 SHA256 图像，共 2 个文件。</li>
+<li>03 有 1 组完全相同的 SHA256 图像，共 2 个文件。</li>
+<li>05 的 2,000 个文件中只有 1,994 张带类别图；<code>1000images/</code> 内另有 997 张重复副本。</li>
+</ul>
+<p>训练前必须做 SHA256 去重和感知哈希相似图检查；03 的 SMOTE notebook 是在完整图像向量上先合成再切分，不能据此认为已有独立测试集。</p>
+<h2>5. 与三个模型的对应关系</h2>
+<h3>Qwen 多模态模型</h3>
+<p>第一阶段用 01、02、03 做分类和结构化输出，用 04、05、06 做眼底泛化训练，用 13 的 OCT 子集做形态辅助。仅使用真实标签；没有人工 caption 时，不让模型学习“由模板生成的长篇影像描述”。</p>
+<p>建议先做零样本基线，再训练 LoRA。训练损失只计算 assistant 结构化答案，图像编码器先冻结或小学习率解冻。</p>
+<h3>Intern-Decision 决策模型</h3>
+<p>需要构造类似下面的 SFT 样本：</p>
+<pre><code class="language-json">{
+  &quot;case_id&quot;: &quot;external_case_0001&quot;,
+  &quot;input&quot;: {
+    &quot;summary&quot;: &quot;患者年龄、性别、症状、病程、既往史等&quot;,
+    &quot;vision&quot;: &quot;经审核的影像描述&quot;,
+    &quot;evidence&quot;: [&quot;指南条目&quot;, &quot;文献段落&quot;, &quot;相似病例&quot;]
+  },
+  &quot;target&quot;: {
+    &quot;choice&quot;: &quot;一个受约束的处置选项&quot;,
+    &quot;score&quot;: 0.0,
+    &quot;noul&quot;: &quot;不超过证据边界的说明&quot;,
+    &quot;requires_human_review&quot;: true
+  }
+}
+</code></pre>
+<p>现有数据不能直接提供 <code>summary</code>、医生处置和 <code>score</code> 的真实标签。ODIR 的年龄、性别、诊断关键词只能做弱关联特征，不能自行生成金标准决策。补齐真实病例文本和医生审核后，再训练 Intern-Decision。</p>
+<h3>BGE-M3 检索</h3>
+<p>第一期不建议微调：</p>
+<ol>
+<li>收集指南、专家共识、论文摘要和脱敏病例摘要。</li>
+<li>按段落切块，记录来源、版本、日期和适用范围。</li>
+<li>用 BGE-M3 生成向量，建立本地检索索引。</li>
+<li>用人工问题-证据对评估 Recall@k。</li>
+</ol>
+<p>当前下载内容主要是图像，尚不能直接形成可靠的医学 RAG 语料。</p>
+<h2>6. 推荐的训练顺序</h2>
+<ol>
+<li>从目录生成 <code>vision_uv</code>、<code>vision_aux</code>、<code>vision_oct_aux</code> 清单，并记录图像路径、标签、来源、患者组、原始 split 和是否重复。</li>
+<li>对 01、02、03 做 SHA256 去重和相似图检查，固定一份不参与训练的 holdout。</li>
+<li>训练三个独立的小型分类基线：OCT 四分类、Toxo 二分类、眼病五分类。</li>
+<li>用冻结视觉编码器或 Qwen LoRA 做结构化分类输出；和零样本基线比较 macro-F1、AUC 与校准误差。</li>
+<li>在 144 张有掩膜的 Toxo 图上训练分割辅助任务，在与任务头解耦的验证集上评估 Dice。</li>
+<li>用 ODIR、RFMiD、眼底/OCT 辅助任务做泛化预训练，不把辅助标签混进葡萄膜炎标签。</li>
+<li>补充并审核病例文本、指南和文献后，再建立 decision SFT 与 RAG 索引。</li>
+<li>三件套联调时，所有输出都带来源证据和 <code>requires_human_review=true</code>。</li>
+</ol>
+<h2>7. 验收指标</h2>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>主指标</th>
+<th>必须同时记录</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 OCT 四分类</td>
+<td>macro-F1、AUC</td>
+<td>各类召回率、混淆矩阵、患者/来源分组切分</td>
+</tr>
+<tr>
+<td>02 Toxo 二分类</td>
+<td>macro-F1、AUC</td>
+<td>两个来源分别的成绩</td>
+</tr>
+<tr>
+<td>03 五分类</td>
+<td>macro-F1</td>
+<td>Uveitis 召回率、去重前后差异</td>
+</tr>
+<tr>
+<td>分割</td>
+<td>Dice、IoU</td>
+<td>仅报告 144 张匹配掩膜样本</td>
+</tr>
+<tr>
+<td>定位</td>
+<td>平均像素误差/归一化误差</td>
+<td>按原始 train/validation/test 分开</td>
+</tr>
+<tr>
+<td>分类校准</td>
+<td>ECE、Brier</td>
+<td>不使用未校准的 <code>confidence</code> 做临床阈值</td>
+</tr>
+<tr>
+<td>决策模型</td>
+<td>JSON 合法率、与医生标注一致率</td>
+<td>证据覆盖率、拒答率、人工复核率</td>
+</tr>
+<tr>
+<td>检索</td>
+<td>Recall@k、MRR</td>
+<td>来源可追溯率</td>
+</tr>
+</tbody>
+</table>
+<h2>8. 当前阻塞项</h2>
+<ul>
+<li>葡萄膜炎专项数据量小，01 只有 75 张，不能支撑从零训练大模型。</li>
+<li>02 的 412 张分类图是眼弓形虫病数据，不等于一般葡萄膜炎队列。</li>
+<li>02 有 1 个图像文件名与标签表不一致，需要人工核对。</li>
+<li>03 的类别目录是否全部为原始图像尚未确认，且可能包含 SMOTE 合成样本。</li>
+<li>04 没有葡萄膜炎标签。</li>
+<li>06 的标签 CSV 存在编码/字符问题，需要清洗后再训练。</li>
+<li>13 同时包含 OCT 和胸部 X 光，训练时必须只取 <code>CellData/OCT/</code>。</li>
+<li>决策与 RAG 所需的病例文本、医生处置标签、指南版权和来源核验尚缺。</li>
+<li>所有数据集的生产使用许可必须逐项核对源站条款。</li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>数据集训练映射 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

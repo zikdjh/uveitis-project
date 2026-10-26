@@ -21,8 +21,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 MODEL_DIR = ROOT / "model-training" / "models" / "qwen" / "Qwen3.5-4B"
-MANIFEST_PATH = ROOT / "datasets" / "training" / "manifest.csv"
-ARTIFACTS_ROOT = ROOT / "artifacts" / "qwen3.5-4b"
+MANIFEST_PATH = ROOT / "model-training" / "datasets" / "training" / "manifest.csv"
+ARTIFACTS_ROOT = ROOT / "model-training" / "assets" / "qwen3.5-4b"
 
 PHASE1_TASKS = {
     "oct_uveitis_4class",
@@ -92,7 +92,7 @@ def _load_train_rows(limit: int) -> list[dict]:
 
 
 def _image_path(row: dict) -> Path:
-    return ROOT / "datasets" / "training" / row["image"]
+    return ROOT / "model-training" / "datasets" / "training" / row["image"]
 
 
 def _build_prompt(task: str, label: str) -> tuple[str, str]:

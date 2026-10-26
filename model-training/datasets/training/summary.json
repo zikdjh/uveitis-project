@@ -1,0 +1,29 @@
+{
+  "images": 16638,
+  "bytes": 1566888019,
+  "split_counts": {
+    "test": 1727,
+    "train": 14734,
+    "validation": 177
+  },
+  "dataset_counts": {
+    "01_uveitis_oct": 75,
+    "02_toxofundus": 412,
+    "03_eye_five_class": 2297,
+    "04_odir5k": 2000,
+    "06_rfmid2": 854,
+    "13_zhanglab_oct": 11000
+  },
+  "unique_source_groups": 1869,
+  "toxofundus_name_alias": {
+    "2809.jpg": "2805.jpg"
+  },
+  "notes": [
+    "01 has no patient identifiers; its split is dataset-internal.",
+    "03 is an SMOTE-derived source and is used for prototype training only.",
+    "ODIR left and right eyes stay in the same patient group.",
+    "RFMiD keeps the original train/validation/test split.",
+    "RFMiD excludes six label/image mismatches with no safe one-to-one mapping.",
+    "ZhangLab includes only CellData/OCT, never chest_xray."
+  ]
+}

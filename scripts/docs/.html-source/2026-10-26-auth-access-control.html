@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>系统鉴权与权限体系 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-model-runtime-evaluation.html">上一份</a>
+    <a href="2026-10-26-project-overview.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>系统设计</span>
+    <span>2026-10-26</span>
+  </div>
+  <h1>系统鉴权与权限体系</h1>
+<p class="doc-summary">双令牌无感刷新、角色权限、CSRF、账号管理和审计边界</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-auth-access-control.html</code></p>
+  <article class="html-body">
+<p>后端是唯一授权边界。前端路由和导航只控制可用界面，所有病例、知识库、系统运行和账号接口均在 FastAPI 服务端复核当前会话、账号状态与权限。</p>
+
+<h2>角色与权限</h2>
+<table>
+  <thead><tr><th>权限</th><th>医生</th><th>系统管理员</th><th>主要接口</th></tr></thead>
+  <tbody>
+    <tr><td><code>case:read</code></td><td>允许</td><td>允许</td><td>病例列表、详情、影像读取</td></tr>
+    <tr><td><code>case:write</code></td><td>允许</td><td>允许</td><td>建档、影像上传、启动分析</td></tr>
+    <tr><td><code>case:review</code></td><td>允许</td><td>允许</td><td>医生复核与最终记录</td></tr>
+    <tr><td><code>knowledge:read</code></td><td>允许</td><td>允许</td><td>知识检索与索引状态</td></tr>
+    <tr><td><code>knowledge:write</code></td><td>禁止</td><td>允许</td><td>知识文档写入</td></tr>
+    <tr><td><code>system:read</code></td><td>允许</td><td>允许</td><td>运行概览</td></tr>
+    <tr><td><code>system:manage</code></td><td>禁止</td><td>允许</td><td>数据库与会话存储检查</td></tr>
+    <tr><td><code>user:read</code> / <code>user:manage</code></td><td>禁止</td><td>允许</td><td>账号列表、创建、角色、状态与密码重置</td></tr>
+    <tr><td><code>audit:read</code></td><td>禁止</td><td>允许</td><td>鉴权审计记录</td></tr>
+  </tbody>
+</table>
+
+<h2>登录与会话</h2>
+<ol>
+  <li>登录失败按“账号 + 来源 IP”在 Redis 中计数，默认 15 分钟窗口最多 5 次；达到阈值后返回 <code>429</code>。</li>
+  <li>成功后签发短期访问令牌和长期刷新令牌。访问令牌默认 15 分钟，刷新令牌默认 30 天。</li>
+  <li>Redis 仅保存两个令牌的 SHA-256 指纹，不保存浏览器可见的原始令牌。</li>
+  <li>访问令牌 Cookie 使用 <code>HttpOnly</code>、<code>SameSite=Lax</code> 和可配置的 <code>Secure</code> 属性；刷新令牌 Cookie 进一步限制为仅发送到刷新接口。</li>
+  <li>访问令牌失效时，前端通过单一并发锁调用 <code>POST /api/v1/auth/refresh</code>，成功后自动重放原请求而无需用户重新登录。</li>
+  <li>每次刷新都会同时轮换访问令牌和刷新令牌，并为短暂并发保留刷新宽限期；退出、改密、角色变更和账号停用会撤销整组令牌。</li>
+  <li>服务端保存会话创建时间、最近活动时间、刷新到期时间、来源 IP 和客户端标识，并支持查看与撤销其他会话。</li>
+  <li>账号停用、角色变更、管理员重置密码或用户修改密码后，相关旧会话被撤销。</li>
+</ol>
+
+<h2>CSRF 与浏览器调用</h2>
+<p>双令牌配合双提交 CSRF 校验。登录后服务端签发访问令牌、刷新令牌和可读的 CSRF Cookie；前端对 <code>POST</code>、<code>PATCH</code>、<code>PUT</code>、<code>DELETE</code> 请求自动附加 <code>X-CSRF-Token</code>。凭证请求显式使用 <code>credentials: include</code>，当前部署约定为同主机、不同端口；改用跨站域名时需要同步调整 Cookie 域、SameSite、CORS 与 CSRF 方案。</p>
+
+<h2>账号管理</h2>
+<ul>
+  <li>管理员可创建医生或管理员账号，修改显示名、角色和启用状态。</li>
+  <li>密码最少 12 位。管理员重置密码后撤销该账号全部会话。</li>
+  <li>不能停用当前登录账号；系统始终保留至少一个启用的管理员。</li>
+  <li>医生不能读取账号列表、管理账号或查看系统基础设施状态。</li>
+</ul>
+
+<h2>审计与安全响应头</h2>
+<p>登录成功、登录失败、登录限流、令牌刷新、退出、会话撤销、密码修改、密码重置、账号创建和账号更新均写入 <code>auth_audit_events</code>。API 响应统一加入 <code>X-Content-Type-Options</code>、<code>X-Frame-Options</code>、<code>Referrer-Policy</code> 和权限策略响应头；鉴权与管理接口不缓存。</p>
+
+<h2>运行配置</h2>
+<pre><code>APP_ACCESS_TOKEN_TTL_SECONDS=900
+APP_REFRESH_TOKEN_TTL_SECONDS=2592000
+APP_REFRESH_ROTATION_GRACE_SECONDS=30
+APP_LOGIN_MAX_ATTEMPTS=5
+APP_LOGIN_WINDOW_SECONDS=900
+APP_TRUST_PROXY_HEADERS=false
+APP_COOKIE_SECURE=false
+APP_BOOTSTRAP_ADMIN_USERNAME=admin
+APP_BOOTSTRAP_ADMIN_PASSWORD=replace-before-deployment</code></pre>
+<p>本地无 PostgreSQL 配置时，账号和审计记录使用 SQLite；连接 PostgreSQL 时使用同一套 SQLAlchemy 模型。会话和登录限流依赖 Redis。部署环境应启用 HTTPS，并设置 <code>APP_COOKIE_SECURE=true</code>，同时将引导账号密码替换为随机强密码。</p>
+
+<h2>主要接口</h2>
+<ul>
+  <li><code>POST /api/v1/auth/login</code>、<code>POST /api/v1/auth/refresh</code>、<code>POST /api/v1/auth/logout</code>、<code>GET /api/v1/auth/me</code></li>
+  <li><code>GET /api/v1/auth/sessions</code>、<code>DELETE /api/v1/auth/sessions/{id}</code>、<code>POST /api/v1/auth/sessions/revoke-others</code></li>
+  <li><code>POST /api/v1/auth/password</code></li>
+  <li><code>GET|POST /api/v1/admin/users</code>、<code>PATCH /api/v1/admin/users/{id}</code>、<code>POST /api/v1/admin/users/{id}/password</code></li>
+  <li><code>GET /api/v1/admin/audit-events</code></li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>系统鉴权与权限体系 · 2026-10-26</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

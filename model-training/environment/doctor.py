@@ -59,10 +59,14 @@ def main() -> int:
     model_lock = lock["model"]
 
     print(f"Project root: {ROOT}")
+    controller_venv = controller["venv"]
+    controller_python = Path(controller_venv)
+    if not controller_python.is_absolute():
+        controller_python = ROOT / controller_python
     checks.append(
         check(
             Path(sys.executable).resolve()
-            == (ROOT / controller["venv"] / "Scripts/python.exe").resolve(),
+            == (controller_python / "Scripts/python.exe").resolve(),
             "local Python is the Modal controller venv",
             sys.executable,
         )
@@ -76,9 +80,9 @@ def main() -> int:
     )
     checks.append(
         check(
-            (ROOT / ".venv-modal/Scripts/modal.exe").is_file(),
+            (controller_python / "Scripts/modal.exe").is_file(),
             "Modal CLI",
-            str(ROOT / ".venv-modal/Scripts/modal.exe"),
+            str(controller_python / "Scripts/modal.exe"),
         )
     )
     try:
@@ -128,7 +132,7 @@ def main() -> int:
             for row in rows
             if not (
                 ROOT
-                / "datasets/training"
+                / "model-training/datasets/training"
                 / row.get("image", row.get("path", ""))
             ).is_file()
         )

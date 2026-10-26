@@ -22,6 +22,7 @@ import {
   type ImageKind,
   type ReviewInput,
 } from "@/api/cases";
+import { apiUrl } from "@/api/client";
 
 const statusText: Record<CaseRecord["status"], string> = {
   created: "待分析",
@@ -384,7 +385,7 @@ function CaseDetail({
         {item.images.length > 0 && (
           <div className="image-list">
             {item.images.map((image) => (
-              <a href={image.url} target="_blank" rel="noreferrer" key={image.id}>
+              <a href={apiUrl(image.url)} target="_blank" rel="noreferrer" key={image.id}>
                 <FileImage size={16} />
                 <span>{image.filename}</span>
                 <small>{imageKindText[image.kind]} · {formatBytes(image.size_bytes)}</small>

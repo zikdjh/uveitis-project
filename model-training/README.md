@@ -1,15 +1,16 @@
 # 模型训练管理
 
-整理日期：2026-10-25
+整理日期：2026-10-26
 
 本目录是模型训练的单一管理入口。代码、Modal 任务、训练计划、预算记录、数据入口和本地产物入口都从这里查找。
+
+训练工程目标收口日期：**2026-11-10**。统一跟踪见 `docs/2026-10-26-progress-tracking.html`，阶段汇总见 `docs/2026-10-26-model-training-progress.html`，当前运行态见 `docs/2026-10-26-model-training-status.html`。
 
 ## 目录结构
 
 ```text
 model-training/
 ├── README.md
-├── STATUS.md
 ├── environment/                版本锁定、环境预检与依赖定义
 ├── code/
 │   └── training/               QLoRA、评估、smoke、Volume 与数据检查代码
@@ -17,39 +18,37 @@ model-training/
 │   ├── modal/                  训练子集构建、Volume 同步和批量上传
 │   ├── run_local_4060_smoke.ps1 本地 4060 QLoRA 冒烟入口
 │   └── run_local_4060_formal.ps1 本地 4060 可恢复正式训练入口
-├── docs/
-│   ├── training-plan-modal-l40s-20261023.md
-│   ├── training-budget-plan-modal-l40s-44usd-20261025.md
-│   └── training-cost-ledger-modal-20261025.md
-├── data/
-│   └── training/               指向 datasets/training 的目录链接
+├── datasets/
+│   ├── raw/                    新下载压缩包的临时暂存区
+│   ├── extracted/              完整解压数据集与 manifests/ 清单
+│   └── training/               训练图像、manifest 和标签
 ├── models/
 │   └── qwen/Qwen3.5-4B/       从 Modal uveitis-models 拉取的本地基座权重
-└── artifacts/
-    └── qwen3.5-4b/             指向 artifacts/qwen3.5-4b 的目录链接
+└── assets/
+    └── qwen3.5-4b/             adapter、指标、评估和训练快照
 ```
 
-`data/training` 和 `artifacts/qwen3.5-4b` 是指向原目录的 Windows junction，不复制数据。训练数据和运行产物仍然分别位于：
-
-```text
-datasets/training/
-artifacts/qwen3.5-4b/
-```
+完整数据集、训练子集、基座和产物均位于 `model-training/` 内，不再依赖根级 junction。模型运行侧只读取这些文件，不复制权重。
 
 `models/qwen/Qwen3.5-4B/` 是本地基座副本，当前 14 个模型文件、9,342,907,469 字节（不含单独的 `pull-manifest.json`），包含两份 safetensors 分片、索引、配置和 tokenizer。它不替代 Modal 上的 `uveitis-models`；正式训练仍从 Modal 卷加载基座。
 
 本地加载需要支持 `qwen3_5` 架构的 Transformers。项目训练脚本固定使用 `50e35cc0ca18ec19b80653690de553e6decf74f5`；后端当前的 Transformers 4.51.3 不识别该架构，不能直接用它加载这个模型目录。本地校验清单见 `models/qwen/Qwen3.5-4B/pull-manifest.json`。
 
-本地 4060 使用独立的 `model-training/.venv-local/`，其中是 CUDA 12.8 的 PyTorch 和 Transformers 5.20.2，不使用 `backend/.venv` 的 CPU PyTorch。该环境已完成 4-bit NF4、bfloat16、LoRA 前向/反向、optimizer step、周期验证和可恢复正式训练实测；详见 `STATUS.md` 与 `artifacts/qwen3.5-4b/local-4060-formal-20261025-01/`。
+本地 4060 使用独立的 `model-training/.venv-local/`，其中是 CUDA 12.8 的 PyTorch 和 Transformers 5.20.2，不使用 `backend/.venv` 的 CPU PyTorch。该环境已完成 4-bit NF4、bfloat16、LoRA 前向/反向、optimizer step、周期验证和可恢复正式训练实测；状态见 `docs/2026-10-26-model-training-status.html`，产物索引见 `assets/README.md`。
+
+2026-10-26 已清理本地 smoke run、中间 checkpoint、`training_state.pt`、重复 processor 和非当前 final adapter。当前只保留两组 best adapter、训练指标和冻结评估断点；完整 checkpoint 与优化器状态仍以 Modal `uveitis-runs` 为真相源。
 
 ## 当前训练路线
 
 - 主模型：Qwen3.5-4B，4-bit QLoRA，本地 RTX 4060 单卡训练。
-- 数据集：`data/training/manifest.csv`，16,638 张图像；训练 14,734、验证 177、冻结测试 1,727。
+- 数据集：`datasets/training/manifest.csv`，16,638 张图像；训练 14,734、验证 177、冻结测试 1,727。完整数据与精简训练子集均归 `model-training/datasets/` 管理。
 - 基线：Qwen3.5-2B 仅作对照。
 - 补充决策模型：Intern-Decision-4B；在真实病例文本、医生处置标签和独立评测集到位前默认不训练。
-- 真相源：本轮训练使用本地 `datasets/training/manifest.csv` 和 `model-training/models/qwen/Qwen3.5-4B/`；正式 checkpoint、验证指标和 adapter 位于 `artifacts/qwen3.5-4b/local-4060-formal-20261025-01/`。
-- 发布候选：`best_adapter/`，对应第 150 步和最佳验证损失 `0.0261653`；`final_adapter/` 仅用于记录最后一步。
+- 真相源：本轮训练使用本地 `datasets/training/manifest.csv` 和 `models/qwen/Qwen3.5-4B/`；checkpoint、验证指标和 adapter 位于 `assets/qwen3.5-4b/`。
+- 当前冻结评估基线：`local-4060-grouped-cont-20261025-01/best_adapter`，第 100 步。
+- 当前 OCT 候选：`local-4060-oct-focus-cont-20261025-01/best_adapter`，第 20 步。
+- 发布状态：尚未提升候选。第 20 步候选已完成 1,000 条 OCT 冻结测试评估；第 100 步基线的同一评估在 145/1,000 处停止，可断点续跑。停止点与恢复命令见 `docs/2026-10-26-qwen3.5-4b-progress-stop.html`。
+- 11.10 前收口条件：完成第 100 步基线的同一冻结测试，按冻结测试指标决定是否提升第 20 步候选，并冻结 adapter、指标、模型卡和运行读取路径。
 
 ## 常用命令
 
@@ -57,23 +56,23 @@ artifacts/qwen3.5-4b/
 
 ```powershell
 # 构建训练子集
-.\.venv-modal\Scripts\python.exe model-training\scripts\modal\build_budget_training_subset.py
+.\model-training\.venv-modal\Scripts\python.exe model-training\scripts\modal\build_budget_training_subset.py
 
 # 上传训练数据
 .\model-training\scripts\modal\upload_data_batches.ps1
 
 # 运行 Qwen3.5-4B 训练
-.\.venv-modal\Scripts\modal.exe run model-training\code\training\modal_qwen4b_train.py
+.\model-training\.venv-modal\Scripts\modal.exe run model-training\code\training\modal_qwen4b_train.py
 
 # 运行评估
 $env:UV_RUN_ID = "qwen4b-stage1-20261025-01"
-.\.venv-modal\Scripts\modal.exe run model-training\code\training\modal_qwen4b_eval.py
+.\model-training\.venv-modal\Scripts\modal.exe run model-training\code\training\modal_qwen4b_eval.py
 
 # 验证本地训练清单
-.\.venv-modal\Scripts\python.exe scripts\datasets\verify_archive_extraction.py --manifests-only
+.\model-training\.venv-modal\Scripts\python.exe scripts\datasets\verify_archive_extraction.py --manifests-only
 
 # 环境预检；不启动 GPU
-.\.venv-modal\Scripts\python.exe model-training\environment\doctor.py
+.\model-training\.venv-modal\Scripts\python.exe model-training\environment\doctor.py
 
 # 本地 4060 单步或短程 QLoRA 冒烟；不产生 Modal 费用
 .\model-training\scripts\run_local_4060_smoke.ps1 `
@@ -85,17 +84,24 @@ $env:UV_RUN_ID = "qwen4b-stage1-20261025-01"
   -RunId local-4060-formal-20261025-01 -Steps 500 -GradAccum 4 `
   -ValidationEvery 25 -SaveEvery 25 -LearningRate 2.5e-5
 
-# 中断后续训；扩展步数时必须保留原调度为完整前缀
+# 中断后续训；仅在已从 Modal 恢复 checkpoints/ 和 training_state.pt 后使用
 .\model-training\scripts\run_local_4060_formal.ps1 `
   -RunId local-4060-formal-20261025-01 -Steps 500 -GradAccum 4 `
   -ValidationEvery 25 -SaveEvery 25 -LearningRate 2.5e-5 -Resume
+
+# 运行或续跑冻结测试集评估；已有部分预测时不要添加 -Overwrite
+powershell -NoProfile -ExecutionPolicy Bypass -File `
+  'model-runtime\scripts\run_local_4060_eval.ps1' `
+  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
+  -OutputDir 'model-training\assets\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01\step100' `
+  -Tasks 'oct_aux_4class'
 
 # 检查启动参数但不启动 GPU
 .\model-training\scripts\launch_training.ps1 -RunId env-check-20261025 `
   -AllowedGpuMinutes 5 -BudgetConfirmed -TrainLimit 16 -MaxSteps 1 -DryRun
 ```
 
-运行训练前，先在 `model-training/docs/training-budget-plan-modal-l40s-44usd-20261025.md` 核对当前预算，在 `model-training/docs/training-cost-ledger-modal-20261025.md` 核对最近一次实际消耗。训练命令依赖 Modal CLI 和 `model-training/code/training/modal_volumes.py`，不要把训练脚本单独复制到其他位置执行。
+运行训练前，先在 `docs/2026-10-25-training-budget-plan-modal-l40s.html` 核对当前预算，在 `docs/2026-10-25-training-cost-ledger-modal.html` 核对最近一次实际消耗。训练命令依赖 Modal CLI 和 `model-training/code/training/modal_volumes.py`，不要把训练脚本单独复制到其他位置执行。
 
 `environment/` 中锁定了本机 Modal 控制器、远端 Python/PyTorch/Transformers/PEFT/Accelerate/bitsandbytes 版本，以及数据清单和本地模型的 SHA256 或尺寸。`launch_training.ps1` 每次都会先运行 `doctor.py`；必须显式传入 `-BudgetConfirmed` 和 GPU 分钟上限，避免误启动无界训练。上述两个版本探测应用均无 GPU，运行后已停止。
 
@@ -106,11 +112,13 @@ $env:UV_RUN_ID = "qwen4b-stage1-20261025-01"
 | 训练代码与 Modal 应用 | `model-training/code/training/` | 是 |
 | 环境锁定与启动闸门 | `model-training/environment/`、`model-training/scripts/launch_training.ps1` | 是 |
 | 数据准备与上传脚本 | `model-training/scripts/modal/` | 是 |
-| 训练计划、预算、消耗记录 | `model-training/docs/` | 是 |
-| Modal 训练精简数据 | `datasets/training/` | 通过 `data/training` 链接管理 |
+| 训练计划、预算、消耗记录 | `docs/` 的 HTML 专题文档 | 是 |
+| Modal 训练精简数据 | `model-training/datasets/training/` | 是 |
 | 本地 Qwen3.5-4B 基座 | `model-training/models/qwen/Qwen3.5-4B/` | 是 |
-| 本地评估快照 | `artifacts/qwen3.5-4b/` | 通过 `artifacts/qwen3.5-4b` 链接管理 |
-| 完整解压数据 | `datasets/extracted/` | 否，由数据集清单管理 |
-| 推理服务与 RAG 服务 | `ai-services/inference/`、`ai-services/rag-kb/` | 否 |
+| 本地评估快照 | `model-training/assets/qwen3.5-4b/` | 是 |
+| 完整解压数据 | `model-training/datasets/extracted/` | 是 |
+| 新下载数据暂存 | `model-training/datasets/raw/` | 是 |
+| 模型运行服务与评估 | `model-runtime/` | 否，运行侧管理 |
+| 业务推理与 RAG 扩展 | `ai-services/`、`backend/` | 否 |
 
-每次正式训练应更新 `STATUS.md`、预算排期和消耗记录；只有完成评估并记录数据版本与 adapter 指纹后，才把 checkpoint 视为候选产物。
+每次正式训练应更新 HTML 状态页、预算排期和消耗记录；只有完成评估并记录数据版本与 adapter 指纹后，才把 checkpoint 视为候选产物。

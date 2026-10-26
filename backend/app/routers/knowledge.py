@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 
-from app.core.security import require_role
+from app.core.security import require_permission
+from app.schemas.auth import Permission
 from app.schemas.case import (
     KnowledgeDocument,
     KnowledgeDocumentCreate,
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/api/v1/knowledge", tags=["knowledge"])
 def add_document(
     payload: KnowledgeDocumentCreate, request: Request
 ) -> KnowledgeDocument:
-    require_role(request, "admin")
+    require_permission(request, Permission.KNOWLEDGE_WRITE)
     try:
         return request.app.state.knowledge_store.add(payload)
     except ValueError as exc:
@@ -30,7 +31,7 @@ def add_document(
 def search_knowledge(
     payload: KnowledgeSearchRequest, request: Request
 ) -> list[KnowledgeMatch]:
-    require_role(request, "doctor", "admin")
+    require_permission(request, Permission.KNOWLEDGE_READ)
     try:
         return request.app.state.knowledge_store.search(
             payload.query,
@@ -46,4 +47,5 @@ def search_knowledge(
 
 @router.get("/status", response_model=KnowledgeIndexStatus)
 def knowledge_status(request: Request) -> KnowledgeIndexStatus:
+    require_permission(request, Permission.KNOWLEDGE_READ)
     return request.app.state.knowledge_store.status()

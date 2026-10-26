@@ -1,0 +1,11 @@
+{
+  "adapter_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\local-4060-grouped-cont-20261025-01\\best_adapter",
+  "adapter_sha256": "517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a",
+  "tasks": [
+    "oct_aux_4class"
+  ],
+  "rows": 1,
+  "selection_sha256": "126db710058195d109874fd9091186af23a5a9d8daa34fe9780fca8fc34276ec",
+  "partial_predictions": "predictions.partial.jsonl",
+  "output_dir": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\eval-layout-smoke-20261026"
+}

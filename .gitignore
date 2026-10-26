@@ -16,6 +16,7 @@ __pycache__/
 htmlcov/
 node_modules/
 dist/
+*.tsbuildinfo
 coverage/
 .env
 .env.*
@@ -38,6 +39,11 @@ scripts/ui-check-20261025/*.png
 model-training/.venv-local/
 model-training/models/
 model-training/data/
+model-training/datasets/raw/
+model-training/datasets/extracted/*/
+!model-training/datasets/extracted/manifests/
+!model-training/datasets/extracted/manifests/**
+model-training/datasets/training/data/
 **/processor/tokenizer.json
 *.partial.*
 *.safetensors

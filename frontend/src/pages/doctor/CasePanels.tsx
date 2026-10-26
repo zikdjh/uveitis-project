@@ -11,6 +11,7 @@ import {
 import { type ChangeEvent, type FormEvent, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { apiUrl } from "@/api/client";
 import {
   analyzeCase,
   createCase,
@@ -118,7 +119,7 @@ export function CaseImagesPage() {
   return (
     <section className="panel">
       <div className="section-heading"><div><h2>影像</h2><span>{item.images.length} 个文件</span></div><FileImage size={20} /></div>
-      {item.images.length ? <div className="image-list case-image-list">{item.images.map((image) => <a href={image.url} target="_blank" rel="noreferrer" key={image.id}><FileImage size={18} /><span>{image.filename}</span><small>{imageKindText[image.kind]} · {(image.size_bytes / 1024 / 1024).toFixed(1)} MB</small></a>)}</div> : <div className="empty-state"><FileImage size={26} /><p>暂无影像</p><span>本病例可继续使用文本资料。</span></div>}
+      {item.images.length ? <div className="image-list case-image-list">{item.images.map((image) => <a href={apiUrl(image.url)} target="_blank" rel="noreferrer" key={image.id}><FileImage size={18} /><span>{image.filename}</span><small>{imageKindText[image.kind]} · {(image.size_bytes / 1024 / 1024).toFixed(1)} MB</small></a>)}</div> : <div className="empty-state"><FileImage size={26} /><p>暂无影像</p><span>本病例可继续使用文本资料。</span></div>}
     </section>
   );
 }

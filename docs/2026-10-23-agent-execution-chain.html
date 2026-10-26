@@ -10,12 +10,11 @@
 <body>
 <a class="doc-skip" href="#doc-content">跳到正文</a>
 <header class="doc-nav">
-  <a class="doc-brand" href="2026-10-25-project-overview.html">葡萄膜炎项目文档</a>
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
   <nav aria-label="文档导航">
-    <a href="2026-10-25-document-catalog.html">文档索引</a>
-    <a href="2026-10-25-document-catalog.html">文档索引</a>
-    <a href="2026-10-25-outputs-guide.html">上一份</a>
-    <a href="2026-10-23-training-plan-modal-l40s.html">下一份</a>
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-25-redundant-archives.html">上一份</a>
+    <a href="2026-10-26-auth-access-control.html">下一份</a>
   </nav>
 </header>
 <main id="doc-content" class="doc-page">
@@ -25,10 +24,10 @@
   </div>
   <h1>智能体执行链路规划</h1>
   <p class="doc-summary">病例接入、影像感知、检索、决策和安全复核链路</p>
-  <p class="doc-source">Markdown 源文件：<code>docs/agent-execution-chain-20261023.md</code></p>
-  <article class="markdown-body">
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-23-agent-execution-chain.html</code></p>
+  <article class="html-body">
 <p>目标：把诊断系统拆成一条可审计、可回滚、可扩展的智能体链路，而不是让一个大模型一次性完成所有任务。</p>
-<h2 id="1-总体链路">1. 总体链路</h2>
+<h2>1. 总体链路</h2>
 <pre><code class="language-text">用户/医生输入
   -&gt; IntakeAgent
   -&gt; PreprocessAgent
@@ -48,8 +47,8 @@
 <li>所有结果都带 <code>case_id</code> 和 <code>trace_id</code>。</li>
 <li>医生复核永远保留在链路里。</li>
 </ul>
-<h2 id="2-节点职责">2. 节点职责</h2>
-<h3 id="1-intakeagent">1. IntakeAgent</h3>
+<h2>2. 节点职责</h2>
+<h3>1. IntakeAgent</h3>
 <p>接收用户输入。</p>
 <p>输入：</p>
 <ul>
@@ -73,7 +72,7 @@
   &quot;consent&quot;: true
 }
 </code></pre>
-<h3 id="2-preprocessagent">2. PreprocessAgent</h3>
+<h3>2. PreprocessAgent</h3>
 <p>负责标准化和脱敏。</p>
 <p>任务：</p>
 <ul>
@@ -93,7 +92,7 @@
   &quot;risk_flags&quot;: []
 }
 </code></pre>
-<h3 id="3-routeragent">3. RouterAgent</h3>
+<h3>3. RouterAgent</h3>
 <p>决定使用哪条模态路径。</p>
 <p>可路由到：</p>
 <ul>
@@ -108,7 +107,7 @@
   &quot;confidence&quot;: 0.94
 }
 </code></pre>
-<h3 id="4-perceptionagent">4. PerceptionAgent</h3>
+<h3>4. PerceptionAgent</h3>
 <p>主力模型：Qwen3.5-4B。</p>
 <p>任务：</p>
 <ul>
@@ -130,7 +129,7 @@
   &quot;report&quot;: &quot;...&quot;
 }
 </code></pre>
-<h3 id="5-retrievalagent">5. RetrievalAgent</h3>
+<h3>5. RetrievalAgent</h3>
 <p>向量化模型：BGE-M3；向量数据库：zvec。</p>
 <p>zvec 是嵌入式本地向量数据库，承担向量、标量字段和过滤条件的持久化检索，不另外部署独立向量服务。BGE-M3 只负责把文本转换为 DIM 维向量。</p>
 <p>BGE-M3 从 ModelScope 的 <code>BAAI/bge-m3</code> 下载到项目本地，在 CPU 上以 FP32 运行，默认使用稠密向量。模型首次检索时惰性加载，不在 API 启动阶段占用内存。切换 embedding provider 后必须重建 zvec 索引。</p>
@@ -154,7 +153,7 @@
   ]
 }
 </code></pre>
-<h3 id="6-decisionagent">6. DecisionAgent</h3>
+<h3>6. DecisionAgent</h3>
 <p>状态：可选补充方案，默认关闭。是否启用由项目进度、真实决策标注质量和试点评测决定，不阻塞核心流程。</p>
 <p>候选模型：Intern-Decision-4B；Kev-4B 作为对照，不默认常驻。</p>
 <p>输入：</p>
@@ -180,7 +179,7 @@
   &quot;confidence&quot;: 0.71
 }
 </code></pre>
-<h3 id="7-safetyagent">7. SafetyAgent</h3>
+<h3>7. SafetyAgent</h3>
 <p>这是一个确定性校验节点，不是大模型。</p>
 <p>检查：</p>
 <ul>
@@ -196,7 +195,7 @@
 <li>补充决策已启用但输出不合法时，返回 <code>noul</code> 或转医生人工判断</li>
 <li>不把 Kev-4B 作为无条件的自动重试依赖</li>
 </ul>
-<h3 id="8-reportagent">8. ReportAgent</h3>
+<h3>8. ReportAgent</h3>
 <p>生成医生端报告和患者友好说明。</p>
 <p>输出：</p>
 <ul>
@@ -205,7 +204,7 @@
 <li>检查建议</li>
 <li>证据引用</li>
 </ul>
-<h3 id="9-reviewagent">9. ReviewAgent</h3>
+<h3>9. ReviewAgent</h3>
 <p>医生复核节点。</p>
 <p>记录：</p>
 <ul>
@@ -214,7 +213,7 @@
 <li>不同意原因</li>
 <li>是否允许入训练集</li>
 </ul>
-<h3 id="10-learningagent">10. LearningAgent</h3>
+<h3>10. LearningAgent</h3>
 <p>后台节点，不在线上实时跑。</p>
 <p>任务：</p>
 <ul>
@@ -223,7 +222,7 @@
 <li>触发下一轮训练</li>
 <li>记录模型版本</li>
 </ul>
-<h2 id="3-modal-部署结构">3. Modal 部署结构</h2>
+<h2>3. Modal 部署结构</h2>
 <table>
 <thead>
 <tr>
@@ -296,7 +295,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="4-状态存储">4. 状态存储</h2>
+<h2>4. 状态存储</h2>
 <table>
 <thead>
 <tr>
@@ -335,7 +334,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="5-失败与回退">5. 失败与回退</h2>
+<h2>5. 失败与回退</h2>
 <table>
 <thead>
 <tr>
@@ -370,18 +369,17 @@
 </tr>
 </tbody>
 </table>
-<h2 id="6-最小可用版本-mvp">6. 最小可用版本 MVP</h2>
+<h2>6. 最小可用版本 MVP</h2>
 <p>第一阶段只需要保留：</p>
 <pre><code class="language-text">Intake -&gt; Preprocess -&gt; Perception -&gt; Retrieval -&gt; Safety -&gt; Report -&gt; Review
 </code></pre>
 <p>Decision 为补充分支；Learning 可以后补。补充决策必须通过标注和评测门槛后再插入链路。</p>
 <p>这样能最快跑通，且不会牺牲安全边界。</p>
-
   </article>
 </main>
 <footer class="doc-footer">
   <span>智能体执行链路规划 · 2026-10-23</span>
-  <span><a href="2026-10-25-document-catalog.html">返回文档索引</a></span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
 </footer>
 </body>
 </html>
