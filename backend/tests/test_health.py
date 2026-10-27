@@ -4,6 +4,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME
 from app.core.config import settings
 from app.db.audit import MemoryAuthAuditStore
 from app.main import create_app
@@ -25,9 +26,9 @@ def make_client(tmp_path: Path, role: str = "doctor") -> TestClient:
     )
     password = app.state.auth_service.hash_password("test-password")
     users.ensure_user("doctor", password, "测试医生", "doctor")
-    users.ensure_user("admin", password, "测试管理员", "admin")
+    users.ensure_single_admin(ROOT_ADMIN_USERNAME, password, "测试管理员")
     client = TestClient(app)
-    username = "admin" if role == "admin" else "doctor"
+    username = ROOT_ADMIN_USERNAME if role == "admin" else "doctor"
     login = client.post(
         "/api/v1/auth/admin/login" if role == "admin" else "/api/v1/auth/login",
         json={"username": username, "password": "test-password"},
@@ -177,7 +178,6 @@ def test_admin_can_manage_users_and_read_audit(tmp_path: Path) -> None:
         json={
             "username": "doctor.new",
             "display_name": "新医生",
-            "role": "doctor",
             "password": "new-doctor-password",
         },
     )
@@ -255,13 +255,15 @@ def test_admin_and_doctor_use_separate_login_entries(tmp_path: Path) -> None:
     )
     password = app.state.auth_service.hash_password("test-password")
     app.state.user_store.ensure_user("doctor", password, "测试医生", "doctor")
-    app.state.user_store.ensure_user("admin", password, "测试管理员", "admin")
+    app.state.user_store.ensure_single_admin(
+        ROOT_ADMIN_USERNAME, password, "测试管理员"
+    )
 
     doctor_client = TestClient(app)
     doctor_client.headers["X-CSRF-Token"] = "unused"
     doctor_rejected = doctor_client.post(
         "/api/v1/auth/login",
-        json={"username": "admin", "password": "test-password"},
+        json={"username": ROOT_ADMIN_USERNAME, "password": "test-password"},
     )
     assert doctor_rejected.status_code == 403
 
@@ -275,7 +277,7 @@ def test_admin_and_doctor_use_separate_login_entries(tmp_path: Path) -> None:
 
     accepted = admin_client.post(
         "/api/v1/auth/admin/login",
-        json={"username": "admin", "password": "test-password"},
+        json={"username": ROOT_ADMIN_USERNAME, "password": "test-password"},
     )
     assert accepted.status_code == 200
     assert accepted.json()["user"]["role"] == "admin"
@@ -302,7 +304,6 @@ def test_disabled_user_cannot_login(tmp_path: Path) -> None:
         json={
             "username": "disabled",
             "display_name": "停用账号",
-            "role": "doctor",
             "password": "disabled-password",
         },
     ).json()
@@ -426,3 +427,80 @@ def test_memory_auth_store_round_trip(tmp_path: Path) -> None:
     )
     assert response.status_code == 200
     assert response.json()["user"]["permissions"]
+
+
+def test_registration_is_not_exposed(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    response = client.post(
+        "/api/v1/auth/register",
+        json={
+            "username": "self.registered",
+            "display_name": "自主注册",
+            "password": "self-register-password",
+        },
+    )
+    assert response.status_code == 404
+
+
+def test_admin_cannot_create_second_admin(tmp_path: Path) -> None:
+    client = make_client(tmp_path, role="admin")
+    response = client.post(
+        "/api/v1/admin/users",
+        json={
+            "username": "admin.two",
+            "display_name": "第二管理员",
+            "role": "admin",
+            "password": "second-admin-password",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_root_admin_cannot_be_disabled_or_reset(tmp_path: Path) -> None:
+    client = make_client(tmp_path, role="admin")
+    users = client.get("/api/v1/admin/users").json()
+    root = next(user for user in users if user["is_root"])
+
+    disabled = client.patch(
+        f"/api/v1/admin/users/{root['id']}",
+        json={"is_active": False},
+    )
+    assert disabled.status_code == 409
+
+    reset = client.post(
+        f"/api/v1/admin/users/{root['id']}/password",
+        json={"new_password": "replacement-password"},
+    )
+    assert reset.status_code == 409
+
+    self_change = client.post(
+        "/api/v1/auth/password",
+        json={
+            "current_password": "test-password",
+            "new_password": "replacement-password",
+        },
+    )
+    assert self_change.status_code == 409
+
+
+def test_bootstrap_creates_only_root_and_demotes_legacy_admin(tmp_path: Path) -> None:
+    users = MemoryUserStore()
+    users.ensure_user("legacy.admin", "legacy-password", "旧管理员", "admin")
+    bootstrap_settings = settings.model_copy(
+        update={"bootstrap_admin_password": "bootstrap-password"}
+    )
+    create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=MemorySessionStore(),
+        runtime_settings=bootstrap_settings,
+        bootstrap_users=True,
+    )
+    listed = {user.username: user for user in users.list()}
+    assert listed[ROOT_ADMIN_USERNAME].role == "admin"
+    assert listed[ROOT_ADMIN_USERNAME].is_root is True
+    assert listed["legacy.admin"].role == "doctor"
+    assert sum(user.role == "admin" for user in users.list()) == 1

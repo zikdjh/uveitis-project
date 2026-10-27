@@ -21,7 +21,6 @@ import {
   updateUser,
   type AuthAuditEvent,
   type User,
-  type UserRole,
 } from "@/api/auth";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -33,6 +32,8 @@ const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
 
 const eventLabels: Record<string, string> = {
   login: "登录",
+  doctor_login: "医生登录",
+  admin_login: "管理员登录",
   token_refresh: "令牌刷新",
   logout: "退出",
   session_revoke: "撤销会话",
@@ -92,7 +93,6 @@ export default function AccessPage() {
       await createUser({
         username: String(form.get("username") ?? ""),
         display_name: String(form.get("display_name") ?? ""),
-        role: String(form.get("role") ?? "doctor") as UserRole,
         password: String(form.get("password") ?? ""),
       });
       formElement.reset();
@@ -105,7 +105,7 @@ export default function AccessPage() {
     }
   }
 
-  async function handleUpdate(user: User, values: Partial<Pick<User, "role" | "is_active">>) {
+  async function handleUpdate(user: User, values: Partial<Pick<User, "is_active">>) {
     setBusy(true);
     setError(null);
     setNotice(null);
@@ -148,7 +148,7 @@ export default function AccessPage() {
   return (
     <section className="page">
       <div className="page-heading">
-        <div><h1>账号与权限</h1><p className="page-lead">管理账号角色、启用状态和鉴权审计记录。</p></div>
+        <div><h1>医生账号管理</h1><p className="page-lead">唯一管理员 root 维护医生账号，系统不提供自助注册。</p></div>
         <button className="button secondary" type="button" onClick={() => void load()} disabled={loading || busy}>
           <RefreshCw size={16} className={loading ? "spin" : ""} /> 刷新
         </button>
@@ -158,7 +158,7 @@ export default function AccessPage() {
 
       <div className="metric-grid access-metric-grid">
         <AccessMetric icon={Users} label="有效账号" value={activeUsers} note="当前可登录" />
-        <AccessMetric icon={ShieldCheck} label="管理员" value={adminUsers} note="系统管理权限" />
+        <AccessMetric icon={ShieldCheck} label="唯一管理员" value={adminUsers} note="固定 root 账号" />
         <AccessMetric icon={UserX} label="已停用" value={inactiveUsers} note="不可登录" />
         <AccessMetric icon={History} label="异常审计" value={failedEvents} note="最近 80 条" />
       </div>
@@ -166,7 +166,7 @@ export default function AccessPage() {
       <div className="access-layout">
         <section className="panel">
           <div className="section-heading">
-            <div><h2>账号列表</h2><span>{users.length} 个账号</span></div>
+            <div><h2>账号列表</h2><span>{users.length} 个账号，仅管理员可维护医生账号</span></div>
             <Users size={20} />
           </div>
           {loading && !users.length ? (
@@ -184,48 +184,37 @@ export default function AccessPage() {
                           <span><strong>{user.display_name}</strong><small>@{user.username}</small></span>
                         </div>
                       </td>
-                      <td data-label="角色">
-                        <select
-                          value={user.role}
-                          disabled={busy || user.id === currentUser?.id}
-                          onChange={(event) => void handleUpdate(user, { role: event.target.value as UserRole })}
-                          aria-label={`${user.display_name} 的角色`}
-                        >
-                          <option value="doctor">医生</option>
-                          <option value="admin">系统管理员</option>
-                        </select>
-                      </td>
+                      <td data-label="角色">{user.is_root ? "唯一管理员" : "医生"}</td>
                       <td data-label="状态">
                         <button
                           className={`status-toggle ${user.is_active ? "active" : "disabled"}`}
                           type="button"
-                          disabled={busy || user.id === currentUser?.id}
+                          disabled={busy || user.id === currentUser?.id || user.is_root}
                           onClick={() => void handleUpdate(user, { is_active: !user.is_active })}
                         >
                           {user.is_active ? "启用" : "停用"}
                         </button>
                       </td>
-                      <td data-label="操作"><button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button></td>
+                      <td data-label="操作">{user.is_root ? <span className="muted">系统固定</span> : <button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button>}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {!users.length && <div className="empty-state"><Users size={26} /><p>暂无账号</p><span>创建账号后可在这里管理权限。</span></div>}
+              {!users.length && <div className="empty-state"><Users size={26} /><p>暂无账号</p><span>创建医生账号后可在这里维护。</span></div>}
             </div>
           )}
         </section>
 
         <section className="panel">
           <div className="section-heading">
-            <div><h2>新建账号</h2><span>密码至少 12 位</span></div>
+            <div><h2>新建医生账号</h2><span>由管理员设置初始密码，密码至少 12 位</span></div>
             <UserPlus size={20} />
           </div>
           <form className="form-grid compact" onSubmit={(event) => void handleCreate(event)}>
             <label>姓名<input name="display_name" required maxLength={100} /></label>
             <label>登录账号<input name="username" required minLength={3} maxLength={100} pattern="[A-Za-z0-9._-]+" /></label>
-            <label>角色<select name="role" defaultValue="doctor"><option value="doctor">医生</option><option value="admin">系统管理员</option></select></label>
             <label>初始密码<input name="password" type="password" required minLength={12} maxLength={200} autoComplete="new-password" /></label>
-            <div className="form-actions span-2"><button className="button primary" type="submit" disabled={busy}><UserPlus size={16} /> 创建账号</button></div>
+            <div className="form-actions span-2"><button className="button primary" type="submit" disabled={busy}><UserPlus size={16} /> 创建医生账号</button></div>
           </form>
         </section>
       </div>

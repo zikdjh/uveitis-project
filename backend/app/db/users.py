@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from sqlalchemy import inspect, text
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME
 from app.db.models import UserRow
 from app.schemas.auth import UserRead, UserRole, permissions_for_role
 
@@ -24,6 +25,7 @@ def _user_read(
         display_name=display_name,
         role=normalized_role,
         is_active=is_active,
+        is_root=username == ROOT_ADMIN_USERNAME,
         permissions=permissions_for_role(normalized_role),
     )
 
@@ -118,6 +120,44 @@ class UserStore:
                 )
                 session.add(row)
         return self._from_row(row)
+
+    def ensure_single_admin(
+        self,
+        username: str,
+        password_hash: str,
+        display_name: str,
+    ) -> UserRead:
+        username = username.strip().lower()
+        if username != ROOT_ADMIN_USERNAME:
+            raise ValueError(f"系统管理员账号固定为 {ROOT_ADMIN_USERNAME}")
+        with self._session_factory.begin() as session:
+            root = session.query(UserRow).filter(
+                UserRow.username == username
+            ).one_or_none()
+            if root is None:
+                root = UserRow(
+                    id=str(uuid4()),
+                    username=username,
+                    display_name=display_name,
+                    role="admin",
+                    password_hash=password_hash,
+                    is_active=True,
+                    created_at=datetime.now(UTC),
+                )
+                session.add(root)
+                session.flush()
+            else:
+                root.display_name = display_name
+                root.role = "admin"
+                root.password_hash = password_hash
+                root.is_active = True
+            other_admins = session.query(UserRow).filter(
+                UserRow.role == "admin",
+                UserRow.id != root.id,
+            ).all()
+            for row in other_admins:
+                row.role = "doctor"
+        return self._from_row(root)
 
     def update(
         self,
@@ -219,6 +259,45 @@ class MemoryUserStore:
         if current is not None:
             return current[0]
         return self.create(username, password_hash, display_name, role)
+
+    def ensure_single_admin(
+        self,
+        username: str,
+        password_hash: str,
+        display_name: str,
+    ) -> UserRead:
+        username = username.strip().lower()
+        if username != ROOT_ADMIN_USERNAME:
+            raise ValueError(f"系统管理员账号固定为 {ROOT_ADMIN_USERNAME}")
+        for existing_username, (user, existing_password_hash) in list(self._users.items()):
+            if user.username == username:
+                continue
+            if user.role == "admin":
+                self._users[existing_username] = (
+                    user.model_copy(
+                        update={
+                            "role": "doctor",
+                            "permissions": permissions_for_role("doctor"),
+                        }
+                    ),
+                    existing_password_hash,
+                )
+        current = self._users.get(username)
+        if current is not None:
+            self._users[username] = (
+                current[0].model_copy(
+                    update={
+                        "display_name": display_name,
+                        "role": "admin",
+                        "is_active": True,
+                        "is_root": True,
+                        "permissions": permissions_for_role("admin"),
+                    }
+                ),
+                password_hash,
+            )
+            return self._users[username][0]
+        return self.create(username, password_hash, display_name, "admin")
 
     def update(
         self,

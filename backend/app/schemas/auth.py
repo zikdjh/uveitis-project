@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 UserRole = Literal["doctor", "admin"]
@@ -52,19 +52,22 @@ class UserRead(BaseModel):
     display_name: str
     role: UserRole
     is_active: bool = True
+    is_root: bool = False
     permissions: list[Permission] = Field(default_factory=list)
 
 
 class UserCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     username: str = Field(min_length=3, max_length=100, pattern=r"^[A-Za-z0-9._-]+$")
     display_name: str = Field(min_length=1, max_length=100)
-    role: UserRole = "doctor"
     password: str = Field(min_length=12, max_length=200)
 
 
 class UserUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     display_name: str | None = Field(default=None, min_length=1, max_length=100)
-    role: UserRole | None = None
     is_active: bool | None = None
 
 

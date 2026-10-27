@@ -36,7 +36,7 @@ uveitis-project/
 └── ai-services/              预留的 AI 服务扩展目录
 ```
 
-## 当前状态（2026-10-26）
+## 当前状态（2026-10-27）
 
 目标工程收口日期：**2026-11-10**。统一跟踪见 `docs/2026-10-26-progress-tracking.html`；项目开发进度见 `docs/2026-10-26-project-development-progress.html`，模型训练进度见 `docs/2026-10-26-model-training-progress.html`。
 
@@ -46,7 +46,7 @@ uveitis-project/
 - [x] 数据集已重新下载、解压并整理（2026-10-25），索引见 `docs/2026-10-26-dataset-index.html`
 - [x] 训练结果快照已按 run 和评估阶段归档，索引见 `docs/2026-10-26-training-assets-index.html`
 - [x] M1 前后端基础框架：病例建档、影像上传、分析任务、医生复核、管理概览
-- [x] 鉴权与权限体系：医生/管理员角色、双令牌无感刷新、CSRF、账号管理、登录限流与审计；见 `docs/2026-10-26-auth-access-control.html`
+- [x] 鉴权与权限体系：唯一 `root` 管理员、管理员开户医生、禁止自助注册、双令牌无感刷新、CSRF、登录限流与审计；见 `docs/2026-10-26-auth-access-control.html` 和 `docs/2026-10-27-auth-account-provisioning.html`
 - [x] PostgreSQL 病例、账号、审计与服务配置持久化
 - [x] 核心模型适配边界与演示模式
 - [x] zvec 嵌入式知识库适配层：文档写入、过滤检索与本地持久化
@@ -65,7 +65,7 @@ uveitis-project/
 - HTML 文档统一从 `docs/index.html` 进入；文件名采用 `YYYY-MM-DD-kebab-case.html`。
 - 模型训练统一从站点内的“模型训练管理”页或 `model-training/README.md` 管理；训练任务、数据入口和产物入口都从这里查找。
 - 模型运行、评估与部署统一从站点内的“模型运行服务”页或 `model-runtime/README.md` 管理。
-- 鉴权、角色权限、账号维护和会话安全统一见 [`2026-10-26-auth-access-control.html`](docs/2026-10-26-auth-access-control.html)。
+- 鉴权、角色权限、账号维护和会话安全统一见 [`2026-10-26-auth-access-control.html`](docs/2026-10-26-auth-access-control.html) 与 [`2026-10-27-auth-account-provisioning.html`](docs/2026-10-27-auth-account-provisioning.html)。
 - 本页 HTML 版本为 [`2026-10-26-project-overview.html`](docs/2026-10-26-project-overview.html)。
 - 文档总索引：[`docs/index.html`](docs/index.html)。
 - 专题文档统一使用 HTML；除目录级 `README.md` 外，不保留专题 Markdown。重建与校验命令为 `.\model-training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py`。
@@ -94,7 +94,7 @@ docker compose up -d postgres redis
 .\.venv\Scripts\uvicorn.exe app.asgi:app --reload --host 127.0.0.1 --port 8000
 ```
 
-后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
+后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。管理员账号固定为 `root`，密码由本地忽略的 `backend/.env` 或部署环境变量 `APP_BOOTSTRAP_ADMIN_PASSWORD` 提供；医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
 
 前端：
 

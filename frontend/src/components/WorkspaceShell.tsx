@@ -62,7 +62,7 @@ const navigation: Record<WorkspaceMode, NavGroup[]> = {
     {
       label: "权限与安全",
       items: [
-        { to: "/admin/access", label: "账号权限", icon: Users },
+        { to: "/admin/access", label: "医生账号", icon: Users },
         { to: "/admin/security", label: "账号安全", icon: KeyRound },
       ],
     },

@@ -6,6 +6,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME
 from app.core.security import (
     ACCESS_COOKIE,
     CSRF_COOKIE,
@@ -335,6 +336,8 @@ def revoke_other_sessions(request: Request) -> Response:
 def change_password(payload: PasswordChange, request: Request) -> Response:
     user = require_user(request)
     auth = request.app.state.auth_service
+    if user.username == ROOT_ADMIN_USERNAME:
+        raise HTTPException(status_code=409, detail="固定管理员账号密码不可修改")
     if not auth.verify_password(user.id, payload.current_password):
         _audit(
             request,

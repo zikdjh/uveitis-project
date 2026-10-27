@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME
 from app.core.security import (
     request_ip,
     request_user_agent,
@@ -52,12 +53,14 @@ def list_users(request: Request) -> list[UserRead]:
 def create_user(payload: UserCreate, request: Request) -> UserRead:
     actor = require_permission(request, Permission.USER_MANAGE)
     auth = request.app.state.auth_service
+    if payload.username.strip().lower() == ROOT_ADMIN_USERNAME:
+        raise HTTPException(status_code=409, detail="root 管理员账号已由系统保留")
     try:
         user = auth.users.create(
             payload.username,
             auth.hash_password(payload.password),
             payload.display_name,
-            payload.role,
+            "doctor",
         )
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -68,7 +71,7 @@ def create_user(payload: UserCreate, request: Request) -> UserRead:
         username=user.username,
         user_id=user.id,
         actor_id=actor.id,
-        detail=f"创建 {user.role} 账号",
+        detail="管理员创建医生账号",
     )
     return user
 
@@ -81,25 +84,20 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
     if current is None:
         raise HTTPException(status_code=404, detail="账号不存在")
 
-    next_role = payload.role or current.role
     next_active = current.is_active if payload.is_active is None else payload.is_active
-    removes_admin = current.role == "admin" and (
-        next_role != "admin" or next_active is False
-    )
-    if removes_admin and users.count_active_admins(excluding_user_id=current.id) == 0:
-        raise HTTPException(status_code=409, detail="系统必须保留至少一个启用的管理员")
+    if current.username == ROOT_ADMIN_USERNAME and next_active is False:
+        raise HTTPException(status_code=409, detail="固定管理员账号不能停用")
     if current.id == actor.id and next_active is False:
         raise HTTPException(status_code=409, detail="不能停用当前登录账号")
 
     updated = users.update(
         user_id,
         display_name=payload.display_name,
-        role=payload.role,
         is_active=payload.is_active,
     )
     if updated is None:
         raise HTTPException(status_code=404, detail="账号不存在")
-    if not updated.is_active or updated.role != current.role:
+    if not updated.is_active:
         request.app.state.auth_service.revoke_all_sessions(updated.id)
     _audit(
         request,
@@ -108,7 +106,7 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
         username=updated.username,
         user_id=updated.id,
         actor_id=actor.id,
-        detail=f"角色 {updated.role}，状态 {'启用' if updated.is_active else '停用'}",
+        detail=f"账号状态 {'启用' if updated.is_active else '停用'}",
     )
     return updated
 
@@ -124,6 +122,8 @@ def reset_password(
     user = request.app.state.user_store.get(user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="账号不存在")
+    if user.username == ROOT_ADMIN_USERNAME:
+        raise HTTPException(status_code=409, detail="固定管理员账号密码不能由后台重置")
     auth.users.set_password(user.id, auth.hash_password(payload.new_password))
     auth.revoke_all_sessions(user.id)
     _audit(

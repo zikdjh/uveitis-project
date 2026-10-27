@@ -21,6 +21,7 @@ export type User = {
   display_name: string;
   role: UserRole;
   is_active: boolean;
+  is_root: boolean;
   permissions: Permission[];
 };
 
@@ -106,7 +107,6 @@ export function listUsers(): Promise<User[]> {
 export function createUser(input: {
   username: string;
   display_name: string;
-  role: UserRole;
   password: string;
 }): Promise<User> {
   return request("/api/v1/admin/users", {
@@ -117,7 +117,7 @@ export function createUser(input: {
 
 export function updateUser(
   userId: string,
-  input: Partial<Pick<User, "display_name" | "role" | "is_active">>,
+  input: Partial<Pick<User, "display_name" | "is_active">>,
 ): Promise<User> {
   return request(`/api/v1/admin/users/${encodeURIComponent(userId)}`, {
     method: "PATCH",

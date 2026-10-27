@@ -30,10 +30,7 @@ class Settings(BaseSettings):
     login_window_seconds: int = 15 * 60
     trust_proxy_headers: bool = False
     cookie_secure: bool = False
-    bootstrap_admin_username: str = ""
     bootstrap_admin_password: str = ""
-    bootstrap_doctor_username: str = ""
-    bootstrap_doctor_password: str = ""
     max_upload_bytes: int = 25 * 1024 * 1024
     model_mode: Literal["mock", "remote"] = "mock"
     perception_model: str = "Qwen3.5-4B"

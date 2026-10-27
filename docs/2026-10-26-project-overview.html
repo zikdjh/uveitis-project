@@ -58,7 +58,7 @@
 ├── frontend/                  React 三端
 └── ai-services/              预留的 AI 服务扩展目录
 </code></pre>
-<h2>当前状态（2026-10-26）</h2>
+<h2>当前状态（2026-10-27）</h2>
 <p>目标工程收口日期：<strong>2026-11-10</strong>。统一跟踪见 <code>docs/2026-10-26-progress-tracking.html</code>；项目开发进度见 <code>docs/2026-10-26-project-development-progress.html</code>，模型训练进度见 <code>docs/2026-10-26-model-training-progress.html</code>。</p>
 <ul>
 <li>[x] 数据集调研：国内开源眼科数据集梳理、许可逐项核验（见 docs/ 调研文档）</li>
@@ -67,7 +67,7 @@
 <li>[x] 数据集已重新下载、解压并整理（2026-10-25），索引见 <code>docs/2026-10-26-dataset-index.html</code></li>
 <li>[x] 训练结果快照已按 run 和评估阶段归档，索引见 <code>docs/2026-10-26-training-assets-index.html</code></li>
 <li>[x] M1 前后端基础框架：病例建档、影像上传、分析任务、医生复核、管理概览</li>
-<li>[x] 鉴权与权限体系：医生/管理员角色、双令牌无感刷新、CSRF、账号管理、登录限流与审计；见 <code>docs/2026-10-26-auth-access-control.html</code></li>
+<li>[x] 鉴权与权限体系：唯一 <code>root</code> 管理员、管理员开户医生、禁止自助注册、双令牌无感刷新、CSRF、登录限流与审计；见 <code>docs/2026-10-26-auth-access-control.html</code> 和 <code>docs/2026-10-27-auth-account-provisioning.html</code></li>
 <li>[x] PostgreSQL 病例、账号、审计与服务配置持久化</li>
 <li>[x] 核心模型适配边界与演示模式</li>
 <li>[x] zvec 嵌入式知识库适配层：文档写入、过滤检索与本地持久化</li>
@@ -86,7 +86,7 @@
 <li>HTML 文档统一从 <code>docs/index.html</code> 进入；文件名采用 <code>YYYY-MM-DD-kebab-case.html</code>。</li>
 <li>模型训练统一从站点内的“模型训练管理”页或 <code>model-training/README.md</code> 管理；训练任务、数据入口和产物入口都从这里查找。</li>
 <li>模型运行、评估与部署统一从站点内的“模型运行服务”页或 <code>model-runtime/README.md</code> 管理。</li>
-<li>鉴权、角色权限、账号维护和会话安全统一见 <a href="2026-10-26-auth-access-control.html"><code>2026-10-26-auth-access-control.html</code></a>。</li>
+<li>鉴权、角色权限、账号维护和会话安全统一见 <a href="2026-10-26-auth-access-control.html"><code>2026-10-26-auth-access-control.html</code></a> 与 <a href="2026-10-27-auth-account-provisioning.html"><code>2026-10-27-auth-account-provisioning.html</code></a>。</li>
 <li>本页 HTML 版本为 <a href="2026-10-26-project-overview.html"><code>2026-10-26-project-overview.html</code></a>。</li>
 <li>文档总索引：<a href="index.html"><code>docs/index.html</code></a>。</li>
 <li>专题文档统一使用 HTML；除目录级 <code>README.md</code> 外，不保留专题 Markdown。重建与校验命令为 <code>.\model-training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py</code>。</li>
@@ -108,7 +108,7 @@ Copy-Item .env.example .env
 docker compose up -d postgres redis
 .\.venv\Scripts\uvicorn.exe app.asgi:app --reload --host 127.0.0.1 --port 8000
 </code></pre>
-<p>后端只使用 PostgreSQL 持久化；<code>APP_DATABASE_URL</code> 未配置或数据库不可达时启动失败，不会回落到 SQLite。<code>APP_DATABASE_CONNECT_TIMEOUT_SECONDS</code> 默认 5 秒。<code>app.main:create_app</code> 是应用工厂，ASGI 启动入口为 <code>app.asgi:app</code>。管理员和医生分别从 <code>/admin/login</code>、<code>/login</code> 进入，两个入口在服务端分别校验角色。</p>
+<p>后端只使用 PostgreSQL 持久化；<code>APP_DATABASE_URL</code> 未配置或数据库不可达时启动失败，不会回落到 SQLite。<code>APP_DATABASE_CONNECT_TIMEOUT_SECONDS</code> 默认 5 秒。<code>app.main:create_app</code> 是应用工厂，ASGI 启动入口为 <code>app.asgi:app</code>。管理员账号固定为 <code>root</code>，密码由本地忽略的 <code>backend/.env</code> 或部署环境变量 <code>APP_BOOTSTRAP_ADMIN_PASSWORD</code> 提供；医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 <code>/admin/login</code>、<code>/login</code> 进入，两个入口在服务端分别校验角色。</p>
 <p>前端：</p>
 <pre><code class="language-powershell">cd frontend
 npm install

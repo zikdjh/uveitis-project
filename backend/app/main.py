@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.auth_policy import ROOT_ADMIN_DISPLAY_NAME, ROOT_ADMIN_USERNAME
 from app.core.config import settings
 from app.db import PostgresCaseStore
 from app.db.audit import AuthAuditStore
@@ -135,7 +136,7 @@ def create_app(
         login_window_seconds=runtime_settings.login_window_seconds,
     )
     if bootstrap_users:
-        _bootstrap_users(app.state.auth_service, runtime_settings)
+        _bootstrap_root_admin(app.state.auth_service, runtime_settings)
     app.state.knowledge_store = KnowledgeStore(
         runtime_settings,
         vector_dir or runtime_settings.vector_dir,
@@ -197,25 +198,13 @@ class _UnavailableUserStore:
         return None
 
 
-def _bootstrap_users(auth_service: AuthService, config) -> None:
-    for username, password, display_name, role in (
-        (
-            config.bootstrap_doctor_username,
-            config.bootstrap_doctor_password,
-            "示例医生",
-            "doctor",
-        ),
-        (
-            config.bootstrap_admin_username,
-            config.bootstrap_admin_password,
-            "系统管理员",
-            "admin",
-        ),
-    ):
-        if username and password:
-            auth_service.users.ensure_user(
-                username,
-                auth_service.hash_password(password),
-                display_name,
-                role,
-            )
+def _bootstrap_root_admin(auth_service: AuthService, config) -> None:
+    if not config.bootstrap_admin_password:
+        raise RuntimeError(
+            "必须配置 APP_BOOTSTRAP_ADMIN_PASSWORD 作为 root 管理员初始密码"
+        )
+    auth_service.users.ensure_single_admin(
+        ROOT_ADMIN_USERNAME,
+        auth_service.hash_password(config.bootstrap_admin_password),
+        ROOT_ADMIN_DISPLAY_NAME,
+    )
