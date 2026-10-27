@@ -101,13 +101,13 @@
   <li>主要错误方向是把 <code>inactive</code> 判成 <code>active</code>（31 条里错 17 条），同时 <code>active</code> 召回高达 <code>0.929</code>。方向上偏保守，但精度不足以支撑活动度结论。</li>
   <li>判定为 <code>research_auxiliary_only</code>：可以用于研究辅助与“疑似感染性葡萄膜炎分流”，<strong>不能</strong>在运行链路里输出活动期判断，也必须保留医生复核。</li>
   <li>该 adapter 不替换当前的 OCT 第 20 步运行候选，也不替换二分类毒浆体 adapter。</li>
-  <li>评估分辨率会显著影响结果（macro-F1 相差 <code>0.089</code>）。第一次评估误用了默认 16,384 像素；两次读数都保留在案，主读数使用与训练一致的 65,536 像素。</li>
+  <li>评估分辨率会显著影响结果（macro-F1 相差 <code>0.089</code>）。第一次评估误用了旧默认的 16,384 像素；两次读数都保留在案，主读数使用与训练一致的 65,536 像素，评估入口的默认值也已改为 <code>65,536</code>。</li>
   <li>此后不得再用这 66 条调参、选 checkpoint 或提示词；任何活动度结论都需要新的患者隔离、医生确认留出集。</li>
 </ul>
 
 <h2>下一步</h2>
 <ol>
-  <li>把评估分辨率固定为与训练一致，并写进评估入口的默认值，避免再次出现分辨率漂移。</li>
+  <li>把评估分辨率固定为与训练一致并写进评估入口默认值：已完成，<code>evaluate_local_task.py</code> 的默认值改为 <code>65,536</code>。</li>
   <li>优先补齐患者隔离、医生确认的活动度数据；<code>docs/Uvéites_25_etiologies_group_0626.csv</code> 目前只有表头，需要先补齐数据行（<code>patient_id</code>、<code>eye</code> 插在最后的 <code>Etiology</code> 列之前）。</li>
   <li>Birdshot-WIDE 属于受控访问，签署 DUA 需要负责人确认后才能申请。</li>
 </ol>

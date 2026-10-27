@@ -98,7 +98,7 @@ Open UWF 7 类与二分类实验均在本机 4060 完成，新增 Modal GPU 费�
 
 两份 UWF manifest 各 700 行，图像存在性、患者组跨切分、内容去重和 SHA256 已复核：缺图 0、跨切分患者组 0、重复内容 0。患者组键是 `14_open_uwf700:<diagnosis>:<Patient ID>`；源 Patient ID 不跨诊断队列唯一。测试输出已经消费，不得据其继续调参。
 
-活动度三分类在上一轮二分类冻结测试消费后另建任务 `fundus_toxo_activity_3class`：只取二分类任务的 330 条训练行，按类别分层留出 66 条（固定种子 `20261027`）作为内部开发集，清单 SHA256 `da0b57622723caad9024c9996849c046be6f41ff5ca550fb8779e08d5a69d1a0`。标签采用活动性包含式映射，训练行里的 `active/inactive` 与 `active/active` 一并归入 `active`。训练 `180/180` 步、最佳第 125 步，9 条选择验证 macro-F1 `1.0`；66 条内部开发集主读数为 accuracy `0.651515`、macro-F1 `0.667548`、JSON 有效率 `100%`，其中 `inactive` 31 条有 17 条被判成 `active`，`active` 召回 `0.929`。该 66 条已消费，判定 `research_auxiliary_only`，不接入运行链路的活动度判断。评估入口当时的默认分辨率是 `16,384` 像素，与训练的 `65,536` 不一致，两次读数都已保留；后续评估必须显式传入与训练一致的分辨率。详见 `model-training/datasets/tasks/fundus_toxo_activity_3class/evidence.json`。
+活动度三分类在上一轮二分类冻结测试消费后另建任务 `fundus_toxo_activity_3class`：只取二分类任务的 330 条训练行，按类别分层留出 66 条（固定种子 `20261027`）作为内部开发集，清单 SHA256 `da0b57622723caad9024c9996849c046be6f41ff5ca550fb8779e08d5a69d1a0`。标签采用活动性包含式映射，训练行里的 `active/inactive` 与 `active/active` 一并归入 `active`。训练 `180/180` 步、最佳第 125 步，9 条选择验证 macro-F1 `1.0`；66 条内部开发集主读数为 accuracy `0.651515`、macro-F1 `0.667548`、JSON 有效率 `100%`，其中 `inactive` 31 条有 17 条被判成 `active`，`active` 召回 `0.929`。该 66 条已消费，判定 `research_auxiliary_only`，不接入运行链路的活动度判断。评估入口当时的默认分辨率是 `16,384` 像素，与训练的 `65,536` 不一致，两次读数都已保留；该默认值现已改为 `65,536`，历史 `evaluation.json` 里的 `image_pixels` 字段保持不变。详见 `model-training/datasets/tasks/fundus_toxo_activity_3class/evidence.json`。
 
 ## 参考材料
 
