@@ -1,0 +1,102 @@
+{
+  "plan_id": "uveitis-data-acquisition-20261027",
+  "generated_on": "2026-10-27",
+  "timezone": "Asia/Shanghai",
+  "proxy_used": "http://127.0.0.1:7890",
+  "objective": "为葡萄膜炎视觉判断模型取得患者级隔离、医生确认标签的外部数据，用于执行后续训练与外部验证。",
+  "verified_state": {
+    "running_training_jobs": 0,
+    "note": "本轮检查时本地没有训练进程在运行，也没有未完成的 Modal 作业。",
+    "user_supplied_matrix": {
+      "path": "docs/Uvéites_25_etiologies_group_0626.csv",
+      "bytes": 2320,
+      "columns": 153,
+      "data_rows": 0,
+      "finding": "文件只有表头，153 列且最后一列为 Etiology，没有任何数据行，无法用于训练或评估。",
+      "required_format": "首行表头保持；每个病例一行；自变量列填数值编码；最后一列 Etiology 填病因分类；若同一患者双眼都入组，请额外提供 patient_id 与 eye 两列以便患者隔离切分。"
+    },
+    "case_database": {
+      "path": "data/uveitis.db",
+      "tables": ["cases"],
+      "rows": 0,
+      "finding": "本地病例库为空，取不到任何真实病例记录。"
+    }
+  },
+  "search_status": {
+    "public_downloadable_patient_isolated_doctor_labeled_uveitis_imaging": "not_found",
+    "rounds": [
+      {
+        "round": "R1",
+        "platforms": ["Zenodo", "Figshare", "Hugging Face", "Dryad", "OSF"],
+        "result": "无可直接训练的患者级开放影像数据集"
+      },
+      {
+        "round": "R2",
+        "platforms": ["Zenodo", "DataCite", "Dryad", "OSF", "Hugging Face", "Figshare", "Europe PMC", "Harvard Dataverse", "Kaggle", "BioStudies", "Grand Challenge", "PapersWithCode", "PhysioNet", "IEEE DataPort", "DuckDuckGo", "Bing"],
+        "result": "新增外部线索全部落回本地既有数据或被约束排除；公开渠道已穷尽"
+      },
+      {
+        "round": "R3",
+        "platforms": ["Mendeley Data direct API", "GigaDB API", "Science Data Bank API", "Bing", "DuckDuckGo", "Brave", "Mojeek"],
+        "result": "Mendeley/GigaDB/Science Data Bank 公开检索端点均返回 404，无法结构化核查；Brave 429、Mojeek 403、DuckDuckGo 空结果页，搜索引擎侧证据不可用。结论不变。"
+      }
+    ]
+  },
+  "acquisition_requests": [
+    {
+      "priority": "P0",
+      "target": "Birdshot-WIDE",
+      "doi": "10.5281/zenodo.19474623",
+      "access_portal": "https://zenodo.org/records/19474623",
+      "code_repo": "https://github.com/thomasb6/Birdshot-WIDE",
+      "license": "CC BY 4.0 (dataset), MIT (code)",
+      "access_mode": "controlled_access_with_dua",
+      "modality": "ultra-widefield fundus (Optos Silverstone)",
+      "content": "5042 张 BSCR 眼底图（742 眼）与 1310 张年龄性别匹配健康对照图（742 眼）",
+      "patient_isolation": "possible_pseudonymous_sha256_patient_ids",
+      "doctor_labels": "逐图人工质量审核与主导病灶亚型分类；队列标签为 BSCR 或 Control",
+      "why_it_matters": "同时满足患者级隔离、医生确认标签、公开许可三项条件，是目前唯一可直接支撑外部验证的来源。",
+      "procedure": "通过 Zenodo 平台提交 access request 并同意仓库页面公开的 DUA。",
+      "requires_from_user": ["申请人姓名", "所属机构与院系", "机构邮箱", "项目名称与一句话研究目的", "数据用途说明（研究/非商业）", "数据保管责任人及保存期限", "伦理审查或豁免编号", "同意不再分发且不做再识别尝试"]
+    },
+    {
+      "priority": "P1",
+      "target": "RV_CME_ML",
+      "source": "https://doi.org/10.3389/fopht.2026.1901237",
+      "code_repo": "https://github.com/celinaw09/RV_CME_ML",
+      "content": "207 张晚期 FA、117 患者，含患者级 CME 标签",
+      "access_mode": "contact_author"
+    },
+    {
+      "priority": "P1",
+      "target": "UveAI (Jules-Gonin)",
+      "source": "https://doi.org/10.1038/s41598-026-46069-w",
+      "code_repo": "https://github.com/JulesGoninRIO/uveitis_transformers_fulltt-",
+      "content": "644 眼、369 患者 FA 数据集，数据未公开",
+      "access_mode": "contact_author"
+    },
+    {
+      "priority": "P1",
+      "target": "Stanford UWFFP inflammation",
+      "source": "https://doi.org/10.1016/j.xops.2025.101000",
+      "content": "非感染性葡萄膜炎炎症检测，超广角眼底",
+      "access_mode": "reasonable_request"
+    }
+  ],
+  "dua_request_draft": {
+    "subject": "Data access request for Birdshot-WIDE (DOI 10.5281/zenodo.19474623)",
+    "outline": [
+      "说明身份与非商业研究目的",
+      "声明用途一：微调视觉语言模型识别鸟枪弹样脉络膜视网膜病变",
+      "声明用途二：严格按伪匿名患者 ID 做患者隔离外部验证",
+      "承诺遵守公开 DUA：机构存储、不再分发、不做再识别、非商业、成果引用 Foulonneau et al. Scientific Data 2026"
+    ],
+    "status": "draft_requires_user_identity",
+    "note": "草稿不含任何真实身份信息，填入申请人信息后方可提交。"
+  },
+  "next_actions": [
+    "补齐 25 病因矩阵的数据行与 patient_id/eye 列后即可直接进入训练。",
+    "确认申请人信息后提交 Birdshot-WIDE 的 Zenodo 受控访问申请。",
+    "等待期间不重复消费任何已冻结测试集，不引入网络抓取或 SMOTE 数据充当独立验证。"
+  ]
+}
