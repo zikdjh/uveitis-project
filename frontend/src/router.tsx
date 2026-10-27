@@ -26,7 +26,6 @@ import {
   NewCasePage,
 } from "@/pages/doctor/CasePanels";
 import KnowledgePage from "@/pages/doctor/KnowledgePage";
-import ReviewQueuePage from "@/pages/doctor/ReviewQueuePage";
 import WorkbenchPage from "@/pages/doctor/WorkbenchPage";
 
 const ServicesPage = lazy(() => import("@/pages/admin/ServicesPage"));
@@ -68,7 +67,7 @@ const router = createBrowserRouter([
               { path: "report", element: <CaseReportPage /> },
             ],
           },
-          { path: "reviews", element: <ReviewQueuePage /> },
+          { path: "reviews", element: <Navigate to="/doctor/cases?status=awaiting_review" replace /> },
           { path: "knowledge", element: <KnowledgePage /> },
           { path: "security", element: <SecurityPage /> },
         ],

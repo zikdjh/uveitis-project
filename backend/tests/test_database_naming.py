@@ -3,7 +3,13 @@ from contextlib import contextmanager
 from sqlalchemy import BigInteger, UniqueConstraint
 
 from app.db import postgres as postgres_db
-from app.db.models import AuthAuditRow, CaseRow, DataDictionaryRow, UserRow
+from app.db.models import (
+    AnalysisJobRow,
+    AuthAuditRow,
+    CaseRow,
+    DataDictionaryRow,
+    UserRow,
+)
 from app.db.naming import column_name, table_name
 
 
@@ -28,6 +34,7 @@ def test_database_tables_and_columns_use_project_prefixes() -> None:
     assert AuthAuditRow.__tablename__ == table_name("auth_audit_event")
     assert CaseRow.__tablename__ == table_name("case")
     assert DataDictionaryRow.__tablename__ == table_name("data_dictionary")
+    assert AnalysisJobRow.__tablename__ == table_name("analysis_job")
 
     assert {column.name for column in UserRow.__table__.columns} == {
         column_name("id"),
@@ -42,6 +49,7 @@ def test_database_tables_and_columns_use_project_prefixes() -> None:
     assert {column.name for column in CaseRow.__table__.columns} == {
         column_name("id"),
         column_name("case_key"),
+        column_name("owner_id"),
         column_name("status"),
         column_name("created_at"),
         column_name("updated_at"),
@@ -57,6 +65,10 @@ def test_database_tables_and_columns_use_project_prefixes() -> None:
     _assert_identity_and_business_key(
         AuthAuditRow,
         column_name("event_key"),
+    )
+    _assert_identity_and_business_key(
+        AnalysisJobRow,
+        column_name("job_key"),
     )
 
 
@@ -95,6 +107,40 @@ def test_legacy_identifiers_are_renamed_before_orm_startup(monkeypatch) -> None:
         'ALTER TABLE "cases" RENAME TO "t_case"',
         'ALTER TABLE "t_user" RENAME COLUMN "id" TO "f_id"',
         'ALTER TABLE "t_case" RENAME COLUMN "id" TO "f_id"',
+    ]
+
+
+def test_existing_case_table_gets_owner_column_and_index(monkeypatch) -> None:
+    statements: list[str] = []
+
+    class FakeConnection:
+        def execute(self, statement) -> None:
+            statements.append(str(statement))
+
+    class FakeEngine:
+        @contextmanager
+        def begin(self):
+            yield FakeConnection()
+
+    class FakeInspector:
+        def get_table_names(self) -> list[str]:
+            return [table_name("case")]
+
+        def get_columns(self, table: str) -> list[dict[str, str]]:
+            return [{"name": column_name("case_key")}]
+
+        def get_indexes(self, table: str) -> list[dict]:
+            return []
+
+    monkeypatch.setattr(postgres_db, "inspect", lambda _engine: FakeInspector())
+
+    postgres_db._ensure_case_ownership(FakeEngine())
+
+    assert statements == [
+        'ALTER TABLE "t_case" ADD COLUMN "f_owner_id" '
+        "VARCHAR(36) NOT NULL DEFAULT ''",
+        'CREATE INDEX "ix_t_case_f_owner_id" '
+        'ON "t_case" ("f_owner_id")',
     ]
 
 

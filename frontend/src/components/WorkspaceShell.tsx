@@ -9,7 +9,6 @@ import {
   Menu,
   ScanEye,
   Settings2,
-  ShieldCheck,
   Users,
   X,
 } from "lucide-react";
@@ -39,7 +38,6 @@ const navigation: Record<WorkspaceMode, NavGroup[]> = {
       items: [
         { to: "/doctor/workbench", label: "工作台", icon: LayoutDashboard },
         { to: "/doctor/cases", label: "病例", icon: ClipboardList },
-        { to: "/doctor/reviews", label: "待复核", icon: ShieldCheck },
       ],
     },
     {

@@ -132,6 +132,7 @@ def test_agentscope_backend_result_survives_plan_normalization(monkeypatch) -> N
     now = datetime.now(UTC)
     case = CaseRead(
         id="case-1",
+        owner_id="doctor-1",
         patient_age=42,
         patient_sex="F",
         complaint="左眼视物模糊",

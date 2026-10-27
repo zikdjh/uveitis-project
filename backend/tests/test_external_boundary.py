@@ -31,6 +31,7 @@ def make_case() -> CaseRead:
     now = datetime.now(UTC)
     return CaseRead(
         id="case-privacy-001",
+        owner_id="doctor-1",
         patient_age=42,
         patient_sex="F",
         complaint=COMPLAINT,

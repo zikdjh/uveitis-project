@@ -94,6 +94,18 @@ docker compose up -d postgres redis
 .\.venv\Scripts\uvicorn.exe app.asgi:app --reload --host 127.0.0.1 --port 8000
 ```
 
+分析任务会先写入 PostgreSQL 的 `t_analysis_job`，再由 Web 进程和独立 worker 共享租约领取。只启动 Web 进程时任务仍可执行；生产环境建议同时启动 worker：
+
+```powershell
+.\.venv\Scripts\python.exe -m app.worker
+```
+
+Docker Compose 已包含 `analysis-worker` 服务。任务默认 300 秒租约、最多尝试 2 次；Web 或 worker 重启后，过期租约会被回收并重新排队，不会永久停留在“分析中”。
+
+任务使用 `f_job_key` 作为业务标识，执行前校验租约持有者和有效期；非持有者不能重复执行。病例已经生成完整分析结果时，任务重试只补齐完成状态，不会再次调用分析服务。任务队列的契约、验收证据和剩余边界见 [`2026-10-27-analysis-job-queue.html`](docs/2026-10-27-analysis-job-queue.html)。
+
+真实模型运行要求后端与运行服务共享病例上传根目录。Docker Compose 使用 `case-uploads` 卷，后端和 worker 可写、模型服务只读；本机启动时设置 `APP_DATA_DIR`、`MODEL_RUNTIME_UPLOAD_ROOT` 和相同的 `APP_INTERNAL_SERVICE_TOKEN`。本地 Qwen 冷启动与推理合计可能超过 45 秒，后端默认 `APP_PERCEPTION_TIMEOUT_SECONDS=90`。真实回写和资源证据见 [`2026-10-27-model-runtime-business-integration.html`](docs/2026-10-27-model-runtime-business-integration.html)。
+
 后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。数据库表和字段统一使用 `t_${业务名}`、`f_${业务名}`；每张表使用 `f_id BIGINT` 自增主键，API 和跨表引用使用独立的唯一业务键。管理员账号固定为 `root`，`APP_BOOTSTRAP_ADMIN_PASSWORD` 只在首次创建 root 时使用；root 已存在后，重启和应用层操作都不会覆盖密码，唯一变更方式是直接修改 `t_data_dictionary` 中的加密哈希记录。医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
 
 前端：

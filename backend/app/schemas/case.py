@@ -89,6 +89,7 @@ class AnalysisResult(BaseModel):
     summary: str = ""
     external_summary_used: bool = False
     external_payload: dict[str, Any] = Field(default_factory=dict)
+    runtime_metadata: dict[str, Any] = Field(default_factory=dict)
     toolchain_plan: dict[str, Any] = Field(default_factory=dict)
     confidence: float = Field(default=0, ge=0, le=1)
     safety_flags: list[str] = Field(default_factory=list)
@@ -119,6 +120,8 @@ class CaseReview(ReviewUpdate):
 
 class CaseRead(BaseModel):
     id: str
+    owner_id: str = ""
+    owner_name: str = ""
     patient_age: int
     patient_sex: str
     complaint: str
@@ -131,6 +134,13 @@ class CaseRead(BaseModel):
     review: CaseReview | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class CaseListPage(BaseModel):
+    items: list[CaseRead] = Field(default_factory=list)
+    total: int = Field(default=0, ge=0)
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=8, ge=1)
 
 
 class CaseStats(BaseModel):

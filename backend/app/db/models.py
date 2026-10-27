@@ -6,6 +6,7 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     DateTime,
+    ForeignKey,
     Identity,
     Integer,
     String,
@@ -161,6 +162,9 @@ class CaseRow(Base):
     case_key: Mapped[str] = mapped_column(
         column_name("case_key"), String(36), index=True
     )
+    owner_id: Mapped[str] = mapped_column(
+        column_name("owner_id"), String(36), index=True, default=""
+    )
     status: Mapped[str] = mapped_column(column_name("status"), String(30), index=True)
     created_at: Mapped[datetime] = mapped_column(
         column_name("created_at"), DateTime(timezone=True), index=True
@@ -169,3 +173,57 @@ class CaseRow(Base):
         column_name("updated_at"), DateTime(timezone=True), index=True
     )
     payload_json: Mapped[str] = mapped_column(column_name("payload_json"), Text)
+
+
+class AnalysisJobRow(Base):
+    __tablename__ = table_name("analysis_job")
+    __table_args__ = (
+        UniqueConstraint(
+            column_name("job_key"),
+            name="uq_t_analysis_job_f_job_key",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(
+        column_name("id"),
+        BigInteger,
+        Identity(),
+        primary_key=True,
+    )
+    job_key: Mapped[str] = mapped_column(
+        column_name("job_key"), String(36), index=True
+    )
+    case_id: Mapped[str] = mapped_column(
+        column_name("case_id"),
+        String(36),
+        ForeignKey("t_case.f_case_key", ondelete="CASCADE"),
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(
+        column_name("status"), String(20), index=True
+    )
+    attempt_count: Mapped[int] = mapped_column(
+        column_name("attempt_count"), Integer, default=0, nullable=False
+    )
+    max_attempts: Mapped[int] = mapped_column(
+        column_name("max_attempts"), Integer, default=2, nullable=False
+    )
+    lease_owner: Mapped[str] = mapped_column(
+        column_name("lease_owner"), String(100), default=""
+    )
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        column_name("lease_expires_at"), DateTime(timezone=True), nullable=True
+    )
+    error: Mapped[str] = mapped_column(column_name("error"), Text, default="")
+    created_at: Mapped[datetime] = mapped_column(
+        column_name("created_at"), DateTime(timezone=True), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        column_name("updated_at"), DateTime(timezone=True), index=True
+    )
+    started_at: Mapped[datetime | None] = mapped_column(
+        column_name("started_at"), DateTime(timezone=True), nullable=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        column_name("completed_at"), DateTime(timezone=True), nullable=True
+    )

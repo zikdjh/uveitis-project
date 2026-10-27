@@ -40,6 +40,35 @@ def make_client(tmp_path: Path, role: str = "doctor") -> TestClient:
     return client
 
 
+def make_isolated_clients(tmp_path: Path) -> tuple[TestClient, TestClient]:
+    users = MemoryUserStore()
+    sessions = MemorySessionStore()
+    app = create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=sessions,
+        bootstrap_users=False,
+    )
+    password = app.state.auth_service.hash_password("test-password")
+    users.ensure_user("doctor-a", password, "医生甲", "doctor")
+    users.ensure_user("doctor-b", password, "医生乙", "doctor")
+    users.ensure_single_admin(ROOT_ADMIN_USERNAME, password, "测试管理员")
+    clients: list[TestClient] = []
+    for username in ("doctor-a", "doctor-b"):
+        client = TestClient(app)
+        login = client.post(
+            "/api/v1/auth/login",
+            json={"username": username, "password": "test-password"},
+        )
+        assert login.status_code == 200
+        client.headers["X-CSRF-Token"] = client.cookies.get("uveitis_csrf")
+        clients.append(client)
+    return clients[0], clients[1]
+
+
 def test_health_returns_ready(tmp_path: Path) -> None:
     client = make_client(tmp_path)
     response = client.get("/api/v1/health")
@@ -113,6 +142,115 @@ def test_case_analysis_and_review_workflow(tmp_path: Path) -> None:
     )
     assert qwen_stage["status"] == "skipped"
     assert case["analysis"]["external_summary_used"] is False
+
+
+def test_doctor_cannot_access_another_doctors_case(tmp_path: Path) -> None:
+    doctor_a, doctor_b = make_isolated_clients(tmp_path)
+    created = doctor_a.post(
+        "/api/v1/cases",
+        json={
+            "patient_age": 42,
+            "patient_sex": "F",
+            "complaint": "医生甲的病人",
+            "consent_confirmed": True,
+        },
+    )
+    assert created.status_code == 201
+    case_id = created.json()["id"]
+    assert created.json()["owner_name"] == "医生甲"
+
+    own_list = doctor_a.get("/api/v1/cases").json()
+    assert own_list["total"] == 1
+    assert own_list["items"][0]["id"] == case_id
+
+    other_list = doctor_b.get("/api/v1/cases").json()
+    assert other_list["total"] == 0
+    assert other_list["items"] == []
+    own_overview = doctor_a.get("/api/v1/system/overview").json()
+    other_overview = doctor_b.get("/api/v1/system/overview").json()
+    assert own_overview["stats"]["total"] == 1
+    assert other_overview["stats"]["total"] == 0
+    assert doctor_b.get(f"/api/v1/cases/{case_id}").status_code == 404
+    assert doctor_b.post(f"/api/v1/cases/{case_id}/analyze").status_code == 404
+    assert doctor_b.patch(
+        f"/api/v1/cases/{case_id}/review",
+        json={
+            "decision": "accepted",
+            "final_reason": "越权尝试",
+            "reviewer": "医生乙",
+        },
+    ).status_code == 404
+
+
+def test_admin_can_audit_cases_across_doctors(tmp_path: Path) -> None:
+    doctor_a, _ = make_isolated_clients(tmp_path)
+    created = doctor_a.post(
+        "/api/v1/cases",
+        json={
+            "patient_age": 42,
+            "patient_sex": "F",
+            "complaint": "管理员审计病例",
+            "consent_confirmed": True,
+        },
+    )
+    assert created.status_code == 201
+    app = doctor_a.app
+    admin = TestClient(app)
+    login = admin.post(
+        "/api/v1/auth/admin/login",
+        json={"username": ROOT_ADMIN_USERNAME, "password": "test-password"},
+    )
+    assert login.status_code == 200
+    admin.headers["X-CSRF-Token"] = admin.cookies.get("uveitis_csrf")
+    result = admin.get(
+        "/api/v1/cases?page=1&page_size=1&status=created"
+    ).json()
+    assert result["total"] == 1
+    assert result["page"] == 1
+    assert result["page_size"] == 1
+    assert result["items"][0]["owner_name"] == "医生甲"
+    assert admin.get(
+        "/api/v1/cases?status=reviewed"
+    ).json()["total"] == 0
+    today = created.json()["updated_at"][:10]
+    assert admin.get(
+        f"/api/v1/cases?from={today}&to={today}"
+    ).json()["total"] == 1
+    assert admin.get(
+        "/api/v1/cases?from=2999-01-01&to=2999-01-02"
+    ).json()["total"] == 0
+    assert admin.post(
+        "/api/v1/cases",
+        json={
+            "patient_age": 42,
+            "patient_sex": "F",
+            "complaint": "管理员不应创建临床病例",
+            "consent_confirmed": True,
+        },
+    ).status_code == 403
+
+
+def test_case_list_filters_and_paginates_on_server(tmp_path: Path) -> None:
+    doctor, _ = make_isolated_clients(tmp_path)
+    for index in range(3):
+        created = doctor.post(
+            "/api/v1/cases",
+            json={
+                "patient_age": 40 + index,
+                "patient_sex": "F",
+                "complaint": f"分页病例 {index}",
+                "consent_confirmed": True,
+            },
+        )
+        assert created.status_code == 201
+
+    first = doctor.get("/api/v1/cases?page=1&page_size=2").json()
+    second = doctor.get("/api/v1/cases?page=2&page_size=2").json()
+    assert first["total"] == 3
+    assert len(first["items"]) == 2
+    assert len(second["items"]) == 1
+    assert doctor.get("/api/v1/cases?status=reviewed").json()["total"] == 0
+    assert doctor.get("/api/v1/cases?from=not-a-date").status_code == 422
 
 
 def test_case_requires_consent(tmp_path: Path) -> None:

@@ -27,6 +27,25 @@ services:
     build: ./model-runtime
     ports:
       - "8010:8010"
+    environment:
+      MODEL_RUNTIME_MODEL_DIR: /data/model-images/qwen/Qwen3.5-4B
+      MODEL_RUNTIME_ADAPTER_DIR: /data/model-assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter
+      MODEL_RUNTIME_IMAGE_ROOT: /data/model-images
+      MODEL_RUNTIME_UPLOAD_ROOT: /data/uploads
+      MODEL_RUNTIME_INTERNAL_TOKEN: ${APP_INTERNAL_SERVICE_TOKEN:-}
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=3)"
+      interval: 5s
+      timeout: 4s
+      retries: 12
+    volumes:
+      - ./model-training/models:/data/model-images:ro
+      - ./model-training/assets:/data/model-assets:ro
+      - case-uploads:/data/uploads:ro
 
   backend:
     build: ./backend
@@ -36,12 +55,35 @@ services:
       APP_ENVIRONMENT: development
       APP_DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/postgres
       APP_REDIS_URL: redis://redis:6379/0
+      APP_DATA_DIR: /data
+      APP_INTERNAL_SERVICE_TOKEN: ${APP_INTERNAL_SERVICE_TOKEN:-}
       APP_PERCEPTION_SERVICE_URL: http://model-runtime:8010
       APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:-}
+    volumes:
+      - case-uploads:/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  analysis-worker:
+    build: ./backend
+    command: ["uv", "run", "python", "-m", "app.worker"]
+    environment:
+      APP_ENVIRONMENT: development
+      APP_DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/postgres
+      APP_REDIS_URL: redis://redis:6379/0
+      APP_DATA_DIR: /data
+      APP_INTERNAL_SERVICE_TOKEN: ${APP_INTERNAL_SERVICE_TOKEN:-}
+      APP_PERCEPTION_SERVICE_URL: http://model-runtime:8010
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:-}
+    volumes:
+      - case-uploads:/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      model-runtime:
         condition: service_healthy
 
   frontend:
@@ -52,3 +94,6 @@ services:
       - backend
     environment:
       VITE_API_BASE_URL: http://127.0.0.1:8000
+
+volumes:
+  case-uploads:

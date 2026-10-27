@@ -822,6 +822,36 @@ a {
   min-height: 150px;
 }
 
+.case-list-pagination {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px 0;
+  margin-top: 16px;
+}
+
+.case-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.case-filters > .ant-select {
+  width: 150px;
+}
+
+.case-filters > .ant-picker {
+  width: min(100%, 310px);
+}
+
+@media (max-width: 640px) {
+  .case-date-range-popup .ant-picker-panels > .ant-picker-panel:last-child {
+    display: none;
+  }
+}
+
 .text-link {
   width: fit-content;
   display: inline-flex;
@@ -844,6 +874,23 @@ a {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
   gap: 16px;
+}
+
+.workbench-review {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workbench-review-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.workbench-review-footer .text-link {
+  margin-top: 0;
 }
 
 .case-detail-header {
@@ -1791,8 +1838,18 @@ a {
 .access-layout {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
+  align-items: stretch;
+  grid-auto-rows: 1fr;
   gap: 16px;
+}
+
+.security-grid > .panel {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.security-grid > .panel + .panel {
+  margin-top: 0;
 }
 
 .security-grid + .panel,
@@ -1835,6 +1892,10 @@ a {
 
 .form-grid.compact .form-actions {
   margin-top: 2px;
+}
+
+.password-form {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .session-list,
@@ -1892,6 +1953,28 @@ a {
   overflow-wrap: anywhere;
   color: var(--muted);
   font-size: 10px;
+}
+
+.session-filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 150px;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2ef;
+}
+
+.session-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.session-empty {
+  padding: 32px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
 }
 
 .text-button {
@@ -2222,6 +2305,16 @@ a {
   .account-facts,
   .inline-form {
     grid-template-columns: 1fr;
+  }
+
+  .session-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .session-pagination {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: 12px;
   }
 
   .session-row,

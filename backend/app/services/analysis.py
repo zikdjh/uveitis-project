@@ -483,6 +483,11 @@ class AnalysisService:
             external_payload=(
                 summary_result.data if summary_result.status == "completed" else {}
             ),
+            runtime_metadata=(
+                judgment.get("runtime", {})
+                if judgment_result.status == "completed"
+                else {}
+            ),
             toolchain_plan=plan.as_dict(),
             confidence=confidence,
             safety_flags=safety_flags,

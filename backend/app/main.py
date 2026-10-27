@@ -1,4 +1,6 @@
 from pathlib import Path
+import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +13,7 @@ from app.core.auth_policy import (
 from app.core.config import settings
 from app.core.secret_box import SecretBox
 from app.db import PostgresCaseStore
+from app.db.analysis_jobs import MemoryAnalysisJobStore, PostgresAnalysisJobStore
 from app.db.audit import AuthAuditStore
 from app.db.data_dictionary import DataDictionaryStore, MemoryDataDictionaryStore
 from app.db.users import UserStore
@@ -31,6 +34,7 @@ from app.services import (
     OptionalIntegrations,
     RedisStore,
 )
+from app.services.analysis_jobs import AnalysisJobService
 from app.services.integration_settings import (
     MemoryIntegrationSettingsStore,
     PostgresIntegrationSettingsStore,
@@ -50,21 +54,61 @@ class MemoryCaseStore:
     def get(self, case_id):
         return self._cases.get(case_id)
 
-    def list(self, limit: int = 100):
-        return sorted(
-            self._cases.values(),
-            key=lambda case: case.updated_at,
-            reverse=True,
-        )[:limit]
+    def list(
+        self,
+        *,
+        owner_id: str | None = None,
+        status: str | None = None,
+        from_at=None,
+        to_at=None,
+        offset: int = 0,
+        limit: int = 100,
+    ):
+        cases = [
+            case
+            for case in self._cases.values()
+            if (owner_id is None or case.owner_id == owner_id)
+            and (status is None or case.status == status)
+            and (from_at is None or case.updated_at >= from_at)
+            and (to_at is None or case.updated_at < to_at)
+        ]
+        cases.sort(key=lambda case: case.updated_at, reverse=True)
+        return cases[offset : offset + limit]
 
-    def stats(self):
+    def count(
+        self,
+        *,
+        owner_id: str | None = None,
+        status: str | None = None,
+        from_at=None,
+        to_at=None,
+    ) -> int:
+        return len(
+            self.list(
+                owner_id=owner_id,
+                status=status,
+                from_at=from_at,
+                to_at=to_at,
+                limit=len(self._cases) + 1,
+            )
+        )
+
+    def stats(self, *, owner_id: str | None = None):
         from app.schemas.case import CaseStats
 
         counts = {"analyzing": 0, "awaiting_review": 0, "reviewed": 0}
         for case in self._cases.values():
+            if owner_id is not None and case.owner_id != owner_id:
+                continue
             if case.status in counts:
                 counts[case.status] += 1
-        return CaseStats(total=len(self._cases), **counts)
+        total = sum(counts.values()) + sum(
+            1
+            for case in self._cases.values()
+            if case.status not in counts
+            and (owner_id is None or case.owner_id == owner_id)
+        )
+        return CaseStats(total=total, **counts)
 
 
 def create_app(
@@ -81,11 +125,27 @@ def create_app(
     data_dictionary_store=None,
 ) -> FastAPI:
     runtime_settings = runtime_settings or settings
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        try:
+            recovered = app.state.analysis_job_service.recover_stale()
+            if recovered:
+                logging.getLogger("uveitis.analysis_jobs").info(
+                    "recovered %s stale analysis jobs", recovered
+                )
+        except Exception:
+            logging.getLogger("uveitis.analysis_jobs").exception(
+                "analysis job recovery failed"
+            )
+        yield
+
     app = FastAPI(
         title=runtime_settings.app_name,
         version=runtime_settings.app_version,
         docs_url="/docs",
         openapi_url="/openapi.json",
+        lifespan=lifespan,
     )
 
     app.add_middleware(
@@ -200,6 +260,20 @@ def create_app(
         runtime_settings,
         knowledge_store=app.state.knowledge_store,
         integrations=app.state.integrations,
+    )
+    if hasattr(case_store, "_session_factory"):
+        app.state.analysis_job_store = PostgresAnalysisJobStore(
+            case_store._session_factory
+        )
+    else:
+        app.state.analysis_job_store = MemoryAnalysisJobStore()
+    app.state.analysis_job_service = AnalysisJobService(
+        app.state.analysis_job_store,
+        case_store,
+        app.state.analysis_service,
+        app.state.redis_store,
+        lease_seconds=runtime_settings.analysis_job_lease_seconds,
+        max_attempts=runtime_settings.analysis_job_max_attempts,
     )
 
     app.include_router(health.router)

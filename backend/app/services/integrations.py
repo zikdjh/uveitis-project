@@ -503,6 +503,7 @@ class OptionalIntegrations:
             "task": "oct_aux_4class",
             "case": {
                 "case_id": case.id,
+                "owner_id": case.owner_id,
                 "patient_age": case.patient_age,
                 "patient_sex": case.patient_sex,
                 "complaint": case.complaint,
@@ -571,6 +572,26 @@ class OptionalIntegrations:
                     "requires_human_review": bool(
                         data.get("requires_human_review", True)
                     ),
+                    "runtime": {
+                        "model": _safe_text(response.get("model")),
+                        "adapter_sha256": _safe_text(
+                            response.get("adapter_sha256")
+                        ),
+                        "latency_ms": response.get("latency_ms"),
+                        "generated_at": _safe_text(
+                            response.get("generated_at")
+                        ),
+                        "truncated": bool(response.get("truncated", False)),
+                        "peak_allocated_gib": response.get(
+                            "peak_allocated_gib"
+                        ),
+                        "peak_reserved_gib": response.get(
+                            "peak_reserved_gib"
+                        ),
+                        "research_use_only": bool(
+                            response.get("research_use_only", True)
+                        ),
+                    },
                 },
                 int((time.perf_counter() - started) * 1000),
             )

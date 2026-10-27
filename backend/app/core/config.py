@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     bootstrap_admin_password: str = ""
     max_upload_bytes: int = 25 * 1024 * 1024
+    analysis_job_lease_seconds: int = 300
+    analysis_job_max_attempts: int = 2
+    analysis_worker_poll_seconds: float = 2.0
     model_mode: Literal["mock", "remote"] = "mock"
     perception_model: str = "Qwen3.5-4B"
     retrieval_model: str = "BAAI/bge-m3"
@@ -45,7 +48,7 @@ class Settings(BaseSettings):
     decision_service_url: str = ""
     internal_service_token: str = ""
     integration_timeout_seconds: float = 12.0
-    perception_timeout_seconds: float = 45.0
+    perception_timeout_seconds: float = 90.0
     summary_timeout_seconds: float = 20.0
     web_search_enabled: bool = False
     web_search_providers: str = "tavily,brave,serper"

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from typing import Protocol
 from uuid import uuid4
 
@@ -23,7 +24,25 @@ class CaseRepository(Protocol):
 
     def get(self, case_id: str) -> CaseRead | None: ...
 
-    def list(self, limit: int = 100) -> list[CaseRead]: ...
+    def list(
+        self,
+        *,
+        owner_id: str | None = None,
+        status: str | None = None,
+        from_at: datetime | None = None,
+        to_at: datetime | None = None,
+        offset: int = 0,
+        limit: int = 100,
+    ) -> list[CaseRead]: ...
+
+    def count(
+        self,
+        *,
+        owner_id: str | None = None,
+        status: str | None = None,
+        from_at: datetime | None = None,
+        to_at: datetime | None = None,
+    ) -> int: ...
 
     def stats(self) -> CaseStats: ...
 
@@ -32,6 +51,33 @@ def migrate_database_identifiers(engine: Engine) -> None:
     """Rename legacy identifiers and split business keys from identity keys."""
     _rename_legacy_identifiers(engine)
     _migrate_primary_keys(engine)
+    _ensure_case_ownership(engine)
+
+
+def _ensure_case_ownership(engine: Engine) -> None:
+    """Add owner scoping to existing case tables without rewriting payloads."""
+    table = "t_case"
+    if table not in inspect(engine).get_table_names():
+        return
+    owner_column = "f_owner_id"
+    columns = _column_map(engine, table)
+    if owner_column not in columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    f'ALTER TABLE "{table}" ADD COLUMN "{owner_column}" '
+                    "VARCHAR(36) NOT NULL DEFAULT ''"
+                )
+            )
+    indexes = {index.get("name") for index in inspect(engine).get_indexes(table)}
+    if "ix_t_case_f_owner_id" not in indexes:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    f'CREATE INDEX "ix_t_case_f_owner_id" '
+                    f'ON "{table}" ("{owner_column}")'
+                )
+            )
 
 
 def _rename_legacy_identifiers(engine: Engine) -> None:
@@ -287,8 +333,10 @@ class PostgresCaseStore:
             class_=Session,
             expire_on_commit=False,
         )
-        migrate_database_identifiers(self.engine)
+        # Create new tables before running additive compatibility migrations.
+        # Existing installations still receive the owner column and index.
         Base.metadata.create_all(self.engine)
+        migrate_database_identifiers(self.engine)
 
     def save(self, case: CaseRead) -> CaseRead:
         with self._session_factory.begin() as session:
@@ -297,6 +345,7 @@ class PostgresCaseStore:
                 session.add(
                     CaseRow(
                         case_key=case.id,
+                        owner_id=case.owner_id,
                         status=case.status,
                         created_at=case.created_at,
                         updated_at=case.updated_at,
@@ -304,6 +353,7 @@ class PostgresCaseStore:
                     )
                 )
             else:
+                row.owner_id = case.owner_id
                 row.status = case.status
                 row.updated_at = case.updated_at
                 row.payload_json = case.model_dump_json()
@@ -312,20 +362,64 @@ class PostgresCaseStore:
     def get(self, case_id: str) -> CaseRead | None:
         with self._session_factory() as session:
             row = self._row_by_key(session, case_id)
-        return self._decode(row.payload_json) if row else None
+        return self._decode(row.payload_json, owner_id=row.owner_id) if row else None
 
-    def list(self, limit: int = 100) -> list[CaseRead]:
+    def list(
+        self,
+        *,
+        owner_id: str | None = None,
+        status: str | None = None,
+        from_at: datetime | None = None,
+        to_at: datetime | None = None,
+        offset: int = 0,
+        limit: int = 100,
+    ) -> list[CaseRead]:
+        query = select(CaseRow)
+        if owner_id is not None:
+            query = query.where(CaseRow.owner_id == owner_id)
+        if status is not None:
+            query = query.where(CaseRow.status == status)
+        if from_at is not None:
+            query = query.where(CaseRow.updated_at >= from_at)
+        if to_at is not None:
+            query = query.where(CaseRow.updated_at < to_at)
         with self._session_factory() as session:
             rows = session.scalars(
-                select(CaseRow).order_by(CaseRow.updated_at.desc()).limit(limit)
+                query.order_by(CaseRow.updated_at.desc())
+                .offset(offset)
+                .limit(limit)
             ).all()
-        return [self._decode(row.payload_json) for row in rows]
+        return [
+            self._decode(row.payload_json, owner_id=row.owner_id)
+            for row in rows
+        ]
 
-    def stats(self) -> CaseStats:
+    def count(
+        self,
+        *,
+        owner_id: str | None = None,
+        status: str | None = None,
+        from_at: datetime | None = None,
+        to_at: datetime | None = None,
+    ) -> int:
+        query = select(func.count()).select_from(CaseRow)
+        if owner_id is not None:
+            query = query.where(CaseRow.owner_id == owner_id)
+        if status is not None:
+            query = query.where(CaseRow.status == status)
+        if from_at is not None:
+            query = query.where(CaseRow.updated_at >= from_at)
+        if to_at is not None:
+            query = query.where(CaseRow.updated_at < to_at)
         with self._session_factory() as session:
-            rows = session.execute(
-                select(CaseRow.status, func.count()).group_by(CaseRow.status)
-            ).all()
+            return int(session.execute(query).scalar_one())
+
+    def stats(self, *, owner_id: str | None = None) -> CaseStats:
+        query = select(CaseRow.status, func.count()).group_by(CaseRow.status)
+        if owner_id is not None:
+            query = query.where(CaseRow.owner_id == owner_id)
+        with self._session_factory() as session:
+            rows = session.execute(query).all()
         counts = {status: count for status, count in rows}
         return CaseStats(
             total=sum(counts.values()),
@@ -347,5 +441,8 @@ class PostgresCaseStore:
         )
 
     @staticmethod
-    def _decode(payload: str) -> CaseRead:
-        return CaseRead.model_validate(json.loads(payload))
+    def _decode(payload: str, *, owner_id: str = "") -> CaseRead:
+        case = CaseRead.model_validate(json.loads(payload))
+        if owner_id and case.owner_id != owner_id:
+            case = case.model_copy(update={"owner_id": owner_id})
+        return case

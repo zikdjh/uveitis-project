@@ -54,9 +54,9 @@ export default function DoctorPage() {
   const selected = cases.find((item) => item.id === selectedId) ?? null;
 
   async function refresh(preferredId?: string) {
-    const result = await listCases();
-    setCases(result);
-    setSelectedId((current) => preferredId ?? current ?? result[0]?.id ?? null);
+    const result = await listCases({ page_size: 100 });
+    setCases(result.items);
+    setSelectedId((current) => preferredId ?? current ?? result.items[0]?.id ?? null);
   }
 
   useEffect(() => {
@@ -107,9 +107,9 @@ export default function DoctorPage() {
   async function waitForAnalysis(caseId: string) {
     for (let attempt = 0; attempt < 20; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 700));
-      const result = await listCases();
-      setCases(result);
-      const latest = result.find((item) => item.id === caseId);
+      const result = await listCases({ page_size: 100 });
+      setCases(result.items);
+      const latest = result.items.find((item) => item.id === caseId);
       if (latest && latest.status !== "analyzing") {
         setNotice(
           latest.status === "failed"
