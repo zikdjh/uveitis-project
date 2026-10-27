@@ -57,6 +57,22 @@
       "doctor_labels": "逐图人工质量审核与主导病灶亚型分类；队列标签为 BSCR 或 Control",
       "why_it_matters": "同时满足患者级隔离、医生确认标签、公开许可三项条件，是目前唯一可直接支撑外部验证的来源。",
       "procedure": "通过 Zenodo 平台提交 access request 并同意仓库页面公开的 DUA。",
+      "dua_version": "Birdshot-Wide Data Usage Agreement 1.0.0",
+      "dua_clauses": [
+        "Non-Identification: 不尝试识别数据中任何个体",
+        "Disclosure Avoidance: 在发表与沟通中避免泄露个体身份",
+        "Non-Redistribution: 不向他人分享访问权限，所有使用者必须各自申请并签署",
+        "Data Security: 数据须托管在安全基础设施并维持合理安全措施",
+        "Reporting Vulnerabilities: 发现可能可识别个体的信息须立即邮件报告通讯作者 avienne@15-20.fr",
+        "Lawful Use: 仅用于合法科学研究，不得用于其他目的",
+        "Ethical Compliance: 研究须符合机构伦理与适用数据保护法规",
+        "Statement of Intent: 申请中须说明数据使用的一般目的",
+        "Citation Requirement: 发表成果须在参考文献中引用数据集与原文",
+        "Termination of Agreement: 协议可由任一方终止，终止后义务继续有效"
+      ],
+      "corresponding_author_email": "avienne@15-20.fr",
+      "data_volume": "1.0 TB",
+      "data_volume_note": "Zenodo 记录标注总体积 1.0 TB，远超本地 4060 机器的可用磁盘与代理带宽。获授权后应分阶段处理：先取 metadata 与文件清单，再按 visit 或按眼抽样下载子集，或改在云端完成预处理。",
       "requires_from_user": ["申请人姓名", "所属机构与院系", "机构邮箱", "项目名称与一句话研究目的", "数据用途说明（研究/非商业）", "数据保管责任人及保存期限", "伦理审查或豁免编号", "同意不再分发且不做再识别尝试"]
     },
     {
@@ -91,6 +107,8 @@
       "声明用途二：严格按伪匿名患者 ID 做患者隔离外部验证",
       "承诺遵守公开 DUA：机构存储、不再分发、不做再识别、非商业、成果引用 Foulonneau et al. Scientific Data 2026"
     ],
+    "dua_version": "1.0.0",
+    "must_be_signed_by": "每一位需要访问数据的使用者各自申请并签署",
     "status": "draft_requires_user_identity",
     "note": "草稿不含任何真实身份信息，填入申请人信息后方可提交。"
   },

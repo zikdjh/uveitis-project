@@ -127,6 +127,28 @@ Sincerely,
 &lt;principal investigator&gt;</pre>
 <p>草稿中所有尖括号字段都还没有真实信息。填入申请人身份与机构信息后方可提交。</p>
 
+<h3>5.1 需要同意的 DUA 条款（Birdshot-Wide Data Usage Agreement 1.0.0）</h3>
+<ol>
+  <li>Non-Identification：不尝试识别数据中任何个体。</li>
+  <li>Disclosure Avoidance：在发表与沟通中避免泄露个体身份。</li>
+  <li>Non-Redistribution：不向他人分享访问权限，<b>所有使用者必须各自申请并签署</b>。</li>
+  <li>Data Security：数据须托管在安全基础设施并维持合理安全措施。</li>
+  <li>Reporting Vulnerabilities：发现可能可识别个体的信息须立即邮件报告通讯作者。</li>
+  <li>Lawful Use：仅用于合法科学研究。</li>
+  <li>Ethical Compliance：研究须符合机构伦理与适用数据保护法规。</li>
+  <li>Statement of Intent：申请中须说明数据使用的一般目的。</li>
+  <li>Citation Requirement：发表成果须引用数据集与原文。</li>
+  <li>Termination of Agreement：协议可由任一方终止，终止后义务继续有效。</li>
+</ol>
+
+<h3>5.2 体积约束</h3>
+<p>Zenodo 记录标注该数据集<b>总体积 1.0 TB</b>。这远超本地 4060 机器的磁盘与代理带宽，因此获授权后必须分阶段处理：</p>
+<ul>
+  <li>先取 metadata 与文件清单，确认图像格式、分辨率与单文件体积。</li>
+  <li>再按随访 visit 或按眼抽样下载子集，不做全量落地。</li>
+  <li>若确需全量，改在云端完成预处理与特征提取，只回传特征与清单。</li>
+</ul>
+
 <h2>6. P1：联系作者路线</h2>
 <table>
 <thead>
