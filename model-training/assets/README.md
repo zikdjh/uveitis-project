@@ -2,7 +2,7 @@
 
 整理日期：2026-10-26
 
-这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除早期 smoke adapter、历史中间 checkpoint、`training_state.pt` 和第二、第三阶段实验权重，并保留第 4、5 阶段实验目录供本轮审计；当前保留两组工作 adapter、阶段实验指标、摘要、决策文件、错误来源分析和受控推理 smoke。实验 adapter 不作为运行候选。完整训练状态仍以 Modal `uveitis-runs` 为唯一真相源。
+这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除早期 smoke adapter、历史中间 checkpoint、`training_state.pt` 和第二、第三阶段实验权重，并保留第 4、5 阶段实验目录供本轮审计；当前保留两组 OCT 工作 adapter、一个弓形虫病辅助研究 adapter、阶段实验指标、摘要、决策文件、错误来源分析和受控推理 smoke。实验 adapter 不作为运行候选。完整训练状态仍以 Modal `uveitis-runs` 为唯一真相源。
 
 本目录属于训练侧。模型运行服务只读取 adapter，不在 `model-runtime/` 复制权重。
 
@@ -52,6 +52,8 @@ step 100、200、300 的内部验证 loss 分别为 `0.018165`、`0.020989`、`0
 
 - `local-4060-grouped-cont-20261025-01/best_adapter`：第 100 步同源冻结评估基线。
 - `local-4060-oct-focus-cont-20261025-01/best_adapter`：第 20 步选定 OCT 运行候选。
+- `local-4060-uveitis-focus-20261027-01/best_adapter`：第 200 步弓形虫病辅助研究 adapter；训练未读取 Toxo 测试行，也未复用 Open UWF 已消费的测试与验证行。
+- `toxo-test-20261027-01/evaluation.json`：该 adapter 的一次性 ToxoFundus 82 条图像级冻结评估；accuracy `0.914634`、macro-F1 `0.907345`、JSON 有效率 `100%`，不作为患者级外部验证或通用葡萄膜炎结论。
 - `eval-oct-step20-vs-step100-20261025-01/`：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 `selection_decision.json`。
 - `local-4060-oct-stage2-20261026-01/`、`local-4060-oct-stage2b-20261026-01/`：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。
 - `eval-oct-stage2-20261026-01/stage2_decision.json`：第二阶段结论，决定保留第 20 步候选，不提升实验 final adapter。

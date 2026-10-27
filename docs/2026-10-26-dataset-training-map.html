@@ -14,7 +14,7 @@
   <nav aria-label="文档导航">
     <a href="2026-10-26-document-catalog.html">文档索引</a>
     <a href="2026-10-25-training-budget-plan-modal-l40s.html">上一份</a>
-    <a href="2026-10-26-modal-training-storage.html">下一份</a>
+    <a href="2026-10-27-uveitis-open-data-audit.html">下一份</a>
   </nav>
 </header>
 <main id="doc-content" class="doc-page">
@@ -423,7 +423,7 @@
 <ul>
 <li>葡萄膜炎专项数据量小，01 只有 75 张，不能支撑从零训练大模型。</li>
 <li>02 的 412 张分类图是眼弓形虫病数据，不等于一般葡萄膜炎队列。</li>
-<li>02 有 1 个图像文件名与标签表不一致，需要人工核对。</li>
+<li>02 的唯一文件名差异（标签表 <code>2809.jpg</code> 对图像 <code>2805.jpg</code>）已按唯一对应关系显式配对并登记在 <code>model-training/datasets/tasks/fundus_toxo_binary/audit.json</code>；02 没有患者 ID，只能做数据集内评估。</li>
 <li>03 的类别目录是否全部为原始图像尚未确认，且可能包含 SMOTE 合成样本。</li>
 <li>04 没有葡萄膜炎标签。</li>
 <li>06 的标签 CSV 存在编码/字符问题，需要清洗后再训练。</li>

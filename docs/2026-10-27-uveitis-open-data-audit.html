@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>葡萄膜炎开放数据审计 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-dataset-training-map.html">上一份</a>
+    <a href="2026-10-27-uveitis-focus-training.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>数据</span>
+    <span>2026-10-27</span>
+  </div>
+  <h1>葡萄膜炎开放数据审计</h1>
+  <p class="doc-summary">在用数据集许可、访问方式、患者级隔离能力与外部候选数据的核验结论</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-uveitis-open-data-audit.html</code></p>
+  <article class="html-body">
+<p>核验日期：2026-10-27。访问方式：本地代理 <code>http://127.0.0.1:7890</code>，通过 Zenodo 与 Figshare 官方 API 复核。</p>
+<p>机器可读清单：<code>model-training/datasets/audits/uveitis-open-data-audit-20261027.json</code>；任务级审计：<code>model-training/datasets/tasks/fundus_toxo_binary/audit.json</code>。</p>
+
+<h2>1. 结论摘要</h2>
+<ul>
+  <li>本轮没有找到任何<b>可直接下载、患者级隔离、且标签由医生确认</b>的葡萄膜炎影像数据集。</li>
+  <li>可直接下载、带医生标注的开放数据只有 <b>ToxoFundus</b>（眼弓形虫病眼底），但它<b>没有患者 ID</b>，只能做数据集内评估。</li>
+  <li>新纳入两份开放临床数据（18 前葡萄膜炎角膜内皮、19 葡萄膜炎临床与病因表），并为 01 的 75 张 OCT 找到了计数吻合的临床对照表与 28 例医生确认病因。</li>
+  <li>最接近"患者级 + 医生确认"的资源是 <b>Birdshot-WIDE</b>（Zenodo 受控访问，需 DUA），以及若干需联系作者/申请的数据（RV_CME_ML、UveAI、Stanford UWFFP）。</li>
+  <li>在用数据集的许可并不统一：01/02/03/06/13/14/15/16/17 明确开放，04/05/07-12 存在许可不明或附加义务，生产使用前必须逐项复核。</li>
+</ul>
+
+<h2>2. 在用数据集许可清单</h2>
+<p>范围：<code>model-training/datasets/extracted/</code> 下的 17 组数据。"核验"列中 API 表示本轮通过源站接口复核，文档表示沿用项目内既有来源记录。</p>
+<table>
+<thead>
+<tr><th>编号</th><th>数据集</th><th>许可</th><th>访问</th><th>患者 ID</th><th>医生标注</th><th>核验</th></tr>
+</thead>
+<tbody>
+<tr><td>01</td><td>葡萄膜炎 OCT（Mendeley hbr5pwk5w5）</td><td>CC BY 4.0</td><td>开放</td><td>否</td><td>部分</td><td>文档</td></tr>
+<tr><td>02</td><td>ToxoFundus（Zenodo 13883485）</td><td>CC BY 4.0</td><td>开放</td><td>否</td><td>是</td><td>API</td></tr>
+<tr><td>03</td><td>五分类含症状文本（Mendeley n9zp473wfw）</td><td>CC BY 4.0</td><td>开放</td><td>否</td><td>未知</td><td>文档</td></tr>
+<tr><td>04</td><td>ODIR-5K</td><td>未明示</td><td>需注册</td><td>是</td><td>是</td><td>待核</td></tr>
+<tr><td>05</td><td>JSIEC1000（fundusimage1000）</td><td>ODbL</td><td>需注册</td><td>否</td><td>未知</td><td>文档</td></tr>
+<tr><td>06</td><td>RFMiD 2.0（Zenodo 7505822）</td><td>CC BY 4.0</td><td>开放</td><td>部分</td><td>是</td><td>API</td></tr>
+<tr><td>07</td><td>iChallenge-ADAM</td><td>子集条款</td><td>需注册</td><td>是</td><td>是</td><td>待核</td></tr>
+<tr><td>08</td><td>iChallenge-AGE</td><td>子集条款</td><td>需注册</td><td>是</td><td>是</td><td>待核</td></tr>
+<tr><td>09</td><td>iChallenge-GOALS</td><td>子集条款</td><td>需注册</td><td>是</td><td>是</td><td>待核</td></tr>
+<tr><td>10</td><td>iChallenge-PALM</td><td>子集条款</td><td>需注册</td><td>是</td><td>是</td><td>待核</td></tr>
+<tr><td>11</td><td>REFUGE 多标注</td><td>子集条款</td><td>需注册</td><td>是</td><td>是</td><td>待核</td></tr>
+<tr><td>12</td><td>REFUGE2</td><td>子集条款</td><td>需注册</td><td>是</td><td>是</td><td>待核</td></tr>
+<tr><td>13</td><td>Kermany ZhangLab OCT + 胸片</td><td>CC BY 4.0</td><td>开放</td><td>是</td><td>是</td><td>文档</td></tr>
+<tr><td>14</td><td>Open UWF 700（figshare 26936446）</td><td>CC BY 4.0</td><td>开放</td><td>是</td><td>部分</td><td>文档</td></tr>
+<tr><td>15</td><td>结核相关葡萄膜炎 IFN</td><td>CC0</td><td>开放</td><td>否</td><td>不适用</td><td>文档</td></tr>
+<tr><td>16</td><td>玻璃体标本葡萄膜炎分类</td><td>CC0</td><td>开放</td><td>否</td><td>不适用</td><td>文档</td></tr>
+<tr><td>17</td><td>糖尿病合并前葡萄膜炎</td><td>CC BY 4.0</td><td>开放</td><td>否</td><td>不适用</td><td>API</td></tr>
+</tbody>
+</table>
+<p>需要注意的许可风险：04 ODIR-5K 的许可未明确零售，公开成果前须联系数据方；05 JSIEC1000 是 ODbL，附带 share-alike 义务；07-12 的 iChallenge 子集要逐条核对条款；03 与 Kaggle 镜像含 SMOTE 合成样本，不能作为独立验证。</p>
+
+<h2>3. 外部候选清单</h2>
+<table>
+<thead>
+<tr><th>资源</th><th>许可 / 访问</th><th>模态</th><th>患者级</th><th>医生标注</th><th>优先级</th></tr>
+</thead>
+<tbody>
+<tr><td>Birdshot-WIDE（Zenodo 19474623）</td><td>CC BY 4.0 / 受控</td><td>超广角眼底</td><td>是</td><td>是</td><td>P0</td></tr>
+<tr><td>RV_CME_ML（视网膜血管炎 FA）</td><td>未公开 / 联系作者</td><td>FA</td><td>是</td><td>是</td><td>P1</td></tr>
+<tr><td>UveAI（Jules-Gonin）</td><td>未公开 / 待公开</td><td>FA</td><td>是</td><td>是</td><td>P1</td></tr>
+<tr><td>Stanford UWFFP 炎症检测</td><td>合理请求</td><td>超广角眼底</td><td>是</td><td>是</td><td>P1</td></tr>
+<tr><td>Uveitis Atlas（Zenodo 20783773）</td><td>CC BY 4.0 / 开放</td><td>单细胞组学</td><td>是</td><td>不适用</td><td>P2</td></tr>
+<tr><td>figshare 21201104 / 21897163</td><td>CC BY 4.0 / 开放</td><td>厚度图 / 蛋白组</td><td>否或未知</td><td>部分</td><td>P3</td></tr>
+<tr><td>Kaggle orvile / nafin59 等镜像</td><td>CC BY 4.0 / 需注册</td><td>眼底</td><td>否</td><td>未知</td><td>P4</td></tr>
+</tbody>
+</table>
+<p>Birdshot-WIDE 是目前唯一"患者级隔离 + 医生审核 + 公开许可"三项齐备的来源，但走 Zenodo controlled access，需要提交数据使用协议（DUA），必须先取得项目负责人同意再申请。</p>
+
+<h2>4. 本轮搜索范围</h2>
+<ul>
+  <li>Zenodo <code>/api/records</code>：<code>uveitis</code>、<code>type=dataset</code>、按最新排序，共 43 条；2026-10-22 之后新增的都是临床/组学或论文附表。</li>
+  <li>Figshare <code>/v2/articles/search</code>：<code>uveitis</code>、<code>ocular toxoplasmosis</code>、<code>retinal vasculitis</code>、<code>birdshot chorioretinopathy</code>；新增条目均为补充表/图。</li>
+  <li>Hugging Face datasets、Dryad、OSF：无明确相关的患者级影像数据集。</li>
+</ul>
+
+<h2>5. ToxoFundus 任务审计</h2>
+<p>脚本 <code>model-training/scripts/datasets/audit_fundus_toxo_task.py</code> 校验了"源标签 → 源图像 → 暂存图像 → 训练清单"的一致性：</p>
+<ul>
+  <li>源标签 412 条、源图像 412 张、暂存图像 412 张完全一致，文件内容重复 0 组。</li>
+  <li>唯一文件名差异 <code>2809.jpg</code>（标签）对 <code>2805.jpg</code>（图像）按唯一对应关系显式配对，不做静默匹配。</li>
+  <li>原始标签分布：healthy 132、inactive 187、active 34、active/inactive 57、active/active 1、inactive/inactive 1；二分类任务为 healthy 对 toxoplasmosis。</li>
+  <li>179 张掩膜中有 144 张能与图像按文件名主干匹配，可做分割辅助任务。</li>
+  <li>数据集<b>没有患者 ID</b>，现有 train 330 / test 82 为图像级切分，外部验证结论被标记为 <code>prohibited</code>。</li>
+</ul>
+
+<h2>6. 新纳入的开放数据</h2>
+<p>本轮额外下载并纳入两组许可明确（CC BY 4.0）的开放临床数据：</p>
+<table>
+<thead>
+<tr><th>编号</th><th>数据集</th><th>内容</th><th>用途</th></tr>
+</thead>
+<tbody>
+<tr><td>18</td><td>前葡萄膜炎角膜内皮（figshare 32054064）</td><td>152 行前节与内皮临床变量，含患眼与对侧正常眼对照</td><td>决策模型真实病例特征</td></tr>
+<tr><td>19</td><td>葡萄膜炎临床与病因表（figshare 22632715）</td><td>75 眼临床表 + 28 例医生确认病因</td><td>01 OCT 的临床对照与病因标签</td></tr>
+</tbody>
+</table>
+<p>关键发现：19 的 75 眼逐类别计数（PVR 19 / Intermediate+Posterior Uveitis 12 / Panuveitis 16 / Normal 28）与 <code>01_uveitis_oct</code> 的 75 张图像完全一致，且其 28 例葡萄膜炎带医生确认病因（Toxoplasma 8、Sifilis 7、Tuberculosis 6、Idiopathic 3、Paraneoplastic 2、CMV 1、VKH 1）。脚本 <code>model-training/scripts/datasets/build_uveitis_oct_clinical.py</code> 建立了图像到临床行的映射，输出 <code>model-training/datasets/tasks/oct_uveitis_clinical/clinical-link.csv</code> 与 <code>audit.json</code>。该映射由类别内序号推断，<b>未确认前不得用于患者级分组</b>。</p>
+
+<h2>7. ToxoFundus 训练后冻结评估</h2>
+<p>审计后使用 ToxoFundus 训练行和 Open UWF 训练行完成一轮本地 QLoRA（run <code>local-4060-uveitis-focus-20261027-01</code>），训练 200/200 步，峰值保留显存 <code>5.69 GiB</code>，Modal 费用 <code>$0.00</code>。训练期间未读取 Toxo 测试行，也已排除 Open UWF 已消费的测试与验证行。</p>
+<table>
+<thead>
+<tr><th>评估对象</th><th>样本</th><th>结果</th><th>边界</th></tr>
+</thead>
+<tbody>
+<tr><td>内部选择验证</td><td>14 条</td><td>macro-F1 <code>1.0</code>，JSON 有效率 <code>100%</code></td><td>仅用于选择第 200 步 checkpoint，不足以证明泛化。</td></tr>
+<tr><td>ToxoFundus 冻结测试</td><td>82 条</td><td>accuracy <code>0.914634</code>，macro-F1 <code>0.907345</code>，JSON 有效率 <code>100%</code></td><td>图像级切分；数据集没有患者 ID，不能报告为患者级外部验证。</td></tr>
+</tbody>
+</table>
+<p>混淆情况：26 条 healthy 全部正确；49 条 toxoplasmosis 正确，7 条漏判为 healthy。该 adapter 适合作为弓形虫病辅助研究，不代表通用葡萄膜炎判断。测试结果已经冻结，不得用于继续调参。完整记录见 <a href="2026-10-27-uveitis-focus-training.html">毒浆体病辅助训练与冻结评估</a>。</p>
+
+<h2>8. 下一步</h2>
+<ul>
+  <li>ToxoFundus 仅作为毒浆体病（单一感染性葡萄膜炎亚型）辅助任务，不能替代通用葡萄膜炎外部验证。</li>
+  <li>如需患者级外部验证，先获得负责人同意，再申请 Birdshot-WIDE 的 Zenodo 受控访问。</li>
+  <li>逐项复核 04/05/07-12 的源站许可，并把许可文本归档到 <code>model-training/datasets/licenses/</code>。</li>
+  <li>不得使用 Web 搜图、SMOTE 合成样本或非患者隔离数据冒充独立验证集。</li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>葡萄膜炎开放数据审计 · 2026-10-27</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

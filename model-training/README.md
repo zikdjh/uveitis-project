@@ -36,7 +36,7 @@ model-training/
 
 本地 4060 使用独立的 `model-training/.venv-local/`，其中是 CUDA 12.8 的 PyTorch 和 Transformers 5.20.2，不使用 `backend/.venv` 的 CPU PyTorch。该环境已完成 4-bit NF4、bfloat16、LoRA 前向/反向、optimizer step、周期验证和可恢复正式训练实测；状态见 `docs/2026-10-26-model-training-status.html`，产物索引见 `assets/README.md`。
 
-2026-10-26 已清理旧 smoke run、历史中间 checkpoint、`training_state.pt`、早期实验权重和重复 processor。当前保留两组工作 adapter、第二至第五阶段的指标、摘要和决策文件、错误来源分析、受控推理 smoke，以及冻结评估断点；第 4、5 阶段新生成的实验权重仍留在各自目录，均不作为运行候选。完整 checkpoint 与优化器状态仍以 Modal `uveitis-runs` 为真相源。
+2026-10-26 已清理旧 smoke run、历史中间 checkpoint、`training_state.pt`、早期实验权重和重复 processor。当前保留两组 OCT 工作 adapter、一个弓形虫病辅助研究 adapter、第二至第五阶段的指标、摘要和决策文件、错误来源分析、受控推理 smoke，以及冻结评估断点；第 4、5 阶段新生成的实验权重仍留在各自目录，均不作为运行候选。完整 checkpoint 与优化器状态仍以 Modal `uveitis-runs` 为真相源。
 
 ## 当前训练路线
 
@@ -47,12 +47,15 @@ model-training/
 - 真相源：本轮训练使用本地 `datasets/training/manifest.csv` 和 `models/qwen/Qwen3.5-4B/`；checkpoint、验证指标和 adapter 位于 `assets/qwen3.5-4b/`。
 - 当前冻结评估基线：`local-4060-grouped-cont-20261025-01/best_adapter`，第 100 步。
 - 当前选定的 OCT 运行候选：`local-4060-oct-focus-cont-20261025-01/best_adapter`，第 20 步。
+- 弓形虫病辅助研究 adapter：`local-4060-uveitis-focus-20261027-01/best_adapter`，第 200 步；仅使用 ToxoFundus 训练行和 Open UWF 训练行，已排除 Open UWF 已消费的测试与验证行。
+- 弓形虫病冻结评估：`toxo-test-20261027-01/evaluation.json`；82 条图像级测试 accuracy `0.914634`、macro-F1 `0.907345`、JSON 有效率 `100%`。
 - 发布状态：第 20 步候选和基线均已完成 1,000 条同源 OCT 冻结测试；候选 macro-F1 `0.947245`，基线 `0.918252`，提升 `+0.028993`，通过 `0.02` 选型门槛。当前尚未作为临床模型发布。
 - 错误来源：第 20 步候选主要错误为 `NORMAL->DRUSEN` 18 条、`DRUSEN->CNV` 14 条、`CNV->DME` 8 条；相对第 100 步基线，DRUSEN 纠正 38 条，但 CNV 退化 6 条、NORMAL 退化 4 条。
 - 受控推理 smoke：第 20 步候选在四类各 4 条本地测试中正确 16/16，JSON 有效率 100%，峰值保留显存 `3.31 GiB`；结果只证明链路可用，不作为泛化精度证据。
 - 真实运行服务：`POST /v1/judge` 已加载 4-bit 基座和第 20 步 adapter；冷启动约 22 秒，预处理修正后热请求 `3.363 秒`，单图峰值保留 `3.355469 GiB`，8 并发无 OOM。单张 CNV 训练图返回 DRUSEN、置信度 0，只证明链路和结构契约可用，不能作为准确率或置信度证据。证据见 `assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json`。
 - 11.10 前收口条件：冻结第 20 步候选 adapter、模型卡、指标文件和运行读取路径，并保留数据来源及患者隔离限制。
 - Open UWF 700：CC BY 4.0，7 类与葡萄膜炎二分类任务清单位于 `datasets/tasks/`；数据直接从 `datasets/extracted/14_open_uwf700/` 读取。患者组键必须包含诊断，因为源 `Patient ID` 在不同诊断队列中复用。
+- 弓形虫病辅助任务：ToxoFundus 标签由眼科医生确认，但没有患者 ID，现有 train/test 为图像级切分；该 adapter 只作研究补充，不报告患者级外部验证，也不替换第 20 步 OCT 运行候选。
 
 2026-10-26 已完成第二阶段受控复核：分别从第 20 步候选初始化，以 `5e-6` 和 `1e-5` 学习率、OCT 任务权重 4 训练 30 步上限。两次运行都在第 10 步因连续两次验证未改善而早停；第 5、10 步验证 macro-F1 为 `0.867725`，低于入口的 `0.873358`，JSON 有效率仍为 `100%`。因此没有产生新的提升候选，运行候选继续保留第 20 步 adapter，第二阶段 final adapter 不提升、不覆盖。结构化记录见 `assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json`。
 

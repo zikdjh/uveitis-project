@@ -1,0 +1,576 @@
+[
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/(747).jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/100.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/101.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/106.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/108.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/109.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/11.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/111.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/118.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/120.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/125.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/1315.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/133.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/140.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/141.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/145.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/146.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/14741.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/149.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/150.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/15074.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/15410.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/15610.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/157.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/15996.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/16127.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/16132.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/16641.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/1751.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/17598.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/17608.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/17955.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/19.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/25.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/33.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/34.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/3429.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/3430.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/35.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/39.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/41.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/43.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/44.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/5.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/52.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/60.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/64.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/693.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/738.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/747.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/75.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/78.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/8.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/81.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/83.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/84.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/879.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/94.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/943.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/95.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/IM0228RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0284RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0295RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0386RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0398RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0567RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0608RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0640RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0340RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0353RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0385RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0490RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0491RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0512RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0523RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0525RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0529RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0548RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0574RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0609RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0631RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0662RE.JPG",
+    "task": "fundus_toxo_binary",
+    "expected": "toxoplasmosis",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  }
+]

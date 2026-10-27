@@ -36,7 +36,7 @@
   </thead>
   <tbody>
     <tr><td>项目工程交付</td><td>进行中，约 72%</td><td>10-28：界面和文档第一轮冻结</td><td>患者端、医生端、管理员端可用；鉴权和病例流程可演示</td></tr>
-    <tr><td>模型训练</td><td>OCT 复核完成，Open UWF 研究试验完成，保留第 20 步候选</td><td>10-28：冻结第 20 步候选证据</td><td>两组同源 OCT 评估均完成；第 20 步候选 macro-F1 0.947245，提升 0.028993；UWF 二分类单次测试仅 0.338235，未晋级</td></tr>
+    <tr><td>模型训练</td><td>OCT 复核完成，Open UWF 研究试验完成，弓形虫病辅助任务完成一次冻结评估；保留第 20 步 OCT 运行候选</td><td>10-28：冻结第 20 步候选证据</td><td>两组同源 OCT 评估均完成；第 20 步候选 macro-F1 0.947245，提升 0.028993；Toxo 辅助 adapter 图像级测试 macro-F1 0.907345；UWF 二分类单次测试仅 0.338235，未晋级</td></tr>
     <tr><td>模型运行集成</td><td>本地推理已接通，业务回写待完成</td><td>11-01：端到端回写与部署联调</td><td>真实 <code>/v1/judge</code> 已加载 Qwen3.5-4B 和第 20 步 adapter；冷启动约 22 秒，修正后热请求 <code>3.363 秒</code>，8 并发串行请求全部成功；后端失败可独立降级</td></tr>
     <tr><td>端到端验收</td><td>未开始</td><td>11-04：完成登录至复核的联调</td><td>需要连续流程证据，不接受单页孤岛演示</td></tr>
     <tr><td>最终冻结</td><td>未开始</td><td>11-10：冻结接口、adapter、文档和限制说明</td><td>项目完成定义为工程收口，不等同临床验证</td></tr>
@@ -80,6 +80,7 @@
     <tr><td>T-06B4</td><td>Open UWF 700 二分类试验</td><td>完成，未晋级</td><td>60 步、最佳 step 50；验证 accuracy 0.684211、macro-F1 0.676136；唯一一次 90 条患者隔离测试降至 accuracy 0.377778、macro-F1 0.338235；54 个阴性误报阳性；峰值保留 5.697 GiB；Modal 费用 $0。</td><td>冻结测试输出，不用于调参；补充患者隔离阳性、医生确认标签和异质性阴性数据后再训练</td><td><code>eval-open-uwf-stage1-20261026-01/decision.json</code></td></tr>
     <tr><td>T-06B5</td><td>Open UWF 7 类试验</td><td>完成，不可用</td><td>60 步后最佳验证 accuracy 0.2222、macro-F1 0.214286，葡萄膜炎 F1 为 0；未执行测试。</td><td>停止该小样本 7 类路线，不作为运行候选</td><td><code>uwf-stage1-20261026-01/training_summary.json</code></td></tr>
     <tr><td>T-06B6</td><td>UWF 训练入口复现</td><td>完成</td><td>增加任务筛选和显式验证快照；DryRun 精确回放 484/19、415/16，验证哈希 <code>cf103d21...</code>，调度哈希 <code>cae2d1e9...</code>。</td><td>新实验必须带 <code>-Task</code> 与 <code>-SplitSnapshot</code>；不使用冻结测试调参</td><td><code>validation_split.json</code></td></tr>
+    <tr><td>T-06B7</td><td>弓形虫病辅助训练与冻结评估</td><td>完成，研究辅助</td><td><code>local-4060-uveitis-focus-20261027-01</code> 完成 200/200 步；14 条选择验证 macro-F1 1.0、JSON 100%；ToxoFundus 82 条图像级冻结测试 accuracy 0.914634、macro-F1 0.907345、JSON 100%；峰值保留 5.691 GiB；Modal 费用 $0。</td><td>测试已冻结；不替换 OCT 运行候选，仅在新增患者隔离病例或医生复核修正集后继续该辅助任务</td><td><code>toxo-test-20261027-01/evaluation.json</code></td></tr>
     <tr><td>T-06C</td><td>错误来源分析</td><td>完成</td><td>1,000 条中 53 条错误；主要是 <code>NORMAL-&gt;DRUSEN</code> 18、<code>DRUSEN-&gt;CNV</code> 14、<code>CNV-&gt;DME</code> 8；685 组中 50 组有错误，前 10 组占错误约 24.53%。</td><td>后续实验聚焦 NORMAL/DRUSEN 和 CNV/DME，不再盲目增加步数</td><td><code>step20-source-analysis.json</code></td></tr>
     <tr><td>T-07</td><td>本地运行服务</td><td>完成本地烟测</td><td>第 20 步候选四类各 4 条为 16/16；真实 <code>/v1/judge</code> 冷启动约 22 秒，修正后热请求 3.363 秒，单图峰值保留 3.355469 GiB，8 并发全部成功。单张 CNV 训练图返回 DRUSEN、置信度 0，不能作为准确率证据。</td><td>11-01 完成上传目录配置与业务端到端回写</td><td><code>runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code></td></tr>
     <tr><td>T-08</td><td>决策模型门槛复核</td><td>暂缓</td><td>缺少真实脱敏病例、医生处置标签、独立测试集和稳定评测。</td><td>11-03 决定是否进入后续研究</td><td>模型训练进度文档</td></tr>
@@ -104,6 +105,7 @@
     <tr><td>第五阶段新患者组最佳 macro-F1</td><td>0.873358（入口）</td><td>0.873358</td><td>第 15 步退化为 0.867725；新组覆盖成功，不代表泛化提升</td></tr>
     <tr><td>Open UWF 二分类测试 macro-F1</td><td>0.676136（验证）</td><td>0.338235</td><td>90 条、78 个患者组，仅评估一次；验证与测试差距明显，adapter 不晋级</td></tr>
     <tr><td>Open UWF 7 类验证 macro-F1</td><td>—</td><td>0.214286</td><td>葡萄膜炎 F1 为 0，判定不可用，未读取测试集</td></tr>
+    <tr><td>Toxo 辅助冻结测试 macro-F1</td><td>—</td><td>0.907345</td><td>82 条图像级测试，无患者 ID；7 条弓形虫病漏判为 healthy；只作研究辅助，不报告患者级外部验证</td></tr>
     <tr><td>错误类型集中度</td><td>—</td><td>前 10 个错误组占 24.53%</td><td>685 个患者/来源组中 50 组有错误；错误并非完全均匀分散</td></tr>
     <tr><td>四类均衡推理 smoke</td><td>—</td><td>16/16，JSON 100%</td><td>只证明本地链路和四类覆盖，不作为准确率或泛化证据</td></tr>
     <tr><td>推理峰值保留显存</td><td>—</td><td>3.355469 GiB（运行服务）</td><td>满足 8 GB 本地约束；服务已停止，GPU 当前为 0 MiB</td></tr>
@@ -119,7 +121,7 @@
     <tr><td>10-26</td><td>两份进度文档和跟踪页建立，目录状态同步</td><td>完成冻结评估、阶段二至阶段五复核、错误来源分析和四类均衡推理 smoke；记录 <code>retain_step20_candidate</code></td><td>已完成：无生成错误，selection 哈希一致；新患者组轮换无指标提升，本地推理峰值 3.31 GiB</td></tr>
     <tr><td>10-26</td><td>Open UWF 数据契约与训练结论同步</td><td>完成 7 类与二分类本地实验；记录单次测试冻结政策</td><td>已完成：700 行清单图像缺失 0、跨切分患者组 0、重复内容 0；UWF adapter 不晋级</td></tr>
     <tr><td>10-26</td><td>管理员登录、PostgreSQL-only 边界和本地推理服务完成</td><td>不新增训练；保留第 20 步候选</td><td>已通过：运行时测试 10 项、后端契约 2 项、真实 GPU 请求 HTTP 200、8 并发无 OOM 和 31 页 HTML 校验</td></tr>
-    <tr><td>10-27</td><td>剩余界面开始收口</td><td>冻结第 20 步候选 adapter、模型卡和指标证据</td><td>模型卡、adapter 指纹和运行读取路径明确</td></tr>
+    <tr><td>10-27</td><td>剩余界面开始收口</td><td>完成弓形虫病辅助训练与 ToxoFundus 图像级冻结评估；继续冻结第 20 步 OCT 候选证据</td><td>已完成：200/200 步；Toxo 测试 accuracy 0.914634、macro-F1 0.907345、JSON 100%，判定 research_auxiliary_only</td></tr>
     <tr><td>10-28</td><td>界面、文档和运行边界第一轮冻结</td><td>定义服务级推理请求、超时和失败回退契约</td><td>设计验收通过；本地 smoke 结果可映射到服务契约</td></tr>
     <tr><td>11-01</td><td>模型运行接入后端分析任务</td><td>冻结 adapter 并完成运行路径检查</td><td>请求、超时、回退和结果回写可演示</td></tr>
     <tr><td>11-04</td><td>完成端到端联调和移动端回归</td><td>完成受控推理 smoke</td><td>病例全流程无阻断，错误状态可恢复</td></tr>

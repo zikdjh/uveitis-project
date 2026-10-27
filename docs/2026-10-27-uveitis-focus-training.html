@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>毒浆体病辅助训练与冻结评估 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-uveitis-open-data-audit.html">上一份</a>
+    <a href="2026-10-26-modal-training-storage.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>训练</span>
+    <span>2026-10-27</span>
+  </div>
+  <h1>毒浆体病辅助训练与冻结评估</h1>
+  <p class="doc-summary">ToxoFundus 与 Open UWF 训练行、一次性冻结评估和晋级边界</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-uveitis-focus-training.html</code></p>
+  <article class="html-body">
+<p>记录日期：2026-10-27。训练和评估均在本机 RTX 4060 Laptop 8 GB 上完成，没有启动 Modal GPU，新增 Modal 费用为 <code>$0.00</code>。</p>
+
+<h2>本轮结论</h2>
+<ul>
+  <li>新 run <code>local-4060-uveitis-focus-20261027-01</code> 已完成 <code>200/200</code> 步，最佳 checkpoint 为第 200 步，未触发早停。</li>
+  <li>训练只使用 ToxoFundus 训练行和 Open UWF 训练行；Open UWF 已消费的测试与验证行已排除，训练期间没有读取测试图像。</li>
+  <li>14 条选择验证集的结果为 macro-F1 <code>1.0</code>、JSON 有效率 <code>100%</code>，但样本量过小，只用于 checkpoint 选择，不是泛化结论。</li>
+  <li>ToxoFundus 82 条图像级冻结测试已完成一次：accuracy <code>0.914634</code>、macro-F1 <code>0.907345</code>、JSON 有效率 <code>100%</code>。</li>
+  <li>该 adapter 是眼弓形虫病辅助研究候选，不是通用葡萄膜炎运行候选，也没有替换当前 OCT 第 20 步 adapter。</li>
+  <li>测试结果已冻结；不得用这 82 条继续选择学习率、步数、checkpoint 或提示词。</li>
+</ul>
+
+<h2>训练数据与隔离审查</h2>
+<table>
+  <thead>
+    <tr><th>项目</th><th>结果</th><th>说明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>训练清单</td><td><code>model-training/datasets/tasks/uveitis_focus_20261027/manifest.csv</code></td><td>915 条数据行，manifest SHA256 <code>be63f8846fb2613d5f125bb6734113d75635245c2a9cbc9c13a4d1b158fae04f</code>。</td></tr>
+    <tr><td>任务构成</td><td><code>fundus_toxo_binary</code> 412 条；<code>uwf_uveitis_binary</code> 503 条</td><td>ToxoFundus 为医生标签但无患者 ID；Open UWF 使用患者组隔离切分。</td></tr>
+    <tr><td>训练与验证</td><td>819 条训练、14 条验证；749 个训练组、12 个验证组</td><td>任务平均 macro-F1 作为首要选择指标，其后为 JSON 有效率和 loss。</td></tr>
+    <tr><td>已排除的 Open UWF 行</td><td>测试 90 条、验证 107 条</td><td>来自已消费 run <code>uwf-binary-eval-test-20261026-01</code>；本轮训练与训练行组重叠为 0。</td></tr>
+    <tr><td>Toxo 切分</td><td>训练 330、测试 82</td><td>图像级切分；数据集没有患者 ID，不能报告患者级外部验证。</td></tr>
+  </tbody>
+</table>
+
+<h2>训练结果</h2>
+<table>
+  <thead>
+    <tr><th>指标</th><th>结果</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Run ID</td><td><code>local-4060-uveitis-focus-20261027-01</code></td></tr>
+    <tr><td>状态</td><td><code>ok</code>，完成 200 步；停止原因 <code>target_steps</code></td></tr>
+    <tr><td>最佳 checkpoint</td><td>第 200 步；final adapter 与 best adapter 相同</td></tr>
+    <tr><td>训练配置</td><td>4-bit NF4、bfloat16、LoRA r=8 / alpha=16、图像 65,536 像素、序列 256、梯度累积 4、学习率 <code>2.5e-5</code></td></tr>
+    <tr><td>选择验证</td><td>14 条；macro-F1 <code>1.0</code>、JSON 有效率 <code>100%</code>、loss <code>0.017978</code></td></tr>
+    <tr><td>显存</td><td>峰值分配 <code>5.452397 GiB</code>；峰值保留 <code>5.691406 GiB</code></td></tr>
+    <tr><td>耗时</td><td><code>1807.29</code> 秒</td></tr>
+    <tr><td>Adapter SHA256</td><td><code>8d10d8a81e7915247b9a963e073a92674ab076e37bc12696e4961a55b1c8be13</code></td></tr>
+  </tbody>
+</table>
+<p>验证集只有 14 条，单次满分不足以证明泛化；它只说明当前选择流程能区分本批次训练样本。</p>
+
+<h2>ToxoFundus 冻结测试</h2>
+<p>测试清单仍为上述 915 行 manifest 中的 <code>split=test</code> 与 <code>task=fundus_toxo_binary</code> 子集，共 82 条；训练器没有读取该子集。</p>
+<table>
+  <thead>
+    <tr><th>指标</th><th style="text-align:right">数值</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>测试行数</td><td style="text-align:right">82</td></tr>
+    <tr><td>类别构成</td><td style="text-align:right">healthy 26；toxoplasmosis 56</td></tr>
+    <tr><td>Accuracy</td><td style="text-align:right">0.914634</td></tr>
+    <tr><td>Macro-F1</td><td style="text-align:right">0.907345</td></tr>
+    <tr><td>严格 JSON 有效率</td><td style="text-align:right">100%</td></tr>
+    <tr><td>生成错误</td><td style="text-align:right">0</td></tr>
+    <tr><td>评估峰值保留显存</td><td style="text-align:right">3.697266 GiB</td></tr>
+    <tr><td>评估耗时</td><td style="text-align:right">236.87 秒</td></tr>
+  </tbody>
+</table>
+<table>
+  <thead>
+    <tr><th>类别</th><th style="text-align:right">Precision</th><th style="text-align:right">Recall</th><th style="text-align:right">F1</th><th style="text-align:right">Support</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>healthy</td><td style="text-align:right">0.787879</td><td style="text-align:right">1.000000</td><td style="text-align:right">0.881356</td><td style="text-align:right">26</td></tr>
+    <tr><td>toxoplasmosis</td><td style="text-align:right">1.000000</td><td style="text-align:right">0.875000</td><td style="text-align:right">0.933333</td><td style="text-align:right">56</td></tr>
+  </tbody>
+</table>
+<p>混淆矩阵：26 条 healthy 全部正确；49 条 toxoplasmosis 正确，7 条被预测为 healthy。主要风险是弓形虫病漏识别，不是健康样本误报。</p>
+
+<h2>产物与可复现信息</h2>
+<ul>
+  <li>训练摘要：<code>model-training/assets/qwen3.5-4b/local-4060-uveitis-focus-20261027-01/training_summary.json</code>。</li>
+  <li>最佳 adapter 元数据：<code>model-training/assets/qwen3.5-4b/local-4060-uveitis-focus-20261027-01/best_adapter/</code>；<code>*.safetensors</code> 由仓库忽略规则排除，不提交患者数据或权重。</li>
+  <li>冻结评估：<code>model-training/assets/qwen3.5-4b/toxo-test-20261027-01/evaluation.json</code>。</li>
+  <li>逐样本预测：<code>model-training/assets/qwen3.5-4b/toxo-test-20261027-01/predictions.json</code>。</li>
+  <li>任务审计：<code>model-training/datasets/tasks/fundus_toxo_binary/audit.json</code>、<code>model-training/datasets/tasks/uveitis_focus_20261027/audit.json</code>。</li>
+</ul>
+
+<h2>晋级判断与下一步</h2>
+<ul>
+  <li>判定：<code>research_auxiliary_only</code>。该 adapter 可用于弓形虫病二分类研究补充，不作为通用葡萄膜炎判断，也不替换 OCT 第 20 步运行候选。</li>
+  <li>不可报告为患者级外部验证：ToxoFundus 没有患者 ID，现有 82 条测试是图像级切分。</li>
+  <li>不可继续在这 82 条上调参；若需要进一步提高弓形虫病召回，应寻找新的患者隔离病例或医生复核修正集。</li>
+  <li>若要把该任务接入运行链路，必须先定义它只处理“疑似感染性葡萄膜炎辅助分流”，并保留最终医生复核。</li>
+  <li>下一步优先事项仍是申请或取得患者级、医生确认标签的独立数据；Birdshot-WIDE 属于受控访问，申请前需要负责人批准 DUA。</li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>毒浆体病辅助训练与冻结评估 · 2026-10-27</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

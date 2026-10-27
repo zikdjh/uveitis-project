@@ -1,0 +1,44 @@
+{
+  "downloaded_on": "2026-10-27",
+  "proxy": "http://127.0.0.1:7890",
+  "datasets": [
+    {
+      "dataset": "18_figshare_anterior_uveitis_endothelium",
+      "title": "Minimal dataset for: Corneal endothelial changes in anterior uveitis",
+      "source_page": "https://figshare.com/articles/dataset/32054064",
+      "doi": "10.6084/m9.figshare.32054064",
+      "license": "CC BY 4.0",
+      "access": "open",
+      "file": "dataset_uveitis_endothelium.xlsx",
+      "file_size_bytes": 76212,
+      "file_sha256": "483a5f15855aa9968eaa3f281ba078b116ff8634e71d9130d6d800933a309eb9",
+      "rows": 152,
+      "modality": "clinical table",
+      "usage_note": "前葡萄膜炎患者双眼对照临床变量（年龄、性别、视力、前节体征、眼压、内皮细胞计数与形态）。患者级临床数据，不是影像数据集。"
+    },
+    {
+      "dataset": "19_figshare_uveitis_clinical_tables",
+      "title": "Characteristics of Proliferative Vitreoretinopathy, Uveitis, and Normal Eyes",
+      "source_page": "https://figshare.com/articles/dataset/22632715",
+      "doi": "10.6084/m9.figshare.22632715",
+      "license": "CC BY 4.0",
+      "access": "open",
+      "files": [
+        {
+          "name": "characteristics_pvr_uveitis_normal.csv",
+          "size_bytes": 2778,
+          "sha256": "7c2f3ecc597ec5bc8e5ed70ce25e45859fb3cc6c02d649833ca9450095dc92b6",
+          "rows": 75
+        },
+        {
+          "name": "characteristics_uveitis_patients.csv",
+          "size_bytes": 1340,
+          "sha256": "a4f27492da70c3801ae9e98f7d6f44e156ac6c5932bb9873c1354b2c0975bd5a",
+          "rows": 28
+        }
+      ],
+      "modality": "clinical table",
+      "usage_note": "Proliferative Vitreoretinopathy 19 / Intermediate+Posterior Uveitis 12 / Panuveitis 16 / Normal 28，共 75 眼，计数与 01_uveitis_oct 的 75 张图像逐类别一致；第二份给出 28 例葡萄膜炎的病因标签。"
+    }
+  ]
+}

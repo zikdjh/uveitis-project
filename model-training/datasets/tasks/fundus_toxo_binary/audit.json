@@ -1,0 +1,46 @@
+{
+  "status": "ok",
+  "task": "fundus_toxo_binary",
+  "source": "model-training/datasets/extracted/02_toxofundus",
+  "manifest": "model-training/datasets/training/manifest.csv",
+  "license": "CC BY 4.0",
+  "license_scope": "research and commercial use with attribution",
+  "labels": [
+    "healthy",
+    "toxoplasmosis"
+  ],
+  "images": 412,
+  "masks": 179,
+  "images_with_matching_mask": 144,
+  "raw_label_counts": {
+    "active": 34,
+    "active/active": 1,
+    "active/inactive": 57,
+    "healthy": 132,
+    "inactive": 187,
+    "inactive/inactive": 1
+  },
+  "split_counts": {
+    "test": 82,
+    "train": 330
+  },
+  "label_split_counts": {
+    "test::healthy": 26,
+    "test::toxoplasmosis": 56,
+    "train::healthy": 106,
+    "train::toxoplasmosis": 224
+  },
+  "patient_id_available": false,
+  "patient_isolated_split": false,
+  "doctor_annotation_evidence": true,
+  "external_validation_claim": "prohibited",
+  "filename_reconciliation": {
+    "2805.jpg": "2809.jpg"
+  },
+  "duplicate_image_content": 0,
+  "duplicate_content_examples": [],
+  "source_labels_sha256": "7cff5f1c0de4068d7e108c0ff9c0782678aed2ccd0d20e1dcf6455d1ac425834",
+  "training_manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "frozen_oct_test_images_read": false,
+  "note": "ToxoFundus has no patient identifiers, so the existing train/test split is an image-level split and cannot be reported as patient-isolated external validation. Labels were assigned by ophthalmologists, but the task is ocular toxoplasmosis, a single infectious uveitis subtype, not general uveitis."
+}

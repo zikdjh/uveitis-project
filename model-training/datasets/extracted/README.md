@@ -15,10 +15,13 @@ model-training/datasets/
 │   ├── 15_zenodo_tb_uveitis_ifn/
 │   ├── 16_zenodo_vitreous_classification/
 │   ├── 17_zenodo_dm_anterior_uveitis/
+│   ├── 18_figshare_anterior_uveitis_endothelium/
+│   ├── 19_figshare_uveitis_clinical_tables/
 │   ├── README.md               本说明
 │   └── manifests/
 │       ├── extracted-files.csv 逐文件清单
 │       ├── public-downloads-2026-10-26.csv 本次公开数据逐文件清单
+│       ├── public-download-sources-2026-10-27.json 2026-10-27 新增两份表格的来源登记
 │       └── archive-cleanup-2026-10-25.csv 已删除压缩包的来源账本
 └── training/                 Modal 训练用精简数据与标签
 ```
@@ -50,6 +53,8 @@ model-training/datasets/
 | 15 | 结核相关葡萄膜炎 IFN 数据 | 1 | 0 | 基因表达 XLSX | 结核阳性葡萄膜炎风险分层 |
 | 16 | 玻璃体标本葡萄膜炎分类 | 1 | 0 | 临床实验室 XLSX | 玻璃体标本辅助分类 |
 | 17 | 糖尿病合并前葡萄膜炎 | 2 | 0 | 回顾性横断面 XLSX 与原始数据 PDF | 真实病例临床特征补充 |
+| 18 | 前葡萄膜炎角膜内皮 | 1 | 0 | 前节/内皮临床变量 XLSX | 前葡萄膜炎真实病例临床变量 |
+| 19 | 葡萄膜炎临床与病因表 | 2 | 0 | 75 眼临床 CSV、28 例病因 CSV | 影像临床对照与医生确认病因标签 |
 
 合计 181,167 个文件，其中 179,914 张图像。数量按文件扩展名统计，不对标签唯一性或患者切分作保证。
 
@@ -63,6 +68,8 @@ model-training/datasets/
 
 类别：`Intermediate+Posterior Uveitis`、`Normal`、`Panuveitis`、`RRD-PVR`。
 
+这 75 张图像原本没有患者信息。2026-10-27 在 figshare `22632715` 找到逐类别计数完全一致的 75 眼临床对照表（`RRD-PVR` 19、`Intermediate+Posterior Uveitis` 12、`Panuveitis` 16、`Normal` 28），其中 28 例葡萄膜炎还带医生给出的病因标签（Toxoplasma 8、Sifilis 7、Tuberculosis 6、Idiopathic 3、Paraneoplastic syndrome 2、CMV 1、VKH 1）。图像到临床行的映射由类别内序号推断，记录在 `model-training/datasets/tasks/oct_uveitis_clinical/clinical-link.csv`，审计见同目录 `audit.json`；在用于患者级分组前必须先与数据作者确认该映射。
+
 ### 02 ToxoFundus
 
 根目录：`02_toxofundus/`
@@ -71,7 +78,12 @@ model-training/datasets/
 
 `images/` 实际有 412 张眼底图，`masks/` 有 179 张分割掩膜；掩膜不应当作独立分类图像。412 张图像均有分类标签，其中 144 张可匹配到掩膜，可用于分割辅助任务。
 
-分类标签表与实际图像有一处文件名差异：标签表为 `2809.jpg`，图像目录为 `2805.jpg`。整理后续清单时需人工确认后再建立映射，不能直接按文件名静默配对。
+分类标签表与实际图像只有一处文件名差异：标签表为 `2809.jpg`，图像目录为 `2805.jpg`；两侧各自只差这一条，因此按唯一对应关系显式配对为 `2805.jpg ← 2809.jpg`（标签为 `active`），并在任务清单中记录，不做静默匹配。核对结果见 `model-training/datasets/tasks/fundus_toxo_binary/audit.json`：
+
+- 源标签 412 条、源图像 412 张、暂存图像 412 张三方一致，图像内容重复 0 组。
+- 原始标签分布为 healthy 132、inactive 187、active 34、active/inactive 57、active/active 1、inactive/inactive 1。
+- 该数据集**没有患者 ID**，现有的 train 330 / test 82 切分按图像进行，只能做数据集内评估，不能宣称患者级外部验证。
+- 训练任务为 `fundus_toxo_binary`（healthy 对 toxoplasmosis），运行清单是 `model-training/datasets/training/manifest.csv`。
 
 ### 03 五分类眼病
 
@@ -189,6 +201,27 @@ model-training/datasets/
 来源：Zenodo `10.5281/zenodo.21808930` 与 `10.5281/zenodo.23054920`，许可为 CC BY 4.0。
 
 文件：`diabetes_anterior_uveitis.xlsx` 和 `diabetes_anterior_uveitis_raw_data.pdf`。内容为泰国患者糖尿病、血糖控制与非特异性前葡萄膜炎关系的回顾性横断面数据。样本规模和终点与主任务不同，只能作为真实病例特征补充。
+
+### 18 前葡萄膜炎角膜内皮
+
+根目录：`18_figshare_anterior_uveitis_endothelium/`
+
+来源：Figshare `10.6084/m9.figshare.32054064`，许可为 CC BY 4.0，开放访问。
+
+文件：`dataset_uveitis_endothelium.xlsx`，152 行。字段覆盖年龄、性别、诊断、眼别、视力、前节体征（结膜、角膜、细胞、KP、虹膜、瞳孔、晶体、角膜知觉）、眼压、杯盘比、房角、抗青光眼用药、激素使用、复发记录，以及患眼与对侧正常眼的内皮细胞计数、变异系数、六角形细胞比例和角膜厚度。属于患者级临床变量，可补充决策模型，不是影像数据。
+
+### 19 葡萄膜炎临床与病因表
+
+根目录：`19_figshare_uveitis_clinical_tables/`
+
+来源：Figshare `10.6084/m9.figshare.22632715`，许可为 CC BY 4.0，开放访问。
+
+文件：
+
+- `characteristics_pvr_uveitis_normal.csv`：75 眼，字段为编号、诊断、年龄、性别、视力、VIT/RPE 相对强度。
+- `characteristics_uveitis_patients.csv`：28 例葡萄膜炎，字段为编号、年龄、性别、视力、诊断、病因。
+
+它与 `01_uveitis_oct` 的 75 张图像逐类别计数一致，是这批 OCT 的临床对照表，并给出医生确认的病因标签。图像到临床行的映射是推断的，登记在 `model-training/datasets/tasks/oct_uveitis_clinical/`。
 
 ## 使用注意
 
