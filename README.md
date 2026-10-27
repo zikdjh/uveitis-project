@@ -114,6 +114,7 @@ npm run dev
 
 ```text
 病例结构化 -> 影像预处理
+  -> AgentScope 工具链规划（可选）
   -> Qwen3.5-4B 微调判断（可选）
   -> RAG 证据检索（可选）
   -> 补充决策模型（可选）
@@ -126,6 +127,7 @@ npm run dev
 - RAG 使用本地 BGE-M3 和 zvec；索引为空、模型缺失或检索失败时直接跳过。
 - 网络搜索支持 Tavily、Brave Search、Serper、Google Programmable Search (CSE)、Bing Web Search、Exa、Perplexity 和自建 SearXNG；管理员可调整尝试顺序并逐项检查，单个提供方失败后继续下一个，全部失败只跳过搜索分支。默认不把主诉发送给外部搜索。
 - 补充决策模型保持默认关闭，待真实脱敏病例、医生确认标签和独立评测齐备后启用。
+- 工具链规划由 AgentScope 承担：规划代理只决定本次运行哪些可选技能，执行顺序、超时与失败处理仍由后端确定性代码控制。规划关闭、依赖缺失、凭据不完整或规划失败时回退到确定性顺序，病例分析照常完成。细则见 [AgentScope 工具链编排](docs/2026-10-27-agent-toolchain-plan.html)。
 - 外部总结支持 OpenAI Responses、OpenAI Chat Completions 和 Anthropic Messages 三种接口，调用时使用管理员在服务配置页保存的地址、模型与密钥；默认不发送原始影像、主诉和病史，不可用时使用确定性回退摘要。
 - 外部服务配置由管理员维护；医生只能读取是否启用，不能读取或修改凭据。API Key 使用 AES-GCM 加密保存，接口响应只返回“是否已配置”，永不回传原文。
 - 任一增强组件失败都只写 `failed` 或 `skipped`，病例仍进入 `awaiting_review`，不会阻断医生复核。

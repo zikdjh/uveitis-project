@@ -76,6 +76,17 @@ class Settings(BaseSettings):
     bge_m3_batch_size: int = 8
     bge_m3_max_length: int = 1024
     vector_top_k: int = 5
+    agent_orchestration_enabled: bool = False
+    agent_planner_protocol: Literal[
+        "openai_responses", "openai_chat_completions", "anthropic_messages"
+    ] = "openai_chat_completions"
+    agent_planner_base_url: str = ""
+    agent_planner_api_key: str = ""
+    agent_planner_model: str = ""
+    agent_planner_use_summary_credentials: bool = True
+    agent_planner_max_steps: int = 6
+    agent_planner_max_retries: int = 1
+    agent_planner_timeout_seconds: float = 30.0
 
     @property
     def database_path(self) -> Path:

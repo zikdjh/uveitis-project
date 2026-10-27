@@ -89,6 +89,7 @@ class AnalysisResult(BaseModel):
     summary: str = ""
     external_summary_used: bool = False
     external_payload: dict[str, Any] = Field(default_factory=dict)
+    toolchain_plan: dict[str, Any] = Field(default_factory=dict)
     confidence: float = Field(default=0, ge=0, le=1)
     safety_flags: list[str] = Field(default_factory=list)
     started_at: datetime

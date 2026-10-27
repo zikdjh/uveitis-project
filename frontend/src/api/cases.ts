@@ -48,6 +48,13 @@ export type AnalysisResult = {
   summary: string;
   external_summary_used: boolean;
   external_payload: Record<string, unknown>;
+  toolchain_plan: {
+    planner: string;
+    steps: string[];
+    skipped: Record<string, string>;
+    rationale: string;
+    notes: string[];
+  };
   confidence: number;
   safety_flags: string[];
   started_at: string;

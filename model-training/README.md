@@ -43,7 +43,7 @@ model-training/
 - 主模型：Qwen3.5-4B，4-bit QLoRA，本地 RTX 4060 单卡训练。
 - 数据集：`datasets/training/manifest.csv`，16,638 张图像；训练 14,734、验证 177、冻结测试 1,727。完整数据与精简训练子集均归 `model-training/datasets/` 管理。
 - 基线：Qwen3.5-2B 仅作对照。
-- 补充决策模型：Intern-Decision-4B；在真实病例文本、医生处置标签和独立评测集到位前默认不训练。
+- 补充决策模型：Intern-Decision-4B；2026-10-27 决定暂缓训练不启动任何训练任务，但在辅助分析调用链中保留该槽位（默认 `APP_DECISION_ENABLED=false`，结果里标记为跳过）。在真实病例文本、医生处置标签和独立评测集到位前不恢复训练，也不使用弱标签或合成标签生成结论。槽位与规划细则见 [AgentScope 工具链编排](docs/2026-10-27-agent-toolchain-plan.html)。
 - 真相源：本轮训练使用本地 `datasets/training/manifest.csv` 和 `models/qwen/Qwen3.5-4B/`；checkpoint、验证指标和 adapter 位于 `assets/qwen3.5-4b/`。
 - 当前冻结评估基线：`local-4060-grouped-cont-20261025-01/best_adapter`，第 100 步。
 - 当前选定的 OCT 运行候选：`local-4060-oct-focus-cont-20261025-01/best_adapter`，第 20 步。

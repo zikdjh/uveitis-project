@@ -164,6 +164,27 @@ class OptionalIntegrations:
             return IntegrationConfigRead()
         return self.config_store.public()
 
+    def external_summary_credentials(self) -> dict[str, Any]:
+        """Return the external summary endpoint configuration in clear text.
+
+        Used by the tool-chain planner so that a deployment which already
+        configured an external summary model does not need a second set of
+        credentials. The returned key stays server-side.
+        """
+
+        config = self._config()
+        return {
+            "protocol": str(
+                config.get("summary_protocol") or "openai_chat_completions"
+            ),
+            "base_url": str(config.get("summary_base_url") or ""),
+            "model": str(config.get("summary_model") or ""),
+            "api_key": str(config.get("summary_api_key") or ""),
+            "include_clinical_text": bool(
+                config.get("summary_include_clinical_text")
+            ),
+        }
+
     def test_summary(self) -> IntegrationTestOutcome:
         started = time.perf_counter()
         try:
