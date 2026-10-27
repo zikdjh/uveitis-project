@@ -335,7 +335,35 @@ def test_admin_can_manage_users_and_read_audit(tmp_path: Path) -> None:
 
     audit = client.get("/api/v1/admin/audit-events")
     assert audit.status_code == 200
-    assert audit.json()[0]["event"] == "user_update"
+    audit_page = audit.json()
+    assert audit_page["items"][0]["event"] == "user_update"
+    assert audit_page["total"] >= 1
+    assert audit_page["page"] == 1
+    assert audit_page["page_size"] == 20
+    filtered = client.get(
+        "/api/v1/admin/audit-events?event=user_update&outcome=success"
+    ).json()
+    assert filtered["total"] >= 1
+    assert all(item["event"] == "user_update" for item in filtered["items"])
+    searched = client.get(
+        "/api/v1/admin/audit-events?search=doctor.new&page_size=1"
+    ).json()
+    assert searched["total"] >= 1
+    assert len(searched["items"]) == 1
+    today = searched["items"][0]["created_at"][:10]
+    dated = client.get(
+        f"/api/v1/admin/audit-events?from={today}&to={today}"
+    ).json()
+    assert dated["total"] >= 1
+    assert client.get(
+        "/api/v1/admin/audit-events?from=2026-10-28&to=2026-10-27"
+    ).status_code == 422
+    assert client.get(
+        "/api/v1/admin/audit-events?event=unknown"
+    ).status_code == 422
+    assert client.get(
+        "/api/v1/admin/audit-events?outcome=unknown"
+    ).status_code == 422
 
 
 def test_doctor_cannot_manage_users(tmp_path: Path) -> None:
@@ -380,7 +408,7 @@ def test_integration_config_is_admin_managed_and_secret_is_write_only(
 
     audit = admin.get("/api/v1/admin/audit-events")
     assert audit.status_code == 200
-    assert audit.json()[0]["event"] == "integration_config_update"
+    assert audit.json()["items"][0]["event"] == "integration_config_update"
 
 
 def test_admin_and_doctor_use_separate_login_entries(tmp_path: Path) -> None:

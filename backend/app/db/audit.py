@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
+from sqlalchemy import or_
+
 from app.db.models import AuthAuditRow
 from app.schemas.auth import AuthAuditEventRead
 
@@ -40,6 +42,67 @@ class AuthAuditStore:
         with self._session_factory.begin() as session:
             session.add(row)
         return self._from_row(row)
+
+    @staticmethod
+    def _query(
+        session,
+        *,
+        event: str | None = None,
+        outcome: str | None = None,
+        from_at: datetime | None = None,
+        to_at: datetime | None = None,
+        search: str | None = None,
+    ):
+        query = session.query(AuthAuditRow)
+        if event:
+            query = query.where(AuthAuditRow.event == event)
+        if outcome:
+            query = query.where(AuthAuditRow.outcome == outcome)
+        if from_at is not None:
+            query = query.where(AuthAuditRow.created_at >= from_at)
+        if to_at is not None:
+            query = query.where(AuthAuditRow.created_at < to_at)
+        if search and search.strip():
+            pattern = f"%{search.strip()}%"
+            query = query.where(
+                or_(
+                    AuthAuditRow.username.ilike(pattern),
+                    AuthAuditRow.detail.ilike(pattern),
+                )
+            )
+        return query
+
+    def list_page(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 20,
+        event: str | None = None,
+        outcome: str | None = None,
+        from_at: datetime | None = None,
+        to_at: datetime | None = None,
+        search: str | None = None,
+    ) -> tuple[list[AuthAuditEventRead], int]:
+        with self._session_factory() as session:
+            query = self._query(
+                session,
+                event=event,
+                outcome=outcome,
+                from_at=from_at,
+                to_at=to_at,
+                search=search,
+            )
+            total = query.count()
+            rows = (
+                query.order_by(
+                    AuthAuditRow.created_at.desc(),
+                    AuthAuditRow.id.desc(),
+                )
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+                .all()
+            )
+        return [self._from_row(row) for row in rows], total
 
     def list(self, limit: int = 100) -> list[AuthAuditEventRead]:
         with self._session_factory() as session:
@@ -85,6 +148,36 @@ class MemoryAuthAuditStore:
         )
         self.events.insert(0, event)
         return event
+
+    def list_page(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 20,
+        event: str | None = None,
+        outcome: str | None = None,
+        from_at: datetime | None = None,
+        to_at: datetime | None = None,
+        search: str | None = None,
+    ) -> tuple[list[AuthAuditEventRead], int]:
+        values = self.events
+        if event:
+            values = [item for item in values if item.event == event]
+        if outcome:
+            values = [item for item in values if item.outcome == outcome]
+        if from_at is not None:
+            values = [item for item in values if item.created_at >= from_at]
+        if to_at is not None:
+            values = [item for item in values if item.created_at < to_at]
+        if search and search.strip():
+            needle = search.strip().lower()
+            values = [
+                item
+                for item in values
+                if needle in item.username.lower() or needle in item.detail.lower()
+            ]
+        offset = (page - 1) * page_size
+        return values[offset : offset + page_size], len(values)
 
     def list(self, limit: int = 100) -> list[AuthAuditEventRead]:
         return self.events[:limit]

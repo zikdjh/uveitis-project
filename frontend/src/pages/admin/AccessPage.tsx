@@ -10,7 +10,10 @@ import {
   UserX,
   Users,
 } from "lucide-react";
-import { type FormEvent, useEffect, useState } from "react";
+import { Button, DatePicker, Input, Pagination, Select } from "antd";
+import dayjs, { type Dayjs } from "dayjs";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import {
   createUser,
@@ -45,8 +48,14 @@ const eventLabels: Record<string, string> = {
 };
 
 export default function AccessPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
   const [events, setEvents] = useState<AuthAuditEvent[]>([]);
+  const [eventTotal, setEventTotal] = useState(0);
+  const [auditLoading, setAuditLoading] = useState(true);
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditPageSize, setAuditPageSize] = useState(20);
+  const auditRequestRef = useRef(0);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [resettingUser, setResettingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,19 +66,23 @@ export default function AccessPage() {
   const activeUsers = users.filter((user) => user.is_active).length;
   const adminUsers = users.filter((user) => user.role === "admin").length;
   const inactiveUsers = users.length - activeUsers;
-  const failedEvents = events.filter((event) => event.outcome !== "success").length;
+  const selectedEvent = searchParams.get("event") ?? "all";
+  const selectedOutcome = searchParams.get("outcome") ?? "all";
+  const auditSearch = searchParams.get("search") ?? "";
+  const from = validDate(searchParams.get("from"));
+  const to = validDate(searchParams.get("to"));
+  const auditDateRange: [Dayjs, Dayjs] | null = from && to ? [dayjs(from), dayjs(to)] : null;
+  const hasAuditFilters = selectedEvent !== "all" || selectedOutcome !== "all" || Boolean(auditSearch || from || to);
 
   async function load() {
     setLoading(true);
     setError(null);
     try {
-      const [userList, auditEvents, me] = await Promise.all([
+      const [userList, me] = await Promise.all([
         listUsers(),
-        listAuthAuditEvents(80),
         getCurrentUser(),
       ]);
       setUsers(userList);
-      setEvents(auditEvents);
       setCurrentUser(me);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "权限数据加载失败");
@@ -81,6 +94,48 @@ export default function AccessPage() {
   useEffect(() => {
     void load();
   }, []);
+
+  useEffect(() => {
+    const requestId = ++auditRequestRef.current;
+    setAuditLoading(true);
+    setError(null);
+    listAuthAuditEvents({
+      page: auditPage,
+      page_size: auditPageSize,
+      event: selectedEvent === "all" ? undefined : selectedEvent,
+      outcome: selectedOutcome === "all" ? undefined : selectedOutcome,
+      from,
+      to,
+      search: auditSearch,
+    })
+      .then((result) => {
+        if (requestId !== auditRequestRef.current) return;
+        setEvents(result.items);
+        setEventTotal(result.total);
+      })
+      .catch((reason: unknown) => {
+        if (requestId !== auditRequestRef.current) return;
+        setError(reason instanceof Error ? reason.message : "鉴权审计加载失败");
+      })
+      .finally(() => {
+        if (requestId === auditRequestRef.current) setAuditLoading(false);
+      });
+  }, [auditPage, auditPageSize, auditSearch, from, selectedEvent, selectedOutcome, to]);
+
+  useEffect(() => {
+    const pageCount = Math.max(1, Math.ceil(eventTotal / auditPageSize));
+    setAuditPage((current) => Math.min(current, pageCount));
+  }, [auditPageSize, eventTotal]);
+
+  function updateAuditFilters(next: Partial<Record<"event" | "outcome" | "from" | "to" | "search", string>>) {
+    const params = new URLSearchParams(searchParams);
+    Object.entries(next).forEach(([key, value]) => {
+      if (!value || value === "all") params.delete(key);
+      else params.set(key, value);
+    });
+    setSearchParams(params, { replace: true });
+    setAuditPage(1);
+  }
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -160,7 +215,7 @@ export default function AccessPage() {
         <AccessMetric icon={Users} label="有效账号" value={activeUsers} note="当前可登录" />
         <AccessMetric icon={ShieldCheck} label="唯一管理员" value={adminUsers} note="固定 root 账号" />
         <AccessMetric icon={UserX} label="已停用" value={inactiveUsers} note="不可登录" />
-        <AccessMetric icon={History} label="异常审计" value={failedEvents} note="最近 80 条" />
+        <AccessMetric icon={History} label="审计事件" value={eventTotal} note="当前筛选总量" />
       </div>
 
       <div className="access-layout">
@@ -239,6 +294,55 @@ export default function AccessPage() {
           <div><h2>鉴权审计</h2><span>最近的登录、账号与会话操作</span></div>
           <History size={20} />
         </div>
+        <div className="audit-filters">
+          <Select
+            value={selectedEvent}
+            onChange={(value) => updateAuditFilters({ event: value })}
+            options={[
+              { value: "all", label: "全部事件" },
+              ...Object.entries(eventLabels).map(([value, label]) => ({ value, label })),
+            ]}
+            aria-label="按审计事件筛选"
+          />
+          <Select
+            value={selectedOutcome}
+            onChange={(value) => updateAuditFilters({ outcome: value })}
+            options={[
+              { value: "all", label: "全部结果" },
+              { value: "success", label: "成功" },
+              { value: "failed", label: "失败" },
+              { value: "blocked", label: "阻止" },
+            ]}
+            aria-label="按审计结果筛选"
+          />
+          <DatePicker.RangePicker
+            classNames={{ popup: { root: "case-date-range-popup" } }}
+            value={auditDateRange}
+            onChange={(dates) => {
+              const [start, end] = dates ?? [null, null];
+              updateAuditFilters({
+                from: start?.format("YYYY-MM-DD") ?? "",
+                to: end?.format("YYYY-MM-DD") ?? "",
+              });
+            }}
+            allowClear
+            placeholder={["开始日期", "结束日期"]}
+            aria-label="按审计时间筛选"
+          />
+          <Input.Search
+            defaultValue={auditSearch}
+            key={auditSearch}
+            placeholder="账号或说明"
+            allowClear
+            onSearch={(value) => updateAuditFilters({ search: value.trim() })}
+            aria-label="搜索审计账号或说明"
+          />
+          {hasAuditFilters && (
+            <Button onClick={() => updateAuditFilters({ event: "", outcome: "", from: "", to: "", search: "" })}>
+              重置
+            </Button>
+          )}
+        </div>
         <div className="audit-list">
           {events.map((event) => (
             <div className="audit-row" key={event.id}>
@@ -247,12 +351,32 @@ export default function AccessPage() {
               <time dateTime={event.created_at}>{dateFormatter.format(new Date(event.created_at))}</time>
             </div>
           ))}
-          {!events.length && <div className="empty-state"><History size={26} /><p>暂无审计记录</p><span>登录与会话操作会显示在这里。</span></div>}
+          {!auditLoading && !events.length && <div className="empty-state"><History size={26} /><p>{hasAuditFilters ? "没有符合条件的审计记录" : "暂无审计记录"}</p><span>{hasAuditFilters ? "请调整筛选条件。" : "登录与会话操作会显示在这里。"}</span></div>}
         </div>
+        {eventTotal > 0 && (
+          <Pagination
+            className="case-list-pagination"
+            current={auditPage}
+            pageSize={auditPageSize}
+            total={eventTotal}
+            showSizeChanger
+            pageSizeOptions={[20, 40, 80]}
+            showTotal={(total) => `共 ${total} 条`}
+            onChange={(page, pageSize) => {
+              const changed = pageSize !== auditPageSize;
+              setAuditPageSize(pageSize);
+              setAuditPage(changed ? 1 : page);
+            }}
+          />
+        )}
       </section>
 
     </section>
   );
+}
+
+function validDate(value: string | null) {
+  return value && /^\d{4}-\d{2}-\d{2}$/.test(value) && dayjs(value).isValid() ? value : "";
 }
 
 function AccessMetric({ icon: Icon, label, value, note }: { icon: typeof Users; label: string; value: number; note: string }) {

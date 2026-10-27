@@ -9,7 +9,8 @@ from sqlalchemy import delete, select
 
 from app.core.config import Settings
 from app.core.secret_box import SecretBox
-from app.db.models import AnalysisJobRow, CaseRow
+from app.db.audit import AuthAuditStore
+from app.db.models import AnalysisJobRow, AuthAuditRow, CaseRow
 from app.db.analysis_jobs import PostgresAnalysisJobStore
 from app.db.data_dictionary import DataDictionaryStore
 from app.db.postgres import PostgresCaseStore
@@ -37,6 +38,11 @@ def cleanup_contract_rows():
     )
     with store._session_factory.begin() as session:
         session.execute(
+            delete(AuthAuditRow).where(
+                AuthAuditRow.username.like("contract-audit-%")
+            )
+        )
+        session.execute(
             delete(AnalysisJobRow).where(
                 AnalysisJobRow.case_id.in_(case_keys)
             )
@@ -44,6 +50,62 @@ def cleanup_contract_rows():
         session.execute(
             delete(CaseRow).where(CaseRow.owner_id == "contract-doctor")
         )
+
+
+def test_postgres_audit_page_filters_before_pagination() -> None:
+    store = PostgresCaseStore(TEST_DATABASE_URL, connect_timeout_seconds=3)
+    audit = AuthAuditStore(store._session_factory)
+    username = f"contract-audit-{uuid4().hex}"
+    for index in range(5):
+        audit.record(
+            event="login" if index < 3 else "logout",
+            outcome="success" if index % 2 == 0 else "failed",
+            username=username,
+            user_id=None,
+            actor_id=None,
+            ip_address="127.0.0.1",
+            user_agent="contract",
+            detail=f"audit event {index}",
+        )
+
+    first, total = audit.list_page(
+        page=1,
+        page_size=2,
+        event="login",
+        search=username,
+    )
+    assert total == 3
+    assert len(first) == 2
+    assert all(item.event == "login" for item in first)
+    second, second_total = audit.list_page(
+        page=2,
+        page_size=2,
+        event="login",
+        search=username,
+    )
+    assert second_total == 3
+    assert len(second) == 1
+    failed, failed_total = audit.list_page(
+        page=1,
+        page_size=20,
+        outcome="failed",
+        search=username,
+    )
+    assert failed_total == 2
+    assert all(item.outcome == "failed" for item in failed)
+    today = datetime.now(UTC).date().isoformat()
+    today_start = datetime.combine(
+        datetime.fromisoformat(today).date(),
+        datetime.min.time(),
+        UTC,
+    )
+    dated, dated_total = audit.list_page(
+        from_at=today_start,
+        to_at=today_start + timedelta(days=1),
+        search=username,
+    )
+    assert dated_total == 5
+    assert len(dated) == 5
 
 
 def test_postgres_case_store_round_trip() -> None:

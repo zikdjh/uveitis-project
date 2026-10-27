@@ -50,6 +50,23 @@ export type AuthAuditEvent = {
   created_at: string;
 };
 
+export type AuthAuditEventPage = {
+  items: AuthAuditEvent[];
+  total: number;
+  page: number;
+  page_size: number;
+};
+
+export type AuthAuditQuery = {
+  page?: number;
+  page_size?: number;
+  event?: string;
+  outcome?: string;
+  from?: string;
+  to?: string;
+  search?: string;
+};
+
 export function login(input: {
   username: string;
   password: string;
@@ -134,6 +151,13 @@ export function resetUserPassword(userId: string, newPassword: string): Promise<
   });
 }
 
-export function listAuthAuditEvents(limit = 100): Promise<AuthAuditEvent[]> {
-  return request(`/api/v1/admin/audit-events?limit=${limit}`);
+export function listAuthAuditEvents(
+  query: AuthAuditQuery = {},
+): Promise<AuthAuditEventPage> {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  });
+  const suffix = params.size ? `?${params.toString()}` : "";
+  return request<AuthAuditEventPage>(`/api/v1/admin/audit-events${suffix}`);
 }

@@ -1924,6 +1924,18 @@ a {
   flex-direction: column;
 }
 
+.audit-filters {
+  display: grid;
+  grid-template-columns: 150px 130px minmax(220px, 1fr) minmax(180px, 0.8fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.audit-filters > .ant-input-search {
+  width: 100%;
+}
+
 .session-row,
 .audit-row {
   display: grid;
@@ -2340,6 +2352,15 @@ a {
   .session-row,
   .audit-row {
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .audit-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .audit-filters > .ant-picker,
+  .audit-filters > .ant-input-search {
+    grid-column: 1 / -1;
   }
 
   .session-row > .text-button,

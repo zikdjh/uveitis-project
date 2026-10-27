@@ -108,3 +108,10 @@ class AuthAuditEventRead(BaseModel):
     user_agent: str
     detail: str
     created_at: datetime
+
+
+class AuthAuditEventPage(BaseModel):
+    items: list[AuthAuditEventRead]
+    total: int
+    page: int
+    page_size: int

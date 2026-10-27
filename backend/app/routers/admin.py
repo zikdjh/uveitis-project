@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, time, timedelta
+
 from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 
 from app.core.auth_policy import ROOT_ADMIN_USERNAME
@@ -9,7 +11,7 @@ from app.core.security import (
     require_permission,
 )
 from app.schemas.auth import (
-    AuthAuditEventRead,
+    AuthAuditEventPage,
     PasswordReset,
     Permission,
     UserCreate,
@@ -19,6 +21,22 @@ from app.schemas.auth import (
 
 
 router = APIRouter(prefix="/api/v1/admin", tags=["administration"])
+
+AUDIT_EVENTS = {
+    "login",
+    "doctor_login",
+    "admin_login",
+    "token_refresh",
+    "logout",
+    "session_revoke",
+    "session_revoke_others",
+    "password_change",
+    "password_reset",
+    "user_create",
+    "user_update",
+    "integration_config_update",
+}
+AUDIT_OUTCOMES = {"success", "failed", "blocked"}
 
 
 def _audit(
@@ -138,10 +156,58 @@ def reset_password(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/audit-events", response_model=list[AuthAuditEventRead])
+def _audit_date_bounds(from_date: str | None, to_date: str | None):
+    try:
+        start = (
+            datetime.combine(datetime.fromisoformat(from_date).date(), time.min, UTC)
+            if from_date
+            else None
+        )
+        end = (
+            datetime.combine(
+                datetime.fromisoformat(to_date).date() + timedelta(days=1),
+                time.min,
+                UTC,
+            )
+            if to_date
+            else None
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="日期格式应为 YYYY-MM-DD") from exc
+    if start and end and start >= end:
+        raise HTTPException(status_code=422, detail="开始日期不能晚于结束日期")
+    return start, end
+
+
+@router.get("/audit-events", response_model=AuthAuditEventPage)
 def list_audit_events(
     request: Request,
-    limit: int = Query(default=100, ge=1, le=500),
-) -> list[AuthAuditEventRead]:
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    event: str | None = Query(default=None, max_length=50),
+    outcome: str | None = Query(default=None, max_length=30),
+    from_date: str | None = Query(default=None, alias="from"),
+    to_date: str | None = Query(default=None, alias="to"),
+    search: str | None = Query(default=None, max_length=100),
+) -> AuthAuditEventPage:
     require_permission(request, Permission.AUDIT_READ)
-    return request.app.state.audit_store.list(limit=limit)
+    if event and event not in AUDIT_EVENTS:
+        raise HTTPException(status_code=422, detail="不支持的审计事件")
+    if outcome and outcome not in AUDIT_OUTCOMES:
+        raise HTTPException(status_code=422, detail="不支持的审计结果")
+    from_at, to_at = _audit_date_bounds(from_date, to_date)
+    items, total = request.app.state.audit_store.list_page(
+        page=page,
+        page_size=page_size,
+        event=event,
+        outcome=outcome,
+        from_at=from_at,
+        to_at=to_at,
+        search=search,
+    )
+    return AuthAuditEventPage(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+    )

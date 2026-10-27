@@ -58,6 +58,7 @@ PAGES = (
     Page(Path("scripts/docs/.html-source/2026-10-23-agent-execution-chain.html"), "2026-10-23-agent-execution-chain.html", "智能体执行链路规划", "系统设计", "病例接入、影像感知、检索、决策和安全复核链路", "2026-10-23", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-26-auth-access-control.html"), "2026-10-26-auth-access-control.html", "系统鉴权与权限体系", "系统设计", "双令牌无感刷新、角色权限、CSRF、账号管理和审计边界", "2026-10-26", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-27-auth-account-provisioning.html"), "2026-10-27-auth-account-provisioning.html", "唯一管理员与医生账号开户流程", "系统设计", "固定 root 管理员、管理员创建医生、禁止自助注册及前后端接口边界", "2026-10-27", "html"),
+    Page(Path("scripts/docs/.html-source/2026-10-27-audit-pagination.html"), "2026-10-27-audit-pagination.html", "鉴权审计服务端分页", "系统设计", "账号审计的事件类型、结果、时间范围、关键词筛选和后端分页契约", "2026-10-27", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-27-data-dictionary.html"), "2026-10-27-data-dictionary.html", "数据字典与运行配置存储", "系统设计", "外部模型路径、API Key、运行参数和 root 密码哈希的加密存储边界", "2026-10-27", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-27-agent-toolchain-plan.html"), "2026-10-27-agent-toolchain-plan.html", "AgentScope 工具链编排", "系统设计", "决策模型训练暂缓期间的调用链占位、AgentScope 规划流程、可用性门控与降级规则", "2026-10-27", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-27-case-ownership-pagination.html"), "2026-10-27-case-ownership-pagination.html", "病例归属隔离与服务端分页", "系统设计", "医生病例数据隔离、管理员审计边界、旧数据兼容和病例列表查询契约", "2026-10-27", "html"),
