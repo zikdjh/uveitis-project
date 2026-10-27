@@ -98,5 +98,21 @@
     "补齐 25 病因矩阵的数据行与 patient_id/eye 列后即可直接进入训练。",
     "确认申请人信息后提交 Birdshot-WIDE 的 Zenodo 受控访问申请。",
     "等待期间不重复消费任何已冻结测试集，不引入网络抓取或 SMOTE 数据充当独立验证。"
-  ]
+  ],
+  "ready_pipeline": {
+    "builder": "model-training/scripts/datasets/build_etiology_task.py",
+    "purpose": "把 25 病因矩阵转成患者隔离的 train/validation/test 任务，数据到位即可直接训练。",
+    "verified_on": "2026-10-27",
+    "evidence": {
+      "synthetic_fixture_rows": 80,
+      "synthetic_fixture_patients": 40,
+      "split_rows": {"train": 44, "validation": 18, "test": 18},
+      "split_patients": {"train": 22, "validation": 9, "test": 9},
+      "patients_crossing_splits": 0,
+      "negative_cases": [
+        "缺少 patient_id/eye 且使用 --require-patient 时返回 exit 2",
+        "真实矩阵没有数据行时返回 exit 2 并提示 export the case rows"
+      ]
+    }
+  }
 }
