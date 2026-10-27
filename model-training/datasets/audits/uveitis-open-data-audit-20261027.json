@@ -1,6 +1,8 @@
 {
   "audit_id": "uveitis-open-data-audit-20261027",
   "generated_on": "2026-10-27",
+  "last_reverified_on": "2026-10-27",
+  "reverify_round": "R2-proxy-enabled",
   "timezone": "Asia/Shanghai",
   "proxy": "http://127.0.0.1:7890",
   "purpose": "核验项目在用数据集与外部候选葡萄膜炎数据的许可、访问方式、患者级隔离能力和医生标注证据，作为训练与评估的可追溯依据。",
@@ -486,6 +488,22 @@
       "external_validation_ready": false,
       "priority": "P4",
       "notes": "系统综述支持材料，不是患者影像。"
+    },
+    {
+      "dataset": "zenodo.23503796",
+      "title": "Deep-learning prediction models for retinal vascular leakage",
+      "source_page": "https://zenodo.org/records/23503796",
+      "doi": "10.5281/zenodo.23503796",
+      "license": "CC BY-NC 4.0",
+      "access": "restricted",
+      "verification": "api",
+      "modality": "model checkpoints (OCT + CFP)",
+      "patient_id_available": "not_applicable",
+      "doctor_annotation_evidence": "not_applicable",
+      "patient_isolated_possible": false,
+      "external_validation_ready": false,
+      "priority": "P2",
+      "notes": "2026-10-20 公开的葡萄膜炎 FFA 渗漏预测权重（RETFound 主干，OCT 与 CFP 各一个 .pth），受控访问且为 NC 许可，只能作外部模型对照，不能用于商业产出，也不是训练数据。"
     }
   ],
   "search_log": [
@@ -541,11 +559,102 @@
       "checked_on": "2026-10-27",
       "result": "仅系统综述支持材料",
       "imaging_datasets_found": 0
+    },
+    {
+      "source": "Harvard Dataverse API /api/search",
+      "queries": [
+        "uveitis",
+        "uveitis fundus",
+        "birdshot chorioretinopathy",
+        "Vogt-Koyanagi-Harada",
+        "ocular toxoplasmosis",
+        "anterior uveitis AS-OCT",
+        "retinal vasculitis",
+        "chorioretinitis",
+        "panuveitis imaging"
+      ],
+      "checked_on": "2026-10-27",
+      "result": "命中均为临床/蛋白组/问卷复制数据；含患者级影像关键词的公开集只有 Fundus Image Segmentation Benchmark（血管分割，无葡萄膜炎标签）",
+      "imaging_datasets_found": 0
+    },
+    {
+      "source": "Kaggle public dataset list /api/v1/datasets/list",
+      "queries": [
+        "uveitis",
+        "fundus disease"
+      ],
+      "checked_on": "2026-10-27",
+      "result": "keratitis-and-uveitis 许可 unknown，按规则排除；orvile/eye-diseases-classification、kondwani/eye-disease-dataset 等为派生镜像或 SMOTE 扩充，均无患者 ID",
+      "imaging_datasets_found": 0
+    },
+    {
+      "source": "DataCite API /dois (resource-type-id=dataset)",
+      "queries": [
+        "uveitis"
+      ],
+      "checked_on": "2026-10-27",
+      "result": "新增条目为论文补充材料、综述与机构库登记；无开放患者级葡萄膜炎影像数据集",
+      "imaging_datasets_found": 0
+    },
+    {
+      "source": "EMBL-EBI BioStudies API /api/v1/search",
+      "queries": [
+        "uveitis"
+      ],
+      "checked_on": "2026-10-27",
+      "result": "命中全部映射到 PMC 文献条目，无原始影像数据提交",
+      "imaging_datasets_found": 0
+    },
+    {
+      "source": "Grand Challenge / PapersWithCode / PhysioNet / IEEE DataPort",
+      "queries": [
+        "uveitis"
+      ],
+      "checked_on": "2026-10-27",
+      "result": "无葡萄膜炎相关公开挑战或数据集",
+      "imaging_datasets_found": 0
+    },
+    {
+      "source": "DuckDuckGo HTML / Bing",
+      "queries": [
+        "uveitis fundus image dataset download open access",
+        "uveitis image dataset download open access fundus OCT"
+      ],
+      "checked_on": "2026-10-27",
+      "result": "外部索引首位为 Roboflow Universe Uveitis Dataset（网络抓取、许可不明，排除）与 Mendeley n9zp473wfw（Google 搜图 + SMOTE，排除），其余为论文与综述",
+      "imaging_datasets_found": 0
     }
   ],
   "conclusions": {
     "open_patient_isolated_doctor_confirmed_uveitis_dataset_found": false,
     "directly_downloadable_new_external_validation": false,
+    "reverify_r2_summary": "代理恢复后复跑 12 个平台检索（Zenodo、DataCite、Dryad、OSF、Hugging Face、Figshare、Europe PMC、Harvard Dataverse、Kaggle、BioStudies、Grand Challenge、DuckDuckGo/Bing）。没有发现任何新的可直接下载、患者级隔离且医生标注的葡萄膜炎影像数据集；三条外部线索经核对后全部落回本地既有数据或不符合约束。",
+    "reverified_local_sources": [
+      {
+        "local": "02_toxofundus",
+        "remote": "zenodo.13883485",
+        "method": "Zenodo REST API 读取 record metadata 与文件清单",
+        "result": "同一数据集。本地 592 个文件（412 图 + 179 掩膜 + dataset_labels.csv）与 V3 归档一致。CC BY 4.0、open，可直接使用与再分发。"
+      },
+      {
+        "local": "14_open_uwf700",
+        "remote": "figshare.26936446（Scientific Data s41597-024-04113-2）",
+        "method": "Nature 文章正文与 Figshare DOI 交叉核对",
+        "result": "同一数据集，开放超广角眼底 700 图 / 602 患者，含 Uveitis 子目录，CC BY 4.0。其冻结测试集已在 20261027 运行中消费，禁止再用于调参或选型。"
+      },
+      {
+        "local": "03_eye_five_class",
+        "remote": "mendeley n9zp473wfw/2",
+        "method": "Mendeley Data public API 读取 description",
+        "result": "同一数据集。作者自述图像来自 Google 搜图并做 SMOTE 平衡至每类 649 张，无患者 ID、无原始采集链路。禁止作为独立验证；如需使用只能定位为噪声预训练或负例提示。"
+      }
+    ],
+    "reverify_r2_rejected": [
+      "Roboflow Universe 'Uveitis Dataset'（网络抓取、许可不明、无医生标注链路）",
+      "Mendeley n9zp473wfw（Google 搜图 + SMOTE + 无患者 ID）",
+      "Kaggle kiran5566bs/keratitis-and-uveitis（许可 unknown）",
+      "Zenodo 23503796（葡萄膜炎 FFA 渗漏预测权重，CC BY-NC 4.0、受控访问，是模型不是数据）"
+    ],
     "best_open_doctor_labeled_modality_candidate": "02_toxofundus",
     "best_patient_isolated_candidate_after_dua": "Birdshot-WIDE (zenodo.19474623)",
     "best_patient_isolated_candidate_after_request": [
@@ -560,6 +669,7 @@
       "03_eye_five_class 与 Kaggle 镜像含 SMOTE 合成样本，不能作独立验证。"
     ],
     "recommended_next_actions": [
+      "R2 复检结论：公开渠道已穷尽，凡满足患者级隔离 + 医生标注的葡萄膜炎影像数据，目前没有可直接下载来源；后续若继续推进，应转向 DUA/合作申请而非继续公开检索。",
       "对 02_toxofundus 建立独立任务清单并标注 patient_id_available=false，仅做数据集内评估。",
       "若需患者级外部验证，先获得负责人同意再申请 Birdshot-WIDE 受控访问。",
       "逐项复核 04/05/07-12 的源站许可并归档许可文本到 model-training/datasets/licenses/。"

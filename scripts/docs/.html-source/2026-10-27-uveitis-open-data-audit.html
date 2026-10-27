@@ -26,7 +26,7 @@
   <p class="doc-summary">在用数据集的许可、访问与患者级隔离能力，以及外部候选葡萄膜炎数据的核验结论</p>
   <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-uveitis-open-data-audit.html</code></p>
   <article class="html-body">
-<p>核验日期：2026-10-27。访问方式：本地代理 <code>http://127.0.0.1:7890</code>，通过 Zenodo 与 Figshare 官方 API 复核。</p>
+<p>核验日期：2026-10-27。访问方式：本地代理 <code>http://127.0.0.1:7890</code>，通过 Zenodo、Figshare、DataCite、Dryad、OSF、Harvard Dataverse、Kaggle 等平台官方 API 复核。本文记录首轮审计与代理恢复后的 R2 复检（12 个平台）两轮结果。</p>
 <p>机器可读清单：<code>model-training/datasets/audits/uveitis-open-data-audit-20261027.json</code>；任务级审计：<code>model-training/datasets/tasks/fundus_toxo_binary/audit.json</code>。</p>
 
 <h2>1. 结论摘要</h2>
@@ -39,7 +39,7 @@
 </ul>
 
 <h2>2. 在用数据集许可清单</h2>
-<p>范围：<code>model-training/datasets/extracted/</code> 下的 17 组数据。"核验"列中 API 表示本轮通过源站接口复核，文档表示沿用项目内既有来源记录。</p>
+<p>范围：<code>model-training/datasets/extracted/</code> 下的 19 组数据。"核验"列中 API 表示通过源站接口复核，文档表示沿用项目内既有来源记录。</p>
 <table>
 <thead>
 <tr><th>编号</th><th>数据集</th><th>许可</th><th>访问</th><th>患者 ID</th><th>医生标注</th><th>核验</th></tr>
@@ -62,6 +62,8 @@
 <tr><td>15</td><td>结核相关葡萄膜炎 IFN</td><td>CC0</td><td>开放</td><td>否</td><td>不适用</td><td>文档</td></tr>
 <tr><td>16</td><td>玻璃体标本葡萄膜炎分类</td><td>CC0</td><td>开放</td><td>否</td><td>不适用</td><td>文档</td></tr>
 <tr><td>17</td><td>糖尿病合并前葡萄膜炎</td><td>CC BY 4.0</td><td>开放</td><td>否</td><td>不适用</td><td>API</td></tr>
+<tr><td>18</td><td>前葡萄膜炎角膜内皮（figshare 32054064）</td><td>CC BY 4.0</td><td>开放</td><td>否</td><td>不适用</td><td>API</td></tr>
+<tr><td>19</td><td>葡萄膜炎临床与病因表（figshare 22632715）</td><td>CC BY 4.0</td><td>开放</td><td>否</td><td>是</td><td>API</td></tr>
 </tbody>
 </table>
 <p>需要注意的许可风险：04 ODIR-5K 的许可未明确零售，公开成果前须联系数据方；05 JSIEC1000 是 ODbL，附带 share-alike 义务；07-12 的 iChallenge 子集要逐条核对条款；03 与 Kaggle 镜像含 SMOTE 合成样本，不能作为独立验证。</p>
@@ -84,10 +86,39 @@
 <p>Birdshot-WIDE 是目前唯一"患者级隔离 + 医生审核 + 公开许可"三项齐备的来源，但走 Zenodo controlled access，需要提交数据使用协议（DUA），必须先取得项目负责人同意再申请。</p>
 
 <h2>4. 本轮搜索范围</h2>
+<p>R2 复检在代理恢复后执行，覆盖 12 个平台与 9 组眼科关键词。结论不变：<b>没有发现新的可直接下载、患者级隔离、医生标注的葡萄膜炎影像数据集</b>。</p>
+<table>
+<thead>
+<tr><th>平台</th><th>查询</th><th>结果</th></tr>
+</thead>
+<tbody>
+<tr><td>Zenodo</td><td>uveitis、uveitis fundus、birdshot、Vogt-Koyanagi-Harada、panuveitis imaging、ocular toxoplasmosis、retinal vasculitis 等</td><td>命中的数据集为 ToxoFundus（已在本地 02）、Uveitis Atlas（单细胞组学）、TB-IFN 与玻璃体分类（已在本地 15、16）、糖尿病合并前葡萄膜炎（临床表）、Birdshot-WIDE（受控访问）；无新的开放影像数据集</td></tr>
+<tr><td>DataCite</td><td>resource-type-id=dataset + uveitis</td><td>命中均为论文补充材料与机构库登记</td></tr>
+<tr><td>Dryad</td><td>uveitis、birdshot、ocular toxoplasmosis</td><td>6 条结果全部是临床或组学数据，其中两条已在本地（15、16）</td></tr>
+<tr><td>OSF</td><td>uveitis</td><td>系统综述支持材料</td></tr>
+<tr><td>Hugging Face datasets</td><td>uveitis</td><td>无结果</td></tr>
+<tr><td>Figshare</td><td>9 组眼科关键词，103 条命中</td><td>全部是论文补充表/图或病例报告</td></tr>
+<tr><td>Europe PMC</td><td>uveitis + data availability + dataset</td><td>仅文献条目，无原始影像提交</td></tr>
+<tr><td>Harvard Dataverse</td><td>9 组关键词，91 条命中</td><td>临床/蛋白组/复制数据；唯一含患者级影像的是血管分割基准，没有葡萄膜炎标签</td></tr>
+<tr><td>Kaggle</td><td>uveitis、fundus disease</td><td>keratitis-and-uveitis 许可 unknown；其余为派生镜像或 SMOTE 扩充</td></tr>
+<tr><td>BioStudies</td><td>uveitis</td><td>全部映射到 PMC 文献条目</td></tr>
+<tr><td>Grand Challenge / PapersWithCode / PhysioNet / IEEE DataPort</td><td>uveitis</td><td>无相关公开挑战或数据集</td></tr>
+<tr><td>DuckDuckGo / Bing</td><td>开放葡萄膜炎影像数据集</td><td>首位是 Roboflow 网络抓取集与 Google 搜图 + SMOTE 集，均被约束排除</td></tr>
+</tbody>
+</table>
+
+<h3>4.1 R2 复检的三条线索落点</h3>
 <ul>
-  <li>Zenodo <code>/api/records</code>：<code>uveitis</code>、<code>type=dataset</code>、按最新排序，共 43 条；2026-10-22 之后新增的都是临床/组学或论文附表。</li>
-  <li>Figshare <code>/v2/articles/search</code>：<code>uveitis</code>、<code>ocular toxoplasmosis</code>、<code>retinal vasculitis</code>、<code>birdshot chorioretinopathy</code>；新增条目均为补充表/图。</li>
-  <li>Hugging Face datasets、Dryad、OSF：无明确相关的患者级影像数据集。</li>
+  <li><code>zenodo.13883485</code>（Ocular Toxoplasmosis Fundus Images Dataset）经 API 核对就是本地 <code>02_toxofundus</code>：412 图 + 179 掩膜 + 标签表，CC BY 4.0、开放访问，可直接使用与再分发。</li>
+  <li>Scientific Data 论文 <code>s41597-024-04113-2</code> 的数据落点 <code>figshare.26936446</code> 就是本地 <code>14_open_uwf700</code>：700 图 / 602 患者、含 Uveitis 子目录、CC BY 4.0。其冻结测试集已在 2026-10-27 的运行中消费，禁止再用于调参或选型。</li>
+  <li><code>mendeley n9zp473wfw/2</code> 就是本地 <code>03_eye_five_class</code>：作者自述图像来自 Google 搜图并用 SMOTE 平衡至每类 649 张，无患者 ID、无原始采集链路，只能定位为噪声预训练素材，不能作为独立验证。</li>
+</ul>
+
+<h3>4.2 R2 复检排除项</h3>
+<ul>
+  <li>Roboflow Universe “Uveitis Dataset”：网络抓取、许可不明、无医生标注链路。</li>
+  <li>Kaggle <code>kiran5566bs/keratitis-and-uveitis</code>：许可为 unknown。</li>
+  <li><code>zenodo.23503796</code>：葡萄膜炎 FFA 渗漏预测模型权重，CC BY-NC 4.0 且受控访问，是模型不是数据，只能作外部模型对照。</li>
 </ul>
 
 <h2>5. ToxoFundus 任务审计</h2>
@@ -128,6 +159,7 @@
 
 <h2>8. 下一步</h2>
 <ul>
+  <li>R2 复检确认公开渠道已穷尽：凡同时满足“患者级隔离 + 医生标注”的葡萄膜炎影像数据，目前不存在可直接下载的来源。后续如需推进，应转为 DUA / 合作申请，而不是继续公开检索。</li>
   <li>ToxoFundus 仅作为毒浆体病（单一感染性葡萄膜炎亚型）辅助任务，不能替代通用葡萄膜炎外部验证。</li>
   <li>如需患者级外部验证，先获得负责人同意，再申请 Birdshot-WIDE 的 Zenodo 受控访问。</li>
   <li>逐项复核 04/05/07-12 的源站许可，并把许可文本归档到 <code>model-training/datasets/licenses/</code>。</li>
