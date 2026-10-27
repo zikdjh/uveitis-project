@@ -11,9 +11,13 @@ import pytest
 from app.core.config import Settings
 from app.schemas.case import CaseImage, CaseRead
 from app.core.external_boundary import (
+    BOUNDARY_ALLOW_CASE_DATA,
+    BOUNDARY_SERVICE,
     assert_external_payload,
     assert_external_text,
+    external_request_guard,
     find_external_violations,
+    is_controlled_host,
     sanitize_external_payload,
 )
 from app.services.integrations import OptionalIntegrations
@@ -82,6 +86,56 @@ def test_assert_external_text_refuses_verbatim_case_fields() -> None:
 
     with pytest.raises(ValueError):
         assert_external_text(f"summary: {HISTORY}", make_case(), service="外部总结")
+
+
+def test_external_request_guard_blocks_case_data_on_public_hosts() -> None:
+    request = httpx.Request(
+        "POST",
+        "https://8.8.8.8/v1/summary",
+        json={"medical_history": HISTORY},
+        extensions={BOUNDARY_SERVICE: "外部总结"},
+    )
+
+    with pytest.raises(ValueError) as error:
+        external_request_guard(request)
+
+    assert "出站钩子拦截" in str(error.value)
+    assert "medical_history" in str(error.value)
+
+
+def test_external_request_guard_allows_case_data_only_on_controlled_hosts() -> None:
+    request = httpx.Request(
+        "POST",
+        "http://127.0.0.1:8010/v1/judge",
+        json={"images": [{"filename": "oct.png"}]},
+        extensions={
+            BOUNDARY_ALLOW_CASE_DATA: True,
+            BOUNDARY_SERVICE: "Qwen 模型服务",
+        },
+    )
+
+    external_request_guard(request)
+    assert is_controlled_host("127.0.0.1")
+    assert is_controlled_host("qwen.local")
+    assert not is_controlled_host("8.8.8.8")
+
+
+def test_external_request_guard_blocks_public_model_endpoint() -> None:
+    request = httpx.Request(
+        "POST",
+        "https://8.8.8.8/v1/judge",
+        json={"case": {"complaint": COMPLAINT}},
+        extensions={
+            BOUNDARY_ALLOW_CASE_DATA: True,
+            BOUNDARY_SERVICE: "Qwen 模型服务",
+        },
+    )
+
+    with pytest.raises(ValueError) as error:
+        external_request_guard(request)
+
+    assert "非受控主机" in str(error.value)
+    assert "8.8.8.8" in str(error.value)
 
 
 def summary_handler(recorded: list[dict]) -> object:
@@ -340,4 +394,30 @@ def test_web_search_blocks_a_model_label_that_quotes_case_text() -> None:
 
     assert result.status == "failed"
     assert "已阻止外发" in result.detail
+    assert recorded == []
+
+
+def test_qwen_service_must_be_on_a_controlled_host() -> None:
+    recorded: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        recorded.append(json.loads(request.content.decode("utf-8")))
+        return httpx.Response(200, json={"label": "cnv"})
+
+    settings = Settings(
+        model_mode="remote",
+        qwen_judgment_enabled=True,
+        perception_service_url="https://8.8.8.8",
+    )
+    integrations = OptionalIntegrations(
+        settings,
+        client_factory=lambda **kwargs: httpx.Client(
+            transport=httpx.MockTransport(handler), **kwargs
+        ),
+    )
+
+    result = integrations.qwen_judgment(make_case())
+
+    assert result.status == "failed"
+    assert "非受控主机" in result.detail
     assert recorded == []

@@ -13,7 +13,10 @@ from app.core.config import Settings
 from app.schemas.case import CaseRead, Evidence, WebEvidence
 from app.schemas.integrations import IntegrationConfigRead
 from app.core.external_boundary import (
+    BOUNDARY_ALLOW_CASE_DATA,
+    BOUNDARY_SERVICE,
     assert_external_text,
+    external_request_guard,
     prepare_external_payload,
 )
 from app.services.integration_settings import integration_defaults
@@ -431,9 +434,23 @@ class OptionalIntegrations:
         *,
         timeout: float,
         headers: dict[str, str] | None = None,
+        service: str = "外部服务",
+        allow_case_data: bool = False,
     ) -> dict[str, Any]:
-        with self.client_factory(timeout=timeout) as client:
-            response = client.post(url, json=payload, headers=headers or self._headers())
+        extensions = {
+            BOUNDARY_ALLOW_CASE_DATA: allow_case_data,
+            BOUNDARY_SERVICE: service,
+        }
+        with self.client_factory(
+            timeout=timeout,
+            event_hooks={"request": [external_request_guard]},
+        ) as client:
+            response = client.post(
+                url,
+                json=payload,
+                headers=headers or self._headers(),
+                extensions=extensions,
+            )
             response.raise_for_status()
             data = response.json()
         if not isinstance(data, dict):
@@ -447,9 +464,23 @@ class OptionalIntegrations:
         timeout: float,
         params: dict[str, Any],
         headers: dict[str, str] | None = None,
+        service: str = "外部服务",
+        allow_case_data: bool = False,
     ) -> dict[str, Any]:
-        with self.client_factory(timeout=timeout) as client:
-            response = client.get(url, params=params, headers=headers or self._headers())
+        extensions = {
+            BOUNDARY_ALLOW_CASE_DATA: allow_case_data,
+            BOUNDARY_SERVICE: service,
+        }
+        with self.client_factory(
+            timeout=timeout,
+            event_hooks={"request": [external_request_guard]},
+        ) as client:
+            response = client.get(
+                url,
+                params=params,
+                headers=headers or self._headers(),
+                extensions=extensions,
+            )
             response.raise_for_status()
             data = response.json()
         if not isinstance(data, dict):
@@ -504,6 +535,8 @@ class OptionalIntegrations:
                 url,
                 payload,
                 timeout=self.settings.perception_timeout_seconds,
+                service="Qwen 模型服务",
+                allow_case_data=True,
             )
             data = response.get("result") if isinstance(response.get("result"), dict) else response
             findings = _normalize_findings(data.get("findings"))
@@ -579,6 +612,8 @@ class OptionalIntegrations:
                 url,
                 payload,
                 timeout=self.settings.integration_timeout_seconds,
+                service="决策模型服务",
+                allow_case_data=True,
             )
             data = response.get("result") if isinstance(response.get("result"), dict) else response
             primary = str(
