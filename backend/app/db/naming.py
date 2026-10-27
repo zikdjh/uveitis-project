@@ -13,6 +13,17 @@ def column_name(business_name: str) -> str:
     return f"{COLUMN_PREFIX}{business_name}"
 
 
+PRIMARY_KEY_COLUMN = column_name("id")
+
+BUSINESS_KEY_COLUMNS = {
+    table_name("user"): column_name("user_key"),
+    table_name("case"): column_name("case_key"),
+    table_name("data_dictionary"): column_name("dictionary_key"),
+    table_name("auth_audit_event"): column_name("event_key"),
+    table_name("integration_setting"): column_name("setting_key"),
+}
+
+
 LEGACY_TABLE_RENAMES = {
     "users": table_name("user"),
     "cases": table_name("case"),

@@ -94,7 +94,7 @@ docker compose up -d postgres redis
 .\.venv\Scripts\uvicorn.exe app.asgi:app --reload --host 127.0.0.1 --port 8000
 ```
 
-后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。数据库表和字段统一使用 `t_${业务名}`、`f_${业务名}`。管理员账号固定为 `root`，`APP_BOOTSTRAP_ADMIN_PASSWORD` 只在首次创建 root 时使用；root 已存在后，重启和应用层操作都不会覆盖密码，唯一变更方式是直接修改 `t_data_dictionary` 中的加密哈希记录。医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
+后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。数据库表和字段统一使用 `t_${业务名}`、`f_${业务名}`；每张表使用 `f_id BIGINT` 自增主键，API 和跨表引用使用独立的唯一业务键。管理员账号固定为 `root`，`APP_BOOTSTRAP_ADMIN_PASSWORD` 只在首次创建 root 时使用；root 已存在后，重启和应用层操作都不会覆盖密码，唯一变更方式是直接修改 `t_data_dictionary` 中的加密哈希记录。医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
 
 前端：
 

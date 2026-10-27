@@ -34,6 +34,8 @@
   <tbody>
     <tr><td>数据库表</td><td><code>t_${业务名}</code>，业务名使用小写单数英文和 snake_case。</td><td><code>t_user</code>、<code>t_case</code>、<code>t_data_dictionary</code></td></tr>
     <tr><td>数据库字段</td><td><code>f_${业务名}</code>，保留 snake_case 业务语义。</td><td><code>f_id</code>、<code>f_username</code>、<code>f_display_name</code></td></tr>
+    <tr><td>物理主键</td><td>每张表统一使用 <code>f_id BIGINT</code> 自增主键，只用于数据库内部关联和排序，不作为 API 标识。</td><td><code>1</code>、<code>2</code>、<code>3</code></td></tr>
+    <tr><td>业务唯一键</td><td>每张表另设一个唯一业务键，API、文件和审计引用使用该值，不使用物理主键。</td><td><code>f_user_key</code>、<code>f_case_key</code>、<code>f_dictionary_key</code></td></tr>
     <tr><td>Python 属性与 API 字段</td><td>保持现有 snake_case，不附加数据库前缀。</td><td><code>UserRow.display_name</code>、JSON 字段 <code>display_name</code></td></tr>
     <tr><td>数据字典逻辑键</td><td>仍使用点分业务键，不附加 <code>f_</code>；这是配置键而不是物理列名。</td><td><code>integration/summary.base_url</code></td></tr>
   </tbody>
@@ -78,6 +80,7 @@
 <ol>
   <li>首次启动时，如果数据字典没有 root 哈希，则从现有 <code>t_user.f_password_hash</code> 读取旧值，加密后迁入 <code>auth/root.password_hash</code>，随后把用户表字段改为不可登录占位值。</li>
   <li>如果数据字典已有 root 哈希，则环境变量和管理接口都不能覆盖它。</li>
+  <li>旧版 UUID 主键会先保留为对应业务键，例如 <code>f_user_key</code>、<code>f_case_key</code>、<code>f_dictionary_key</code>，再新建 <code>f_id</code> 自增主键；审计事件新增 <code>f_event_key</code> 并回填唯一值。</li>
   <li>旧版 <code>t_integration_setting.f_payload_json</code> 存在时，普通字段转为普通字典项，API Key 密文按原加密格式迁入密钥字典项。</li>
   <li>迁移后原表不再作为运行时主存储，仅保留为回滚和审计期间的兼容快照。</li>
 </ol>

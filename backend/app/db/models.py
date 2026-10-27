@@ -2,7 +2,16 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    Identity,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from app.db.naming import column_name, table_name
@@ -14,8 +23,22 @@ class Base(DeclarativeBase):
 
 class UserRow(Base):
     __tablename__ = table_name("user")
+    __table_args__ = (
+        UniqueConstraint(
+            column_name("user_key"),
+            name="uq_t_user_f_user_key",
+        ),
+    )
 
-    id: Mapped[str] = mapped_column(column_name("id"), String(36), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        column_name("id"),
+        BigInteger,
+        Identity(),
+        primary_key=True,
+    )
+    user_key: Mapped[str] = mapped_column(
+        column_name("user_key"), String(36), index=True
+    )
     username: Mapped[str] = mapped_column(
         column_name("username"), String(100), unique=True, index=True
     )
@@ -34,13 +57,27 @@ class DataDictionaryRow(Base):
     __tablename__ = table_name("data_dictionary")
     __table_args__ = (
         UniqueConstraint(
+            column_name("dictionary_key"),
+            name="uq_t_data_dictionary_f_dictionary_key",
+        ),
+        UniqueConstraint(
             column_name("namespace"),
             column_name("key"),
             name="uq_t_data_dictionary_f_namespace_f_key",
         ),
     )
 
-    id: Mapped[str] = mapped_column(column_name("id"), String(36), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        column_name("id"),
+        BigInteger,
+        Identity(),
+        primary_key=True,
+    )
+    dictionary_key: Mapped[str] = mapped_column(
+        column_name("dictionary_key"),
+        String(36),
+        nullable=False,
+    )
     namespace: Mapped[str] = mapped_column(
         column_name("namespace"), String(100), index=True
     )
@@ -69,9 +106,21 @@ class DataDictionaryRow(Base):
 
 class AuthAuditRow(Base):
     __tablename__ = table_name("auth_audit_event")
+    __table_args__ = (
+        UniqueConstraint(
+            column_name("event_key"),
+            name="uq_t_auth_audit_event_f_event_key",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(
-        column_name("id"), Integer, primary_key=True, autoincrement=True
+        column_name("id"),
+        BigInteger,
+        Identity(),
+        primary_key=True,
+    )
+    event_key: Mapped[str] = mapped_column(
+        column_name("event_key"), String(36), index=True
     )
     event: Mapped[str] = mapped_column(column_name("event"), String(50), index=True)
     outcome: Mapped[str] = mapped_column(
@@ -96,8 +145,22 @@ class AuthAuditRow(Base):
 
 class CaseRow(Base):
     __tablename__ = table_name("case")
+    __table_args__ = (
+        UniqueConstraint(
+            column_name("case_key"),
+            name="uq_t_case_f_case_key",
+        ),
+    )
 
-    id: Mapped[str] = mapped_column(column_name("id"), String(36), primary_key=True)
+    id: Mapped[int] = mapped_column(
+        column_name("id"),
+        BigInteger,
+        Identity(),
+        primary_key=True,
+    )
+    case_key: Mapped[str] = mapped_column(
+        column_name("case_key"), String(36), index=True
+    )
     status: Mapped[str] = mapped_column(column_name("status"), String(30), index=True)
     created_at: Mapped[datetime] = mapped_column(
         column_name("created_at"), DateTime(timezone=True), index=True

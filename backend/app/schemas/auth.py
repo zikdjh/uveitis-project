@@ -98,7 +98,7 @@ class SessionRead(BaseModel):
 
 
 class AuthAuditEventRead(BaseModel):
-    id: int
+    id: str
     event: str
     outcome: str
     username: str

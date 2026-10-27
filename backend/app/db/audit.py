@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from uuid import uuid4
 
 from app.db.models import AuthAuditRow
 from app.schemas.auth import AuthAuditEventRead
@@ -25,6 +26,7 @@ class AuthAuditStore:
         detail: str = "",
     ) -> AuthAuditEventRead:
         row = AuthAuditRow(
+            event_key=str(uuid4()),
             event=event,
             outcome=outcome,
             username=username.strip().lower(),
@@ -49,7 +51,7 @@ class AuthAuditStore:
     @staticmethod
     def _from_row(row: AuthAuditRow) -> AuthAuditEventRead:
         return AuthAuditEventRead(
-            id=row.id,
+            id=row.event_key,
             event=row.event,
             outcome=row.outcome,
             username=row.username,
@@ -70,7 +72,7 @@ class MemoryAuthAuditStore:
 
     def record(self, **values) -> AuthAuditEventRead:
         event = AuthAuditEventRead(
-            id=len(self.events) + 1,
+            id=str(uuid4()),
             event=values["event"],
             outcome=values["outcome"],
             username=values["username"].strip().lower(),

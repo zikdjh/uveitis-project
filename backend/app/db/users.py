@@ -66,7 +66,7 @@ class UserStore:
 
     def get(self, user_id: str) -> UserRead | None:
         with self._session_factory() as session:
-            row = session.get(UserRow, user_id)
+            row = self._row_by_key(session, user_id)
         return self._from_row(row) if row else None
 
     def list(self) -> list[UserRead]:
@@ -88,7 +88,7 @@ class UserStore:
             if exists is not None:
                 raise ValueError("账号已存在")
             row = UserRow(
-                id=str(uuid4()),
+                user_key=str(uuid4()),
                 username=username,
                 display_name=display_name.strip(),
                 role=role,
@@ -113,7 +113,7 @@ class UserStore:
             ).one_or_none()
             if row is None:
                 row = UserRow(
-                    id=str(uuid4()),
+                    user_key=str(uuid4()),
                     username=username,
                     display_name=display_name,
                     role=role,
@@ -141,7 +141,7 @@ class UserStore:
                 if not password_hash:
                     raise ValueError("root 管理员首次创建必须提供初始密码")
                 root = UserRow(
-                    id=str(uuid4()),
+                    user_key=str(uuid4()),
                     username=username,
                     display_name=display_name,
                     role="admin",
@@ -157,7 +157,7 @@ class UserStore:
                 root.is_active = True
             other_admins = session.query(UserRow).filter(
                 UserRow.role == "admin",
-                UserRow.id != root.id,
+                UserRow.user_key != root.user_key,
             ).all()
             for row in other_admins:
                 row.role = "doctor"
@@ -172,7 +172,7 @@ class UserStore:
         is_active: bool | None = None,
     ) -> UserRead | None:
         with self._session_factory.begin() as session:
-            row = session.get(UserRow, user_id)
+            row = self._row_by_key(session, user_id)
             if row is None:
                 return None
             if display_name is not None:
@@ -185,7 +185,7 @@ class UserStore:
 
     def set_password(self, user_id: str, password_hash: str) -> UserRead | None:
         with self._session_factory.begin() as session:
-            row = session.get(UserRow, user_id)
+            row = self._row_by_key(session, user_id)
             if row is None:
                 return None
             row.password_hash = password_hash
@@ -208,13 +208,21 @@ class UserStore:
                 UserRow.is_active.is_(True),
             )
             if excluding_user_id:
-                query = query.filter(UserRow.id != excluding_user_id)
+                query = query.filter(UserRow.user_key != excluding_user_id)
             return query.count()
+
+    @staticmethod
+    def _row_by_key(session, user_key: str) -> UserRow | None:
+        return (
+            session.query(UserRow)
+            .filter(UserRow.user_key == user_key)
+            .one_or_none()
+        )
 
     @staticmethod
     def _from_row(row: UserRow) -> UserRead:
         return _user_read(
-            user_id=row.id,
+            user_id=row.user_key,
             username=row.username,
             display_name=row.display_name,
             role=row.role,

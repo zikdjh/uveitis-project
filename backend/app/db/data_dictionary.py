@@ -400,7 +400,7 @@ class DataDictionaryStore:
             stored = _encode_value(value, value_type, self.secret_box)
         if row is None:
             row = DataDictionaryRow(
-                id=str(uuid4()),
+                dictionary_key=str(uuid4()),
                 namespace=namespace,
                 key=key,
                 value_type=value_type,
@@ -440,7 +440,7 @@ class DataDictionaryStore:
         row = by_key.get(key)
         if row is None:
             row = DataDictionaryRow(
-                id=str(uuid4()),
+                dictionary_key=str(uuid4()),
                 namespace=namespace,
                 key=key,
                 value_type=value_type,
@@ -463,7 +463,7 @@ class DataDictionaryStore:
 
     def _read_row(self, row: DataDictionaryRow) -> DataDictionaryEntryRead:
         return _public_entry(
-            entry_id=row.id,
+            entry_id=row.dictionary_key,
             namespace=row.namespace,
             key=row.key,
             value_type=row.value_type,
