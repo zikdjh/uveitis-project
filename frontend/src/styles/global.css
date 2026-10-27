@@ -1678,7 +1678,27 @@ a {
 .admin-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  align-items: stretch;
   gap: 16px;
+}
+
+.admin-grid > .panel {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.admin-grid > .panel + .panel {
+  margin-top: 0;
+}
+
+.admin-boundary-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-boundary-panel .disclaimer {
+  margin-top: auto;
+  padding-top: 15px;
 }
 
 .model-list {
