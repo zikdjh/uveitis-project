@@ -1,0 +1,331 @@
+dataset,task,label,source_group,source_split,split,image,source_image
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0568RE.JPG,02_toxofundus/images/OS0568RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/1303.jpg,02_toxofundus/images/1303.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2478.jpg,02_toxofundus/images/2478.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/18264.jpg,02_toxofundus/images/18264.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/114.jpg,02_toxofundus/images/114.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/3547.jpg,02_toxofundus/images/3547.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/557.jpg,02_toxofundus/images/557.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17117.jpg,02_toxofundus/images/17117.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17430.jpg,02_toxofundus/images/17430.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/160.jpg,02_toxofundus/images/160.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15094.jpg,02_toxofundus/images/15094.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/18250.jpg,02_toxofundus/images/18250.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/151.jpg,02_toxofundus/images/151.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/1255.jpg,02_toxofundus/images/1255.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2076.jpg,02_toxofundus/images/2076.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/91.jpg,02_toxofundus/images/91.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15173.jpg,02_toxofundus/images/15173.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/119.jpg,02_toxofundus/images/119.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/(749).jpg,02_toxofundus/images/(749).jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/535.jpg,02_toxofundus/images/535.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2275.jpg,02_toxofundus/images/2275.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/159.jpg,02_toxofundus/images/159.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2805.jpg,02_toxofundus/images/2805.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/1253.jpg,02_toxofundus/images/1253.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/565.jpg,02_toxofundus/images/565.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15170.jpg,02_toxofundus/images/15170.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/3166.jpg,02_toxofundus/images/3166.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14735.jpg,02_toxofundus/images/14735.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/143.jpg,02_toxofundus/images/143.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0155RE.JPG,02_toxofundus/images/IM0155RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0590RE.JPG,02_toxofundus/images/OD0590RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14743.jpg,02_toxofundus/images/14743.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/291.jpg,02_toxofundus/images/291.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/749.jpg,02_toxofundus/images/749.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/86.jpg,02_toxofundus/images/86.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/16214.jpg,02_toxofundus/images/16214.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2957.jpg,02_toxofundus/images/2957.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/116.jpg,02_toxofundus/images/116.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/105.jpg,02_toxofundus/images/105.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/540.jpg,02_toxofundus/images/540.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/18260.jpg,02_toxofundus/images/18260.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/625.jpg,02_toxofundus/images/625.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/93.jpg,02_toxofundus/images/93.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/18238.jpg,02_toxofundus/images/18238.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/857.jpg,02_toxofundus/images/857.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/104.jpg,02_toxofundus/images/104.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14771.jpg,02_toxofundus/images/14771.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0591RE.JPG,02_toxofundus/images/OD0591RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/16096.jpg,02_toxofundus/images/16096.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0157RE.JPG,02_toxofundus/images/IM0157RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/1599.jpg,02_toxofundus/images/1599.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14937.jpg,02_toxofundus/images/14937.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/117.jpg,02_toxofundus/images/117.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15149.jpg,02_toxofundus/images/15149.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/10.jpg,02_toxofundus/images/10.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0554RE.JPG,02_toxofundus/images/OD0554RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/16.jpg,02_toxofundus/images/16.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/68.jpg,02_toxofundus/images/68.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0533RE.JPG,02_toxofundus/images/OD0533RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/21.jpg,02_toxofundus/images/21.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/22.jpg,02_toxofundus/images/22.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/59.jpg,02_toxofundus/images/59.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/28.jpg,02_toxofundus/images/28.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/30.jpg,02_toxofundus/images/30.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0538RE.JPG,02_toxofundus/images/OD0538RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/62.jpg,02_toxofundus/images/62.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0484RE.JPG,02_toxofundus/images/OS0484RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/7.jpg,02_toxofundus/images/7.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/23.jpg,02_toxofundus/images/23.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/57.jpg,02_toxofundus/images/57.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/26.jpg,02_toxofundus/images/26.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/80.jpg,02_toxofundus/images/80.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0516RE.JPG,02_toxofundus/images/OS0516RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/70.jpg,02_toxofundus/images/70.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/18.jpg,02_toxofundus/images/18.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/31.jpg,02_toxofundus/images/31.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0517RE.JPG,02_toxofundus/images/OD0517RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0344RE.JPG,02_toxofundus/images/OS0344RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/29.jpg,02_toxofundus/images/29.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0492RE.JPG,02_toxofundus/images/OD0492RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/54.jpg,02_toxofundus/images/54.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/12.jpg,02_toxofundus/images/12.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/46.jpg,02_toxofundus/images/46.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/32.jpg,02_toxofundus/images/32.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/45.jpg,02_toxofundus/images/45.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/71.jpg,02_toxofundus/images/71.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0487RE.JPG,02_toxofundus/images/OS0487RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/76.jpg,02_toxofundus/images/76.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0482RE.JPG,02_toxofundus/images/OS0482RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0639RE.JPG,02_toxofundus/images/OS0639RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/1.jpg,02_toxofundus/images/1.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0607RE.JPG,02_toxofundus/images/OD0607RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/73.jpg,02_toxofundus/images/73.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/49.jpg,02_toxofundus/images/49.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/48.jpg,02_toxofundus/images/48.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/72.jpg,02_toxofundus/images/72.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/9.jpg,02_toxofundus/images/9.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/53.jpg,02_toxofundus/images/53.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/61.jpg,02_toxofundus/images/61.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0565RE.JPG,02_toxofundus/images/OD0565RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/24.jpg,02_toxofundus/images/24.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0480RE.JPG,02_toxofundus/images/OD0480RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0342RE.JPG,02_toxofundus/images/OD0342RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/69.jpg,02_toxofundus/images/69.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/67.jpg,02_toxofundus/images/67.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0535RE.JPG,02_toxofundus/images/OS0535RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0488RE.JPG,02_toxofundus/images/OD0488RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/58.jpg,02_toxofundus/images/58.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0226RE.JPG,02_toxofundus/images/IM0226RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0489RE.JPG,02_toxofundus/images/OD0489RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/20.jpg,02_toxofundus/images/20.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/77.jpg,02_toxofundus/images/77.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0387RE.JPG,02_toxofundus/images/OS0387RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0481RE.JPG,02_toxofundus/images/OD0481RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/50.jpg,02_toxofundus/images/50.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/37.jpg,02_toxofundus/images/37.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0485RE.JPG,02_toxofundus/images/OD0485RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0534RE.JPG,02_toxofundus/images/OS0534RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0563RE.JPG,02_toxofundus/images/OS0563RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0575RE.JPG,02_toxofundus/images/OD0575RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0287RE.JPG,02_toxofundus/images/OD0287RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/27.jpg,02_toxofundus/images/27.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/79.jpg,02_toxofundus/images/79.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/13.jpg,02_toxofundus/images/13.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/42.jpg,02_toxofundus/images/42.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0514RE.JPG,02_toxofundus/images/OS0514RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0515RE.JPG,02_toxofundus/images/OD0515RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0085RE.JPG,02_toxofundus/images/IM0085RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0532RE.JPG,02_toxofundus/images/OD0532RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0087RE.JPG,02_toxofundus/images/IM0087RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17.jpg,02_toxofundus/images/17.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0511RE.JPG,02_toxofundus/images/OD0511RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/38.jpg,02_toxofundus/images/38.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/55.jpg,02_toxofundus/images/55.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/6.jpg,02_toxofundus/images/6.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0063RE.JPG,02_toxofundus/images/IM0063RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/66.jpg,02_toxofundus/images/66.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/47.jpg,02_toxofundus/images/47.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14.jpg,02_toxofundus/images/14.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0658RE.JPG,02_toxofundus/images/OD0658RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0203RE 2.jpg,02_toxofundus/images/IM0203RE 2.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2698.jpg,02_toxofundus/images/2698.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/425.jpg,02_toxofundus/images/425.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0335RE.JPG,02_toxofundus/images/OD0335RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/102.jpg,02_toxofundus/images/102.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0388RE.JPG,02_toxofundus/images/OS0388RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/1179.jpg,02_toxofundus/images/1179.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15168.jpg,02_toxofundus/images/15168.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0573RE.JPG,02_toxofundus/images/OS0573RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14804.jpg,02_toxofundus/images/14804.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0605RE.JPG,02_toxofundus/images/OS0605RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/3680.jpg,02_toxofundus/images/3680.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0497RE.JPG,02_toxofundus/images/OD0497RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0528RE.JPG,02_toxofundus/images/OD0528RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0494RE.JPG,02_toxofundus/images/OS0494RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0527RE.JPG,02_toxofundus/images/OS0527RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/299.jpg,02_toxofundus/images/299.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0558RE.JPG,02_toxofundus/images/OD0558RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/144.jpg,02_toxofundus/images/144.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17487.jpg,02_toxofundus/images/17487.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14815.jpg,02_toxofundus/images/14815.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2261.jpg,02_toxofundus/images/2261.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/132.jpg,02_toxofundus/images/132.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/16385.jpg,02_toxofundus/images/16385.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0592RE.JPG,02_toxofundus/images/OS0592RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/148.jpg,02_toxofundus/images/148.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/121.jpg,02_toxofundus/images/121.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/92.jpg,02_toxofundus/images/92.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/3174.jpg,02_toxofundus/images/3174.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17796.jpg,02_toxofundus/images/17796.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/130.jpg,02_toxofundus/images/130.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0396RE.JPG,02_toxofundus/images/OD0396RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0547RE.JPG,02_toxofundus/images/OD0547RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2092.jpg,02_toxofundus/images/2092.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0659RE.JPG,02_toxofundus/images/OS0659RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/113.jpg,02_toxofundus/images/113.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14777.jpg,02_toxofundus/images/14777.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/89.jpg,02_toxofundus/images/89.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/1835.jpg,02_toxofundus/images/1835.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/156.jpg,02_toxofundus/images/156.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/16627.jpg,02_toxofundus/images/16627.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2475.jpg,02_toxofundus/images/2475.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/622.jpg,02_toxofundus/images/622.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2556.jpg,02_toxofundus/images/2556.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0546RE.JPG,02_toxofundus/images/OD0546RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/112.jpg,02_toxofundus/images/112.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0499RE.JPG,02_toxofundus/images/OD0499RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/147.jpg,02_toxofundus/images/147.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0553RE.JPG,02_toxofundus/images/OS0553RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0382RE.JPG,02_toxofundus/images/OD0382RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0526RE.JPG,02_toxofundus/images/OS0526RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0493RE.JPG,02_toxofundus/images/OS0493RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/1221.jpg,02_toxofundus/images/1221.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/129.jpg,02_toxofundus/images/129.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/127.jpg,02_toxofundus/images/127.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0146RE.JPG,02_toxofundus/images/IM0146RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0163RE.JPG,02_toxofundus/images/IM0163RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17600.jpg,02_toxofundus/images/17600.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17619.jpg,02_toxofundus/images/17619.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0660RE.JPG,02_toxofundus/images/OS0660RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/868.jpg,02_toxofundus/images/868.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0208RE 2.jpg,02_toxofundus/images/IM0208RE 2.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17795.jpg,02_toxofundus/images/17795.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0519RE.JPG,02_toxofundus/images/OD0519RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0162RE.JPG,02_toxofundus/images/IM0162RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15136.jpg,02_toxofundus/images/15136.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0294RE.JPG,02_toxofundus/images/OD0294RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/98.jpg,02_toxofundus/images/98.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0603RE.JPG,02_toxofundus/images/OD0603RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/134.jpg,02_toxofundus/images/134.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/18005.jpg,02_toxofundus/images/18005.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/139.jpg,02_toxofundus/images/139.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0520RE.JPG,02_toxofundus/images/OD0520RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/97.jpg,02_toxofundus/images/97.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17123.jpg,02_toxofundus/images/17123.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/153.jpg,02_toxofundus/images/153.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0413RE.JPG,02_toxofundus/images/OD0413RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/123.jpg,02_toxofundus/images/123.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15090.jpg,02_toxofundus/images/15090.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/3364.jpg,02_toxofundus/images/3364.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/126.jpg,02_toxofundus/images/126.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/IM0159RE.JPG,02_toxofundus/images/IM0159RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/136.jpg,02_toxofundus/images/136.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0285RE.JPG,02_toxofundus/images/OS0285RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/562.jpg,02_toxofundus/images/562.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0524RE.JPG,02_toxofundus/images/OS0524RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0635RE.JPG,02_toxofundus/images/OS0635RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/124.jpg,02_toxofundus/images/124.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0389RE.JPG,02_toxofundus/images/OS0389RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/85.jpg,02_toxofundus/images/85.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17613.jpg,02_toxofundus/images/17613.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/742.jpg,02_toxofundus/images/742.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/16382.jpg,02_toxofundus/images/16382.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/88.jpg,02_toxofundus/images/88.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0334RE.JPG,02_toxofundus/images/OD0334RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/137.jpg,02_toxofundus/images/137.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0550RE.JPG,02_toxofundus/images/OS0550RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0564RE.JPG,02_toxofundus/images/OS0564RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/947.jpg,02_toxofundus/images/947.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15134.jpg,02_toxofundus/images/15134.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15294.jpg,02_toxofundus/images/15294.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/14811.jpg,02_toxofundus/images/14811.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/87.jpg,02_toxofundus/images/87.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/152.jpg,02_toxofundus/images/152.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0415RE.JPG,02_toxofundus/images/OS0415RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0522RE.JPG,02_toxofundus/images/OD0522RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15817.jpg,02_toxofundus/images/15817.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/2095.jpg,02_toxofundus/images/2095.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/18007.jpg,02_toxofundus/images/18007.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/128.jpg,02_toxofundus/images/128.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/82.jpg,02_toxofundus/images/82.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/155.jpg,02_toxofundus/images/155.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OD0383RE.JPG,02_toxofundus/images/OD0383RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/16319.jpg,02_toxofundus/images/16319.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/17992.jpg,02_toxofundus/images/17992.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/154.jpg,02_toxofundus/images/154.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/18107.jpg,02_toxofundus/images/18107.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,train,data/02_toxofundus/02_toxofundus/images/OS0293RE.JPG,02_toxofundus/images/OS0293RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/15097.jpg,02_toxofundus/images/15097.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/3698.jpg,02_toxofundus/images/3698.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/103.jpg,02_toxofundus/images/103.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/142.jpg,02_toxofundus/images/142.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/96.jpg,02_toxofundus/images/96.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,train,data/02_toxofundus/02_toxofundus/images/724.jpg,02_toxofundus/images/724.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/14796.jpg,02_toxofundus/images/14796.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/18246.jpg,02_toxofundus/images/18246.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/2078.jpg,02_toxofundus/images/2078.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/2336.jpg,02_toxofundus/images/2336.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/110.jpg,02_toxofundus/images/110.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/559.jpg,02_toxofundus/images/559.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/18236.jpg,02_toxofundus/images/18236.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/479.jpg,02_toxofundus/images/479.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/2745.jpg,02_toxofundus/images/2745.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/158.jpg,02_toxofundus/images/158.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/784.jpg,02_toxofundus/images/784.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/3544.jpg,02_toxofundus/images/3544.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/248.jpg,02_toxofundus/images/248.jpg
+02_toxofundus,fundus_toxo_activity_3class,active,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/18248.jpg,02_toxofundus/images/18248.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/36.jpg,02_toxofundus/images/36.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/IM0062RE.JPG,02_toxofundus/images/IM0062RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0518RE.JPG,02_toxofundus/images/OS0518RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/4.jpg,02_toxofundus/images/4.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/40.jpg,02_toxofundus/images/40.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0486RE.JPG,02_toxofundus/images/OS0486RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/IM0053RE.JPG,02_toxofundus/images/IM0053RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0483RE.JPG,02_toxofundus/images/OS0483RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/2.jpg,02_toxofundus/images/2.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/15.jpg,02_toxofundus/images/15.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/65.jpg,02_toxofundus/images/65.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/74.jpg,02_toxofundus/images/74.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/3.jpg,02_toxofundus/images/3.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0539RE.JPG,02_toxofundus/images/OS0539RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0557RE.JPG,02_toxofundus/images/OS0557RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/51.jpg,02_toxofundus/images/51.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OD0479RE.JPG,02_toxofundus/images/OD0479RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/63.jpg,02_toxofundus/images/63.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/56.jpg,02_toxofundus/images/56.jpg
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OD0555RE.JPG,02_toxofundus/images/OD0555RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,healthy,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OD0556RE.JPG,02_toxofundus/images/OD0556RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/2312.jpg,02_toxofundus/images/2312.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/17607.jpg,02_toxofundus/images/17607.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/696.jpg,02_toxofundus/images/696.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0661RE.JPG,02_toxofundus/images/OS0661RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/122.jpg,02_toxofundus/images/122.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/99.jpg,02_toxofundus/images/99.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0606RE.JPG,02_toxofundus/images/OS0606RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/16614.jpg,02_toxofundus/images/16614.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/18103.jpg,02_toxofundus/images/18103.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/17633.jpg,02_toxofundus/images/17633.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/474.jpg,02_toxofundus/images/474.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OD0291RE.JPG,02_toxofundus/images/OD0291RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/17996.jpg,02_toxofundus/images/17996.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0531RE.JPG,02_toxofundus/images/OS0531RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/1833.jpg,02_toxofundus/images/1833.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/17989.jpg,02_toxofundus/images/17989.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/16380.jpg,02_toxofundus/images/16380.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/138.jpg,02_toxofundus/images/138.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OD0601RE.JPG,02_toxofundus/images/OD0601RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/135.jpg,02_toxofundus/images/135.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/107.jpg,02_toxofundus/images/107.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/IM0151RE.JPG,02_toxofundus/images/IM0151RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0395RE.JPG,02_toxofundus/images/OS0395RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/16149.jpg,02_toxofundus/images/16149.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/(742).jpg,02_toxofundus/images/(742).jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/115.jpg,02_toxofundus/images/115.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/2559.jpg,02_toxofundus/images/2559.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center,,test,data/02_toxofundus/02_toxofundus/images/OS0390RE.JPG,02_toxofundus/images/OS0390RE.JPG
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/131.jpg,02_toxofundus/images/131.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/476.jpg,02_toxofundus/images/476.jpg
+02_toxofundus,fundus_toxo_activity_3class,inactive,02_toxofundus:Hospital de Clínicas Medical Center,,test,data/02_toxofundus/02_toxofundus/images/477.jpg,02_toxofundus/images/477.jpg

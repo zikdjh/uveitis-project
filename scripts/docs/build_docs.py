@@ -54,6 +54,7 @@ PAGES = (
     Page(Path("scripts/docs/.html-source/2026-10-27-uveitis-open-data-audit.html"), "2026-10-27-uveitis-open-data-audit.html", "葡萄膜炎开放数据审计", "数据", "在用数据集许可、访问方式、患者级隔离能力与外部候选数据的核验结论", "2026-10-27", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-27-uveitis-data-acquisition.html"), "2026-10-27-uveitis-data-acquisition.html", "葡萄膜炎数据获取与申请材料", "数据", "公开渠道穷尽后的数据补齐路径、Birdshot-WIDE 受控访问申请与联系作者方案", "2026-10-27", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-27-uveitis-focus-training.html"), "2026-10-27-uveitis-focus-training.html", "毒浆体病辅助训练与冻结评估", "训练", "ToxoFundus 与 Open UWF 训练行、一次性冻结评估和晋级边界", "2026-10-27", "html"),
+    Page(Path("scripts/docs/.html-source/2026-10-27-toxo-activity-3class.html"), "2026-10-27-toxo-activity-3class.html", "毒浆体病活动度三分类训练", "训练", "用未消费训练行构建活动度三分类任务、本地 4060 训练与内部开发集读数", "2026-10-27", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-26-modal-training-storage.html"), "2026-10-26-modal-training-storage.html", "Modal 训练存储约定", "基础设施", "Volume 挂载、产物目录、checkpoint 与恢复方式", "2026-10-26", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-26-modal-uploaded-artifacts.html"), "2026-10-26-modal-uploaded-artifacts.html", "Modal 已上传产物", "基础设施", "训练数据卷、模型卷和训练产物卷的实际内容", "2026-10-26", "html"),
     Page(Path("model-training/datasets/extracted/README.md"), "2026-10-26-dataset-index.html", "数据集目录索引", "数据", "已解压数据集的规模、标签、目录和清理后的结构", "2026-10-26", "markdown"),

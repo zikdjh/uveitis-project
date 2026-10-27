@@ -1,0 +1,116 @@
+{
+  "status": "ok",
+  "run_id": "toxo-activity-dev-20261027-01",
+  "task": "fundus_toxo_activity_3class",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\model-training\\datasets\\tasks\\fundus_toxo_activity_3class\\manifest.csv",
+  "manifest_sha256": "da0b57622723caad9024c9996849c046be6f41ff5ca550fb8779e08d5a69d1a0",
+  "adapter": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\fundus-toxo-activity-20261027-01\\best_adapter",
+  "adapter_sha256": "fa48a65f748eb9d2f29e5e2dd24c5b980680200161032b6bd55670aa971c7b5b",
+  "test_rows_read": 66,
+  "test_label_counts": {
+    "active": 14,
+    "healthy": 21,
+    "inactive": 31
+  },
+  "patient_groups": 2,
+  "image_pixels": 16384,
+  "max_length": 256,
+  "metrics": {
+    "loss": 0.07131741461643921,
+    "evaluated": 66,
+    "errors": [],
+    "rows": 66,
+    "accuracy": 0.5606060606060606,
+    "macro_f1": 0.5787037037037036,
+    "json_valid_rate": 1.0,
+    "per_class": {
+      "active": {
+        "precision": 0.35294117647058826,
+        "recall": 0.8571428571428571,
+        "f1": 0.5,
+        "support": 14
+      },
+      "healthy": {
+        "precision": 0.9333333333333333,
+        "recall": 0.6666666666666666,
+        "f1": 0.7777777777777778,
+        "support": 21
+      },
+      "inactive": {
+        "precision": 0.6470588235294118,
+        "recall": 0.3548387096774194,
+        "f1": 0.4583333333333333,
+        "support": 31
+      }
+    },
+    "confusion_matrix": {
+      "active": {
+        "active": 12,
+        "healthy": 1,
+        "inactive": 1
+      },
+      "healthy": {
+        "active": 2,
+        "healthy": 14,
+        "inactive": 5
+      },
+      "inactive": {
+        "active": 20,
+        "healthy": 0,
+        "inactive": 11
+      }
+    },
+    "per_task": {
+      "fundus_toxo_activity_3class": {
+        "samples": 66,
+        "accuracy": 0.5606060606060606,
+        "macro_f1": 0.5787037037037036,
+        "json_valid_rate": 1.0,
+        "per_class": {
+          "active": {
+            "precision": 0.35294117647058826,
+            "recall": 0.8571428571428571,
+            "f1": 0.5,
+            "support": 14
+          },
+          "healthy": {
+            "precision": 0.9333333333333333,
+            "recall": 0.6666666666666666,
+            "f1": 0.7777777777777778,
+            "support": 21
+          },
+          "inactive": {
+            "precision": 0.6470588235294118,
+            "recall": 0.3548387096774194,
+            "f1": 0.4583333333333333,
+            "support": 31
+          }
+        },
+        "confusion_matrix": {
+          "active": {
+            "active": 12,
+            "healthy": 1,
+            "inactive": 1
+          },
+          "healthy": {
+            "active": 2,
+            "healthy": 14,
+            "inactive": 5
+          },
+          "inactive": {
+            "active": 20,
+            "healthy": 0,
+            "inactive": 11
+          }
+        }
+      }
+    }
+  },
+  "peak_allocated_gib": 3.4102187156677246,
+  "peak_reserved_gib": 3.544921875,
+  "total_seconds": 189.9960525000006,
+  "started_at": "2026-10-27T04:07:08.093593+00:00",
+  "finished_at": "2026-10-27T04:10:18.089464+00:00",
+  "policy": "Single evaluation of the validation-selected adapter. Do not tune hyperparameters or checkpoints from these test outputs.",
+  "clinical_status": "research_only_not_validated"
+}

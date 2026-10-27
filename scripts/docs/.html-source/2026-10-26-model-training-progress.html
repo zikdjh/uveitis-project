@@ -41,6 +41,9 @@
   <li>2026-10-27 新增弓形虫病辅助训练：<code>local-4060-uveitis-focus-20261027-01</code> 完成 200/200 步，14 条选择验证达到 macro-F1 <code>1.0</code>、JSON 有效率 <code>100%</code>，但样本量过小，只用于 checkpoint 选择。</li>
   <li>该 adapter 的 ToxoFundus 82 条图像级冻结测试已完成一次：accuracy <code>0.914634</code>、macro-F1 <code>0.907345</code>、JSON 有效率 <code>100%</code>；7 条弓形虫病样本被漏判为 healthy。</li>
   <li>弓形虫病 adapter 判定为 <code>research_auxiliary_only</code>：它不是通用葡萄膜炎模型，测试集没有患者 ID，因此不报告患者级外部验证，也不替换 OCT 第 20 步运行候选。</li>
+  <li>2026-10-27 新增活动度三分类训练：<code>fundus-toxo-activity-20261027-01</code> 在未消费的 330 条训练行上完成 180/180 步，最佳第 125 步；9 条选择验证 macro-F1 <code>1.0</code>，同样只用于 checkpoint 选择。</li>
+  <li>该任务 66 条内部开发集（与训练同分辨率 65,536 像素）读数为 accuracy <code>0.651515</code>、macro-F1 <code>0.667548</code>、JSON 有效率 <code>100%</code>；<code>inactive</code> 31 条中 17 条被误判为 <code>active</code>。</li>
+  <li>活动度三分类判定为 <code>research_auxiliary_only</code>：活动期与陈旧期的区分精度不足，不能接入运行链路的活动度判断，也不能报告为患者级外部验证。</li>
   <li>UWF 实验不改变运行候选：第 20 步 OCT adapter 仍是唯一研究型运行候选，UWF adapter 只保留为审计证据，不接入主链路。单次测试结果已经冻结，不用于继续调参。</li>
   <li>错误来源已复核：第 20 步候选的 53 条错误中，<code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条；相对第 100 步基线，DRUSEN 纠正 38 条是主要收益，同时 CNV 退化 6 条、NORMAL 退化 4 条。</li>
   <li>受控推理 smoke 和真实运行服务烟测已完成：第 20 步候选在四类各 4 条上正确 16/16，JSON 有效率 100%；真实 <code>/v1/judge</code> 冷启动约 22 秒、修正后热请求 <code>3.363</code> 秒，单图峰值保留显存 <code>3.355469 GiB</code>。单张训练图返回 DRUSEN 且置信度为 0，不能作为准确率证据。</li>
@@ -237,6 +240,25 @@
 </table>
 <p>本次 ToxoFundus 测试已消费并冻结，不得用于继续选择学习率、步数、checkpoint 或提示词。该 adapter 可用于“疑似感染性葡萄膜炎辅助分流”的后续研究，但必须保留医生复核和来源限制。完整记录见 <a href="2026-10-27-uveitis-focus-training.html">毒浆体病辅助训练与冻结评估</a>。</p>
 
+<h2>2026-10-27 毒浆体病活动度三分类</h2>
+<p>二分类只能回答“有无病灶”，而原始标签本身带有医生给出的活动度信息。为避免在已消费的 82 条测试行上调参，本轮另建任务 <code>fundus_toxo_activity_3class</code>，只使用二分类任务的 330 条训练行，并从中按类别分层抽出 66 条作为内部开发留出集。</p>
+<table>
+  <thead>
+    <tr><th>项目</th><th>结果</th><th>边界</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>任务与标签</td><td><code>active</code> / <code>inactive</code> / <code>healthy</code>；活动性包含式映射</td><td><code>active/inactive</code> 按发布说明视为存在活动病灶，归入 <code>active</code></td></tr>
+    <tr><td>数据量</td><td>可用 330 条；训练 264 条，内部开发 66 条</td><td>已消费的 82 条二分类测试行整体排除，未读取图像</td></tr>
+    <tr><td>训练 run</td><td><code>fundus-toxo-activity-20261027-01</code>，180/180 步，最佳第 125 步</td><td>本地 4060，Modal 费用 <code>$0.00</code></td></tr>
+    <tr><td>选择验证</td><td>9 条，macro-F1 <code>1.0</code>，JSON 有效率 <code>100%</code>，loss <code>0.011423</code></td><td>样本量过小，只用于 checkpoint 选择</td></tr>
+    <tr><td>内部开发集</td><td>66 条，accuracy <code>0.651515</code>，macro-F1 <code>0.667548</code>，JSON 有效率 <code>100%</code></td><td>图像级切分，<code>external_validation_claim = prohibited_consumed_test</code></td></tr>
+    <tr><td>分辨率敏感度</td><td>16,384 像素 macro-F1 <code>0.578704</code>；65,536 像素 <code>0.667548</code></td><td>两次读数均保留；评估分辨率须与训练一致</td></tr>
+    <tr><td>显存</td><td>训练峰值保留 <code>5.691406 GiB</code>；评估峰值保留 <code>3.648438 GiB</code></td><td>满足本地 8 GB 约束</td></tr>
+    <tr><td>晋级判断</td><td><code>research_auxiliary_only</code></td><td>不替换 OCT 第 20 步运行候选，不在运行链路输出活动期结论</td></tr>
+  </tbody>
+</table>
+<p>主要错误方向是把 <code>inactive</code> 判成 <code>active</code>，同时 <code>active</code> 召回达到 <code>0.929</code>：方向偏保守，但 precision 只有 <code>0.419</code>，不足以支撑活动度判断。66 条内部开发集已经消费，不得再用于调参、选择 checkpoint 或提示词。完整记录见 <a href="2026-10-27-toxo-activity-3class.html">毒浆体病活动度三分类训练</a>。</p>
+
 <h2>Open UWF 700 本地试验</h2>
 <p>本轮补充使用免费可商用的 Open UWF 700（CC BY 4.0，DOI <code>10.6084/m9.figshare.26936446</code>），在本地 RTX 4060 上完成 7 类与葡萄膜炎二分类两项研究实验。图像直接从 <code>model-training/datasets/extracted/14_open_uwf700/</code> 读取，没有复制新增约 24 GB 图像。源 Patient ID 在不同诊断队列中会复用，因此患者组键固定为 <code>14_open_uwf700:&lt;diagnosis&gt;:&lt;Patient ID&gt;</code>。</p>
 <table>
@@ -324,6 +346,8 @@
   <li>真实运行服务在单张 CNV 训练图上返回 DRUSEN、置信度 0、impression 为空；置信度字段尚不能用于自动阈值、自动分诊或排除诊断。</li>
   <li>训练数据包含来源重叠、增强图和缺少患者 ID 的情况，不能把当前指标解释为临床效果。</li>
   <li>下一训练门槛是患者隔离验证数据或明确标签修正，而不是继续增加 epoch、图像像素、训练组权重或训练组偏移。</li>
+  <li>活动度三分类的内部开发集只有 66 条且无患者 ID，<code>inactive</code> 误判为 <code>active</code> 的比例高达 55%；该任务不能用于活动期结论，也不能表述为外部验证。</li>
+  <li>评估入口的默认分辨率曾与训练分辨率不一致（16,384 对 65,536），导致同一 adapter 的 macro-F1 相差 0.089；在默认值对齐前，任何新评估都必须显式传入与训练一致的分辨率。</li>
   <li>补充决策模型缺少真实决策标签和独立评测集，11.10 前默认不启动训练。</li>
   <li>最终交付是“可复现的研究型训练产物”，不是经过临床验证的诊断系统。</li>
 </ul>

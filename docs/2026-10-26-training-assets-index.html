@@ -65,6 +65,10 @@
 <li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：第 20 步选定 OCT 运行候选。</li>
 <li><code>local-4060-uveitis-focus-20261027-01/best_adapter</code>：第 200 步弓形虫病辅助研究 adapter；训练未读取 Toxo 测试行，也未复用 Open UWF 已消费的测试与验证行。</li>
 <li><code>toxo-test-20261027-01/evaluation.json</code>：该 adapter 的一次性 ToxoFundus 82 条图像级冻结评估；accuracy <code>0.914634</code>、macro-F1 <code>0.907345</code>、JSON 有效率 <code>100%</code>，不作为患者级外部验证或通用葡萄膜炎结论。</li>
+<li><code>fundus-toxo-activity-20261027-01/best_adapter</code>：活动度三分类（<code>active</code> / <code>inactive</code> / <code>healthy</code>）研究 adapter，第 125 步最佳点；只使用二分类任务的 330 条训练行，已消费的 82 条测试行整体排除。</li>
+<li><code>toxo-activity-dev-hires-20261027-01/evaluation.json</code>：该 adapter 在 66 条内部开发集、与训练同分辨率 <code>65,536</code> 像素下的唯一主读数；accuracy <code>0.651515</code>、macro-F1 <code>0.667548</code>、JSON 有效率 <code>100%</code>。</li>
+<li><code>toxo-activity-dev-20261027-01/evaluation.json</code>：同一 adapter、同一留出集在默认 <code>16,384</code> 像素下的对照读数（macro-F1 <code>0.578704</code>），用于记录评估分辨率敏感度；该留出集已消费。</li>
+<li><code>model-training/datasets/tasks/fundus_toxo_activity_3class/evidence.json</code>：活动度三分类的训练、两次评估、错误方向和晋级结论汇总。</li>
 <li><code>eval-oct-step20-vs-step100-20261025-01/</code>：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 <code>selection_decision.json</code>。</li>
 <li><code>local-4060-oct-stage2-20261026-01/</code>、<code>local-4060-oct-stage2b-20261026-01/</code>：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。</li>
 <li><code>eval-oct-stage2-20261026-01/stage2_decision.json</code>：第二阶段结论，决定保留第 20 步候选，不提升实验 final adapter。</li>
@@ -94,6 +98,7 @@
 <p>真实运行服务烟测证据位于 <code>runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code>：修正后热请求 <code>3.363 秒</code>，单图峰值保留 <code>3.355469 GiB</code>，8 并发全部返回 HTTP 200，无 OOM。单张 CNV 训练图返回 DRUSEN、置信度 0，仅证明运行链路和结构契约可用。</p>
 <p>Open UWF 7 类与二分类实验均在本机 4060 完成，新增 Modal GPU 费用 <code>$0.00</code>。二分类验证 best step 50 的 accuracy 为 <code>0.684211</code>、macro-F1 为 <code>0.676136</code>，但唯一一次患者隔离测试降至 accuracy <code>0.377778</code>、macro-F1 <code>0.338235</code>；82 个阴性样本中 54 个被误报为阳性。该落差表明当前验证面板和阴性组构成不足以证明特异性，UWF 实验 adapter 不进入运行候选。</p>
 <p>两份 UWF manifest 各 700 行，图像存在性、患者组跨切分、内容去重和 SHA256 已复核：缺图 0、跨切分患者组 0、重复内容 0。患者组键是 <code>14_open_uwf700:&lt;diagnosis&gt;:&lt;Patient ID&gt;</code>；源 Patient ID 不跨诊断队列唯一。测试输出已经消费，不得据其继续调参。</p>
+<p>活动度三分类在上一轮二分类冻结测试消费后另建任务 <code>fundus_toxo_activity_3class</code>：只取二分类任务的 330 条训练行，按类别分层留出 66 条（固定种子 <code>20261027</code>）作为内部开发集，清单 SHA256 <code>da0b57622723caad9024c9996849c046be6f41ff5ca550fb8779e08d5a69d1a0</code>。标签采用活动性包含式映射，训练行里的 <code>active/inactive</code> 与 <code>active/active</code> 一并归入 <code>active</code>。训练 <code>180/180</code> 步、最佳第 125 步，9 条选择验证 macro-F1 <code>1.0</code>；66 条内部开发集主读数为 accuracy <code>0.651515</code>、macro-F1 <code>0.667548</code>、JSON 有效率 <code>100%</code>，其中 <code>inactive</code> 31 条有 17 条被判成 <code>active</code>，<code>active</code> 召回 <code>0.929</code>。该 66 条已消费，判定 <code>research_auxiliary_only</code>，不接入运行链路的活动度判断。评估入口当时的默认分辨率是 <code>16,384</code> 像素，与训练的 <code>65,536</code> 不一致，两次读数都已保留；后续评估必须显式传入与训练一致的分辨率。详见 <code>model-training/datasets/tasks/fundus_toxo_activity_3class/evidence.json</code>。</p>
 <h2>参考材料</h2>
 <p><code>reference/</code> 保存 24 GB GPU 云价格表的 HTML 和 XLSX。价格是历史调研快照，使用前应核对供应商当前报价。</p>
 <h2>完整权重的保存约定</h2>

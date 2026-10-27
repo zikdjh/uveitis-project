@@ -1,0 +1,59 @@
+{
+  "status": "ok",
+  "task": "fundus_toxo_activity_3class",
+  "task_dir": "model-training/datasets/tasks/fundus_toxo_activity_3class",
+  "source": "model-training/datasets/extracted/02_toxofundus",
+  "source_task": "fundus_toxo_binary",
+  "license": "CC BY 4.0",
+  "license_scope": "research and commercial use with attribution",
+  "labels": [
+    "active",
+    "healthy",
+    "inactive"
+  ],
+  "label_mapping": "inclusive_active",
+  "rows": 330,
+  "split_counts": {
+    "test": 66,
+    "train": 264
+  },
+  "label_split_counts": {
+    "test::active": 14,
+    "test::healthy": 21,
+    "test::inactive": 31,
+    "train::active": 54,
+    "train::healthy": 85,
+    "train::inactive": 125
+  },
+  "label_counts": {
+    "active": 68,
+    "healthy": 106,
+    "inactive": 156
+  },
+  "raw_label_counts": {
+    "active": 27,
+    "active/active": 1,
+    "active/inactive": 40,
+    "healthy": 106,
+    "inactive": 156
+  },
+  "source_rows_available": 412,
+  "consumed_test_rows_excluded": 82,
+  "consumed_test_run": "toxo-test-20261027-01",
+  "consumed_test_images_read": false,
+  "patient_id_available": false,
+  "patient_isolated_split": false,
+  "doctor_annotation_evidence": true,
+  "external_validation_claim": "prohibited_consumed_test",
+  "validation_scope": "internal_development_only",
+  "filename_reconciliation": {
+    "2805.jpg": "2809.jpg"
+  },
+  "internal_train_dev_image_overlap": 0,
+  "dev_fraction": 0.2,
+  "split_seed": 20261027,
+  "source_labels_sha256": "7cff5f1c0de4068d7e108c0ff9c0782678aed2ccd0d20e1dcf6455d1ac425834",
+  "source_manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "manifest_sha256": "da0b57622723caad9024c9996849c046be6f41ff5ca550fb8779e08d5a69d1a0",
+  "note": "Built only from the 330 binary-task train rows; the 82-row binary test split is consumed by toxo-test-20261027-01 and is excluded. ToxoFundus has no patient identifiers, so the internal holdout is an image-level development split and cannot be reported as external or patient-isolated validation."
+}
