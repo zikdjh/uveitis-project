@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>跨来源特异性探针与外部验证边界 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-toxo-activity-3class.html">上一份</a>
+    <a href="2026-10-26-modal-training-storage.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>训练</span>
+    <span>2026-10-27</span>
+  </div>
+  <h1>跨来源特异性探针与外部验证边界</h1>
+  <p class="doc-summary">ODIR-5K 正常眼底跨来源假阳性读数，以及外部活动度验证的撤回说明</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-cross-source-specificity.html</code></p>
+  <article class="html-body">
+<p>记录日期：2026-10-27。全部推理在本机 RTX 4060 Laptop 8 GB 上完成，未启动 Modal GPU，新增 Modal 费用为 <code>$0.00</code>。</p>
+
+<h2>背景：外部验证这条路已经关闭</h2>
+<p>活动度三分类的内部开发集已经消费掉，二分类测试集更早就已消费。继续提高可信度的常规做法是取得<strong>患者隔离、医生确认的活动度数据</strong>作为外部验证集，但这类数据无法获得。这意味着：</p>
+<ul>
+  <li>不再等待外部活动度数据，也不再把它列为 11.10 前的待办事项。</li>
+  <li>“外部验证”这一结论在本项目中<strong>永久撤回</strong>，不是暂时挂起。</li>
+  <li>任何以活动度或敏感性为核心的对外表述都不得使用；现有 adapter 只保留研究辅助定位。</li>
+</ul>
+<p>但“没有外部阳性”并不等于“什么都测不了”。仍然可以做一件事：检查模型在<strong>另一个机构、另一种采集条件</strong>的正常眼底上会不会乱报阳性。这是特异性问题，只需要负样本，而这批负样本我们手上就有且从未用过。</p>
+
+<h2>为什么 ODIR-5K 可以用</h2>
+<p>数据源是 ODIR-5K（<code>04_odir5k</code>）。它在训练清单里存在，但任务 <code>fundus_odir_multilabel</code> <strong>从未注册进 <code>PHASE1_TASKS</code></strong>，因此这 2,000 行既没有参与过任何训练，也没有被任何评估读取过，像素是干净的。</p>
+<table>
+  <thead>
+    <tr><th>项目</th><th>结果</th><th>说明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>数据来源</td><td>ODIR-5K，与 ToxoFundus、Open UWF、ZhangLab 均不同源</td><td>CC BY 4.0</td></tr>
+    <tr><td>可用正常行</td><td>946 张（标签 <code>['N']</code>）</td><td>来自 473 个患者组，每患者左右眼各一张</td></tr>
+    <tr><td>抽样方式</td><td>按患者整组抽样 150 个患者，共 300 张</td><td>固定种子 <code>20261028</code>；左右眼不会跨边界拆分</td></tr>
+    <tr><td>实际使用</td><td>300 张全部写入 <code>split=test</code>，一次性读一次</td><td>读完后这 300 行即为已消费</td></tr>
+    <tr><td>提示词与标签</td><td>复用 <code>fundus_toxo_binary</code> 的 <code>healthy</code> 类</td><td>不修改被评估 adapter 的任何推理配置</td></tr>
+  </tbody>
+</table>
+
+<h2>探针结果</h2>
+<p>被评估对象是冻结的弓形虫病二分类 adapter <code>local-4060-uveitis-focus-20261027-01/best_adapter</code>，SHA256 <code>8d10d8a8…8be13</code>，分辨率与训练一致（<code>65,536</code> 像素）。</p>
+<table>
+  <thead>
+    <tr><th>指标</th><th style="text-align:right">数值</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>测试图像</td><td style="text-align:right">300</td></tr>
+    <tr><td>判为 healthy</td><td style="text-align:right">275</td></tr>
+    <tr><td>误判为 toxoplasmosis</td><td style="text-align:right">25</td></tr>
+    <tr><td>图像级假阳性率</td><td style="text-align:right"><code>8.33%</code></td></tr>
+    <tr><td>患者级被标记率（至少一眼）</td><td style="text-align:right"><code>16.00%</code>（24 / 150）</td></tr>
+    <tr><td>双眼同时被标记的患者</td><td style="text-align:right">1</td></tr>
+    <tr><td>左眼 / 右眼假阳性率</td><td style="text-align:right"><code>6.67%</code> / <code>10.00%</code></td></tr>
+    <tr><td>JSON 有效率</td><td style="text-align:right"><code>100%</code></td></tr>
+    <tr><td>运行错误</td><td style="text-align:right">0</td></tr>
+    <tr><td>峰值保留显存 / 耗时</td><td style="text-align:right"><code>4.216797 GiB</code> / <code>1363.43</code> 秒</td></tr>
+  </tbody>
+</table>
+
+<h2>这个数字说明什么</h2>
+<ul>
+  <li>同源冻结测试上这个 adapter 的 macro-F1 是 <code>0.907</code>，看起来已经很好；换到另一个机构的正常眼底，仍然有约 <code>1/12</code> 的图像被判成弓形虫病。</li>
+  <li>误差方向集中在“正常被判成病灶”，也就是偏保守。对筛查类工具来说，这比漏掉病灶更容易被接受，但 <code>8.33%</code> 的假阳性会直接转化为医生复核负担。</li>
+  <li>左右眼差异不大（<code>6.67%</code> 对 <code>10.00%</code>），没有出现明显的单眼系统性偏置；150 个患者里只有 1 人双眼同时被标记，说明误报更接近图像级噪声而非稳定的患者特征。</li>
+  <li>与 Open UWF 的情况一致：验证集表现明显高于跨来源实测。这再次说明小规模同源验证会高估泛化能力。</li>
+  <li>必须强调：这是一个<strong>特异性</strong>读数，不是敏感度读数，因为没有外部阳性样本；它不能用来支持“能识别活动性葡萄膜炎”之类的结论。</li>
+</ul>
+
+<h2>边界与不可宣称项</h2>
+<ul>
+  <li>ODIR 的 <code>N</code> 表示八类目标疾病缺失，不等于“完全无病变的正常眼”，因此 <code>8.33%</code> 是保守上界还是乐观估计无法从本探针判定。</li>
+  <li>读数按图像统计；虽然抽样按患者整组进行，但不能表述为患者隔离验证。</li>
+  <li>这 300 行已经消费，不得用于调参、选择 checkpoint 或提示词，也不得再次报告为新的独立读数。</li>
+  <li>本项目不存在可用的外部活动度阳性集，因此活动度敏感性、活动期判别准确率等指标一律不报告。</li>
+</ul>
+
+<h2>后续</h2>
+<ol>
+  <li>训练侧到此为止：在取得真实病例之前，继续训练既没有合法度量目标，也不会产生新的可信结论。</li>
+  <li>把“活动度外部验证不可获得”作为<strong>已接受的限制</strong>写进交付说明，而不是待办事项。</li>
+  <li>若系统后续进入实际使用，唯一可获得真实独立证据的方式是在运行链路中做<strong>静默取证</strong>：把模型输出与医生最终确认结论并排记录，逐步积累评价集，并在取得授权后使用。</li>
+  <li>运行链路继续按既定设计：微调判断、决策模型、RAG 与网络检索均为可选分支，不可用时跳过且不阻断主链路；所有输出保留医生复核。</li>
+</ol>
+
+<h2>产物与可复现信息</h2>
+<ul>
+  <li>探针清单：<code>model-training/datasets/tasks/fundus_toxo_crosssource_probe/manifest.csv</code>，SHA256 <code>b0168cb6347e658ac387408114ba3c3540ffd68042ae3c99a369460de4cfa893</code>。</li>
+  <li>构建脚本：<code>model-training/scripts/datasets/build_toxo_crosssource_probe.py</code>；审计：<code>model-training/datasets/tasks/fundus_toxo_crosssource_probe/audit.json</code>。</li>
+  <li>评估结果：<code>model-training/assets/qwen3.5-4b/toxo-crosssource-odir-20261027-01/evaluation.json</code>。</li>
+  <li>逐样本预测：<code>model-training/assets/qwen3.5-4b/toxo-crosssource-odir-20261027-01/predictions.json</code>。</li>
+  <li>证据汇总：<code>model-training/datasets/tasks/fundus_toxo_crosssource_probe/evidence.json</code>。</li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>跨来源特异性探针与外部验证边界 · 2026-10-27</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

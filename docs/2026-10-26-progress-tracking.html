@@ -82,6 +82,7 @@
     <tr><td>T-06B6</td><td>UWF 训练入口复现</td><td>完成</td><td>增加任务筛选和显式验证快照；DryRun 精确回放 484/19、415/16，验证哈希 <code>cf103d21...</code>，调度哈希 <code>cae2d1e9...</code>。</td><td>新实验必须带 <code>-Task</code> 与 <code>-SplitSnapshot</code>；不使用冻结测试调参</td><td><code>validation_split.json</code></td></tr>
     <tr><td>T-06B7</td><td>弓形虫病辅助训练与冻结评估</td><td>完成，研究辅助</td><td><code>local-4060-uveitis-focus-20261027-01</code> 完成 200/200 步；14 条选择验证 macro-F1 1.0、JSON 100%；ToxoFundus 82 条图像级冻结测试 accuracy 0.914634、macro-F1 0.907345、JSON 100%；峰值保留 5.691 GiB；Modal 费用 $0。</td><td>测试已冻结；不替换 OCT 运行候选，仅在新增患者隔离病例或医生复核修正集后继续该辅助任务</td><td><code>toxo-test-20261027-01/evaluation.json</code></td></tr>
     <tr><td>T-06B8</td><td>毒浆体病活动度三分类训练</td><td>完成，研究辅助</td><td><code>fundus-toxo-activity-20261027-01</code> 完成 180/180 步；最佳第 125 步，9 条选择验证 macro-F1 1.0、JSON 100%；66 条内部开发集（与训练同分辨率的 65,536 像素）accuracy 0.651515、macro-F1 0.667548、JSON 100%；峰值保留 5.691 GiB；Modal 费用 $0。</td><td>66 条已消费；不得再调参；只有当泛化结论需要活动度时才考虑新患者隔离留出集</td><td><code>model-training/datasets/tasks/fundus_toxo_activity_3class/evidence.json</code></td></tr>
+    <tr><td>T-06B9</td><td>跨来源特异性探针（ODIR-5K）</td><td>完成，研究辅助</td><td>用从未训练、从未评估的 ODIR-5K 正常眼底 150 个患者 / 300 张，对冻结弓形虫病二分类 adapter 做一次性探针：图像级假阳性率 8.33%（25/300），患者级至少一眼被标记 16.00%（24/150），双眼同时被标记仅 1 人，JSON 100%，峰值保留 4.217 GiB，Modal 费用 $0。</td><td>300 行已消费；只作特异性证据，不得表述为外部验证或敏感度结论</td><td><code>model-training/datasets/tasks/fundus_toxo_crosssource_probe/evidence.json</code></td></tr>
     <tr><td>T-06C</td><td>错误来源分析</td><td>完成</td><td>1,000 条中 53 条错误；主要是 <code>NORMAL-&gt;DRUSEN</code> 18、<code>DRUSEN-&gt;CNV</code> 14、<code>CNV-&gt;DME</code> 8；685 组中 50 组有错误，前 10 组占错误约 24.53%。</td><td>后续实验聚焦 NORMAL/DRUSEN 和 CNV/DME，不再盲目增加步数</td><td><code>step20-source-analysis.json</code></td></tr>
     <tr><td>T-07</td><td>本地运行服务</td><td>完成本地烟测</td><td>第 20 步候选四类各 4 条为 16/16；真实 <code>/v1/judge</code> 冷启动约 22 秒，修正后热请求 3.363 秒，单图峰值保留 3.355469 GiB，8 并发全部成功。单张 CNV 训练图返回 DRUSEN、置信度 0，不能作为准确率证据。</td><td>11-01 完成上传目录配置与业务端到端回写</td><td><code>runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code></td></tr>
     <tr><td>T-08</td><td>决策模型门槛复核</td><td>暂缓</td><td>缺少真实脱敏病例、医生处置标签、独立测试集和稳定评测。</td><td>11-03 决定是否进入后续研究</td><td>模型训练进度文档</td></tr>
@@ -109,6 +110,8 @@
     <tr><td>Toxo 辅助冻结测试 macro-F1</td><td>—</td><td>0.907345</td><td>82 条图像级测试，无患者 ID；7 条弓形虫病漏判为 healthy；只作研究辅助，不报告患者级外部验证</td></tr>
     <tr><td>Toxo 活动度三分类内部开发集 macro-F1</td><td>—</td><td>0.667548</td><td>66 条图像级内部开发集，与训练同分辨率；<code>inactive</code> 31 条中 17 条被误判为 <code>active</code>；判定 <code>research_auxiliary_only</code></td></tr>
     <tr><td>Toxo 活动度三分类分辨率敏感度</td><td>—</td><td>0.089</td><td>同 adapter、同留出集在 16,384 与 65,536 像素下 macro-F1 分别为 0.578704 与 0.667548；评估分辨率必须与训练一致</td></tr>
+    <tr><td>Toxo 跨来源假阳性率（图像级）</td><td>0.907345（同源冻结测试）</td><td>0.083333</td><td>另一机构的 300 张正常眼底中 25 张被判为弓形虫病；特异性读数，不是外部验证</td></tr>
+    <tr><td>Toxo 跨来源假阳性率（患者级）</td><td>—</td><td>0.160000</td><td>150 个患者中 24 人至少一眼被标记；双眼同时被标记仅 1 人</td></tr>
     <tr><td>错误类型集中度</td><td>—</td><td>前 10 个错误组占 24.53%</td><td>685 个患者/来源组中 50 组有错误；错误并非完全均匀分散</td></tr>
     <tr><td>四类均衡推理 smoke</td><td>—</td><td>16/16，JSON 100%</td><td>只证明本地链路和四类覆盖，不作为准确率或泛化证据</td></tr>
     <tr><td>推理峰值保留显存</td><td>—</td><td>3.355469 GiB（运行服务）</td><td>满足 8 GB 本地约束；服务已停止，GPU 当前为 0 MiB</td></tr>
@@ -126,6 +129,7 @@
     <tr><td>10-26</td><td>管理员登录、PostgreSQL-only 边界和本地推理服务完成</td><td>不新增训练；保留第 20 步候选</td><td>已通过：运行时测试 10 项、后端契约 2 项、真实 GPU 请求 HTTP 200、8 并发无 OOM 和 31 页 HTML 校验</td></tr>
     <tr><td>10-27</td><td>剩余界面开始收口</td><td>完成弓形虫病辅助训练与 ToxoFundus 图像级冻结评估；继续冻结第 20 步 OCT 候选证据</td><td>已完成：200/200 步；Toxo 测试 accuracy 0.914634、macro-F1 0.907345、JSON 100%，判定 research_auxiliary_only</td></tr>
     <tr><td>10-27</td><td>模型训练证据同步</td><td>在未消费训练行上新建 <code>fundus_toxo_activity_3class</code> 并完成本地训练与一次性内部开发集读数</td><td>已完成：180/180 步；66 条内部开发集 macro-F1 0.667548、JSON 100%；已消费 82 条二分类测试行整体排除</td></tr>
+    <tr><td>10-27</td><td>外部验证路线决策</td><td>确认患者隔离活动度数据不可获得后，用 ODIR-5K 正常眼底做跨来源特异性探针，并撤回外部验证声明</td><td>已完成：300 张、150 患者；图像级假阳性率 8.33%，患者级 16.00%；训练侧停止新增实验</td></tr>
     <tr><td>10-28</td><td>界面、文档和运行边界第一轮冻结</td><td>定义服务级推理请求、超时和失败回退契约</td><td>设计验收通过；本地 smoke 结果可映射到服务契约</td></tr>
     <tr><td>11-01</td><td>模型运行接入后端分析任务</td><td>冻结 adapter 并完成运行路径检查</td><td>请求、超时、回退和结果回写可演示</td></tr>
     <tr><td>11-04</td><td>完成端到端联调和移动端回归</td><td>完成受控推理 smoke</td><td>病例全流程无阻断，错误状态可恢复</td></tr>
@@ -173,6 +177,9 @@
     <tr><td>2026-10-27</td><td>活动度三分类只用二分类任务的训练行构建，已消费的 82 条二分类测试行整体排除。</td><td>该 82 条已由 <code>toxo-test-20261027-01</code> 评估一次；在同一批图像上重建测试集无法声明为独立验证。</td><td>已执行</td></tr>
     <tr><td>2026-10-27</td><td>活动度三分类判定为 <code>research_auxiliary_only</code>，不接入运行链路的活动度判断。</td><td>66 条内部开发集 macro-F1 0.668，<code>inactive</code> 31 条中 17 条被误判为 <code>active</code>；精度不足以支撑活动期结论。</td><td>生效</td></tr>
     <tr><td>2026-10-27</td><td>评估分辨率固定为与训练一致，并保留 16,384 / 65,536 两次读数作为敏感度证据。</td><td>同一 adapter 在两种分辨率下 macro-F1 相差 0.089；先前评估入口默认值与训练配置不一致。</td><td>已执行：<code>evaluate_local_task.py</code> 默认值改为 <code>65,536</code></td></tr>
+    <tr><td>2026-10-27</td><td>撤回外部验证声明：患者隔离、医生确认的活动度数据不可获得，该结论永久不再宣称。</td><td>没有可用的外部活动度阳性集，继续等待数据会占用 11.10 主路径；活动度敏感性无从度量。</td><td>生效</td></tr>
+    <tr><td>2026-10-27</td><td>用 ODIR-5K 从未使用的正常眼底做一次性跨来源特异性探针，替代外部验证的位置。</td><td>该数据既未训练也未评估；特异性只需要负样本，可以在没有外部阳性的前提下给出可核查的泛化落差。</td><td>已执行，300 行已消费</td></tr>
+    <tr><td>2026-10-27</td><td>训练侧停止新增实验；交付口径改为“研究原型 + 已知限制”，后续证据依赖运行链路的静默取证。</td><td>同源数据已全部消费，继续训练没有合法度量目标，也不产生新的可信结论。</td><td>生效</td></tr>
   </tbody>
 </table>
 

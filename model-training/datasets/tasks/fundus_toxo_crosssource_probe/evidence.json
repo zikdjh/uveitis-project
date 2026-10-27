@@ -1,0 +1,53 @@
+{
+  "probe": "fundus_toxo_crosssource_probe",
+  "created": "2026-10-27",
+  "status": "evaluated_once_consumed",
+  "purpose": "cross_source_specificity_only",
+  "adapter": {
+    "run_id": "local-4060-uveitis-focus-20261027-01",
+    "adapter": "best_adapter",
+    "sha256": "8d10d8a81e7915247b9a963e073a92674ab076e37bc12696e4961a55b1c8be13"
+  },
+  "data": {
+    "source_dataset": "ODIR-5K",
+    "source_label": "['N'] (normal)",
+    "patients_available": 473,
+    "patients_sampled": 150,
+    "images": 300,
+    "sampling": "whole patient groups of left+right eye, seed 20261028",
+    "previously_trained_on": false,
+    "previously_evaluated": false,
+    "manifest_sha256": "b0168cb6347e658ac387408114ba3c3540ffd68042ae3c99a369460de4cfa893"
+  },
+  "evaluation": {
+    "run_id": "toxo-crosssource-odir-20261027-01",
+    "image_pixels": 65536,
+    "rows": 300,
+    "predicted_healthy": 275,
+    "predicted_toxoplasmosis": 25,
+    "image_level_false_positive_rate": 0.08333333333333333,
+    "patient_level_flag_rate": 0.16,
+    "patients_flagged_at_least_one_eye": 24,
+    "patients_flagged_both_eyes": 1,
+    "left_eye_false_positive_rate": 0.06666666666666667,
+    "right_eye_false_positive_rate": 0.1,
+    "json_valid_rate": 1.0,
+    "errors": 0,
+    "peak_reserved_gib": 4.216796875,
+    "total_seconds": 1363.4260864999997
+  },
+  "comparison": {
+    "same_source_frozen_test_macro_f1": 0.907345,
+    "same_source_frozen_test_run": "toxo-test-20261027-01",
+    "note": "Same-source frozen test looked strong; a different institution's normals still trigger toxoplasmosis in about 1 of every 12 images."
+  },
+  "external_validation_claim": "prohibited_no_external_positives",
+  "patient_isolated_split": false,
+  "known_limitations": [
+    "Specificity only: there are no external doctor-confirmed toxoplasmosis or uveitis positives in the probe.",
+    "ODIR 'N' means the eight ODIR target diseases are absent; it is not a guarantee of a pathology-free eye.",
+    "The read-out is image-level; patient grouping was used for sampling, not for a patient-isolated claim.",
+    "These 300 rows are consumed and must not be reused for tuning or for a second reported-read."
+  ],
+  "promotion": "research_auxiliary_only"
+}

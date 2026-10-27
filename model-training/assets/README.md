@@ -58,6 +58,8 @@ step 100、200、300 的内部验证 loss 分别为 `0.018165`、`0.020989`、`0
 - `toxo-activity-dev-hires-20261027-01/evaluation.json`：该 adapter 在 66 条内部开发集、与训练同分辨率 `65,536` 像素下的唯一主读数；accuracy `0.651515`、macro-F1 `0.667548`、JSON 有效率 `100%`。
 - `toxo-activity-dev-20261027-01/evaluation.json`：同一 adapter、同一留出集在默认 `16,384` 像素下的对照读数（macro-F1 `0.578704`），用于记录评估分辨率敏感度；该留出集已消费。
 - `model-training/datasets/tasks/fundus_toxo_activity_3class/evidence.json`：活动度三分类的训练、两次评估、错误方向和晋级结论汇总。
+- `toxo-crosssource-odir-20261027-01/evaluation.json`：对同一弓形虫病二分类 adapter 的一次性跨来源特异性探针。使用从未训练也从未评估过的 ODIR-5K 正常眼底，按患者整组抽 150 人共 300 张（种子 `20261028`），图像级假阳性率 `8.33%`（25/300），患者级至少一眼被标记 `16.00%`（24/150），双眼同时被标记仅 1 人，左/右眼 `6.67%` / `10.00%`，JSON 有效率 `100%`。
+- `model-training/datasets/tasks/fundus_toxo_crosssource_probe/evidence.json`：该探针的抽样、边界与“只作特异性、不是外部验证”的声明。
 - `eval-oct-step20-vs-step100-20261025-01/`：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 `selection_decision.json`。
 - `local-4060-oct-stage2-20261026-01/`、`local-4060-oct-stage2b-20261026-01/`：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。
 - `eval-oct-stage2-20261026-01/stage2_decision.json`：第二阶段结论，决定保留第 20 步候选，不提升实验 final adapter。
@@ -99,6 +101,8 @@ Open UWF 7 类与二分类实验均在本机 4060 完成，新增 Modal GPU 费�
 两份 UWF manifest 各 700 行，图像存在性、患者组跨切分、内容去重和 SHA256 已复核：缺图 0、跨切分患者组 0、重复内容 0。患者组键是 `14_open_uwf700:<diagnosis>:<Patient ID>`；源 Patient ID 不跨诊断队列唯一。测试输出已经消费，不得据其继续调参。
 
 活动度三分类在上一轮二分类冻结测试消费后另建任务 `fundus_toxo_activity_3class`：只取二分类任务的 330 条训练行，按类别分层留出 66 条（固定种子 `20261027`）作为内部开发集，清单 SHA256 `da0b57622723caad9024c9996849c046be6f41ff5ca550fb8779e08d5a69d1a0`。标签采用活动性包含式映射，训练行里的 `active/inactive` 与 `active/active` 一并归入 `active`。训练 `180/180` 步、最佳第 125 步，9 条选择验证 macro-F1 `1.0`；66 条内部开发集主读数为 accuracy `0.651515`、macro-F1 `0.667548`、JSON 有效率 `100%`，其中 `inactive` 31 条有 17 条被判成 `active`，`active` 召回 `0.929`。该 66 条已消费，判定 `research_auxiliary_only`，不接入运行链路的活动度判断。评估入口当时的默认分辨率是 `16,384` 像素，与训练的 `65,536` 不一致，两次读数都已保留；该默认值现已改为 `65,536`，历史 `evaluation.json` 里的 `image_pixels` 字段保持不变。详见 `model-training/datasets/tasks/fundus_toxo_activity_3class/evidence.json`。
+
+患者隔离、医生确认的活动度数据确认不可获得，因此**外部验证声明永久撤回**，不再作为待办事项。作为替代，用从未训练、从未评估过的 `04_odir5k`（ODIR-5K）正常眼底做了一次跨来源特异性探针：任务 `fundus_odir_multilabel` 未注册进 `PHASE1_TASKS`，2,000 行像素始终干净；按患者整组抽 150 人共 300 张（种子 `20261028`），对冻结的弓形虫病二分类 adapter 得到图像级假阳性率 `8.33%`（25/300）、患者级至少一眼被标记 `16.00%`（24/150）。同源冻结测试 macro-F1 为 `0.907345`，跨来源仍有约 `1/12` 的正常眼底被误报为病灶，落差与 Open UWF 的表现一致。该探针只提供特异性证据，没有外部阳性样本，不能表述为外部验证或敏感度结论；300 行已消费。详见 `model-training/datasets/tasks/fundus_toxo_crosssource_probe/evidence.json`。
 
 ## 参考材料
 
