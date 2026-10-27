@@ -94,7 +94,7 @@ docker compose up -d postgres redis
 .\.venv\Scripts\uvicorn.exe app.asgi:app --reload --host 127.0.0.1 --port 8000
 ```
 
-后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。管理员账号固定为 `root`，密码由本地忽略的 `backend/.env` 或部署环境变量 `APP_BOOTSTRAP_ADMIN_PASSWORD` 提供；医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
+后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。管理员账号固定为 `root`，`APP_BOOTSTRAP_ADMIN_PASSWORD` 只在首次创建 root 时使用；root 已存在后，重启和应用层操作都不会覆盖密码，唯一变更方式是直接修改数据库中的 `password_hash`。医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
 
 前端：
 

@@ -37,7 +37,7 @@ services:
       APP_DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/postgres
       APP_REDIS_URL: redis://redis:6379/0
       APP_PERCEPTION_SERVICE_URL: http://model-runtime:8010
-      APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:?APP_BOOTSTRAP_ADMIN_PASSWORD is required}
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy

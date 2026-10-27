@@ -124,7 +124,7 @@ class UserStore:
     def ensure_single_admin(
         self,
         username: str,
-        password_hash: str,
+        password_hash: str | None,
         display_name: str,
     ) -> UserRead:
         username = username.strip().lower()
@@ -135,6 +135,8 @@ class UserStore:
                 UserRow.username == username
             ).one_or_none()
             if root is None:
+                if not password_hash:
+                    raise ValueError("root 管理员首次创建必须提供初始密码")
                 root = UserRow(
                     id=str(uuid4()),
                     username=username,
@@ -149,7 +151,6 @@ class UserStore:
             else:
                 root.display_name = display_name
                 root.role = "admin"
-                root.password_hash = password_hash
                 root.is_active = True
             other_admins = session.query(UserRow).filter(
                 UserRow.role == "admin",
@@ -263,7 +264,7 @@ class MemoryUserStore:
     def ensure_single_admin(
         self,
         username: str,
-        password_hash: str,
+        password_hash: str | None,
         display_name: str,
     ) -> UserRead:
         username = username.strip().lower()
@@ -294,9 +295,11 @@ class MemoryUserStore:
                         "permissions": permissions_for_role("admin"),
                     }
                 ),
-                password_hash,
+                current[1],
             )
             return self._users[username][0]
+        if not password_hash:
+            raise ValueError("root 管理员首次创建必须提供初始密码")
         return self.create(username, password_hash, display_name, "admin")
 
     def update(

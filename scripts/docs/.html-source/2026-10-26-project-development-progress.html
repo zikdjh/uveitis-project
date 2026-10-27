@@ -54,7 +54,7 @@
   <li>项目目录完成重组：训练统一放入 <code>model-training/</code>，运行与评估统一放入 <code>model-runtime/</code>，专题文档统一输出为 HTML。</li>
   <li>FastAPI 后端完成病例建档、影像上传、分析任务、医生复核、PostgreSQL 持久化和本地影像读取。</li>
   <li>鉴权与权限体系完成双 Token 无感刷新、访问令牌/刷新令牌轮换、CSRF、登录限流、账号管理、会话撤销和鉴权审计。</li>
-  <li>账号体系收敛为唯一 <code>root</code> 管理员；后台只允许创建医生，系统不提供注册页面或注册 API，root 不能停用、重置或自行改密。</li>
+  <li>账号体系收敛为唯一 <code>root</code> 管理员；后台只允许创建医生，系统不提供注册页面或注册 API，root 不能停用、重置或自行改密，密码只能直接修改数据库。</li>
   <li>医生与管理员使用独立登录页和管理员专用登录 API；管理员后台只使用 PostgreSQL 持久化，应用与测试均不依赖 SQLite。</li>
   <li>生产 ASGI 入口按应用工厂拆分：<code>app.asgi:app</code> 启动时强制要求 PostgreSQL，默认连接超时 5 秒；测试从 <code>app.main:create_app</code> 使用内存仓储，不会触发数据库连接。</li>
   <li>管理员独立登录、角色边界和 PostgreSQL-only 持久化已完成生产构建、隔离数据库契约测试和登录冒烟；真实病例 CSV 仅保留本地并加入忽略规则。</li>

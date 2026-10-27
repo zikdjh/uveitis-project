@@ -199,12 +199,17 @@ class _UnavailableUserStore:
 
 
 def _bootstrap_root_admin(auth_service: AuthService, config) -> None:
-    if not config.bootstrap_admin_password:
+    existing = auth_service.users.get_by_username(ROOT_ADMIN_USERNAME)
+    if existing is None and not config.bootstrap_admin_password:
         raise RuntimeError(
-            "必须配置 APP_BOOTSTRAP_ADMIN_PASSWORD 作为 root 管理员初始密码"
+            "root 管理员首次创建必须配置 APP_BOOTSTRAP_ADMIN_PASSWORD"
         )
     auth_service.users.ensure_single_admin(
         ROOT_ADMIN_USERNAME,
-        auth_service.hash_password(config.bootstrap_admin_password),
+        (
+            auth_service.hash_password(config.bootstrap_admin_password)
+            if config.bootstrap_admin_password
+            else None
+        ),
         ROOT_ADMIN_DISPLAY_NAME,
     )

@@ -504,3 +504,43 @@ def test_bootstrap_creates_only_root_and_demotes_legacy_admin(tmp_path: Path) ->
     assert listed[ROOT_ADMIN_USERNAME].is_root is True
     assert listed["legacy.admin"].role == "doctor"
     assert sum(user.role == "admin" for user in users.list()) == 1
+
+
+def test_existing_root_password_is_only_changed_in_database(tmp_path: Path) -> None:
+    users = MemoryUserStore()
+    users.ensure_single_admin(
+        ROOT_ADMIN_USERNAME,
+        "original-database-hash",
+        "系统管理员",
+    )
+    changed_settings = settings.model_copy(
+        update={"bootstrap_admin_password": "environment-password-ignored"}
+    )
+    create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=MemorySessionStore(),
+        runtime_settings=changed_settings,
+        bootstrap_users=True,
+    )
+    record = users.get_by_username(ROOT_ADMIN_USERNAME)
+    assert record is not None
+    assert record[1] == "original-database-hash"
+
+    empty_settings = settings.model_copy(update={"bootstrap_admin_password": ""})
+    create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=MemorySessionStore(),
+        runtime_settings=empty_settings,
+        bootstrap_users=True,
+    )
+    record = users.get_by_username(ROOT_ADMIN_USERNAME)
+    assert record is not None
+    assert record[1] == "original-database-hash"

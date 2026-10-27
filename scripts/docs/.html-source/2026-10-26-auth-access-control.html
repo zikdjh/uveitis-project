@@ -77,7 +77,7 @@
   <li>系统管理员账号固定为唯一账号 <code>root</code>；启动引导会创建或纠正该账号，并把其他历史管理员降为医生。</li>
   <li>管理员只能创建医生账号，不能从前端或 API 创建第二个管理员、提升医生角色或传入角色字段。</li>
   <li>不提供自助注册入口和注册 API；医生账号只能由管理员开户、启停和重置密码。</li>
-  <li>密码最少 12 位。管理员重置医生密码后撤销该医生全部会话；root 不能停用、重置或自行改密。</li>
+  <li>密码最少 12 位。管理员重置医生密码后撤销该医生全部会话；root 不能停用、重置或自行改密，密码只能由数据库管理员直接更新 <code>password_hash</code>。</li>
   <li>医生不能读取账号列表、管理账号或查看系统基础设施状态。</li>
 </ul>
 
@@ -93,7 +93,7 @@ APP_LOGIN_WINDOW_SECONDS=900
 APP_TRUST_PROXY_HEADERS=false
 APP_COOKIE_SECURE=true
 APP_BOOTSTRAP_ADMIN_PASSWORD=replace-with-root-admin-password</code></pre>
-<p>管理员账号固定为 <code>root</code>，密码只通过部署环境注入；仓库示例不保存真实口令。管理员后台要求配置 <code>APP_DATABASE_URL</code>，缺失时拒绝启动；<code>app.asgi:app</code> 是生产 ASGI 入口，仓储只接受 PostgreSQL。会话和登录限流依赖 Redis，会话数据保存在 Redis，而不是在本地建立第二套数据库。部署环境应启用 HTTPS，保留示例中的 <code>APP_COOKIE_SECURE=true</code>。</p>
+<p>管理员账号固定为 <code>root</code>。<code>APP_BOOTSTRAP_ADMIN_PASSWORD</code> 只在 root 首次创建时使用；账号存在后，环境变量和应用接口都不能覆盖密码，唯一变更方式是直接更新数据库 <code>password_hash</code>。管理员后台要求配置 <code>APP_DATABASE_URL</code>，缺失时拒绝启动；<code>app.asgi:app</code> 是生产 ASGI 入口，仓储只接受 PostgreSQL。会话和登录限流依赖 Redis，会话数据保存在 Redis，而不是在本地建立第二套数据库。部署环境应启用 HTTPS，保留示例中的 <code>APP_COOKIE_SECURE=true</code>。</p>
 
 <h2>主要接口</h2>
 <ul>
