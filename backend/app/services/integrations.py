@@ -12,6 +12,10 @@ import httpx
 from app.core.config import Settings
 from app.schemas.case import CaseRead, Evidence, WebEvidence
 from app.schemas.integrations import IntegrationConfigRead
+from app.core.external_boundary import (
+    assert_external_text,
+    prepare_external_payload,
+)
 from app.services.integration_settings import integration_defaults
 
 
@@ -111,6 +115,55 @@ def _normalize_recommendations(value: Any) -> list[str]:
     return result
 
 
+def _safe_text(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def _safe_judgment(value: dict[str, Any]) -> dict[str, Any]:
+    """Project a model judgment onto the fields allowed to leave the app."""
+
+    return {
+        "label": _safe_text(value.get("label")),
+        "confidence": _confidence(value.get("confidence")),
+        "findings": [
+            {
+                "label": item["label"],
+                "location": item.get("location", ""),
+                "confidence": item["confidence"],
+            }
+            for item in _normalize_findings(value.get("findings"))
+        ],
+    }
+
+
+def _safe_decision(value: dict[str, Any]) -> dict[str, Any]:
+    """Project a decision result onto the fields allowed to leave the app."""
+
+    differential: list[dict[str, Any]] = []
+    for item in value.get("differential") or value.get("differentials") or []:
+        if isinstance(item, dict):
+            label = _safe_text(item.get("label") or item.get("class"))
+            if label:
+                differential.append(
+                    {
+                        "label": label,
+                        "confidence": _confidence(item.get("confidence")),
+                    }
+                )
+    urgency = _safe_text(value.get("urgency") or "unknown").lower()
+    if urgency not in {"low", "medium", "high", "unknown"}:
+        urgency = "unknown"
+    return {
+        "primary_class": _safe_text(
+            value.get("primary_class")
+            or value.get("label")
+        ),
+        "confidence": _confidence(value.get("confidence")),
+        "differential": differential,
+        "urgency": urgency,
+    }
+
+
 class OptionalIntegrations:
     """HTTP adapters for optional model, search and summarization services."""
 
@@ -132,10 +185,8 @@ class OptionalIntegrations:
                     "summary_enabled": self.settings.external_summary_enabled,
                     "summary_base_url": self.settings.external_summary_base_url,
                     "summary_model": self.settings.external_summary_model,
-                    "summary_include_clinical_text": self.settings.external_summary_include_clinical_text,
                     "summary_api_key": self.settings.external_summary_api_key,
                     "web_search_enabled": self.settings.web_search_enabled,
-                    "web_search_include_complaint": self.settings.web_search_include_complaint,
                     "web_search_max_results": self.settings.web_search_max_results,
                     "search_provider_order": [
                         item.strip()
@@ -180,9 +231,6 @@ class OptionalIntegrations:
             "base_url": str(config.get("summary_base_url") or ""),
             "model": str(config.get("summary_model") or ""),
             "api_key": str(config.get("summary_api_key") or ""),
-            "include_clinical_text": bool(
-                config.get("summary_include_clinical_text")
-            ),
         }
 
     def test_summary(self) -> IntegrationTestOutcome:
@@ -591,9 +639,15 @@ class OptionalIntegrations:
         judgment: dict[str, Any],
         decision: dict[str, Any],
     ) -> str:
+        """Build a search query from model labels only.
+
+        The case record is intentionally unused: complaints, history and
+        other patient fields must never reach a third-party search API. The
+        parameter is kept so the call site stays explicit.
+        """
+
+        del case
         terms: list[str] = []
-        if self._config().get("web_search_include_complaint") and case.complaint.strip():
-            terms.append(case.complaint.strip())
         for item in judgment.get("findings", []):
             if isinstance(item, dict) and item.get("label"):
                 terms.append(str(item["label"]))
@@ -619,7 +673,15 @@ class OptionalIntegrations:
         if self.settings.model_mode != "remote" or not config.get("web_search_enabled"):
             return IntegrationResult("skipped", "网络搜索 API 未启用")
         started = time.perf_counter()
-        query = self._search_query(case, judgment, decision)
+        try:
+            query = self._search_query(case, judgment, decision)
+            query = assert_external_text(query, case, service="网络搜索")
+        except Exception as exc:
+            return IntegrationResult(
+                "failed",
+                f"网络搜索已阻止外发: {type(exc).__name__}: {exc}",
+                latency_ms=int((time.perf_counter() - started) * 1000),
+            )
         providers = [str(item).strip().lower() for item in config.get("search_provider_order", []) if str(item).strip()]
         results: list[WebEvidence] = []
         failures: list[str] = []
@@ -858,40 +920,43 @@ class OptionalIntegrations:
         if not self.summary_available:
             return IntegrationResult("skipped", "外部总结 API 未启用")
         started = time.perf_counter()
-        payload: dict[str, Any] = {
-            "judgment": judgment,
-            "decision": decision,
-            "rag_evidence": [
-                item.model_dump(mode="json") for item in evidence[:8]
-            ],
-            "web_evidence": [
-                item.model_dump(mode="json") for item in web_evidence[:8]
-            ],
-        }
         config = self._config()
-        if config.get("summary_include_clinical_text"):
-            payload["clinical_context"] = {
-                "complaint": case.complaint,
-                "medical_history": case.medical_history,
-                "affected_eye": case.affected_eye,
-            }
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You summarize structured ophthalmology research signals. "
-                    "You are not the diagnostician. Do not invent facts, do not "
-                    "make a definitive diagnosis, and do not add patient data. "
-                    "Return compact JSON with keys summary, recommendations, "
-                    "uncertainties, and evidence_ids."
-                ),
-            },
-            {
-                "role": "user",
-                "content": json.dumps(payload, ensure_ascii=False),
-            },
-        ]
+        # Images and the case record never leave the deployment: the payload
+        # carries an explicit allowlist of model output and retrieved evidence
+        # only; upstream dictionaries are never forwarded verbatim.
         try:
+            payload: dict[str, Any] = {
+                "judgment": _safe_judgment(judgment),
+                "decision": _safe_decision(decision),
+                "rag_evidence": [
+                    item.model_dump(mode="json") for item in evidence[:8]
+                ],
+                "web_evidence": [
+                    item.model_dump(mode="json") for item in web_evidence[:8]
+                ],
+            }
+            payload = prepare_external_payload(payload, service="外部总结")
+            assert_external_text(
+                json.dumps(payload, ensure_ascii=False),
+                case,
+                service="外部总结",
+            )
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You summarize structured ophthalmology research signals. "
+                        "You are not the diagnostician. Do not invent facts, do not "
+                        "make a definitive diagnosis, and do not add patient data. "
+                        "Return compact JSON with keys summary, recommendations, "
+                        "uncertainties, and evidence_ids."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(payload, ensure_ascii=False),
+                },
+            ]
             protocol = str(config.get("summary_protocol") or "openai_chat_completions")
             url = str(config.get("summary_base_url") or "").rstrip("/")
             model = str(config.get("summary_model") or "")

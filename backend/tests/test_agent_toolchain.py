@@ -11,6 +11,7 @@ from app.agents.toolchain import (
 from app.core.config import Settings
 from app.schemas.case import CaseRead
 from app.services.analysis import AnalysisService
+from app.core.external_boundary import find_external_violations
 from app.services.integrations import OptionalIntegrations
 
 
@@ -149,10 +150,8 @@ def test_planner_reuses_summary_credentials(monkeypatch) -> None:
     assert plan.steps == ["qwen_judgment"]
     assert plan.rationale == "先做感知判断"
     assert captured["task"] == "plan_tool_chain"
-    assert captured["case_context"] == {
-        "has_images": False,
-        "clinical_text_withheld": True,
-    }
+    assert "case_context" not in captured
+    assert find_external_violations(captured) == []
 
 
 def test_planner_falls_back_when_backend_raises(monkeypatch) -> None:

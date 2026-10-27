@@ -49,7 +49,6 @@ class Settings(BaseSettings):
     summary_timeout_seconds: float = 20.0
     web_search_enabled: bool = False
     web_search_providers: str = "tavily,brave,serper"
-    web_search_include_complaint: bool = False
     web_search_max_results: int = 5
     tavily_api_key: str = ""
     brave_search_api_key: str = ""
@@ -67,7 +66,6 @@ class Settings(BaseSettings):
     external_summary_base_url: str = ""
     external_summary_api_key: str = ""
     external_summary_model: str = ""
-    external_summary_include_clinical_text: bool = False
     integration_secret_key: str = ""
     vector_collection_name: str = "uveitis_knowledge"
     vector_dimension: int = 1024

@@ -41,11 +41,9 @@ class IntegrationConfigRead(BaseModel):
     summary_protocol: SummaryProtocol = "openai_chat_completions"
     summary_base_url: str = ""
     summary_model: str = ""
-    summary_include_clinical_text: bool = False
     summary_api_key_configured: bool = False
     summary_api_key_hint: str = ""
     web_search_enabled: bool = False
-    web_search_include_complaint: bool = False
     web_search_max_results: int = Field(default=5, ge=1, le=10)
     search_provider_order: list[SearchProvider] = Field(
         default_factory=lambda: [
@@ -85,11 +83,9 @@ class IntegrationConfigUpdate(BaseModel):
     summary_protocol: SummaryProtocol | None = None
     summary_base_url: str | None = Field(default=None, max_length=1000)
     summary_model: str | None = Field(default=None, max_length=200)
-    summary_include_clinical_text: bool | None = None
     summary_api_key: str | None = Field(default=None, max_length=4000)
     clear_summary_api_key: bool = False
     web_search_enabled: bool | None = None
-    web_search_include_complaint: bool | None = None
     web_search_max_results: int | None = Field(default=None, ge=1, le=10)
     search_provider_order: list[SearchProvider] | None = None
     tavily_api_key: str | None = Field(default=None, max_length=4000)

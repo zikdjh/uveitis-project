@@ -97,7 +97,6 @@ def test_agentscope_backend_returns_structured_plan(monkeypatch) -> None:
         {
             "task": "plan_tool_chain",
             "tool_chain": skill_catalog(_availability()),
-            "case_context": {"has_images": True},
             "instructions": ["Select only available skills."],
         }
     )

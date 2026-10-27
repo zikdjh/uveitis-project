@@ -61,7 +61,7 @@
     <tr><td><code>auth</code></td><td><code>root.password_hash</code></td><td>root 的 Argon2 哈希，AES-GCM 加密保存；<code>t_user.f_password_hash</code> 只保留占位值。</td></tr>
     <tr><td><code>integration</code></td><td><code>summary.base_url</code>、<code>summary.model</code>、<code>summary.protocol</code></td><td>外部总结模型的请求路径、模型名和接口协议。</td></tr>
     <tr><td><code>integration</code></td><td><code>summary.api_key</code></td><td>外部总结 API Key 密文。</td></tr>
-    <tr><td><code>integration</code></td><td><code>search.provider_order</code>、<code>search.max_results</code>、<code>search.include_complaint</code></td><td>网络搜索运行参数。</td></tr>
+    <tr><td><code>integration</code></td><td><code>search.provider_order</code>、<code>search.max_results</code></td><td>网络搜索运行参数；不保存“发送主诉”一类开关，病例与影像外发由代码硬边界禁止。</td></tr>
     <tr><td><code>integration</code></td><td><code>search.*.api_key</code>、<code>search.google_cse.id</code>、<code>search.searxng.base_url</code></td><td>各搜索服务商连接凭据或地址。</td></tr>
     <tr><td><code>integration</code></td><td><code>_meta.revision</code>、<code>_meta.updated_at</code>、<code>_meta.updated_by</code></td><td>配置版本与审计元数据，不包含秘密值。</td></tr>
   </tbody>

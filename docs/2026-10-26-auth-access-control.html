@@ -53,7 +53,7 @@
   <li><code>PATCH /api/v1/admin/integrations</code> 使用 <code>expected_revision</code> 防止两名管理员互相覆盖，冲突返回 <code>409</code>。</li>
   <li>密钥使用 AES-GCM 加密后保存在 <code>t_data_dictionary.f_value_text</code>；生产环境缺少 <code>APP_INTEGRATION_SECRET_KEY</code> 时拒绝启动。</li>
   <li>更新配置写入 <code>integration_config_update</code> 审计事件；审计只记录版本和操作，不记录密钥。</li>
-  <li>外部总结的临床文本发送和网络搜索的主诉发送是两个独立开关，默认关闭；原始影像不发送。</li>
+  <li>外部总结和网络搜索均不接受病例字段或影像字段；系统不提供相关发送开关，所有外发载荷在 HTTP 调用前经过硬校验。</li>
 </ul>
 
 <h2>登录与会话</h2>

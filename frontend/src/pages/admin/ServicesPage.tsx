@@ -147,9 +147,7 @@ type Draft = {
   summaryProtocol: SummaryProtocol;
   summaryBaseUrl: string;
   summaryModel: string;
-  summaryIncludeClinicalText: boolean;
   webSearchEnabled: boolean;
-  webSearchIncludeComplaint: boolean;
   webSearchMaxResults: number;
   googleCseId: string;
   searxngBaseUrl: string;
@@ -184,9 +182,7 @@ function draftFromConfig(config: IntegrationConfig): Draft {
     summaryProtocol: config.summary_protocol,
     summaryBaseUrl: config.summary_base_url,
     summaryModel: config.summary_model,
-    summaryIncludeClinicalText: config.summary_include_clinical_text,
     webSearchEnabled: config.web_search_enabled,
-    webSearchIncludeComplaint: config.web_search_include_complaint,
     webSearchMaxResults: config.web_search_max_results,
     googleCseId: config.google_cse_id,
     searxngBaseUrl: config.searxng_base_url,
@@ -202,9 +198,7 @@ function buildUpdate(draft: Draft, revision: number) {
     summary_protocol: draft.summaryProtocol,
     summary_base_url: draft.summaryBaseUrl.trim(),
     summary_model: draft.summaryModel.trim(),
-    summary_include_clinical_text: draft.summaryIncludeClinicalText,
     web_search_enabled: draft.webSearchEnabled,
-    web_search_include_complaint: draft.webSearchIncludeComplaint,
     web_search_max_results: draft.webSearchMaxResults,
     google_cse_id: draft.googleCseId.trim(),
     searxng_base_url: draft.searxngBaseUrl.trim(),
@@ -503,11 +497,7 @@ export default function AntdServicesPage() {
                 unCheckedChildren="停用"
               />
               <Text>启用外部总结</Text>
-              <Switch
-                checked={draft.summaryIncludeClinicalText}
-                onChange={(checked) => changeDraft((current) => ({ ...current, summaryIncludeClinicalText: checked }))}
-              />
-              <Text>发送主诉与病史</Text>
+              <Text type="secondary">仅发送模型标签、置信度和检索证据；病例与影像不会外发</Text>
             </Space>
           </div>
         </Card>
@@ -554,12 +544,8 @@ export default function AntdServicesPage() {
             </Form>
           </div>
 
-          <div className="antd-service-section antd-complaint-option">
-            <Switch
-              checked={draft.webSearchIncludeComplaint}
-              onChange={(checked) => changeDraft((current) => ({ ...current, webSearchIncludeComplaint: checked }))}
-            />
-            <Text>搜索词包含主诉</Text>
+          <div className="antd-service-section">
+            <Text type="secondary">搜索词仅使用模型标签，不包含病例、影像或未受控文本</Text>
           </div>
 
           {searchChecks && (

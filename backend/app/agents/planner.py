@@ -22,6 +22,7 @@ from app.agents.toolchain import (
 )
 from app.core.config import Settings
 from app.schemas.case import CaseRead
+from app.core.external_boundary import assert_external_payload
 
 
 PlannerBackend = Callable[[dict[str, Any]], dict[str, Any]]
@@ -63,7 +64,6 @@ class PlannerCredentials:
     base_url: str
     api_key: str
     model: str
-    include_clinical_text: bool
     source: str
 
     @property
@@ -103,9 +103,6 @@ class ToolchainPlanner:
                 base_url=self.settings.agent_planner_base_url,
                 api_key=self.settings.agent_planner_api_key,
                 model=self.settings.agent_planner_model,
-                include_clinical_text=(
-                    self.settings.external_summary_include_clinical_text
-                ),
                 source="agent_planner_settings",
             )
 
@@ -122,9 +119,6 @@ class ToolchainPlanner:
                     base_url=str(snapshot.get("base_url") or ""),
                     api_key=str(snapshot.get("api_key") or ""),
                     model=str(snapshot.get("model") or ""),
-                    include_clinical_text=bool(
-                        snapshot.get("include_clinical_text")
-                    ),
                     source="external_summary_settings",
                 )
 
@@ -133,7 +127,6 @@ class ToolchainPlanner:
             base_url=self.settings.agent_planner_base_url,
             api_key="",
             model=self.settings.agent_planner_model,
-            include_clinical_text=False,
             source="unconfigured",
         )
 
@@ -146,6 +139,14 @@ class ToolchainPlanner:
         case: CaseRead,
         availability: dict[str, SkillAvailability],
     ) -> ToolchainPlan:
+        """Plan the optional chain for one case.
+
+        ``case`` is accepted for call-site symmetry only. It is never part of
+        the planner request: planning works from the skill catalog and the
+        computed availability, so no case field reaches the planner model.
+        """
+
+        del case
         notes: list[str] = []
 
         if not self.settings.agent_orchestration_enabled:
@@ -169,7 +170,10 @@ class ToolchainPlanner:
 
         backend = self._backend or self._agentscope_backend
         try:
-            request = self._build_request(case, availability, credentials)
+            request = assert_external_payload(
+                self._build_request(availability),
+                service="工具链规划",
+            )
             proposal = backend(request)
             if not isinstance(proposal, dict):
                 raise ValueError("规划器未返回 JSON 对象")
@@ -207,31 +211,25 @@ class ToolchainPlanner:
 
     def _build_request(
         self,
-        case: CaseRead,
         availability: dict[str, SkillAvailability],
-        credentials: PlannerCredentials,
     ) -> dict[str, Any]:
+        """Build the planner request.
+
+        The planner is an external model call, so the request carries the
+        skill catalog and selection rules only. Case fields and images are
+        never included, not even as a boolean hint about image presence.
+        """
+
         request: dict[str, Any] = {
             "task": "plan_tool_chain",
             "tool_chain": skill_catalog(availability),
             "instructions": [
                 "Select only skills whose available flag is true.",
                 "Return the selected keys in canonical order.",
-                "Do not diagnose, and do not ask for patient identifiers.",
+                "Plan from the catalog and availability only.",
+                "Do not diagnose, and do not ask for case or patient data.",
             ],
         }
-        if credentials.include_clinical_text:
-            request["case_context"] = {
-                "has_images": bool(case.images),
-                "complaint": case.complaint,
-                "medical_history": case.medical_history,
-                "affected_eye": case.affected_eye,
-            }
-        else:
-            request["case_context"] = {
-                "has_images": bool(case.images),
-                "clinical_text_withheld": True,
-            }
         return request
 
     # ------------------------------------------------------------------
