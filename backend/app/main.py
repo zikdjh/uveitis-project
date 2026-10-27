@@ -3,12 +3,27 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.auth_policy import ROOT_ADMIN_DISPLAY_NAME, ROOT_ADMIN_USERNAME
+from app.core.auth_policy import (
+    ROOT_ADMIN_DISPLAY_NAME,
+    ROOT_ADMIN_USERNAME,
+    ROOT_PASSWORD_SENTINEL,
+)
 from app.core.config import settings
+from app.core.secret_box import SecretBox
 from app.db import PostgresCaseStore
 from app.db.audit import AuthAuditStore
+from app.db.data_dictionary import DataDictionaryStore, MemoryDataDictionaryStore
 from app.db.users import UserStore
-from app.routers import admin, auth, cases, health, integrations, knowledge, system
+from app.routers import (
+    admin,
+    auth,
+    cases,
+    data_dictionary,
+    health,
+    integrations,
+    knowledge,
+    system,
+)
 from app.services import (
     AnalysisService,
     AuthService,
@@ -19,7 +34,6 @@ from app.services import (
 from app.services.integration_settings import (
     MemoryIntegrationSettingsStore,
     PostgresIntegrationSettingsStore,
-    SecretBox,
 )
 
 
@@ -64,6 +78,7 @@ def create_app(
     audit_store=None,
     bootstrap_users: bool = True,
     runtime_settings=None,
+    data_dictionary_store=None,
 ) -> FastAPI:
     runtime_settings = runtime_settings or settings
     app = FastAPI(
@@ -126,21 +141,6 @@ def create_app(
         app.state.audit_store = MemoryAuthAuditStore()
     else:
         app.state.audit_store = AuthAuditStore(case_store._session_factory)
-    app.state.auth_service = AuthService(
-        app.state.user_store,
-        app.state.redis_store,
-        runtime_settings.access_token_ttl_seconds,
-        runtime_settings.refresh_token_ttl_seconds,
-        refresh_grace_seconds=runtime_settings.refresh_rotation_grace_seconds,
-        login_max_attempts=runtime_settings.login_max_attempts,
-        login_window_seconds=runtime_settings.login_window_seconds,
-    )
-    if bootstrap_users:
-        _bootstrap_root_admin(app.state.auth_service, runtime_settings)
-    app.state.knowledge_store = KnowledgeStore(
-        runtime_settings,
-        vector_dir or runtime_settings.vector_dir,
-    )
     secret_material = runtime_settings.integration_secret_key or (
         "development-only-integration-secret-change-me"
     )
@@ -152,14 +152,45 @@ def create_app(
             "生产环境必须配置 APP_INTEGRATION_SECRET_KEY（至少 32 个字符）"
         )
     secret_box = SecretBox(secret_material)
+    if data_dictionary_store is not None:
+        app.state.data_dictionary_store = data_dictionary_store
+    elif not use_environment_database:
+        app.state.data_dictionary_store = MemoryDataDictionaryStore(secret_box)
+    else:
+        app.state.data_dictionary_store = DataDictionaryStore(
+            case_store._session_factory,
+            secret_box,
+        )
+    app.state.auth_service = AuthService(
+        app.state.user_store,
+        app.state.redis_store,
+        runtime_settings.access_token_ttl_seconds,
+        runtime_settings.refresh_token_ttl_seconds,
+        refresh_grace_seconds=runtime_settings.refresh_rotation_grace_seconds,
+        login_max_attempts=runtime_settings.login_max_attempts,
+        login_window_seconds=runtime_settings.login_window_seconds,
+        credential_store=app.state.data_dictionary_store,
+    )
+    if bootstrap_users:
+        _bootstrap_root_admin(
+            app.state.auth_service,
+            runtime_settings,
+            app.state.data_dictionary_store,
+        )
+    app.state.knowledge_store = KnowledgeStore(
+        runtime_settings,
+        vector_dir or runtime_settings.vector_dir,
+    )
     if not use_environment_database:
         app.state.integration_settings_store = MemoryIntegrationSettingsStore(
-            secret_box
+            secret_box,
+            dictionary_store=app.state.data_dictionary_store,
         )
     else:
         app.state.integration_settings_store = PostgresIntegrationSettingsStore(
             case_store._session_factory,
             secret_box,
+            dictionary_store=app.state.data_dictionary_store,
         )
     app.state.integrations = OptionalIntegrations(
         runtime_settings,
@@ -174,6 +205,7 @@ def create_app(
     app.include_router(health.router)
     app.include_router(auth.router)
     app.include_router(admin.router)
+    app.include_router(data_dictionary.router)
     app.include_router(integrations.router)
     app.include_router(cases.router)
     app.include_router(system.router)
@@ -198,18 +230,42 @@ class _UnavailableUserStore:
         return None
 
 
-def _bootstrap_root_admin(auth_service: AuthService, config) -> None:
+def _bootstrap_root_admin(auth_service: AuthService, config, credential_store) -> None:
     existing = auth_service.users.get_by_username(ROOT_ADMIN_USERNAME)
-    if existing is None and not config.bootstrap_admin_password:
+    stored_hash = credential_store.get_value(
+        "auth",
+        "root.password_hash",
+        default="",
+    )
+    legacy_hash = existing[1] if existing is not None else ""
+    if not stored_hash and legacy_hash and legacy_hash != ROOT_PASSWORD_SENTINEL:
+        credential_store.set_value(
+            "auth",
+            "root.password_hash",
+            legacy_hash,
+            value_type="secret",
+            description="root 管理员密码哈希",
+            actor_id="root-bootstrap",
+        )
+        stored_hash = legacy_hash
+    elif not stored_hash and config.bootstrap_admin_password:
+        stored_hash = auth_service.hash_password(config.bootstrap_admin_password)
+        credential_store.set_value(
+            "auth",
+            "root.password_hash",
+            stored_hash,
+            value_type="secret",
+            description="root 管理员密码哈希",
+            actor_id="root-bootstrap",
+        )
+    if not stored_hash and existing is None:
         raise RuntimeError(
             "root 管理员首次创建必须配置 APP_BOOTSTRAP_ADMIN_PASSWORD"
         )
-    auth_service.users.ensure_single_admin(
+    root = auth_service.users.ensure_single_admin(
         ROOT_ADMIN_USERNAME,
-        (
-            auth_service.hash_password(config.bootstrap_admin_password)
-            if config.bootstrap_admin_password
-            else None
-        ),
+        ROOT_PASSWORD_SENTINEL,
         ROOT_ADMIN_DISPLAY_NAME,
     )
+    if existing is None or legacy_hash != ROOT_PASSWORD_SENTINEL:
+        auth_service.users.clear_password_hash(ROOT_ADMIN_USERNAME)

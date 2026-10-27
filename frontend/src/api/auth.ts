@@ -13,7 +13,9 @@ export type Permission =
   | "integration:manage"
   | "user:read"
   | "user:manage"
-  | "audit:read";
+  | "audit:read"
+  | "data_dictionary:read"
+  | "data_dictionary:manage";
 
 export type User = {
   id: string;

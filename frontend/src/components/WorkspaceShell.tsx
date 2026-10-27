@@ -1,6 +1,7 @@
 import {
   Activity,
   ClipboardList,
+  Database,
   FileText,
   KeyRound,
   LayoutDashboard,
@@ -57,6 +58,7 @@ const navigation: Record<WorkspaceMode, NavGroup[]> = {
         { to: "/admin/cases", label: "病例审计", icon: ClipboardList },
         { to: "/admin/knowledge", label: "知识库", icon: FileText },
         { to: "/admin/services", label: "服务配置", icon: Settings2 },
+        { to: "/admin/data-dictionary", label: "数据字典", icon: Database },
       ],
     },
     {

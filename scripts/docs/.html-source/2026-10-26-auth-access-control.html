@@ -51,7 +51,7 @@
 <ul>
   <li><code>GET /api/v1/admin/integrations</code> 只返回公开展示字段；API Key 只返回是否已配置与固定文案提示，不回传原文或可逆值。</li>
   <li><code>PATCH /api/v1/admin/integrations</code> 使用 <code>expected_revision</code> 防止两名管理员互相覆盖，冲突返回 <code>409</code>。</li>
-  <li>密钥使用 AES-GCM 加密后保存在 <code>integration_settings</code>；生产环境缺少 <code>APP_INTEGRATION_SECRET_KEY</code> 时拒绝启动。</li>
+  <li>密钥使用 AES-GCM 加密后保存在 <code>t_data_dictionary.f_value_text</code>；生产环境缺少 <code>APP_INTEGRATION_SECRET_KEY</code> 时拒绝启动。</li>
   <li>更新配置写入 <code>integration_config_update</code> 审计事件；审计只记录版本和操作，不记录密钥。</li>
   <li>外部总结的临床文本发送和网络搜索的主诉发送是两个独立开关，默认关闭；原始影像不发送。</li>
 </ul>
@@ -77,12 +77,12 @@
   <li>系统管理员账号固定为唯一账号 <code>root</code>；启动引导会创建或纠正该账号，并把其他历史管理员降为医生。</li>
   <li>管理员只能创建医生账号，不能从前端或 API 创建第二个管理员、提升医生角色或传入角色字段。</li>
   <li>不提供自助注册入口和注册 API；医生账号只能由管理员开户、启停和重置密码。</li>
-  <li>密码最少 12 位。管理员重置医生密码后撤销该医生全部会话；root 不能停用、重置或自行改密，密码只能由数据库管理员直接更新 <code>password_hash</code>。</li>
+  <li>密码最少 12 位。管理员重置医生密码后撤销该医生全部会话；root 不能停用、重置或自行改密，密码只能由数据库管理员直接更新 <code>t_data_dictionary.f_value_text</code> 中的加密记录。</li>
   <li>医生不能读取账号列表、管理账号或查看系统基础设施状态。</li>
 </ul>
 
 <h2>审计与安全响应头</h2>
-<p>登录成功、登录失败、登录限流、令牌刷新、退出、会话撤销、密码修改、密码重置、账号创建和账号更新均写入 <code>auth_audit_events</code>。API 响应统一加入 <code>X-Content-Type-Options</code>、<code>X-Frame-Options</code>、<code>Referrer-Policy</code> 和权限策略响应头；鉴权与管理接口不缓存。</p>
+<p>登录成功、登录失败、登录限流、令牌刷新、退出、会话撤销、密码修改、密码重置、账号创建和账号更新均写入 <code>t_auth_audit_event</code>。API 响应统一加入 <code>X-Content-Type-Options</code>、<code>X-Frame-Options</code>、<code>Referrer-Policy</code> 和权限策略响应头；鉴权与管理接口不缓存。</p>
 
 <h2>运行配置</h2>
 <pre><code>APP_ACCESS_TOKEN_TTL_SECONDS=900
@@ -93,7 +93,7 @@ APP_LOGIN_WINDOW_SECONDS=900
 APP_TRUST_PROXY_HEADERS=false
 APP_COOKIE_SECURE=true
 APP_BOOTSTRAP_ADMIN_PASSWORD=replace-with-root-admin-password</code></pre>
-<p>管理员账号固定为 <code>root</code>。<code>APP_BOOTSTRAP_ADMIN_PASSWORD</code> 只在 root 首次创建时使用；账号存在后，环境变量和应用接口都不能覆盖密码，唯一变更方式是直接更新数据库 <code>password_hash</code>。管理员后台要求配置 <code>APP_DATABASE_URL</code>，缺失时拒绝启动；<code>app.asgi:app</code> 是生产 ASGI 入口，仓储只接受 PostgreSQL。会话和登录限流依赖 Redis，会话数据保存在 Redis，而不是在本地建立第二套数据库。部署环境应启用 HTTPS，保留示例中的 <code>APP_COOKIE_SECURE=true</code>。</p>
+<p>管理员账号固定为 <code>root</code>。<code>APP_BOOTSTRAP_ADMIN_PASSWORD</code> 只在 root 首次创建时使用；账号存在后，环境变量和应用接口都不能覆盖密码，唯一变更方式是直接更新 <code>t_data_dictionary</code> 中的加密哈希。管理员后台要求配置 <code>APP_DATABASE_URL</code>，缺失时拒绝启动；<code>app.asgi:app</code> 是生产 ASGI 入口，仓储只接受 PostgreSQL。会话和登录限流依赖 Redis，会话数据保存在 Redis，而不是在本地建立第二套数据库。部署环境应启用 HTTPS，保留示例中的 <code>APP_COOKIE_SECURE=true</code>。</p>
 
 <h2>主要接口</h2>
 <ul>

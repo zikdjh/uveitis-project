@@ -6,6 +6,8 @@ from uuid import uuid4
 
 import pytest
 
+from app.core.secret_box import SecretBox
+from app.db.data_dictionary import DataDictionaryStore
 from app.db.postgres import PostgresCaseStore
 from app.schemas.case import CaseRead
 
@@ -41,3 +43,32 @@ def test_postgres_case_store_round_trip() -> None:
     assert loaded.id == case.id
     assert loaded.status == "created"
     assert store.ping() is True
+
+
+def test_postgres_data_dictionary_encrypts_and_redacts_secrets() -> None:
+    case_store = PostgresCaseStore(TEST_DATABASE_URL, connect_timeout_seconds=3)
+    dictionary = DataDictionaryStore(
+        case_store._session_factory,
+        SecretBox("postgres-contract-integration-master-key-32chars"),
+    )
+    namespace = f"contract-{uuid4().hex}"
+    entry = dictionary.set_value(
+        namespace,
+        "api.key",
+        "contract-secret-value",
+        value_type="secret",
+        description="PostgreSQL 数据字典契约测试",
+        actor_id="contract-test",
+    )
+
+    assert entry.is_secret is True
+    assert entry.value is None
+    assert dictionary.get_value(namespace, "api.key") == "contract-secret-value"
+    stored = dictionary.get_namespace_values(namespace, reveal_secret=False)
+    assert stored["api.key"] != "contract-secret-value"
+    assert dictionary.delete_value(
+        namespace,
+        "api.key",
+        actor_id="contract-test",
+        expected_revision=entry.revision,
+    )

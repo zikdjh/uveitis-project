@@ -58,6 +58,7 @@ PAGES = (
     Page(Path("scripts/docs/.html-source/2026-10-23-agent-execution-chain.html"), "2026-10-23-agent-execution-chain.html", "智能体执行链路规划", "系统设计", "病例接入、影像感知、检索、决策和安全复核链路", "2026-10-23", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-26-auth-access-control.html"), "2026-10-26-auth-access-control.html", "系统鉴权与权限体系", "系统设计", "双令牌无感刷新、角色权限、CSRF、账号管理和审计边界", "2026-10-26", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-27-auth-account-provisioning.html"), "2026-10-27-auth-account-provisioning.html", "唯一管理员与医生账号开户流程", "系统设计", "固定 root 管理员、管理员创建医生、禁止自助注册及前后端接口边界", "2026-10-27", "html"),
+    Page(Path("scripts/docs/.html-source/2026-10-27-data-dictionary.html"), "2026-10-27-data-dictionary.html", "数据字典与运行配置存储", "系统设计", "外部模型路径、API Key、运行参数和 root 密码哈希的加密存储边界", "2026-10-27", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-23-cn-eye-datasets.html"), "2026-10-23-cn-eye-datasets.html", "国内眼科数据集核验", "数据", "国内开源免费眼科数据集的许可、规模和可用性", "2026-10-23", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-23-intl-eye-datasets.html"), "2026-10-23-intl-eye-datasets.html", "国外眼科数据集核验", "数据", "国外开源免费眼科数据集的许可、规模和申请方式", "2026-10-23", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-23-manual-download-links.html"), "2026-10-23-manual-download-links.html", "手动下载清单", "数据", "数据集条目页、下载入口与人工下载状态", "2026-10-23", "html"),

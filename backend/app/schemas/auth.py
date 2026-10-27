@@ -21,6 +21,8 @@ class Permission(StrEnum):
     USER_READ = "user:read"
     USER_MANAGE = "user:manage"
     AUDIT_READ = "audit:read"
+    DATA_DICTIONARY_READ = "data_dictionary:read"
+    DATA_DICTIONARY_MANAGE = "data_dictionary:manage"
 
 
 ROLE_PERMISSIONS: dict[UserRole, frozenset[Permission]] = {

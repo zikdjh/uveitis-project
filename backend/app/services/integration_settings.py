@@ -1,16 +1,29 @@
 from __future__ import annotations
 
-import base64
-import hashlib
 import json
-import os
 from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import inspect, text
 
-from app.schemas.integrations import IntegrationConfigRead, IntegrationConfigUpdate, SECRET_KEYS
+from app.core.secret_box import SecretBox
+from app.db.data_dictionary import (
+    REVISION_KEY,
+    UPDATED_AT_KEY,
+    UPDATED_BY_KEY,
+    DataDictionaryStore,
+    DictionaryValue,
+    MemoryDataDictionaryStore,
+)
+from app.db.naming import column_name, table_name
+from app.schemas.integrations import (
+    IntegrationConfigRead,
+    IntegrationConfigUpdate,
+    SECRET_KEYS,
+)
 
+
+INTEGRATION_NAMESPACE = "integration"
 
 DEFAULT_PROVIDER_ORDER = [
     "tavily",
@@ -52,6 +65,65 @@ CLEAR_FIELD_BY_KEY = {
     key: f"clear_{key}" for key in SECRET_KEYS
 }
 
+FIELD_TO_DICTIONARY_KEY = {
+    "summary_enabled": "summary.enabled",
+    "summary_protocol": "summary.protocol",
+    "summary_base_url": "summary.base_url",
+    "summary_model": "summary.model",
+    "summary_include_clinical_text": "summary.include_clinical_text",
+    "summary_api_key": "summary.api_key",
+    "web_search_enabled": "search.enabled",
+    "web_search_include_complaint": "search.include_complaint",
+    "web_search_max_results": "search.max_results",
+    "search_provider_order": "search.provider_order",
+    "google_cse_id": "search.google_cse.id",
+    "searxng_base_url": "search.searxng.base_url",
+    "tavily_api_key": "search.tavily.api_key",
+    "brave_search_api_key": "search.brave.api_key",
+    "serper_api_key": "search.serper.api_key",
+    "google_cse_api_key": "search.google_cse.api_key",
+    "bing_search_api_key": "search.bing.api_key",
+    "exa_api_key": "search.exa.api_key",
+    "perplexity_api_key": "search.perplexity.api_key",
+}
+
+FIELD_VALUE_TYPES = {
+    **{
+        key: "bool"
+        for key in (
+            "summary_enabled",
+            "summary_include_clinical_text",
+            "web_search_enabled",
+            "web_search_include_complaint",
+        )
+    },
+    "web_search_max_results": "int",
+    "search_provider_order": "json",
+    **{key: "secret" for key in SECRET_KEYS},
+}
+
+FIELD_DESCRIPTIONS = {
+    "summary_enabled": "外部总结模型总开关",
+    "summary_protocol": "外部总结接口协议",
+    "summary_base_url": "外部总结 API 请求根路径",
+    "summary_model": "外部总结模型名称",
+    "summary_include_clinical_text": "是否向外部总结发送主诉与病史",
+    "summary_api_key": "外部总结 API Key",
+    "web_search_enabled": "网络搜索总开关",
+    "web_search_include_complaint": "搜索词是否包含主诉",
+    "web_search_max_results": "单次搜索最大结果数",
+    "search_provider_order": "搜索服务商尝试顺序",
+    "google_cse_id": "Google CSE 搜索引擎 ID",
+    "searxng_base_url": "SearXNG 服务地址",
+    "tavily_api_key": "Tavily API Key",
+    "brave_search_api_key": "Brave Search API Key",
+    "serper_api_key": "Serper API Key",
+    "google_cse_api_key": "Google CSE API Key",
+    "bing_search_api_key": "Bing Search API Key",
+    "exa_api_key": "Exa API Key",
+    "perplexity_api_key": "Perplexity API Key",
+}
+
 
 def integration_defaults() -> dict[str, Any]:
     return {
@@ -64,57 +136,68 @@ def integration_defaults() -> dict[str, Any]:
     }
 
 
-class SecretBox:
-    """Authenticated AES-GCM encryption with a deployment-held master key."""
-
-    def __init__(self, key_material: str) -> None:
-        if len(key_material) < 32:
-            raise ValueError("APP_INTEGRATION_SECRET_KEY 至少需要 32 个字符")
-        self.key = hashlib.sha256(key_material.encode("utf-8")).digest()
-
-    def encrypt(self, value: str) -> str:
-        if not value:
-            return ""
-        try:
-            from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-        except ImportError as exc:
-            raise RuntimeError("服务配置加密依赖 cryptography 未安装") from exc
-        nonce = os.urandom(12)
-        ciphertext = AESGCM(self.key).encrypt(nonce, value.encode("utf-8"), None)
-        return base64.urlsafe_b64encode(nonce + ciphertext).decode("ascii")
-
-    def decrypt(self, value: str) -> str:
-        if not value:
-            return ""
-        try:
-            from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-        except ImportError as exc:
-            raise RuntimeError("服务配置加密依赖 cryptography 未安装") from exc
-        try:
-            packed = base64.urlsafe_b64decode(value.encode("ascii"))
-            return AESGCM(self.key).decrypt(
-                packed[:12], packed[12:], None
-            ).decode("utf-8")
-        except Exception as exc:
-            raise ValueError("服务密钥解密失败，请检查 APP_INTEGRATION_SECRET_KEY") from exc
+def _raw_from_values(values: dict[str, Any]) -> dict[str, Any]:
+    raw = integration_defaults()
+    for field, dictionary_key in FIELD_TO_DICTIONARY_KEY.items():
+        if dictionary_key in values:
+            raw[field] = values[dictionary_key]
+    raw["revision"] = int(values.get(REVISION_KEY, 0) or 0)
+    raw["updated_at"] = values.get(UPDATED_AT_KEY)
+    raw["updated_by"] = str(values.get(UPDATED_BY_KEY, "") or "")
+    return raw
 
 
-class MemoryIntegrationSettingsStore:
-    """In-memory integration configuration used by isolated tests."""
+def _mutations_from_payload(
+    payload: IntegrationConfigUpdate,
+) -> dict[str, DictionaryValue]:
+    values = payload.model_dump(exclude_none=True, exclude_unset=True)
+    values.pop("expected_revision", None)
+    mutations: dict[str, DictionaryValue] = {}
+    for secret_key in SECRET_KEYS:
+        secret = values.pop(secret_key, None)
+        should_clear = bool(values.pop(CLEAR_FIELD_BY_KEY[secret_key], False))
+        dictionary_key = FIELD_TO_DICTIONARY_KEY[secret_key]
+        if secret is not None and str(secret).strip():
+            mutations[dictionary_key] = DictionaryValue(
+                value=str(secret).strip(),
+                value_type="secret",
+                description=FIELD_DESCRIPTIONS[secret_key],
+            )
+        elif should_clear:
+            mutations[dictionary_key] = DictionaryValue(delete=True)
+    for field, value in values.items():
+        dictionary_key = FIELD_TO_DICTIONARY_KEY.get(field)
+        if dictionary_key is None:
+            continue
+        mutations[dictionary_key] = DictionaryValue(
+            value=value,
+            value_type=FIELD_VALUE_TYPES.get(field),  # type: ignore[arg-type]
+            description=FIELD_DESCRIPTIONS.get(field, field),
+        )
+    return mutations
 
-    def __init__(self, secret_box: SecretBox) -> None:
-        self.secret_box = secret_box
-        self._payload = integration_defaults()
+
+class _DictionaryIntegrationSettingsStore:
+    dictionary_store: Any
 
     def raw(self) -> dict[str, Any]:
-        return dict(self._payload)
+        return _raw_from_values(
+            self.dictionary_store.get_namespace_values(
+                INTEGRATION_NAMESPACE,
+                reveal_secret=False,
+            )
+        )
 
     def public(self) -> IntegrationConfigRead:
         return _public_view(self.raw())
 
     def secrets(self) -> dict[str, str]:
+        values = self.dictionary_store.get_namespace_values(
+            INTEGRATION_NAMESPACE,
+            reveal_secret=True,
+        )
         return {
-            key: self.secret_box.decrypt(str(self._payload.get(key) or ""))
+            key: str(values.get(FIELD_TO_DICTIONARY_KEY[key], "") or "")
             for key in SECRET_KEYS
         }
 
@@ -124,140 +207,123 @@ class MemoryIntegrationSettingsStore:
         *,
         actor_id: str,
     ) -> IntegrationConfigRead:
-        current = dict(self._payload)
-        revision = int(current.get("revision", 0))
+        current_revision = int(
+            self.dictionary_store.get_value(
+                INTEGRATION_NAMESPACE,
+                REVISION_KEY,
+                default=0,
+            )
+            or 0
+        )
         if (
             payload.expected_revision is not None
-            and payload.expected_revision != revision
+            and payload.expected_revision != current_revision
         ):
             raise ValueError("配置已被其他管理员更新，请刷新后重试")
-        values = payload.model_dump(exclude_none=True, exclude_unset=True)
-        for key in SECRET_KEYS:
-            value = values.pop(key, None)
-            if value is not None and str(value).strip():
-                current[key] = self.secret_box.encrypt(str(value).strip())
-            if values.pop(CLEAR_FIELD_BY_KEY[key], False):
-                current[key] = ""
-        values.pop("expected_revision", None)
-        current.update(values)
-        current["revision"] = revision + 1
-        current["updated_at"] = datetime.now(UTC).isoformat()
-        current["updated_by"] = actor_id
-        self._payload = current
-        return _public_view(current)
+        self.dictionary_store.update_namespace(
+            INTEGRATION_NAMESPACE,
+            _mutations_from_payload(payload),
+            actor_id=actor_id,
+            expected_revision=current_revision,
+        )
+        return self.public()
 
 
-class PostgresIntegrationSettingsStore:
-    def __init__(self, session_factory, secret_box: SecretBox) -> None:
+class MemoryIntegrationSettingsStore(_DictionaryIntegrationSettingsStore):
+    """In-memory integration settings backed by a data dictionary."""
+
+    def __init__(
+        self,
+        secret_box: SecretBox,
+        *,
+        dictionary_store=None,
+    ) -> None:
+        self.dictionary_store = (
+            dictionary_store or MemoryDataDictionaryStore(secret_box)
+        )
+
+
+class PostgresIntegrationSettingsStore(_DictionaryIntegrationSettingsStore):
+    def __init__(
+        self,
+        session_factory,
+        secret_box: SecretBox,
+        *,
+        dictionary_store=None,
+    ) -> None:
         self._session_factory = session_factory
-        self.secret_box = secret_box
-        self._ensure_schema()
+        self.dictionary_store = (
+            dictionary_store or DataDictionaryStore(session_factory, secret_box)
+        )
+        self._migrate_legacy_settings()
 
-    def _ensure_schema(self) -> None:
-        engine = self._session_factory.kw["bind"]
-        inspector = inspect(engine)
-        if "integration_settings" in inspector.get_table_names():
+    def _migrate_legacy_settings(self) -> None:
+        current_revision = self.dictionary_store.get_value(
+            INTEGRATION_NAMESPACE,
+            REVISION_KEY,
+            default=None,
+        )
+        if current_revision is not None:
             return
-        with engine.begin() as connection:
-            connection.execute(
-                text(
-                    """
-                    CREATE TABLE integration_settings (
-                        id INTEGER PRIMARY KEY,
-                        revision INTEGER NOT NULL,
-                        payload_json TEXT NOT NULL,
-                        updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
-                        updated_by VARCHAR(36) NOT NULL
-                    )
-                    """
-                )
-            )
-
-    def _row(self) -> dict[str, Any] | None:
+        engine = self._session_factory.kw["bind"]
+        legacy_table = table_name("integration_setting")
+        if legacy_table not in inspect(engine).get_table_names():
+            return
+        payload_column = column_name("payload_json")
+        id_column = column_name("id")
         with self._session_factory() as session:
             row = session.execute(
                 text(
-                    "SELECT payload_json FROM integration_settings WHERE id = 1"
+                    f'SELECT "{payload_column}" FROM "{legacy_table}" '
+                    f'WHERE "{id_column}" = 1'
                 )
             ).fetchone()
         if row is None:
-            return None
-        value = row[0]
-        return json.loads(value if isinstance(value, str) else str(value))
-
-    def raw(self) -> dict[str, Any]:
-        return self._row() or integration_defaults()
-
-    def public(self) -> IntegrationConfigRead:
-        return _public_view(self.raw())
-
-    def secrets(self) -> dict[str, str]:
-        raw = self.raw()
-        return {
-            key: self.secret_box.decrypt(str(raw.get(key) or ""))
-            for key in SECRET_KEYS
-        }
-
-    def update(
-        self,
-        payload: IntegrationConfigUpdate,
-        *,
-        actor_id: str,
-    ) -> IntegrationConfigRead:
-        with self._session_factory.begin() as session:
-            row = session.execute(
-                text(
-                    "SELECT payload_json FROM integration_settings "
-                    "WHERE id = 1 FOR UPDATE"
-                )
-            ).fetchone()
-            current = (
-                json.loads(row[0]) if row else integration_defaults()
+            return
+        raw_value = row[0]
+        legacy = json.loads(
+            raw_value if isinstance(raw_value, str) else str(raw_value)
+        )
+        values: dict[str, DictionaryValue] = {}
+        for field, dictionary_key in FIELD_TO_DICTIONARY_KEY.items():
+            value = legacy.get(field)
+            if field in SECRET_KEYS:
+                if str(value or "").strip():
+                    values[dictionary_key] = DictionaryValue(
+                        value="",
+                        value_type="secret",
+                        description=FIELD_DESCRIPTIONS[field],
+                        stored_value=str(value),
+                    )
+                continue
+            if value is None:
+                continue
+            values[dictionary_key] = DictionaryValue(
+                value=value,
+                value_type=FIELD_VALUE_TYPES.get(field),  # type: ignore[arg-type]
+                description=FIELD_DESCRIPTIONS.get(field, field),
             )
-            current_revision = int(current.get("revision", 0))
-            if (
-                payload.expected_revision is not None
-                and payload.expected_revision != current_revision
-            ):
-                raise ValueError("配置已被其他管理员更新，请刷新后重试")
-            values = payload.model_dump(exclude_none=True, exclude_unset=True)
-            for key in SECRET_KEYS:
-                value = values.pop(key, None)
-                if value is not None and str(value).strip():
-                    current[key] = self.secret_box.encrypt(str(value).strip())
-                if values.pop(CLEAR_FIELD_BY_KEY[key], False):
-                    current[key] = ""
-            values.pop("expected_revision", None)
-            current.update(values)
-            current["revision"] = current_revision + 1
-            current["updated_at"] = datetime.now(UTC).isoformat()
-            current["updated_by"] = actor_id
-            session.execute(
-                text(
-                    """
-                    INSERT INTO integration_settings
-                        (id, revision, payload_json, updated_at, updated_by)
-                    VALUES (1, :revision, :payload, :updated_at, :updated_by)
-                    ON CONFLICT (id) DO UPDATE SET
-                        revision = EXCLUDED.revision,
-                        payload_json = EXCLUDED.payload_json,
-                        updated_at = EXCLUDED.updated_at,
-                        updated_by = EXCLUDED.updated_by
-                    """
-                ),
-                {
-                    "revision": current["revision"],
-                    "payload": json.dumps(current, ensure_ascii=False),
-                    "updated_at": datetime.now(UTC),
-                    "updated_by": actor_id,
-                },
-            )
-        return _public_view(current)
+        updated_at = None
+        if legacy.get("updated_at"):
+            try:
+                updated_at = datetime.fromisoformat(str(legacy["updated_at"]))
+            except ValueError:
+                updated_at = None
+        self.dictionary_store.update_namespace(
+            INTEGRATION_NAMESPACE,
+            values,
+            actor_id=str(legacy.get("updated_by") or "legacy-migration"),
+            revision=int(legacy.get("revision", 0) or 0),
+            updated_at=updated_at or datetime.now(UTC),
+            updated_by=str(legacy.get("updated_by") or "legacy-migration"),
+        )
 
 
 def _public_view(raw: dict[str, Any]) -> IntegrationConfigRead:
     payload = dict(PUBLIC_DEFAULTS)
-    payload.update({key: raw.get(key, value) for key, value in PUBLIC_DEFAULTS.items()})
+    payload.update(
+        {key: raw.get(key, value) for key, value in PUBLIC_DEFAULTS.items()}
+    )
     for key, configured_key in SECRET_FIELD_BY_KEY.items():
         encrypted = str(raw.get(key) or "")
         payload[configured_key] = bool(encrypted)

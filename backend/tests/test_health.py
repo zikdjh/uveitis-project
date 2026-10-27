@@ -4,9 +4,11 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from app.core.auth_policy import ROOT_ADMIN_USERNAME
+from app.core.auth_policy import ROOT_ADMIN_USERNAME, ROOT_PASSWORD_SENTINEL
 from app.core.config import settings
+from app.core.secret_box import SecretBox
 from app.db.audit import MemoryAuthAuditStore
+from app.db.data_dictionary import MemoryDataDictionaryStore
 from app.main import create_app
 from app.db.users import MemoryUserStore
 from app.services.redis_store import MemorySessionStore
@@ -508,6 +510,9 @@ def test_bootstrap_creates_only_root_and_demotes_legacy_admin(tmp_path: Path) ->
 
 def test_existing_root_password_is_only_changed_in_database(tmp_path: Path) -> None:
     users = MemoryUserStore()
+    dictionary = MemoryDataDictionaryStore(
+        SecretBox("test-integration-master-key-at-least-32-characters")
+    )
     users.ensure_single_admin(
         ROOT_ADMIN_USERNAME,
         "original-database-hash",
@@ -525,10 +530,12 @@ def test_existing_root_password_is_only_changed_in_database(tmp_path: Path) -> N
         redis_store=MemorySessionStore(),
         runtime_settings=changed_settings,
         bootstrap_users=True,
+        data_dictionary_store=dictionary,
     )
     record = users.get_by_username(ROOT_ADMIN_USERNAME)
     assert record is not None
-    assert record[1] == "original-database-hash"
+    assert record[1] == ROOT_PASSWORD_SENTINEL
+    assert dictionary.get_value("auth", "root.password_hash") == "original-database-hash"
 
     empty_settings = settings.model_copy(update={"bootstrap_admin_password": ""})
     create_app(
@@ -540,7 +547,90 @@ def test_existing_root_password_is_only_changed_in_database(tmp_path: Path) -> N
         redis_store=MemorySessionStore(),
         runtime_settings=empty_settings,
         bootstrap_users=True,
+        data_dictionary_store=dictionary,
     )
     record = users.get_by_username(ROOT_ADMIN_USERNAME)
     assert record is not None
-    assert record[1] == "original-database-hash"
+    assert record[1] == ROOT_PASSWORD_SENTINEL
+    assert dictionary.get_value("auth", "root.password_hash") == "original-database-hash"
+
+
+def test_bootstrap_encrypts_root_password_hash_in_data_dictionary(
+    tmp_path: Path,
+) -> None:
+    users = MemoryUserStore()
+    dictionary = MemoryDataDictionaryStore(
+        SecretBox("test-integration-master-key-at-least-32-characters")
+    )
+    bootstrap_settings = settings.model_copy(
+        update={"bootstrap_admin_password": "root-bootstrap-password"}
+    )
+    app = create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=MemorySessionStore(),
+        runtime_settings=bootstrap_settings,
+        bootstrap_users=True,
+        data_dictionary_store=dictionary,
+    )
+
+    record = users.get_by_username(ROOT_ADMIN_USERNAME)
+    assert record is not None
+    assert record[1] == ROOT_PASSWORD_SENTINEL
+    entries = dictionary.list_entries(namespace="auth")
+    entry = next(item for item in entries if item.key == "root.password_hash")
+    assert entry.is_secret is True
+    assert entry.value is None
+    assert "root-bootstrap-password" not in str(
+        dictionary.get_namespace_values("auth", reveal_secret=False)
+    )
+
+    client = TestClient(app)
+    login = client.post(
+        "/api/v1/auth/admin/login",
+        json={"username": ROOT_ADMIN_USERNAME, "password": "root-bootstrap-password"},
+    )
+    assert login.status_code == 200
+
+
+def test_data_dictionary_api_is_admin_only_and_redacts_secrets(tmp_path: Path) -> None:
+    doctor = make_client(tmp_path)
+    assert doctor.get("/api/v1/admin/data-dictionary").status_code == 403
+
+    admin = make_client(tmp_path, role="admin")
+    created = admin.patch(
+        "/api/v1/admin/integrations",
+        json={
+            "summary_api_key": "dictionary-secret-value",
+            "expected_revision": 0,
+        },
+    )
+    assert created.status_code == 200
+
+    entries = admin.get(
+        "/api/v1/admin/data-dictionary",
+        params={"namespace": "integration"},
+    )
+    assert entries.status_code == 200
+    secret = next(
+        item for item in entries.json() if item["key"] == "summary.api_key"
+    )
+    assert secret["configured"] is True
+    assert secret["value"] is None
+    assert "dictionary-secret-value" not in entries.text
+
+    protected = admin.put(
+        "/api/v1/admin/data-dictionary/integration/summary.api_key",
+        json={"value": "replacement", "expected_revision": secret["revision"]},
+    )
+    assert protected.status_code == 409
+
+    writable = admin.put(
+        "/api/v1/admin/data-dictionary/runtime/sample.flag",
+        json={"value": True, "value_type": "bool", "description": "接口测试项"},
+    )
+    assert writable.status_code == 200
+    assert writable.json()["value"] is True

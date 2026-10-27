@@ -434,7 +434,7 @@
 <h2>8. 管理员配置与权限</h2>
 <p>外部 API 与网络搜索 API 的配置权限只授予系统管理员。管理端提供 <code>integration:read</code> 与 <code>integration:manage</code> 对应能力；医生可通过 <code>system:read</code> 查看总结与搜索是否启用，但不能查看 API 地址、模型、服务商顺序、掩码提示或修改任何服务配置。</p>
 <ul>
-<li>配置保存在 PostgreSQL 的 <code>integration_settings</code>，管理员后台不使用 SQLite 持久化。</li>
+<li>配置保存在 PostgreSQL 的 <code>t_data_dictionary</code>，旧版 <code>t_integration_setting</code> 仅保留迁移兼容；管理员后台不使用 SQLite 持久化。</li>
 <li>API Key、搜索 Key 和自建实例凭据只写不读；返回字段仅表示“已配置”，不回传加密值或密钥原文。</li>
 <li>每次更新递增 <code>revision</code> 并写入审计事件 <code>integration_config_update</code>；并发覆盖使用 409 冲突保护。</li>
 <li>配置检查需要管理员权限；搜索服务会执行真实连通性检查，总结服务只校验协议、地址、模型与密钥是否齐全。检查失败只显示错误，不把密钥写入日志、审计详情或前端响应。</li>

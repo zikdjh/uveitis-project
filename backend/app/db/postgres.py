@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 from typing import Protocol
 
-from sqlalchemy import create_engine, func, select, text
+from sqlalchemy import create_engine, func, inspect, select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.db.models import Base, CaseRow
+from app.db.naming import LEGACY_COLUMN_RENAMES, LEGACY_TABLE_RENAMES
 from app.schemas.case import CaseRead, CaseStats
 
 
@@ -19,6 +20,39 @@ class CaseRepository(Protocol):
     def list(self, limit: int = 100) -> list[CaseRead]: ...
 
     def stats(self) -> CaseStats: ...
+
+
+def migrate_database_identifiers(engine: Engine) -> None:
+    """Rename pre-standard tables and columns before SQLAlchemy creates new ones."""
+    table_names = set(inspect(engine).get_table_names())
+    with engine.begin() as connection:
+        for legacy_name, current_name in LEGACY_TABLE_RENAMES.items():
+            if legacy_name not in table_names or current_name in table_names:
+                continue
+            connection.execute(
+                text(f'ALTER TABLE "{legacy_name}" RENAME TO "{current_name}"')
+            )
+            table_names.remove(legacy_name)
+            table_names.add(current_name)
+
+    for table, column_mapping in LEGACY_COLUMN_RENAMES.items():
+        if table not in table_names:
+            continue
+        column_names = {
+            column["name"] for column in inspect(engine).get_columns(table)
+        }
+        with engine.begin() as connection:
+            for legacy_name, current_name in column_mapping.items():
+                if legacy_name not in column_names or current_name in column_names:
+                    continue
+                connection.execute(
+                    text(
+                        f'ALTER TABLE "{table}" '
+                        f'RENAME COLUMN "{legacy_name}" TO "{current_name}"'
+                    )
+                )
+                column_names.remove(legacy_name)
+                column_names.add(current_name)
 
 
 class PostgresCaseStore:
@@ -36,6 +70,7 @@ class PostgresCaseStore:
             class_=Session,
             expire_on_commit=False,
         )
+        migrate_database_identifiers(self.engine)
         Base.metadata.create_all(self.engine)
 
     def save(self, case: CaseRead) -> CaseRead:

@@ -5,8 +5,9 @@ from uuid import uuid4
 
 from sqlalchemy import inspect, text
 
-from app.core.auth_policy import ROOT_ADMIN_USERNAME
+from app.core.auth_policy import ROOT_ADMIN_USERNAME, ROOT_PASSWORD_SENTINEL
 from app.db.models import UserRow
+from app.db.naming import column_name, table_name
 from app.schemas.auth import UserRead, UserRole, permissions_for_role
 
 
@@ -40,14 +41,16 @@ class UserStore:
     def _ensure_schema(self) -> None:
         engine = self._session_factory.kw["bind"]
         inspector = inspect(engine)
-        if "users" not in inspector.get_table_names():
+        table = table_name("user")
+        if table not in inspector.get_table_names():
             return
-        columns = {column["name"] for column in inspector.get_columns("users")}
-        if "is_active" not in columns:
+        columns = {column["name"] for column in inspector.get_columns(table)}
+        is_active_column = column_name("is_active")
+        if is_active_column not in columns:
             with engine.begin() as connection:
                 connection.execute(
                     text(
-                        "ALTER TABLE users ADD COLUMN is_active "
+                        f'ALTER TABLE "{table}" ADD COLUMN "{is_active_column}" '
                         "BOOLEAN NOT NULL DEFAULT TRUE"
                     )
                 )
@@ -186,6 +189,16 @@ class UserStore:
             if row is None:
                 return None
             row.password_hash = password_hash
+        return self._from_row(row)
+
+    def clear_password_hash(self, username: str) -> UserRead | None:
+        with self._session_factory.begin() as session:
+            row = session.query(UserRow).filter(
+                UserRow.username == username.strip().lower()
+            ).one_or_none()
+            if row is None:
+                return None
+            row.password_hash = ROOT_PASSWORD_SENTINEL
         return self._from_row(row)
 
     def count_active_admins(self, excluding_user_id: str | None = None) -> int:
@@ -331,6 +344,14 @@ class MemoryUserStore:
                 self._users[username] = (user, password_hash)
                 return user
         return None
+
+    def clear_password_hash(self, username: str) -> UserRead | None:
+        username = username.strip().lower()
+        current = self._users.get(username)
+        if current is None:
+            return None
+        self._users[username] = (current[0], ROOT_PASSWORD_SENTINEL)
+        return current[0]
 
     def count_active_admins(self, excluding_user_id: str | None = None) -> int:
         return sum(

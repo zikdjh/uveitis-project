@@ -108,7 +108,7 @@ Copy-Item .env.example .env
 docker compose up -d postgres redis
 .\.venv\Scripts\uvicorn.exe app.asgi:app --reload --host 127.0.0.1 --port 8000
 </code></pre>
-<p>后端只使用 PostgreSQL 持久化；<code>APP_DATABASE_URL</code> 未配置或数据库不可达时启动失败，不会回落到 SQLite。<code>APP_DATABASE_CONNECT_TIMEOUT_SECONDS</code> 默认 5 秒。<code>app.main:create_app</code> 是应用工厂，ASGI 启动入口为 <code>app.asgi:app</code>。管理员账号固定为 <code>root</code>，<code>APP_BOOTSTRAP_ADMIN_PASSWORD</code> 只在首次创建 root 时使用；root 已存在后，重启和应用层操作都不会覆盖密码，唯一变更方式是直接修改数据库中的 <code>password_hash</code>。医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 <code>/admin/login</code>、<code>/login</code> 进入，两个入口在服务端分别校验角色。</p>
+<p>后端只使用 PostgreSQL 持久化；<code>APP_DATABASE_URL</code> 未配置或数据库不可达时启动失败，不会回落到 SQLite。<code>APP_DATABASE_CONNECT_TIMEOUT_SECONDS</code> 默认 5 秒。<code>app.main:create_app</code> 是应用工厂，ASGI 启动入口为 <code>app.asgi:app</code>。数据库表和字段统一使用 <code>t_${业务名}</code>、<code>f_${业务名}</code>。管理员账号固定为 <code>root</code>，<code>APP_BOOTSTRAP_ADMIN_PASSWORD</code> 只在首次创建 root 时使用；root 已存在后，重启和应用层操作都不会覆盖密码，唯一变更方式是直接修改 <code>t_data_dictionary</code> 中的加密哈希记录。医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 <code>/admin/login</code>、<code>/login</code> 进入，两个入口在服务端分别校验角色。</p>
 <p>前端：</p>
 <pre><code class="language-powershell">cd frontend
 npm install

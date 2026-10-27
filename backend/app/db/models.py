@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+from app.db.naming import column_name, table_name
 
 
 class Base(DeclarativeBase):
@@ -11,37 +13,96 @@ class Base(DeclarativeBase):
 
 
 class UserRow(Base):
-    __tablename__ = "users"
+    __tablename__ = table_name("user")
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    username: Mapped[str] = mapped_column(String(100), unique=True, index=True)
-    display_name: Mapped[str] = mapped_column(String(100))
-    role: Mapped[str] = mapped_column(String(20), index=True)
-    password_hash: Mapped[str] = mapped_column(Text)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    id: Mapped[str] = mapped_column(column_name("id"), String(36), primary_key=True)
+    username: Mapped[str] = mapped_column(
+        column_name("username"), String(100), unique=True, index=True
+    )
+    display_name: Mapped[str] = mapped_column(column_name("display_name"), String(100))
+    role: Mapped[str] = mapped_column(column_name("role"), String(20), index=True)
+    password_hash: Mapped[str] = mapped_column(column_name("password_hash"), Text)
+    is_active: Mapped[bool] = mapped_column(
+        column_name("is_active"), Boolean, default=True, nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        column_name("created_at"), DateTime(timezone=True)
+    )
+
+
+class DataDictionaryRow(Base):
+    __tablename__ = table_name("data_dictionary")
+    __table_args__ = (
+        UniqueConstraint(
+            column_name("namespace"),
+            column_name("key"),
+            name="uq_t_data_dictionary_f_namespace_f_key",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(column_name("id"), String(36), primary_key=True)
+    namespace: Mapped[str] = mapped_column(
+        column_name("namespace"), String(100), index=True
+    )
+    key: Mapped[str] = mapped_column(column_name("key"), String(200), index=True)
+    value_type: Mapped[str] = mapped_column(column_name("value_type"), String(20))
+    value_text: Mapped[str] = mapped_column(column_name("value_text"), Text)
+    is_secret: Mapped[bool] = mapped_column(
+        column_name("is_secret"), Boolean, default=False, nullable=False
+    )
+    description: Mapped[str] = mapped_column(
+        column_name("description"), String(500), default=""
+    )
+    revision: Mapped[int] = mapped_column(
+        column_name("revision"), Integer, default=1, nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        column_name("created_at"), DateTime(timezone=True)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        column_name("updated_at"), DateTime(timezone=True), index=True
+    )
+    updated_by: Mapped[str] = mapped_column(
+        column_name("updated_by"), String(36), default=""
+    )
 
 
 class AuthAuditRow(Base):
-    __tablename__ = "auth_audit_events"
+    __tablename__ = table_name("auth_audit_event")
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    event: Mapped[str] = mapped_column(String(50), index=True)
-    outcome: Mapped[str] = mapped_column(String(30), index=True)
-    username: Mapped[str] = mapped_column(String(100), index=True)
-    user_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
-    actor_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
-    ip_address: Mapped[str] = mapped_column(String(64))
-    user_agent: Mapped[str] = mapped_column(String(500))
-    detail: Mapped[str] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    id: Mapped[int] = mapped_column(
+        column_name("id"), Integer, primary_key=True, autoincrement=True
+    )
+    event: Mapped[str] = mapped_column(column_name("event"), String(50), index=True)
+    outcome: Mapped[str] = mapped_column(
+        column_name("outcome"), String(30), index=True
+    )
+    username: Mapped[str] = mapped_column(
+        column_name("username"), String(100), index=True
+    )
+    user_id: Mapped[str | None] = mapped_column(
+        column_name("user_id"), String(36), nullable=True, index=True
+    )
+    actor_id: Mapped[str | None] = mapped_column(
+        column_name("actor_id"), String(36), nullable=True, index=True
+    )
+    ip_address: Mapped[str] = mapped_column(column_name("ip_address"), String(64))
+    user_agent: Mapped[str] = mapped_column(column_name("user_agent"), String(500))
+    detail: Mapped[str] = mapped_column(column_name("detail"), Text)
+    created_at: Mapped[datetime] = mapped_column(
+        column_name("created_at"), DateTime(timezone=True), index=True
+    )
 
 
 class CaseRow(Base):
-    __tablename__ = "cases"
+    __tablename__ = table_name("case")
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    status: Mapped[str] = mapped_column(String(30), index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
-    payload_json: Mapped[str] = mapped_column(Text)
+    id: Mapped[str] = mapped_column(column_name("id"), String(36), primary_key=True)
+    status: Mapped[str] = mapped_column(column_name("status"), String(30), index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        column_name("created_at"), DateTime(timezone=True), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        column_name("updated_at"), DateTime(timezone=True), index=True
+    )
+    payload_json: Mapped[str] = mapped_column(column_name("payload_json"), Text)

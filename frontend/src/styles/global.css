@@ -501,6 +501,11 @@ a {
   font-size: 14px;
 }
 
+.dictionary-toolbar {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
 .button {
   min-height: 38px;
   display: inline-flex;
