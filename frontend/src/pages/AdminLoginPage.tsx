@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
           </div>
           {error && <div className="notice error-notice" role="alert"><AlertCircle size={17} /> {error}</div>}
           <form className="login-form" onSubmit={(event) => void handleSubmit(event)}>
-            <label>管理员账号<input name="username" autoComplete="username" required autoFocus /></label>
+            <label>管理员账号<input name="username" autoComplete="username" defaultValue="root" readOnly required autoFocus /></label>
             <label>密码<input name="password" type="password" autoComplete="current-password" required /></label>
             <button className="button primary" type="submit" disabled={busy}>
               {busy ? <LoaderCircle className="spin" size={16} /> : <ArrowRight size={16} />}

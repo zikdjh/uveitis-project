@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>唯一管理员与医生账号开户流程 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-auth-access-control.html">上一份</a>
+    <a href="2026-10-26-project-development-progress.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>系统设计</span>
+    <span>2026-10-27</span>
+  </div>
+  <h1>唯一管理员与医生账号开户流程</h1>
+  <p class="doc-summary">固定 root 管理员、管理员创建医生、禁止自助注册及前后端接口边界</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-auth-account-provisioning.html</code></p>
+  <article class="html-body">
+<p>本页定义账号体系的产品规则和工程契约。权限判断以后端为准；前端只负责隐藏或展示操作，不能作为授权边界。</p>
+
+<h2>账号规则</h2>
+<table>
+  <thead><tr><th>规则</th><th>系统行为</th><th>实现位置</th></tr></thead>
+  <tbody>
+    <tr><td>唯一管理员</td><td>管理员账号固定为 <code>root</code>；服务启动时创建或纠正该账号，并把其他历史管理员降为医生。</td><td>启动引导、用户存储、管理接口</td></tr>
+    <tr><td>固定管理员口令</td><td><code>APP_BOOTSTRAP_ADMIN_PASSWORD</code> 只在 root 首次创建时使用；root 已存在后，环境变量、重启和应用接口都不能覆盖密码。密码哈希保存到数据字典的加密项，唯一变更路径是直接更新该数据库记录。</td><td>启动引导、数据字典</td></tr>
+    <tr><td>医生开户</td><td>只有登录的管理员可以创建医生；创建动作要求显示名、登录名和初始密码。</td><td><code>POST /api/v1/admin/users</code></td></tr>
+    <tr><td>禁止注册</td><td>不提供注册页面，也不提供注册 API；<code>/api/v1/auth/register</code> 返回 404。</td><td>前端路由、FastAPI 路由</td></tr>
+    <tr><td>root 保护</td><td>root 不能停用、不能通过后台重置密码、不能通过账号安全页修改密码；应用层没有修改 root 密码的通道。</td><td>管理接口、密码接口、账号页面</td></tr>
+    <tr><td>医生生命周期</td><td>管理员可以查看医生、启停账号、重置密码；重置密码会撤销该账号全部会话。</td><td>管理接口、访问审计</td></tr>
+  </tbody>
+</table>
+
+<h2>后端逻辑</h2>
+<ol>
+  <li>root 不存在时，应用要求配置 <code>APP_BOOTSTRAP_ADMIN_PASSWORD</code>，把该值哈希后加密写入数据字典完成首次创建。</li>
+  <li>root 已存在时，引导流程只确保角色为管理员、状态为启用并同步固定显示名；已有哈希会迁移到 <code>auth/root.password_hash</code>，之后不再读取 <code>t_user.f_password_hash</code>。</li>
+  <li>管理端创建账号时忽略客户端角色字段，后端固定写入 <code>doctor</code>；请求包含额外角色字段时返回 422，防止越权提升。</li>
+  <li>账号更新只允许修改显示名与启用状态，不接受角色字段；root 的停用请求返回 409。</li>
+  <li>root 的后台密码重置和自行改密请求均返回 409；唯一变更通道是数据库直接更新数据字典中的加密哈希；医生密码重置成功后撤销该医生全部会话。</li>
+  <li>创建、启停、重置密码、登录成功与失败均写入 <code>t_auth_audit_event</code>，审计记录不包含密码明文。</li>
+</ol>
+
+<h2>前端逻辑</h2>
+<table>
+  <thead><tr><th>页面</th><th>用户流程</th><th>关键约束</th></tr></thead>
+  <tbody>
+    <tr><td>管理员登录</td><td>管理员从 <code>/admin/login</code> 进入，账号输入固定为 <code>root</code>。</td><td>登录接口仍复核管理员角色，不能由医生入口越权进入。</td></tr>
+    <tr><td>医生账号</td><td>管理员在 <code>/admin/access</code> 查看账号、创建医生、启停和重置密码。</td><td>页面不提供角色选择、不提供管理员创建入口、不提供注册链接。</td></tr>
+    <tr><td>医生登录</td><td>医生使用管理员分配的账号进入 <code>/login</code>。</td><td>医生不能访问账号列表、审计或管理员服务配置。</td></tr>
+    <tr><td>账号安全</td><td>医生可修改自己的密码并查看会话；root 显示为受系统保护的固定账号。</td><td>前端拦截只是提示，后端仍返回 409 进行最终校验。</td></tr>
+  </tbody>
+</table>
+
+<h2>接口契约</h2>
+<table>
+  <thead><tr><th>方法</th><th>路径</th><th>权限</th><th>行为</th></tr></thead>
+  <tbody>
+    <tr><td>POST</td><td><code>/api/v1/auth/admin/login</code></td><td>公开但仅管理员</td><td>root 登录并签发双 token</td></tr>
+    <tr><td>GET</td><td><code>/api/v1/admin/users</code></td><td><code>user:read</code></td><td>返回管理员和医生账号，root 使用 <code>is_root=true</code> 标记</td></tr>
+    <tr><td>POST</td><td><code>/api/v1/admin/users</code></td><td><code>user:manage</code></td><td>创建医生账号；不接受 <code>role</code> 字段</td></tr>
+    <tr><td>PATCH</td><td><code>/api/v1/admin/users/{id}</code></td><td><code>user:manage</code></td><td>修改显示名或启停状态；root 不可停用</td></tr>
+    <tr><td>POST</td><td><code>/api/v1/admin/users/{id}/password</code></td><td><code>user:manage</code></td><td>重置医生密码并撤销该医生会话</td></tr>
+    <tr><td>POST</td><td><code>/api/v1/auth/register</code></td><td>无</td><td>不存在，返回 404</td></tr>
+  </tbody>
+</table>
+
+<h2>开发进展</h2>
+<table>
+  <thead><tr><th>工作项</th><th>状态</th><th>验收证据</th></tr></thead>
+  <tbody>
+    <tr><td>后端固定 root 与唯一管理员收敛</td><td>已完成第一轮</td><td>启动引导、用户存储、管理接口与会话接口规则已落地。</td></tr>
+    <tr><td>禁止自助注册</td><td>已完成</td><td>无注册路由；回归测试验证注册接口返回 404。</td></tr>
+    <tr><td>管理员创建医生</td><td>已完成第一轮</td><td>创建接口固定医生角色；前端移除角色选择。</td></tr>
+    <tr><td>root 保护与审计</td><td>已完成第一轮</td><td>root 停用、重置和改密均被拒绝；密码哈希保存在数据字典，环境变量不能覆盖现有记录。</td></tr>
+    <tr><td>端到端验收</td><td>待 11-04 前完成</td><td>覆盖 root 登录、创建医生、医生首次登录、无感刷新、停用和重新启用。</td></tr>
+  </tbody>
+</table>
+
+<h2>验收清单</h2>
+<ol>
+  <li>系统中只有 <code>root</code> 一个管理员账号；历史管理员账号在启动后不再具有管理员角色。</li>
+  <li>未登录用户无法访问任何账号管理接口；医生访问管理接口返回 403。</li>
+  <li>管理员创建医生成功，账号角色固定为医生，新医生可以从医生入口登录。</li>
+  <li>任何客户端提交管理员角色创建请求均不能生成第二管理员。</li>
+  <li>root 停用、重置密码和自行改密请求均失败；改环境变量后重启，数据字典中的 root 密码哈希保持不变。</li>
+  <li>直接更新数据字典 <code>auth/root.password_hash</code> 的加密值后，新密码能够登录；应用重建容器不会把密码恢复到环境变量值。</li>
+  <li>前端不存在注册入口；直接请求注册接口返回 404。</li>
+</ol>
+
+<h2>数据库修改约定</h2>
+<p><code>t_data_dictionary</code> 中 <code>auth/root.password_hash</code> 保存的是经过 AES-GCM 加密的 Argon2 密码哈希，不是明文。数据库管理员更新前必须使用项目当前密码实现生成新哈希，再用部署主密钥加密后更新该记录；<code>t_user.f_password_hash</code> 只保留不可登录的占位值，应用启动、环境变量变更、管理员后台和账号安全页都不能改写 root 的现有哈希。</p>
+
+<h2>后续开发边界</h2>
+<p>账号体系不采用自助注册、邀请码注册或邮箱注册。后续新增账号字段时，仍应保持“管理员开户、医生使用”的主流程，并在新增字段通过后端白名单后才能进入页面。如需轮换 root 密码，只能由数据库管理员直接更新数据字典中的加密哈希；不得增加第二个管理员账号，也不得通过应用接口或环境变量覆盖现有密码。</p>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>唯一管理员与医生账号开户流程 · 2026-10-27</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

@@ -7,7 +7,9 @@ import {
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
-import { type FormEvent, useEffect, useState } from "react";
+import { Input, Pagination, Select } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
   changePassword,
@@ -26,6 +28,10 @@ const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
   minute: "2-digit",
 });
 
+type SessionFilter = "all" | "current" | "other";
+
+const SESSION_PAGE_SIZE_OPTIONS = [8, 16, 32];
+
 export default function SecurityPage() {
   const [user, setUser] = useState<User | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -33,6 +39,33 @@ export default function SecurityPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [sessionFilter, setSessionFilter] = useState<SessionFilter>("all");
+  const [sessionQuery, setSessionQuery] = useState("");
+  const [sessionPage, setSessionPage] = useState(1);
+  const [sessionPageSize, setSessionPageSize] = useState(8);
+
+  const filteredSessions = useMemo(() => {
+    const query = sessionQuery.trim().toLocaleLowerCase();
+    return sessions.filter((session) => {
+      if (sessionFilter === "current" && !session.current) return false;
+      if (sessionFilter === "other" && session.current) return false;
+      return !query || `${session.user_agent} ${session.ip_address}`.toLocaleLowerCase().includes(query);
+    });
+  }, [sessionFilter, sessionQuery, sessions]);
+
+  const sessionPageCount = Math.max(1, Math.ceil(filteredSessions.length / sessionPageSize));
+  const visibleSessions = filteredSessions.slice(
+    (sessionPage - 1) * sessionPageSize,
+    sessionPage * sessionPageSize,
+  );
+
+  useEffect(() => {
+    setSessionPage(1);
+  }, [sessionFilter, sessionQuery]);
+
+  useEffect(() => {
+    setSessionPage((current) => Math.min(current, sessionPageCount));
+  }, [sessionPageCount]);
 
   async function load() {
     setLoading(true);
@@ -146,11 +179,11 @@ export default function SecurityPage() {
             <div><h2>修改密码</h2><span>更新后撤销其他会话</span></div>
             <KeyRound size={20} />
           </div>
-          <form className="form-grid compact" onSubmit={(event) => void handlePassword(event)}>
-            <label className="span-2">当前密码<input name="current_password" type="password" autoComplete="current-password" required /></label>
+          <form className="form-grid compact password-form" onSubmit={(event) => void handlePassword(event)}>
+            <label>当前密码<input name="current_password" type="password" autoComplete="current-password" required /></label>
             <label>新密码<input name="new_password" type="password" minLength={12} maxLength={200} autoComplete="new-password" required /></label>
             <label>确认新密码<input name="confirm_password" type="password" minLength={12} maxLength={200} autoComplete="new-password" required /></label>
-            <div className="form-actions span-2">
+            <div className="form-actions">
               <button className="button primary" type="submit" disabled={busy}>
                 {busy ? <LoaderCircle className="spin" size={16} /> : <KeyRound size={16} />} 更新密码
               </button>
@@ -166,8 +199,28 @@ export default function SecurityPage() {
             <MonitorSmartphone size={16} /> 撤销其他会话
           </button>
         </div>
+        <div className="session-filters">
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            value={sessionQuery}
+            onChange={(event) => setSessionQuery(event.target.value)}
+            placeholder="搜索客户端或 IP"
+            aria-label="搜索登录会话"
+          />
+          <Select<SessionFilter>
+            value={sessionFilter}
+            onChange={setSessionFilter}
+            options={[
+              { value: "all", label: "全部设备" },
+              { value: "current", label: "当前设备" },
+              { value: "other", label: "其他设备" },
+            ]}
+            aria-label="按设备类型筛选"
+          />
+        </div>
         <div className="session-list">
-          {sessions.map((session) => (
+          {visibleSessions.map((session) => (
             <div className="session-row" key={session.id}>
               <div className="session-icon"><MonitorSmartphone size={17} /></div>
               <div>
@@ -183,6 +236,27 @@ export default function SecurityPage() {
             </div>
           ))}
         </div>
+        {!loading && filteredSessions.length === 0 && (
+          <div className="session-empty">
+            {sessions.length === 0 ? "暂无有效登录会话" : "没有符合条件的登录会话"}
+          </div>
+        )}
+        {filteredSessions.length > 0 && (
+          <Pagination
+            className="session-pagination"
+            current={sessionPage}
+            pageSize={sessionPageSize}
+            total={filteredSessions.length}
+            showSizeChanger
+            pageSizeOptions={SESSION_PAGE_SIZE_OPTIONS}
+            showTotal={(total) => `筛选结果 ${total} 条`}
+            onChange={(page, pageSize) => {
+              const pageSizeChanged = pageSize !== sessionPageSize;
+              setSessionPageSize(pageSize);
+              setSessionPage(pageSizeChanged ? 1 : page);
+            }}
+          />
+        )}
       </section>
     </section>
   );

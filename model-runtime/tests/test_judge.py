@@ -105,6 +105,9 @@ def test_judge_returns_stable_structured_result(client, image_root: Path) -> Non
     assert body["truncated"] is False
     assert runtime.calls[0][0] == "oct_aux_4class"
     assert runtime.calls[0][1] == [(image_root / "img-1.png").resolve()]
+    assert body["model"] == "Qwen3.5-4B"
+    assert body["peak_reserved_gib"] == 3.7
+    assert body["latency_ms"] >= 0
 
 
 def test_judge_rejects_image_outside_allowed_roots(

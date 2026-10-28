@@ -1,0 +1,190 @@
+from contextlib import contextmanager
+
+from sqlalchemy import BigInteger, UniqueConstraint
+
+from app.db import postgres as postgres_db
+from app.db.models import (
+    AnalysisJobRow,
+    AuthAuditRow,
+    CaseRow,
+    DataDictionaryRow,
+    UserRow,
+)
+from app.db.naming import column_name, table_name
+
+
+def _assert_identity_and_business_key(model, business_key: str) -> None:
+    id_column = model.__table__.c[column_name("id")]
+    assert id_column.primary_key is True
+    assert isinstance(id_column.type, BigInteger)
+    assert id_column.identity is not None
+
+    business_column = model.__table__.c[business_key]
+    assert business_column.primary_key is False
+    unique_columns = {
+        tuple(column.name for column in constraint.columns)
+        for constraint in model.__table__.constraints
+        if isinstance(constraint, UniqueConstraint)
+    }
+    assert (business_key,) in unique_columns
+
+
+def test_database_tables_and_columns_use_project_prefixes() -> None:
+    assert UserRow.__tablename__ == table_name("user")
+    assert AuthAuditRow.__tablename__ == table_name("auth_audit_event")
+    assert CaseRow.__tablename__ == table_name("case")
+    assert DataDictionaryRow.__tablename__ == table_name("data_dictionary")
+    assert AnalysisJobRow.__tablename__ == table_name("analysis_job")
+
+    assert {column.name for column in UserRow.__table__.columns} == {
+        column_name("id"),
+        column_name("user_key"),
+        column_name("username"),
+        column_name("display_name"),
+        column_name("role"),
+        column_name("password_hash"),
+        column_name("is_active"),
+        column_name("created_at"),
+    }
+    assert {column.name for column in CaseRow.__table__.columns} == {
+        column_name("id"),
+        column_name("case_key"),
+        column_name("owner_id"),
+        column_name("status"),
+        column_name("created_at"),
+        column_name("updated_at"),
+        column_name("payload_json"),
+    }
+
+    _assert_identity_and_business_key(UserRow, column_name("user_key"))
+    _assert_identity_and_business_key(CaseRow, column_name("case_key"))
+    _assert_identity_and_business_key(
+        DataDictionaryRow,
+        column_name("dictionary_key"),
+    )
+    _assert_identity_and_business_key(
+        AuthAuditRow,
+        column_name("event_key"),
+    )
+    _assert_identity_and_business_key(
+        AnalysisJobRow,
+        column_name("job_key"),
+    )
+
+
+def test_legacy_identifiers_are_renamed_before_orm_startup(monkeypatch) -> None:
+    tables = {"users", "cases"}
+    columns = {
+        "users": [{"name": "id"}],
+        "cases": [{"name": "id"}],
+        "t_user": [{"name": "id"}],
+        "t_case": [{"name": "id"}],
+    }
+    statements: list[str] = []
+
+    class FakeConnection:
+        def execute(self, statement) -> None:
+            statements.append(str(statement))
+
+    class FakeEngine:
+        @contextmanager
+        def begin(self):
+            yield FakeConnection()
+
+    class FakeInspector:
+        def get_table_names(self) -> list[str]:
+            return list(tables)
+
+        def get_columns(self, table: str) -> list[dict[str, str]]:
+            return columns.get(table, [])
+
+    monkeypatch.setattr(postgres_db, "inspect", lambda _engine: FakeInspector())
+
+    postgres_db._rename_legacy_identifiers(FakeEngine())
+
+    assert statements == [
+        'ALTER TABLE "users" RENAME TO "t_user"',
+        'ALTER TABLE "cases" RENAME TO "t_case"',
+        'ALTER TABLE "t_user" RENAME COLUMN "id" TO "f_id"',
+        'ALTER TABLE "t_case" RENAME COLUMN "id" TO "f_id"',
+    ]
+
+
+def test_existing_case_table_gets_owner_column_and_index(monkeypatch) -> None:
+    statements: list[str] = []
+
+    class FakeConnection:
+        def execute(self, statement) -> None:
+            statements.append(str(statement))
+
+    class FakeEngine:
+        @contextmanager
+        def begin(self):
+            yield FakeConnection()
+
+    class FakeInspector:
+        def get_table_names(self) -> list[str]:
+            return [table_name("case")]
+
+        def get_columns(self, table: str) -> list[dict[str, str]]:
+            return [{"name": column_name("case_key")}]
+
+        def get_indexes(self, table: str) -> list[dict]:
+            return []
+
+    monkeypatch.setattr(postgres_db, "inspect", lambda _engine: FakeInspector())
+
+    postgres_db._ensure_case_ownership(FakeEngine())
+
+    assert statements == [
+        'ALTER TABLE "t_case" ADD COLUMN "f_owner_id" '
+        "VARCHAR(36) NOT NULL DEFAULT ''",
+        'CREATE INDEX "ix_t_case_f_owner_id" '
+        'ON "t_case" ("f_owner_id")',
+    ]
+
+
+def test_legacy_primary_key_is_split_from_business_key(monkeypatch) -> None:
+    statements: list[str] = []
+
+    class FakeConnection:
+        def execute(self, statement) -> None:
+            statements.append(str(statement))
+
+    class FakeEngine:
+        @contextmanager
+        def begin(self):
+            yield FakeConnection()
+
+    class FakeInspector:
+        def get_table_names(self) -> list[str]:
+            return [table_name("user")]
+
+        def get_columns(self, table: str) -> list[dict[str, str]]:
+            return [{"name": column_name("id"), "type": "VARCHAR(36)"}]
+
+        def get_pk_constraint(self, table: str) -> dict:
+            return {
+                "name": "t_user_pkey",
+                "constrained_columns": [column_name("id")],
+            }
+
+        def get_unique_constraints(self, table: str) -> list[dict]:
+            return []
+
+        def get_indexes(self, table: str) -> list[dict]:
+            return []
+
+    monkeypatch.setattr(postgres_db, "inspect", lambda _engine: FakeInspector())
+
+    postgres_db._migrate_primary_keys(FakeEngine())
+
+    assert statements == [
+        'ALTER TABLE "t_user" DROP CONSTRAINT "t_user_pkey"',
+        'ALTER TABLE "t_user" RENAME COLUMN "f_id" TO "f_user_key"',
+        'ALTER TABLE "t_user" ADD COLUMN "f_id" '
+        "BIGINT GENERATED BY DEFAULT AS IDENTITY",
+        'ALTER TABLE "t_user" ADD PRIMARY KEY ("f_id")',
+        'ALTER TABLE "t_user" ADD CONSTRAINT '
+        '"uq_t_user_f_user_key" UNIQUE ("f_user_key")',
+    ]

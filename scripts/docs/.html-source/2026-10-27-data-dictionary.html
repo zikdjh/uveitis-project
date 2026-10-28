@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>数据字典与运行配置存储 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-auth-account-provisioning.html">上一份</a>
+    <a href="2026-10-26-project-development-progress.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>系统设计</span>
+    <span>2026-10-27</span>
+  </div>
+  <h1>数据字典与运行配置存储</h1>
+  <p class="doc-summary">统一保存外部模型路径、API Key、运行参数和 root 密码哈希的加密数据层</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-data-dictionary.html</code></p>
+  <article class="html-body">
+<p>数据字典是运行时配置的唯一登记入口，采用“命名空间 + 键”的数据模型。普通值直接保存；密钥和密码哈希先由 AES-GCM 加密，再写入 <code>t_data_dictionary</code> 表。管理端只显示键的元数据和“已配置”状态，不返回明文。</p>
+
+<h2>物理命名规范</h2>
+<table>
+  <thead><tr><th>对象</th><th>规则</th><th>示例</th></tr></thead>
+  <tbody>
+    <tr><td>数据库表</td><td><code>t_${业务名}</code>，业务名使用小写单数英文和 snake_case。</td><td><code>t_user</code>、<code>t_case</code>、<code>t_data_dictionary</code></td></tr>
+    <tr><td>数据库字段</td><td><code>f_${业务名}</code>，保留 snake_case 业务语义。</td><td><code>f_id</code>、<code>f_username</code>、<code>f_display_name</code></td></tr>
+    <tr><td>物理主键</td><td>每张表统一使用 <code>f_id BIGINT</code> 自增主键，只用于数据库内部关联和排序，不作为 API 标识。</td><td><code>1</code>、<code>2</code>、<code>3</code></td></tr>
+    <tr><td>业务唯一键</td><td>每张表另设一个唯一业务键，API、文件和审计引用使用该值，不使用物理主键。</td><td><code>f_user_key</code>、<code>f_case_key</code>、<code>f_dictionary_key</code></td></tr>
+    <tr><td>Python 属性与 API 字段</td><td>保持现有 snake_case，不附加数据库前缀。</td><td><code>UserRow.display_name</code>、JSON 字段 <code>display_name</code></td></tr>
+    <tr><td>数据字典逻辑键</td><td>仍使用点分业务键，不附加 <code>f_</code>；这是配置键而不是物理列名。</td><td><code>integration/summary.base_url</code></td></tr>
+  </tbody>
+</table>
+
+<h2>核心模型</h2>
+<table>
+  <thead><tr><th>字段</th><th>用途</th><th>安全约定</th></tr></thead>
+  <tbody>
+    <tr><td><code>namespace</code></td><td>按功能域隔离配置，例如 <code>auth</code>、<code>integration</code>。</td><td>命名空间与键组合唯一。</td></tr>
+    <tr><td><code>key</code></td><td>稳定键名，例如 <code>summary.base_url</code>。</td><td>键名可以公开，不能包含凭据。</td></tr>
+    <tr><td><code>value_type</code></td><td>文本、整数、浮点、布尔、JSON 或密钥。</td><td>写入时校验，读取时按类型解码。</td></tr>
+    <tr><td><code>value_text</code></td><td>普通值原文或敏感值密文。</td><td>敏感值不得进入日志、审计详情或 API 响应。</td></tr>
+    <tr><td><code>is_secret</code></td><td>标识该值是否必须脱敏。</td><td>管理端列表将 <code>value</code> 置空。</td></tr>
+    <tr><td><code>revision</code></td><td>单个字典项或命名空间配置的并发版本。</td><td>并发写入使用 409 提示刷新。</td></tr>
+  </tbody>
+</table>
+
+<h2>当前键空间</h2>
+<table>
+  <thead><tr><th>命名空间</th><th>键</th><th>内容</th></tr></thead>
+  <tbody>
+    <tr><td><code>auth</code></td><td><code>root.password_hash</code></td><td>root 的 Argon2 哈希，AES-GCM 加密保存；<code>t_user.f_password_hash</code> 只保留占位值。</td></tr>
+    <tr><td><code>integration</code></td><td><code>summary.base_url</code>、<code>summary.model</code>、<code>summary.protocol</code></td><td>外部总结模型的请求路径、模型名和接口协议。</td></tr>
+    <tr><td><code>integration</code></td><td><code>summary.api_key</code></td><td>外部总结 API Key 密文。</td></tr>
+    <tr><td><code>integration</code></td><td><code>search.provider_order</code>、<code>search.max_results</code></td><td>网络搜索运行参数；不保存“发送主诉”一类开关，病例与影像外发由代码硬边界禁止。</td></tr>
+    <tr><td><code>integration</code></td><td><code>search.*.api_key</code>、<code>search.google_cse.id</code>、<code>search.searxng.base_url</code></td><td>各搜索服务商连接凭据或地址。</td></tr>
+    <tr><td><code>integration</code></td><td><code>_meta.revision</code>、<code>_meta.updated_at</code>、<code>_meta.updated_by</code></td><td>配置版本与审计元数据，不包含秘密值。</td></tr>
+  </tbody>
+</table>
+
+<h2>读写边界</h2>
+<ol>
+  <li>管理员服务配置页继续作为外部模型和搜索 API 的正常维护入口；页面交互不变，后端保存位置改为数据字典。</li>
+  <li><code>auth</code> 与 <code>integration</code> 属于系统维护命名空间，通用字典接口拒绝直接改写，避免绕过认证和配置审计。</li>
+  <li>通用数据字典接口需要 <code>data_dictionary:read</code> 或 <code>data_dictionary:manage</code> 权限；医生账号没有这些权限。</li>
+  <li>敏感项读取只返回 <code>configured=true</code>，不返回密文或解密值；内部运行链路通过受控存储适配器解密。</li>
+  <li>数据库管理员修改 root 密码时，需要在数据字典中替换加密后的 <code>auth/root.password_hash</code>；应用接口仍保留“不允许重置 root 密码”的规则。</li>
+</ol>
+
+<h2>迁移策略</h2>
+<ol>
+  <li>首次启动时，如果数据字典没有 root 哈希，则从现有 <code>t_user.f_password_hash</code> 读取旧值，加密后迁入 <code>auth/root.password_hash</code>，随后把用户表字段改为不可登录占位值。</li>
+  <li>如果数据字典已有 root 哈希，则环境变量和管理接口都不能覆盖它。</li>
+  <li>旧版 UUID 主键会先保留为对应业务键，例如 <code>f_user_key</code>、<code>f_case_key</code>、<code>f_dictionary_key</code>，再新建 <code>f_id</code> 自增主键；审计事件新增 <code>f_event_key</code> 并回填唯一值。</li>
+  <li>旧版 <code>t_integration_setting.f_payload_json</code> 存在时，普通字段转为普通字典项，API Key 密文按原加密格式迁入密钥字典项。</li>
+  <li>迁移后原表不再作为运行时主存储，仅保留为回滚和审计期间的兼容快照。</li>
+</ol>
+
+<h2>验收清单</h2>
+<ol>
+  <li>数据字典表存在 <code>namespace + key</code> 唯一约束，敏感项标记为密钥类型。</li>
+  <li>外部总结路径、模型名、搜索顺序和全部 API Key 均可在字典中定位，但 API 响应不含明文。</li>
+  <li>root 哈希迁移后，<code>t_user.f_password_hash</code> 不再保存可登录哈希；数据库字典中的哈希仍可完成 root 登录。</li>
+  <li>普通命名空间可以按权限读写，系统维护命名空间不能通过通用接口绕过专用流程。</li>
+  <li>并发更新返回 409，审计事件覆盖写入和删除动作。</li>
+</ol>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>数据字典与运行配置存储 · 2026-10-27</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

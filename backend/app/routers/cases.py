@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, time, timedelta
 from pathlib import Path
 from typing import Annotated
 from uuid import uuid4
@@ -9,6 +9,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Query,
     Request,
     UploadFile,
 )
@@ -18,23 +19,62 @@ from app.core.security import require_permission
 from app.schemas.case import (
     CaseCreate,
     CaseImage,
+    CaseListPage,
     CaseRead,
     CaseReview,
     ImageKind,
     ReviewUpdate,
 )
-from app.schemas.auth import Permission
+from app.schemas.auth import Permission, UserRead
 from app.services.analysis import AnalysisService
 
 
 router = APIRouter(prefix="/api/v1/cases", tags=["cases"])
 
 
-def _get_case(request: Request, case_id: str) -> CaseRead:
+def _get_case(request: Request, case_id: str, actor: UserRead) -> CaseRead:
     case = request.app.state.case_store.get(case_id)
     if case is None:
         raise HTTPException(status_code=404, detail="病例不存在")
+    if actor.role != "admin" and case.owner_id != actor.id:
+        # Do not reveal whether another doctor's case exists.
+        raise HTTPException(status_code=404, detail="病例不存在")
     return case
+
+
+def _owner_scope(actor: UserRead) -> str | None:
+    return None if actor.role == "admin" else actor.id
+
+
+def _require_clinical_actor(actor: UserRead) -> None:
+    if actor.role != "doctor":
+        raise HTTPException(
+            status_code=403,
+            detail="管理员仅可审计病例，不能修改临床记录",
+        )
+
+
+def _date_bounds(from_date: str | None, to_date: str | None):
+    try:
+        start = (
+            datetime.combine(datetime.fromisoformat(from_date).date(), time.min, UTC)
+            if from_date
+            else None
+        )
+        end = (
+            datetime.combine(
+                datetime.fromisoformat(to_date).date() + timedelta(days=1),
+                time.min,
+                UTC,
+            )
+            if to_date
+            else None
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="日期格式应为 YYYY-MM-DD") from exc
+    if start and end and start >= end:
+        raise HTTPException(status_code=422, detail="开始日期不能晚于结束日期")
+    return start, end
 
 
 def _run_analysis(app, case_id: str, queued) -> None:
@@ -62,19 +102,22 @@ def _run_analysis(app, case_id: str, queued) -> None:
 
 
 def sync_review_queue(app) -> None:
-    cases = app.state.case_store.list(limit=200)
+    cases = app.state.case_store.list(status="awaiting_review", limit=10_000)
     app.state.redis_store.set_review_queue(
-        case.id for case in cases if case.status == "awaiting_review"
+        case.id for case in cases
     )
 
 
 @router.post("", response_model=CaseRead, status_code=201)
 def create_case(payload: CaseCreate, request: Request) -> CaseRead:
-    require_permission(request, Permission.CASE_WRITE)
+    actor = require_permission(request, Permission.CASE_WRITE)
+    _require_clinical_actor(actor)
     case_id = str(uuid4())
     now = datetime.now(UTC)
     case = CaseRead(
         id=case_id,
+        owner_id=actor.id,
+        owner_name=actor.display_name,
         patient_age=payload.patient_age,
         patient_sex=payload.patient_sex,
         complaint=payload.complaint,
@@ -88,16 +131,50 @@ def create_case(payload: CaseCreate, request: Request) -> CaseRead:
     return request.app.state.case_store.save(case)
 
 
-@router.get("", response_model=list[CaseRead])
-def list_cases(request: Request, limit: int = 100) -> list[CaseRead]:
-    require_permission(request, Permission.CASE_READ)
-    return request.app.state.case_store.list(limit=min(max(limit, 1), 200))
+@router.get("", response_model=CaseListPage)
+def list_cases(
+    request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=8, ge=1, le=100),
+    status: str | None = Query(default=None, max_length=30),
+    from_date: str | None = Query(default=None, alias="from"),
+    to_date: str | None = Query(default=None, alias="to"),
+) -> CaseListPage:
+    actor = require_permission(request, Permission.CASE_READ)
+    if status and status not in {
+        "created",
+        "analyzing",
+        "awaiting_review",
+        "reviewed",
+        "failed",
+    }:
+        raise HTTPException(status_code=422, detail="不支持的病例状态")
+    from_at, to_at = _date_bounds(from_date, to_date)
+    store = request.app.state.case_store
+    scope = _owner_scope(actor)
+    total = store.count(owner_id=scope, status=status, from_at=from_at, to_at=to_at)
+    items = store.list(
+        owner_id=scope,
+        status=status,
+        from_at=from_at,
+        to_at=to_at,
+        offset=(page - 1) * page_size,
+        limit=page_size,
+    )
+    visible_items = []
+    for item in items:
+        if not item.owner_name:
+            owner = request.app.state.user_store.get(item.owner_id)
+            if owner is not None:
+                item = item.model_copy(update={"owner_name": owner.display_name})
+        visible_items.append(item)
+    return CaseListPage(items=visible_items, total=total, page=page, page_size=page_size)
 
 
 @router.get("/{case_id}", response_model=CaseRead)
 def get_case(case_id: str, request: Request) -> CaseRead:
-    require_permission(request, Permission.CASE_READ)
-    return _get_case(request, case_id)
+    actor = require_permission(request, Permission.CASE_READ)
+    return _get_case(request, case_id, actor)
 
 
 @router.post("/{case_id}/images", response_model=CaseRead)
@@ -107,8 +184,9 @@ async def upload_images(
     files: Annotated[list[UploadFile], File(description="病例影像")],
     kind: Annotated[ImageKind, Form()] = "fundus",
 ) -> CaseRead:
-    require_permission(request, Permission.CASE_WRITE)
-    case = _get_case(request, case_id)
+    actor = require_permission(request, Permission.CASE_WRITE)
+    _require_clinical_actor(actor)
+    case = _get_case(request, case_id, actor)
     if not files:
         raise HTTPException(status_code=422, detail="请选择影像文件")
 
@@ -161,8 +239,8 @@ async def upload_images(
 
 @router.get("/{case_id}/images/{image_id}")
 def get_image(case_id: str, image_id: str, request: Request) -> FileResponse:
-    require_permission(request, Permission.CASE_READ)
-    case = _get_case(request, case_id)
+    actor = require_permission(request, Permission.CASE_READ)
+    case = _get_case(request, case_id, actor)
     image = next((item for item in case.images if item.id == image_id), None)
     if image is None:
         raise HTTPException(status_code=404, detail="影像不存在")
@@ -176,8 +254,9 @@ def get_image(case_id: str, image_id: str, request: Request) -> FileResponse:
 def analyze_case(
     case_id: str, request: Request, background_tasks: BackgroundTasks
 ) -> CaseRead:
-    require_permission(request, Permission.CASE_WRITE)
-    case = _get_case(request, case_id)
+    actor = require_permission(request, Permission.CASE_WRITE)
+    _require_clinical_actor(actor)
+    case = _get_case(request, case_id, actor)
     if case.status == "analyzing":
         raise HTTPException(status_code=409, detail="该病例正在分析")
     service: AnalysisService = request.app.state.analysis_service
@@ -186,14 +265,19 @@ def analyze_case(
     case.analysis = queued
     case.updated_at = datetime.now(UTC)
     request.app.state.case_store.save(case)
-    background_tasks.add_task(_run_analysis, request.app, case.id, queued)
+    job = request.app.state.analysis_job_service.enqueue(case.id)
+    background_tasks.add_task(
+        request.app.state.analysis_job_service.run_job,
+        job.job_key,
+    )
     return case
 
 
 @router.patch("/{case_id}/review", response_model=CaseRead)
 def review_case(case_id: str, payload: ReviewUpdate, request: Request) -> CaseRead:
-    require_permission(request, Permission.CASE_REVIEW)
-    case = _get_case(request, case_id)
+    actor = require_permission(request, Permission.CASE_REVIEW)
+    _require_clinical_actor(actor)
+    case = _get_case(request, case_id, actor)
     if case.analysis is None or case.analysis.status != "completed":
         raise HTTPException(status_code=409, detail="分析尚未完成，暂不能复核")
     case.review = CaseReview(

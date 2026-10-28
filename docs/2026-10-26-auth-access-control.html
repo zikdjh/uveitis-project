@@ -14,7 +14,7 @@
   <nav aria-label="文档导航">
     <a href="2026-10-26-document-catalog.html">文档索引</a>
     <a href="2026-10-23-agent-execution-chain.html">上一份</a>
-    <a href="2026-10-23-cn-eye-datasets.html">下一份</a>
+    <a href="2026-10-27-auth-account-provisioning.html">下一份</a>
   </nav>
 </header>
 <main id="doc-content" class="doc-page">
@@ -41,7 +41,7 @@
     <tr><td><code>system:manage</code></td><td>禁止</td><td>允许</td><td>数据库与会话存储检查</td></tr>
     <tr><td><code>integration:read</code></td><td>禁止</td><td>允许</td><td>读取服务地址、模型、掩码状态与搜索顺序</td></tr>
     <tr><td><code>integration:manage</code></td><td>禁止</td><td>允许</td><td>更新服务密钥与配置、执行配置或连通性检查</td></tr>
-    <tr><td><code>user:read</code> / <code>user:manage</code></td><td>禁止</td><td>允许</td><td>账号列表、创建、角色、状态与密码重置</td></tr>
+    <tr><td><code>user:read</code> / <code>user:manage</code></td><td>禁止</td><td>允许</td><td>账号列表、创建医生、状态与医生密码重置</td></tr>
     <tr><td><code>audit:read</code></td><td>禁止</td><td>允许</td><td>鉴权审计记录</td></tr>
   </tbody>
 </table>
@@ -51,9 +51,9 @@
 <ul>
   <li><code>GET /api/v1/admin/integrations</code> 只返回公开展示字段；API Key 只返回是否已配置与固定文案提示，不回传原文或可逆值。</li>
   <li><code>PATCH /api/v1/admin/integrations</code> 使用 <code>expected_revision</code> 防止两名管理员互相覆盖，冲突返回 <code>409</code>。</li>
-  <li>密钥使用 AES-GCM 加密后保存在 <code>integration_settings</code>；生产环境缺少 <code>APP_INTEGRATION_SECRET_KEY</code> 时拒绝启动。</li>
+  <li>密钥使用 AES-GCM 加密后保存在 <code>t_data_dictionary.f_value_text</code>；生产环境缺少 <code>APP_INTEGRATION_SECRET_KEY</code> 时拒绝启动。</li>
   <li>更新配置写入 <code>integration_config_update</code> 审计事件；审计只记录版本和操作，不记录密钥。</li>
-  <li>外部总结的临床文本发送和网络搜索的主诉发送是两个独立开关，默认关闭；原始影像不发送。</li>
+  <li>外部总结和网络搜索均不接受病例字段或影像字段；系统不提供相关发送开关，所有外发载荷在 HTTP 调用前经过硬校验。</li>
 </ul>
 
 <h2>登录与会话</h2>
@@ -66,7 +66,7 @@
   <li>访问令牌失效时，前端通过单一并发锁调用 <code>POST /api/v1/auth/refresh</code>，成功后自动重放原请求而无需用户重新登录。</li>
   <li>每次刷新都会同时轮换访问令牌和刷新令牌，并为短暂并发保留刷新宽限期；退出、改密、角色变更和账号停用会撤销整组令牌。</li>
   <li>服务端保存会话创建时间、最近活动时间、刷新到期时间、来源 IP 和客户端标识，并支持查看与撤销其他会话。</li>
-  <li>账号停用、角色变更、管理员重置密码或用户修改密码后，相关旧会话被撤销。</li>
+  <li>账号停用、医生密码重置或医生修改密码后，相关旧会话被撤销。</li>
 </ol>
 
 <h2>CSRF 与浏览器调用</h2>
@@ -74,14 +74,15 @@
 
 <h2>账号管理</h2>
 <ul>
-  <li>管理员可创建医生或管理员账号，修改显示名、角色和启用状态。</li>
-  <li>密码最少 12 位。管理员重置密码后撤销该账号全部会话。</li>
-  <li>不能停用当前登录账号；系统始终保留至少一个启用的管理员。</li>
+  <li>系统管理员账号固定为唯一账号 <code>root</code>；启动引导会创建或纠正该账号，并把其他历史管理员降为医生。</li>
+  <li>管理员只能创建医生账号，不能从前端或 API 创建第二个管理员、提升医生角色或传入角色字段。</li>
+  <li>不提供自助注册入口和注册 API；医生账号只能由管理员开户、启停和重置密码。</li>
+  <li>密码最少 12 位。管理员重置医生密码后撤销该医生全部会话；root 不能停用、重置或自行改密，密码只能由数据库管理员直接更新 <code>t_data_dictionary.f_value_text</code> 中的加密记录。</li>
   <li>医生不能读取账号列表、管理账号或查看系统基础设施状态。</li>
 </ul>
 
 <h2>审计与安全响应头</h2>
-<p>登录成功、登录失败、登录限流、令牌刷新、退出、会话撤销、密码修改、密码重置、账号创建和账号更新均写入 <code>auth_audit_events</code>。API 响应统一加入 <code>X-Content-Type-Options</code>、<code>X-Frame-Options</code>、<code>Referrer-Policy</code> 和权限策略响应头；鉴权与管理接口不缓存。</p>
+<p>登录成功、登录失败、登录限流、令牌刷新、退出、会话撤销、密码修改、密码重置、账号创建和账号更新均写入 <code>t_auth_audit_event</code>。API 响应统一加入 <code>X-Content-Type-Options</code>、<code>X-Frame-Options</code>、<code>Referrer-Policy</code> 和权限策略响应头；鉴权与管理接口不缓存。</p>
 
 <h2>运行配置</h2>
 <pre><code>APP_ACCESS_TOKEN_TTL_SECONDS=900
@@ -91,9 +92,8 @@ APP_LOGIN_MAX_ATTEMPTS=5
 APP_LOGIN_WINDOW_SECONDS=900
 APP_TRUST_PROXY_HEADERS=false
 APP_COOKIE_SECURE=true
-APP_BOOTSTRAP_ADMIN_USERNAME=admin
-APP_BOOTSTRAP_ADMIN_PASSWORD=replace-before-deployment</code></pre>
-<p>管理员后台要求配置 <code>APP_DATABASE_URL</code>，缺失时拒绝启动；<code>app.asgi:app</code> 是生产 ASGI 入口，仓储只接受 PostgreSQL。会话和登录限流依赖 Redis，会话数据保存在 Redis，而不是在本地建立第二套数据库。部署环境应启用 HTTPS，保留示例中的 <code>APP_COOKIE_SECURE=true</code>，同时将引导账号密码替换为随机强密码。</p>
+APP_BOOTSTRAP_ADMIN_PASSWORD=replace-with-root-admin-password</code></pre>
+<p>管理员账号固定为 <code>root</code>。<code>APP_BOOTSTRAP_ADMIN_PASSWORD</code> 只在 root 首次创建时使用；账号存在后，环境变量和应用接口都不能覆盖密码，唯一变更方式是直接更新 <code>t_data_dictionary</code> 中的加密哈希。管理员后台要求配置 <code>APP_DATABASE_URL</code>，缺失时拒绝启动；<code>app.asgi:app</code> 是生产 ASGI 入口，仓储只接受 PostgreSQL。会话和登录限流依赖 Redis，会话数据保存在 Redis，而不是在本地建立第二套数据库。部署环境应启用 HTTPS，保留示例中的 <code>APP_COOKIE_SECURE=true</code>。</p>
 
 <h2>主要接口</h2>
 <ul>
@@ -103,6 +103,7 @@ APP_BOOTSTRAP_ADMIN_PASSWORD=replace-before-deployment</code></pre>
   <li><code>POST /api/v1/auth/password</code></li>
   <li><code>GET|POST /api/v1/admin/users</code>、<code>PATCH /api/v1/admin/users/{id}</code>、<code>POST /api/v1/admin/users/{id}/password</code></li>
   <li><code>GET /api/v1/admin/audit-events</code></li>
+  <li><a href="2026-10-27-auth-account-provisioning.html">唯一管理员与医生账号开户流程</a>：固定 root、医生开户、禁止注册与接口验收边界</li>
 </ul>
   </article>
 </main>

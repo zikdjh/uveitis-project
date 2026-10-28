@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>病例归属隔离与服务端分页 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-auth-account-provisioning.html">账号体系</a>
+    <a href="2026-10-26-progress-tracking.html">进度跟踪</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker"><span>系统设计</span><span>2026-10-27</span></div>
+  <h1>病例归属隔离与服务端分页</h1>
+  <p class="doc-summary">医生病例数据隔离、管理员审计边界、旧数据兼容和病例列表查询契约</p>
+  <article class="html-body">
+    <p>病例是系统的核心敏感数据。权限判断必须在后端完成，不能依赖前端隐藏菜单或链接。</p>
+    <h2>访问规则</h2>
+    <table>
+      <thead><tr><th>角色</th><th>列表</th><th>详情与影像</th><th>创建、分析、复核</th></tr></thead>
+      <tbody>
+        <tr><td>医生</td><td>仅返回 <code>f_owner_id</code> 等于当前账号的病例。</td><td>仅允许本人病例；其他病例统一返回 404，不泄露是否存在。</td><td>仅允许操作本人病例。</td></tr>
+        <tr><td>管理员</td><td>可跨医生查看全部病例，用于审计。</td><td>可只读查看病例与处理状态。</td><td>禁止创建、分析和复核临床病例。</td></tr>
+      </tbody>
+    </table>
+    <h2>接口契约</h2>
+    <p><code>GET /api/v1/cases</code> 返回分页对象，不再返回无总数的数组。</p>
+    <pre><code>{
+  "items": [CaseRead],
+  "total": 6,
+  "page": 1,
+  "page_size": 8
+}</code></pre>
+    <table>
+      <thead><tr><th>参数</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>page</code></td><td>从 1 开始，当前页码。</td></tr>
+        <tr><td><code>page_size</code></td><td>每页 1 至 100 条，前端使用 8、16、32。</td></tr>
+        <tr><td><code>status</code></td><td>待分析、分析中、待复核、已复核或分析失败。</td></tr>
+        <tr><td><code>from</code>、<code>to</code></td><td>按更新时间筛选，格式为 <code>YYYY-MM-DD</code>；结束日期包含当天。</td></tr>
+      </tbody>
+    </table>
+    <h2>数据迁移</h2>
+    <ol>
+      <li>新建或升级数据库时，为病例表增加 <code>f_owner_id</code> 字段和索引。</li>
+      <li>历史病例没有可靠归属时保留空归属，不被自动分配给任何医生。</li>
+      <li>管理员仍可审计旧病例；如需交给医生继续处理，必须由后续明确的数据迁移流程人工确认归属。</li>
+      <li>读取旧 JSON 快照时以数据库归属列为准，避免旧快照缺少字段导致解码失败。</li>
+    </ol>
+    <h2 id="verification">验证记录</h2>
+    <ul>
+      <li>覆盖医生甲创建病例、医生乙列表为空且详情/分析/复核均返回 404。</li>
+      <li>覆盖管理员跨医生审计病例，并拒绝管理员创建临床病例。</li>
+      <li>覆盖分页总数、页大小、状态筛选和非法日期参数。</li>
+      <li>在真实 PostgreSQL 上验证管理员读取历史病例、服务端分页和历史归属为未分配。</li>
+      <li>工作台待复核列表、医生病例列表和管理员病例审计均由后端执行分页；医生病例与管理员审计支持状态和更新时间范围筛选，筛选条件同步到 URL，刷新和分享链接后可以恢复。</li>
+      <li>浏览器回归验证管理员待复核筛选为 3 例，增加 <code>2026-10-27</code> 单日范围后收敛为 1 例，URL 为 <code>?status=awaiting_review&amp;from=2026-10-27&amp;to=2026-10-27</code>；重置后恢复全部 7 例，控制台无错误或警告。</li>
+      <li>管理员概览的服务状态与使用边界两张卡片在桌面端等高等宽，右侧说明贴近卡片底部；正文和操作区在窄屏下按单列排列。</li>
+      <li>2026-10-27 完成真实浏览器端到端验收：管理员创建临时医生，医生登录后创建病例并上传 1 张 OCT，辅助分析完成后进入待复核，医生填写最终印象并完成复核；最终报告只展示医生确认内容，刷新页面后会话和病例状态均可恢复。</li>
+      <li>同一轮验收确认管理员病例审计可只读查看该病例，但详情页不提供创建、分析或复核入口；管理员越权路径由 <code>_require_clinical_actor</code> 在服务端拒绝。验收结束后临时医生保持停用，测试病例、分析任务和上传影像按唯一业务键清理，管理员病例总数恢复为原有 7 例。</li>
+    </ul>
+    <figure>
+      <img src="assets/admin-overview-aligned.png" alt="管理员概览中服务状态与使用边界卡片等高对齐">
+      <figcaption>管理员概览桌面端等高对齐验收截图。</figcaption>
+    </figure>
+    <h2>后续工作</h2>
+    <p>持久化分析任务队列、租约回收和重试已完成并通过真实 Worker 冒烟，详见 <a href="2026-10-27-analysis-job-queue.html">持久化分析任务队列</a>。mock 模式下的病例建档、影像上传、分析、复核、报告和审计边界已完成端到端验收；真实模型运行结果仍需单独完成业务回写验收，详见 <a href="2026-10-27-model-runtime-business-integration.html">真实模型运行与业务回写</a>。下一阶段继续覆盖移动端复核筛选布局和大数据量页码行为。历史病例归属修复需要单独设计与审计，不能在普通启动过程中猜测分配。</p>
+  </article>
+</main>
+<footer class="doc-footer"><span>病例归属隔离与服务端分页 · 2026-10-27</span><span><a href="index.html">返回文档索引</a></span></footer>
+</body>
+</html>

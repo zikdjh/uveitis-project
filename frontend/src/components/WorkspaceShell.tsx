@@ -1,6 +1,7 @@
 import {
   Activity,
   ClipboardList,
+  Database,
   FileText,
   KeyRound,
   LayoutDashboard,
@@ -8,7 +9,6 @@ import {
   Menu,
   ScanEye,
   Settings2,
-  ShieldCheck,
   Users,
   X,
 } from "lucide-react";
@@ -38,7 +38,6 @@ const navigation: Record<WorkspaceMode, NavGroup[]> = {
       items: [
         { to: "/doctor/workbench", label: "工作台", icon: LayoutDashboard },
         { to: "/doctor/cases", label: "病例", icon: ClipboardList },
-        { to: "/doctor/reviews", label: "待复核", icon: ShieldCheck },
       ],
     },
     {
@@ -57,12 +56,13 @@ const navigation: Record<WorkspaceMode, NavGroup[]> = {
         { to: "/admin/cases", label: "病例审计", icon: ClipboardList },
         { to: "/admin/knowledge", label: "知识库", icon: FileText },
         { to: "/admin/services", label: "服务配置", icon: Settings2 },
+        { to: "/admin/data-dictionary", label: "数据字典", icon: Database },
       ],
     },
     {
       label: "权限与安全",
       items: [
-        { to: "/admin/access", label: "账号权限", icon: Users },
+        { to: "/admin/access", label: "医生账号", icon: Users },
         { to: "/admin/security", label: "账号安全", icon: KeyRound },
       ],
     },

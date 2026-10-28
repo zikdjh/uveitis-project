@@ -13,7 +13,9 @@ export type Permission =
   | "integration:manage"
   | "user:read"
   | "user:manage"
-  | "audit:read";
+  | "audit:read"
+  | "data_dictionary:read"
+  | "data_dictionary:manage";
 
 export type User = {
   id: string;
@@ -21,6 +23,7 @@ export type User = {
   display_name: string;
   role: UserRole;
   is_active: boolean;
+  is_root: boolean;
   permissions: Permission[];
 };
 
@@ -45,6 +48,23 @@ export type AuthAuditEvent = {
   user_agent: string;
   detail: string;
   created_at: string;
+};
+
+export type AuthAuditEventPage = {
+  items: AuthAuditEvent[];
+  total: number;
+  page: number;
+  page_size: number;
+};
+
+export type AuthAuditQuery = {
+  page?: number;
+  page_size?: number;
+  event?: string;
+  outcome?: string;
+  from?: string;
+  to?: string;
+  search?: string;
 };
 
 export function login(input: {
@@ -106,7 +126,6 @@ export function listUsers(): Promise<User[]> {
 export function createUser(input: {
   username: string;
   display_name: string;
-  role: UserRole;
   password: string;
 }): Promise<User> {
   return request("/api/v1/admin/users", {
@@ -117,7 +136,7 @@ export function createUser(input: {
 
 export function updateUser(
   userId: string,
-  input: Partial<Pick<User, "display_name" | "role" | "is_active">>,
+  input: Partial<Pick<User, "display_name" | "is_active">>,
 ): Promise<User> {
   return request(`/api/v1/admin/users/${encodeURIComponent(userId)}`, {
     method: "PATCH",
@@ -132,6 +151,13 @@ export function resetUserPassword(userId: string, newPassword: string): Promise<
   });
 }
 
-export function listAuthAuditEvents(limit = 100): Promise<AuthAuditEvent[]> {
-  return request(`/api/v1/admin/audit-events?limit=${limit}`);
+export function listAuthAuditEvents(
+  query: AuthAuditQuery = {},
+): Promise<AuthAuditEventPage> {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  });
+  const suffix = params.size ? `?${params.toString()}` : "";
+  return request<AuthAuditEventPage>(`/api/v1/admin/audit-events${suffix}`);
 }

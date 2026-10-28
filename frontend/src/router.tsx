@@ -26,10 +26,12 @@ import {
   NewCasePage,
 } from "@/pages/doctor/CasePanels";
 import KnowledgePage from "@/pages/doctor/KnowledgePage";
-import ReviewQueuePage from "@/pages/doctor/ReviewQueuePage";
 import WorkbenchPage from "@/pages/doctor/WorkbenchPage";
 
 const ServicesPage = lazy(() => import("@/pages/admin/ServicesPage"));
+const DataDictionaryPage = lazy(
+  () => import("@/pages/admin/DataDictionaryPage"),
+);
 
 const router = createBrowserRouter([
   {
@@ -65,7 +67,7 @@ const router = createBrowserRouter([
               { path: "report", element: <CaseReportPage /> },
             ],
           },
-          { path: "reviews", element: <ReviewQueuePage /> },
+          { path: "reviews", element: <Navigate to="/doctor/cases?status=awaiting_review" replace /> },
           { path: "knowledge", element: <KnowledgePage /> },
           { path: "security", element: <SecurityPage /> },
         ],
@@ -84,6 +86,7 @@ const router = createBrowserRouter([
           { path: "cases/:caseId", element: <AdminCaseDetailPage /> },
           { path: "knowledge", element: <AdminKnowledgePage /> },
           { path: "services", element: <Suspense fallback={<div className="page-loading" />}><ServicesPage /></Suspense> },
+          { path: "data-dictionary", element: <Suspense fallback={<div className="page-loading" />}><DataDictionaryPage /></Suspense> },
           { path: "access", element: <AccessPage /> },
           { path: "security", element: <SecurityPage /> },
         ],

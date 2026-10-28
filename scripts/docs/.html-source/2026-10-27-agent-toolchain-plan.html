@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AgentScope 工具链编排 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-data-dictionary.html">上一份</a>
+    <a href="2026-10-26-project-development-progress.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>系统设计</span>
+    <span>2026-10-27</span>
+  </div>
+  <h1>AgentScope 工具链编排</h1>
+  <p class="doc-summary">决策模型训练暂缓期间的调用链占位、AgentScope 规划流程、可用性门控与降级规则</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-agent-toolchain-plan.html</code></p>
+  <article class="html-body">
+<p>辅助分析链路由若干可选能力组成。当前真实可用的是 Qwen 微调判断、RAG 向量检索、网络搜索和外部 API 总结；补充决策模型本轮<strong>暂缓训练</strong>，但它在调用链中的槽位保留，由后端标记为“跳过”，不占用额度、不影响主链路。链路的编排选择交给 AgentScope 规划，执行仍由后端按确定性顺序完成。</p>
+
+<h2>调用链定义</h2>
+<table>
+  <thead><tr><th>顺序</th><th>技能键</th><th>可用性门控</th><th>产物</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><code>qwen_judgment</code></td><td><code>APP_MODEL_MODE=remote</code>、<code>APP_QWEN_JUDGMENT_ENABLED=true</code> 且已配置感知服务地址。</td><td><code>findings</code>、<code>impression</code>、<code>confidence</code></td></tr>
+    <tr><td>2</td><td><code>retrieval</code></td><td><code>APP_RAG_ENABLED=true</code> 且本地知识索引存在文档。</td><td><code>evidence</code></td></tr>
+    <tr><td>3</td><td><code>decision</code></td><td><code>APP_DECISION_ENABLED=true</code> 且已配置决策服务地址。<strong>本轮暂缓训练，默认关闭。</strong></td><td><code>differential</code>、<code>urgency</code></td></tr>
+    <tr><td>4</td><td><code>web_search</code></td><td>管理员在服务配置页启用网络搜索。</td><td><code>web_evidence</code></td></tr>
+    <tr><td>5</td><td><code>external_summary</code></td><td>管理员已配置外部总结接口与密钥。</td><td><code>summary</code>、<code>recommendations</code></td></tr>
+  </tbody>
+</table>
+<p>技能清单、顺序和可用性原因由 <code>backend/app/agents/toolchain.py</code> 统一声明，后端与规划器共用同一份定义，避免两处描述漂移。</p>
+
+<h2>规划与执行流程</h2>
+<ol>
+  <li>后端计算每个技能的可用性与不可用原因，生成技能目录。</li>
+  <li>AgentScope 规划代理通过只读工具 <code>list_toolchain_options</code> 读取技能目录。</li>
+  <li>规划代理用结构化输出返回 <code>steps</code> 与一段 <code>rationale</code>。</li>
+  <li>后端规范化该提案：丢弃未登记技能、剔除不可用技能、补回必需技能，并按调用链顺序排序。</li>
+  <li>后端按计划逐个执行技能；未进入计划的技能标记为跳过并记录原因。</li>
+  <li>安全校验与报告整理始终执行，不受规划结果影响。</li>
+</ol>
+<p>规划代理只决定“跑哪些”，不直接调用外部接口，因此不会出现同一次病例分析被模型重复调用付费 API 的情况；执行顺序、超时和失败处理仍由后端确定性代码控制。</p>
+
+<h2>决策模型槽位策略</h2>
+<ul>
+  <li>技能表中保留 <code>decision</code> 条目，并标记 <code>deferred=true</code>。</li>
+  <li>运行时 <code>APP_DECISION_ENABLED=false</code>，可用性原因固定为“补充决策模型训练暂缓，槽位保留但未启用”。</li>
+  <li>病例结果中的 <code>component_results</code> 保留该组件，状态为 <code>skipped</code>，便于界面和审计看到槽位位置。</li>
+  <li>训练数据、医生确认标签和冻结测试集齐备前，不启动决策模型训练，也不使用弱标签或合成标签给出“已验证”结论。</li>
+</ul>
+
+<h2>可配置项</h2>
+<table>
+  <thead><tr><th>环境变量</th><th>默认值</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>APP_AGENT_ORCHESTRATION_ENABLED</code></td><td><code>false</code></td><td>是否启用 AgentScope 工具链规划。关闭时使用确定性顺序。</td></tr>
+    <tr><td><code>APP_AGENT_PLANNER_PROTOCOL</code></td><td><code>openai_chat_completions</code></td><td>规划模型协议，可选 <code>openai_responses</code>、<code>anthropic_messages</code>。</td></tr>
+    <tr><td><code>APP_AGENT_PLANNER_BASE_URL</code> / <code>MODEL</code> / <code>API_KEY</code></td><td>空</td><td>规划模型专用地址、模型名和密钥。</td></tr>
+    <tr><td><code>APP_AGENT_PLANNER_USE_SUMMARY_CREDENTIALS</code></td><td><code>true</code></td><td>专用配置为空时复用管理员维护的外部总结接口凭据，避免重复配置。</td></tr>
+    <tr><td><code>APP_AGENT_PLANNER_MAX_STEPS</code></td><td><code>6</code></td><td>规划代理的最大推理轮数上限。</td></tr>
+    <tr><td><code>APP_AGENT_PLANNER_TIMEOUT_SECONDS</code></td><td><code>30</code></td><td>单次规划的超时时间，超时即回退确定性顺序。</td></tr>
+  </tbody>
+</table>
+
+<h2>依赖与安装</h2>
+<p>AgentScope 以可选依赖形式接入，不进入默认安装路径：</p>
+<p><code>uv sync --extra agent</code></p>
+<ul>
+  <li>锁定版本为 <code>agentscope==2.0.11</code>（Python 3.11+）。</li>
+  <li>AgentScope 的 <code>mcp</code> 依赖要求 <code>pydantic&gt;=2.12.0</code>，后端 <code>pydantic</code> 已从 <code>2.10.6</code> 升级到 <code>2.12.5</code>，其余固定版本不变。</li>
+  <li>升级后后端测试套件与前端构建均通过。</li>
+  <li>未安装 AgentScope 时，规划器检测失败后直接使用确定性顺序，不产生运行时错误。</li>
+</ul>
+
+<h2>降级与安全边界</h2>
+<table>
+  <thead><tr><th>情形</th><th>行为</th></tr></thead>
+  <tbody>
+    <tr><td>未启用工具链规划</td><td>按可用性执行全部已配置技能，规划阶段标注“确定性兜底规划”。</td></tr>
+    <tr><td>未安装 AgentScope</td><td>同上，并在规划说明中记录“未安装 AgentScope”。</td></tr>
+    <tr><td>规划模型凭据不完整</td><td>同上，不发起外部调用。</td></tr>
+    <tr><td>规划超时或返回异常</td><td>回退确定性顺序，病例分析继续完成，异常原因写入规划阶段说明。</td></tr>
+    <tr><td>规划结果包含不可用技能</td><td>后端剔除该技能并记录原因，绝不因为规划结果绕过可用性门控。</td></tr>
+    <tr><td>病例与影像外发</td><td>规划请求只包含技能目录和选择规则，不包含病例字段、影像字段或“有无影像”提示。外部总结与网络搜索同样走字段白名单和硬校验；所有 <code>httpx</code> 出站请求还经过统一请求钩子，公开主机携带病例或影像字段时直接拦截，项目自有模型端点也必须位于 localhost、私网或受控域名。</td></tr>
+  </tbody>
+</table>
+<p>所有分支失败均不阻断医生复核链路。结果中的 <code>safety_flags</code> 会在未使用模型规划时追加“工具链由确定性规则编排，未使用模型规划”。</p>
+
+<h2>验收与测试</h2>
+<table>
+  <thead><tr><th>用例</th><th>验证点</th></tr></thead>
+  <tbody>
+    <tr><td><code>backend/tests/test_agent_toolchain.py</code></td><td>规范化顺序、未知技能剔除、必需技能补回、决策槽位跳过原因、未选择可选技能报告、凭据复用、后端异常回退、分析服务阶段与组件状态。</td></tr>
+    <tr><td><code>backend/tests/test_agentscope_integration.py</code></td><td>安装真实 AgentScope 后验证工具注册、权限放行、ReAct 循环与结构化输出握手；未安装时自动跳过。</td></tr>
+    <tr><td>后端全量测试</td><td><code>uv run pytest</code> 在安装可选依赖后通过。</td></tr>
+    <tr><td>前端构建</td><td><code>npm run build</code> 通过，医生工作台显示“工具链编排”一行。</td></tr>
+  </tbody>
+</table>
+
+<h2>后续待办</h2>
+<ol>
+  <li>把规划模型凭据纳入管理员服务配置页与数据字典，当前通过环境变量或复用外部总结凭据。</li>
+  <li>在管理端增加调用链诊断视图，展示每个技能最近的可用性原因与规划选择记录。</li>
+  <li>决策模型训练所需真实病例、医生确认标签和冻结测试集齐备后，再恢复 <code>decision</code> 槽位的实现与启用评估。</li>
+</ol>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>AgentScope 工具链编排 · 2026-10-27</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

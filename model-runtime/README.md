@@ -21,6 +21,8 @@ cd model-runtime
 
 后端分析链路调用 `POST /v1/judge`：输入病例元数据和受限影像引用，返回结构化标签、发现、置信度、adapter 指纹与推理时延，并固定要求 `requires_human_review=true`。服务只在首个有效请求时加载 4-bit 基座与 adapter，串行执行推理，失败或不可用时由后端独立降级，不影响核心流程和医生复核。
 
+真实业务流程已经验证：后端上传病例影像后，运行服务通过共享上传根目录读取同一文件，结构化结果和运行元数据写回病例，持久任务一次完成。后端默认 Qwen 等待时间为 90 秒，覆盖首次加载；本机两次热推理为 2.528 秒和 2.958 秒，adapter 指纹一致，峰值保留显存 3.311 GiB。该结果只证明真实运行和回写链路，不代表模型置信度或临床泛化。
+
 ## 本地 GPU 启动
 
 运行服务必须使用 CUDA 版 PyTorch，不能把 CPU 版 `backend/.venv` 加入 `PYTHONPATH`。已验证的启动方式：
@@ -33,6 +35,8 @@ $env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
 ```
 
 真实基座与第 20 步 adapter 的本地烟测已完成：首次请求约 22 秒，热请求约 2.4–3.6 秒；常驻显存约 3.5 GiB，单图推理峰值分配 `3.275485 GiB`、峰值保留 `3.355469 GiB`。8 个并发请求经串行保护全部返回 HTTP 200，最慢约 14 秒。该结果只证明运行链路可用，不代表新增准确率证据；单图预测和受控 smoke 均不能替代独立外部验证。证据清单位于 `model-training/assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json`。
+
+本地首次加载和推理串联执行时，后端默认等待时间设为 `APP_PERCEPTION_TIMEOUT_SECONDS=90`，覆盖冷启动；热请求通常远短于该上限。若服务端在加载期间超时，后端只把 Qwen 分支标记为 `failed` 并继续确定性报告，不会把未返回的模型结果写成成功。
 
 图像预处理与训练/评估保持一致：原图通过解码像素上限保护后直接交给 processor，由 processor 按 `MODEL_RUNTIME_IMAGE_PIXELS` 和模型图像处理策略缩放，不再在服务端额外执行一次缩略图。
 

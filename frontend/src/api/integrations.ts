@@ -20,11 +20,9 @@ export type IntegrationConfig = {
   summary_protocol: SummaryProtocol;
   summary_base_url: string;
   summary_model: string;
-  summary_include_clinical_text: boolean;
   summary_api_key_configured: boolean;
   summary_api_key_hint: string;
   web_search_enabled: boolean;
-  web_search_include_complaint: boolean;
   web_search_max_results: number;
   search_provider_order: SearchProvider[];
   tavily_api_key_configured: boolean;
@@ -53,11 +51,9 @@ export type IntegrationUpdate = Partial<{
   summary_protocol: SummaryProtocol;
   summary_base_url: string;
   summary_model: string;
-  summary_include_clinical_text: boolean;
   summary_api_key: string;
   clear_summary_api_key: boolean;
   web_search_enabled: boolean;
-  web_search_include_complaint: boolean;
   web_search_max_results: number;
   search_provider_order: SearchProvider[];
   tavily_api_key: string;

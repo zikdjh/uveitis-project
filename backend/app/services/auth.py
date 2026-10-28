@@ -6,6 +6,7 @@ from secrets import token_urlsafe
 
 from pwdlib import PasswordHash
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME
 from app.schemas.auth import LoginResponse, SessionRead, UserRead
 from app.services.redis_store import RedisStore, session_fingerprint
 
@@ -28,6 +29,7 @@ class AuthService:
         refresh_grace_seconds: int = 30,
         login_max_attempts: int = 5,
         login_window_seconds: int = 15 * 60,
+        credential_store=None,
     ) -> None:
         self.users = users
         self.redis_store = redis_store
@@ -36,6 +38,7 @@ class AuthService:
         self.refresh_grace_seconds = refresh_grace_seconds
         self.login_max_attempts = login_max_attempts
         self.login_window_seconds = login_window_seconds
+        self.credential_store = credential_store
         self.password_hash = PasswordHash.recommended()
 
     def hash_password(self, password: str) -> str:
@@ -45,8 +48,11 @@ class AuthService:
         record = self.users.get_by_username(username)
         if record is None:
             return None
-        user, password_hash = record
+        user, _ = record
         if not user.is_active:
+            return None
+        password_hash = self._password_hash_for(user)
+        if not password_hash:
             return None
         if not self.password_hash.verify(password, password_hash):
             return None
@@ -59,7 +65,11 @@ class AuthService:
         record = self.users.get_by_username(user.username)
         if record is None:
             return False
-        return self.password_hash.verify(password, record[1])
+        password_hash = self._password_hash_for(user)
+        return bool(password_hash) and self.password_hash.verify(
+            password,
+            password_hash,
+        )
 
     def login_allowed(self, identity: str) -> bool:
         return self.redis_store.login_failure_count(identity) < self.login_max_attempts
@@ -226,3 +236,15 @@ class AuthService:
             user=user,
             expires_at=datetime.now(UTC) + timedelta(seconds=self.access_ttl_seconds),
         )
+
+    def _password_hash_for(self, user: UserRead) -> str:
+        if user.username == ROOT_ADMIN_USERNAME and self.credential_store is not None:
+            value = self.credential_store.get_value(
+                "auth",
+                "root.password_hash",
+                default="",
+            )
+            if value:
+                return str(value)
+        record = self.users.get_by_username(user.username)
+        return record[1] if record else ""
