@@ -38,8 +38,8 @@ class Page:
 PAGES = (
     Page(Path("README.md"), "2026-10-26-project-overview.html", "项目总览", "项目", "系统边界、训练与运行目录、当前状态和启动方式", "2026-10-26", "markdown"),
     Page(Path("model/training/README.md"), "2026-10-26-model-training-management.html", "模型训练管理", "训练", "训练代码、环境、数据、计划和产物的统一入口", "2026-10-26", "markdown"),
-    Page(Path("model/runtime/README.md"), "2026-10-26-model-runtime.html", "模型运行服务", "运行", "运行 API、评估入口、资产读取边界和健康检查", "2026-10-26", "markdown"),
-    Page(Path("model/embedding/README.md"), "2026-10-29-model-embedding-service.html", "向量模型服务", "运行", "BGE-M3 独立 FastAPI 服务、接口契约、启动与对接方式", "2026-10-29", "markdown"),
+    Page(Path("qwen3.5-4b/README.md"), "2026-10-26-model-runtime.html", "模型运行服务", "运行", "运行 API、评估入口、资产读取边界和健康检查", "2026-10-26", "markdown"),
+    Page(Path("bge-m3/README.md"), "2026-10-29-model-embedding-service.html", "向量模型服务", "运行", "BGE-M3 独立 FastAPI 服务、接口契约、启动与对接方式", "2026-10-29", "markdown"),
     Page(Path("model/training/assets/README.md"), "2026-10-26-training-assets-index.html", "训练产物索引", "训练", "当前 adapter、训练指标、冻结评估结果和保存约定", "2026-10-26", "markdown"),
     Page(Path("model/training/assets/qwen3.5-4b/freeze-step20-20261028-01/model-card.html"), "2026-10-28-qwen3.5-4b-model-card.html", "Qwen3.5-4B 第 20 步模型卡", "训练", "冻结候选、训练范围、同源评估、运行边界和允许用途", "2026-10-28", "html"),
     Page(Path("model/training/assets/qwen3.5-4b/freeze-step20-20261028-01/known-limitations.html"), "2026-10-28-qwen3.5-4b-known-limitations.html", "Qwen3.5-4B 候选已知限制", "训练", "非临床验证、同源测试、标签范围、校准、外推和隐私边界", "2026-10-28", "html"),
@@ -77,7 +77,7 @@ PAGES = (
     Page(Path("scripts/docs/.html-source/2026-10-23-model-24gb.html"), "2026-10-23-model-24gb.html", "24GB 显卡模型选型", "模型", "24GB 显卡上的候选模型、资源与部署选型", "2026-10-23", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-23-model-trio-24gb.html"), "2026-10-23-model-trio-24gb.html", "24GB 核心模型方案", "模型", "Qwen、补充决策模型与 BGE-M3 的三模型方案", "2026-10-23", "html"),
     Page(Path("model/training/assets/reference/24GB_GPU_Cloud_Price_List_2026-10-25.html"), "2026-10-25-gpu-cloud-price-list.html", "24GB 显存 GPU 云价格清单", "参考", "历史云 GPU 报价快照与预算筛选参考", "2026-10-25", "html"),
-    Page(Path("model/runtime/assets/README.md"), "2026-10-26-model-runtime-assets.html", "模型运行资产索引", "运行", "运行 adapter、冻结评估结果和路径读取约定", "2026-10-26", "markdown"),
+    Page(Path("qwen3.5-4b/assets/README.md"), "2026-10-26-model-runtime-assets.html", "模型运行资产索引", "运行", "运行 adapter、冻结评估结果和路径读取约定", "2026-10-26", "markdown"),
     Page(Path("scripts/docs/.html-source/2026-10-26-model-runtime-evaluation.html"), "2026-10-26-model-runtime-evaluation.html", "模型评估与推理说明", "运行", "本地评估、冻结测试、显存限制与推理边界", "2026-10-26", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-26-outputs-guide.html"), "2026-10-26-outputs-guide.html", "运行输出说明", "项目", "临时输出与长期训练证据的归档边界", "2026-10-26", "html"),
 )
@@ -111,23 +111,23 @@ LEGACY = {
 README_SOURCES = {
     Path("README.md"),
     Path("model/training/README.md"),
-    Path("model/runtime/README.md"),
-    Path("model/embedding/README.md"),
+    Path("qwen3.5-4b/README.md"),
+    Path("bge-m3/README.md"),
     Path("model/training/assets/README.md"),
     Path("outputs/README.md"),
     Path("model/training/datasets/extracted/README.md"),
-    Path("model/runtime/assets/README.md"),
+    Path("qwen3.5-4b/assets/README.md"),
 }
 
 README_MAP = {
     Path("README.md"): "2026-10-26-project-overview.html",
     Path("model/training/README.md"): "2026-10-26-model-training-management.html",
-    Path("model/runtime/README.md"): "2026-10-26-model-runtime.html",
-    Path("model/embedding/README.md"): "2026-10-29-model-embedding-service.html",
+    Path("qwen3.5-4b/README.md"): "2026-10-26-model-runtime.html",
+    Path("bge-m3/README.md"): "2026-10-29-model-embedding-service.html",
     Path("model/training/assets/README.md"): "2026-10-26-training-assets-index.html",
     Path("outputs/README.md"): "2026-10-26-outputs-guide.html",
     Path("model/training/datasets/extracted/README.md"): "2026-10-26-dataset-index.html",
-    Path("model/runtime/assets/README.md"): "2026-10-26-model-runtime-assets.html",
+    Path("qwen3.5-4b/assets/README.md"): "2026-10-26-model-runtime-assets.html",
 }
 
 
@@ -442,11 +442,15 @@ def check_layout() -> None:
         if path.is_file() and path.suffix.lower() in {".py", ".ps1", ".toml", ".txt"}
     ]
     runtime = [
-        path for path in (ROOT / "model" / "runtime").rglob("*")
+        path for path in (ROOT / "qwen3.5-4b").rglob("*")
         if path.is_file() and path.suffix.lower() in {".py", ".ps1", ".toml"}
     ]
-    if not training or not runtime:
-        raise RuntimeError("Training or runtime implementation directory is empty")
+    embedding = [
+        path for path in (ROOT / "bge-m3").rglob("*")
+        if path.is_file() and path.suffix.lower() in {".py", ".toml"}
+    ]
+    if not training or not runtime or not embedding:
+        raise RuntimeError("Training, runtime, or embedding implementation directory is empty")
     extra = {
         path.relative_to(ROOT).as_posix()
         for path in ROOT.rglob("*.md")
@@ -463,12 +467,13 @@ def check_layout() -> None:
         raise RuntimeError("Non-README Markdown remains: " + ", ".join(sorted(extra)))
     for parent, names in (
         (ROOT / "model" / "training", ("models", "datasets", "assets", "environment", "code", "scripts")),
-        (ROOT / "model" / "runtime", ("app", "code", "scripts", "assets")),
+        (ROOT / "qwen3.5-4b", ("app", "code", "scripts", "assets")),
+        (ROOT / "bge-m3", ("app", "tests")),
     ):
         for name in names:
             if not (parent / name).exists():
                 raise RuntimeError(f"Missing {parent.name}/{name}")
-    print(f"Layout check: {len(training)} training files, {len(runtime)} runtime files")
+    print(f"Layout check: {len(training)} training files, {len(runtime)} runtime files, {len(embedding)} embedding files")
     print(f"Markdown entry points: {len(README_SOURCES)}")
 
 

@@ -133,7 +133,7 @@ $env:UV_RUN_ID = "qwen4b-stage1-20261025-01"
 
 # 运行或续跑冻结测试集评估；已有部分预测时不要添加 -Overwrite
 powershell -NoProfile -ExecutionPolicy Bypass -File `
-  'model\runtime\scripts\run_local_4060_eval.ps1' `
+  'qwen3.5-4b\scripts\run_local_4060_eval.ps1' `
   -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
   -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
   -Tasks 'oct_aux_4class' -SamplesPerClass 4
@@ -161,7 +161,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File `
 | Open UWF 任务清单 | `model/training/datasets/tasks/` | 是 |
 | 完整解压数据 | `model/training/datasets/extracted/` | 是 |
 | 新下载数据暂存 | `model/training/datasets/raw/` | 是 |
-| 模型运行服务与评估 | `model/runtime/` | 否，运行侧管理 |
+| 模型运行服务与评估 | `qwen3.5-4b/` | 否，运行侧管理 |
 | 业务推理与 RAG 扩展 | `ai-services/`、`backend/` | 否 |
 
 每次正式训练应更新 HTML 状态页、预算排期和消耗记录；只有完成评估并记录数据版本与 adapter 指纹后，才把 checkpoint 视为候选产物。

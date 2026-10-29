@@ -48,14 +48,14 @@ docker compose up -d postgres redis
 </code></pre>
 
 <h3>2. 模型运行服务（真实推理时启动）</h3>
-<pre><code>cd model\runtime
-$env:MODEL_RUNTIME_IMAGE_ROOT = (Resolve-Path '..\..\backend\data\uploads').Path
-..\..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+<pre><code>cd qwen3.5-4b
+$env:MODEL_RUNTIME_IMAGE_ROOT = (Resolve-Path '..\backend\data\uploads').Path
+..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 </code></pre>
 <p><code>MODEL_RUNTIME_IMAGE_ROOT</code> 必须指向后端的上传目录，否则模型服务会拒绝读取病例影像（403）。启动后访问 <code>http://127.0.0.1:8010/health</code> 确认返回 <code>"status":"ok"</code>。</p>
 
 <h3>3. 向量模型服务（使用知识检索时启动）</h3>
-<pre><code>cd model\embedding
+<pre><code>cd bge-m3
 $env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
 </code></pre>
@@ -134,7 +134,7 @@ npm run dev
 <ol>
   <li>进入 <strong>知识库</strong> 页。</li>
   <li>上传临床指南或文献（分类：guideline / literature / case / other）。</li>
-  <li>向量由独立的 BGE-M3 服务（<code>model/embedding</code>，端口 8011）提供；服务权重在首次检索时加载并常驻内存。</li>
+  <li>向量由独立的 BGE-M3 服务（<code>bge-m3</code>，端口 8011）提供；服务权重在首次检索时加载并常驻内存。</li>
   <li>医生的辅助分析会通过 RAG 检索命中相关条目并注入结果。</li>
 </ol>
 

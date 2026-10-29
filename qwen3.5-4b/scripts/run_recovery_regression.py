@@ -29,9 +29,9 @@ from pathlib import Path
 
 import httpx
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_ROOT = PROJECT_ROOT / "backend"
-RUNTIME_ROOT = PROJECT_ROOT / "model" / "runtime"
+RUNTIME_ROOT = PROJECT_ROOT / "qwen3.5-4b"
 sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.main import create_app  # noqa: E402
@@ -39,7 +39,8 @@ from app.schemas.case import AnalysisResult, CaseImage, CaseRead  # noqa: E402
 from app.services.redis_store import MemorySessionStore  # noqa: E402
 
 RUNTIME_PORT = 8010
-SLOW_PORT = 8011
+# 8011 is the real BGE-M3 embedding service port; keep the slow mock clear.
+SLOW_PORT = 8019
 STAMP = "20261028-01"
 OUTPUT_DIR = (
     PROJECT_ROOT

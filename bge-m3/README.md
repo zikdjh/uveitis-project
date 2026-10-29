@@ -17,17 +17,17 @@ BGE-M3 向量模型统一在本目录作为独立 FastAPI 服务运行：backend
 权重通过 ModelScope 固定来源 `BAAI/bge-m3` 下载到本目录（约 2.3 GB，不进 Git）：
 
 ```powershell
-.\backend\.venv\Scripts\python.exe -c "from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='model/embedding/models/bge-m3')"
+.\backend\.venv\Scripts\python.exe -c "from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='bge-m3/models/bge-m3')"
 ```
 
-如果权重已在旧位置 `backend/models/bge-m3/`，直接移动到 `model/embedding/models/bge-m3/` 即可，无需重新下载。
+如果权重仍在旧位置 `backend/models/bge-m3/`，直接移动到 `bge-m3/models/bge-m3/` 即可，无需重新下载。
 
 ## 本地启动
 
 ```powershell
-cd model\embedding
+cd bge-m3
 $env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
-..\..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
+..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
 ```
 
 首次向量化请求加载权重并常驻 CPU；`GET /health` 不触发加载。可用环境变量：

@@ -34,10 +34,10 @@ backend/.pytest-temp*/
 backend/.test-tmp/
 backend/pytest-cache-files-*/
 backend/.uv-cache/
-model/runtime/.test-tmp/
-model/runtime/.tmp-test/
-model/runtime/pytest-cache-files-*/
-model/embedding/models/
+qwen3.5-4b/.test-tmp/
+qwen3.5-4b/.tmp-test/
+qwen3.5-4b/pytest-cache-files-*/
+bge-m3/models/
 frontend/.npm-cache/
 scripts/ui-check-20261025/*.png
 docs/Uv*.csv

@@ -52,7 +52,7 @@
 <h2>已完成</h2>
 <ul>
   <li>数据集完成下载、解压、嵌套压缩包处理、逐文件清单登记和归档清理；训练数据与原始数据边界已分离。</li>
-  <li>项目目录完成重组：训练统一放入 <code>model/training/</code>，运行与评估统一放入 <code>model/runtime/</code>，专题文档统一输出为 HTML。</li>
+  <li>项目目录完成重组：训练统一放入 <code>model/training/</code>，模型服务以 <code>qwen3.5-4b/</code> 与 <code>bge-m3/</code> 独立包放在仓库根目录，专题文档统一输出为 HTML。</li>
   <li>FastAPI 后端完成病例建档、影像上传、分析任务、医生复核、PostgreSQL 持久化和本地影像读取。</li>
   <li>鉴权与权限体系完成双 Token 无感刷新、访问令牌/刷新令牌轮换、CSRF、登录限流、账号管理、会话撤销和鉴权审计。</li>
   <li>并发刷新幂等重放已实现：同一旧刷新令牌在 30 秒宽限期内第二次刷新时返回相同令牌，不产生新轮换（标准 refresh token rotation reuse detection）。</li>

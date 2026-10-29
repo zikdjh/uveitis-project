@@ -134,7 +134,7 @@ $env:UV_RUN_ID = &quot;qwen4b-stage1-20261025-01&quot;
 
 # 运行或续跑冻结测试集评估；已有部分预测时不要添加 -Overwrite
 powershell -NoProfile -ExecutionPolicy Bypass -File `
-  'model\runtime\scripts\run_local_4060_eval.ps1' `
+  'qwen3.5-4b\scripts\run_local_4060_eval.ps1' `
   -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
   -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
   -Tasks 'oct_aux_4class' -SamplesPerClass 4
@@ -207,7 +207,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File `
 </tr>
 <tr>
 <td>模型运行服务与评估</td>
-<td><code>model/runtime/</code></td>
+<td><code>qwen3.5-4b/</code></td>
 <td>否，运行侧管理</td>
 </tr>
 <tr>

@@ -14,15 +14,15 @@ uveitis-project/
 │   ├── 2026-10-25-training-cost-ledger-modal.html  Modal 训练消耗与结果
 │   ├── 2026-10-25-training-budget-plan-modal-l40s.html 训练预算计划
 │   └── 2026-10-26-model-runtime-evaluation.html 评估与推理说明
-├── model/                     模型域统一目录
-│   ├── embedding/             BGE-M3 向量模型 FastAPI 服务
-│   │   ├── app/               向量 API 与健康检查
-│   │   └── models/            BGE-M3 权重（gitignore）
-│   ├── runtime/               模型运行服务、评估与部署入口
-│   │   ├── app/               模型健康检查 API
-│   │   ├── code/              本地评估代码
-│   │   ├── scripts/           运行脚本
-│   │   └── assets/            运行资产索引
+├── qwen3.5-4b/                Qwen3.5-4B 模型运行服务（FastAPI）
+│   ├── app/                   判断 API 与健康检查
+│   ├── code/                  本地评估代码
+│   ├── scripts/               运行脚本
+│   └── assets/                运行资产索引
+├── bge-m3/                    BGE-M3 向量模型服务（FastAPI）
+│   ├── app/                   向量 API 与健康检查
+│   └── models/                BGE-M3 权重（gitignore）
+├── model/                     模型训练统一目录
 │   └── training/              模型训练统一管理入口
 │       ├── code/training/     Qwen QLoRA 和 Modal 训练代码
 │       ├── scripts/modal/     训练子集与 Volume 同步脚本
@@ -56,7 +56,7 @@ uveitis-project/
 - [x] PostgreSQL 病例、账号、审计与服务配置持久化
 - [x] 核心模型适配边界与演示模式
 - [x] zvec 嵌入式知识库适配层：文档写入、过滤检索与本地持久化
-- [x] BGE-M3 通过 ModelScope 下载到 `model/embedding`，以独立 FastAPI 服务提供 1024 维向量
+- [x] BGE-M3 通过 ModelScope 下载到 `bge-m3`，以独立 FastAPI 服务提供 1024 维向量
 - [x] zvec 检索通过接口调用独立 BGE-M3 向量服务，管理端展示向量数据库状态
 - [x] 混合判断编排：Qwen 判断、RAG、补充决策、网络搜索和外部总结均为可跳过增强分支
 - [x] 项目目录完成训练资产、运行服务和项目文档归类；索引见 `docs/2026-10-26-project-layout.html`
@@ -71,13 +71,13 @@ uveitis-project/
 
 - HTML 文档统一从 `docs/index.html` 进入；文件名采用 `YYYY-MM-DD-kebab-case.html`。
 - 模型训练统一从站点内的“模型训练管理”页或 `model/training/README.md` 管理；训练任务、数据入口和产物入口都从这里查找。
-- 模型运行、评估与部署统一从站点内的“模型运行服务”页或 `model/runtime/README.md` 管理；向量模型服务统一见 `model/embedding/README.md`。
+- 模型运行、评估与部署统一从站点内的“模型运行服务”页或 `qwen3.5-4b/README.md` 管理；向量模型服务统一见 `bge-m3/README.md`。
 - 鉴权、角色权限、账号维护和会话安全统一见 [`2026-10-26-auth-access-control.html`](docs/2026-10-26-auth-access-control.html) 与 [`2026-10-27-auth-account-provisioning.html`](docs/2026-10-27-auth-account-provisioning.html)。
 - 本页 HTML 版本为 [`2026-10-26-project-overview.html`](docs/2026-10-26-project-overview.html)。
 - 文档总索引：[`docs/index.html`](docs/index.html)。
 - 专题文档统一使用 HTML；除目录级 `README.md` 外，不保留专题 Markdown。重建与校验命令为 `.\model\training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py`。
 - 数据集重新下载后先放 `model/training/datasets/raw/`；解压、核验后按 `model/training/datasets/extracted/<数据集名>/` 组织，并清理已展开的临时 ZIP。
-- 训练评估和验证快照放入 `model/training/assets/qwen3.5-4b/<run-id>/`；模型运行与评估入口统一在 `model/runtime/`；完整 adapter 和优化器状态仍以 Modal `uveitis-runs` 为真相源。
+- 训练评估和验证快照放入 `model/training/assets/qwen3.5-4b/<run-id>/`；模型运行与评估入口统一在 `qwen3.5-4b/`；完整 adapter 和优化器状态仍以 Modal `uveitis-runs` 为真相源。
 - 训练子集位于 `model/training/datasets/training/`；逐文件数据清单位于 `model/training/datasets/extracted/manifests/`，已删除归档的来源账本也在那里。
 - 检索脚本仅供归档复用，运行方式见各子目录内 round-*.mjs（ego-browser 环境）。
 
@@ -86,7 +86,7 @@ uveitis-project/
 向量模型服务（可选；知识检索使用时先启动再让后端连接）：
 
 ```powershell
-cd model\embedding
+cd bge-m3
 uv venv .venv
 uv pip install --python .venv\Scripts\python.exe --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 $env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
@@ -96,9 +96,9 @@ $env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
 模型运行服务（可选；先启动再让后端连接）：
 
 ```powershell
-cd model\runtime
-$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\training\datasets\training').Path
-..\..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+cd qwen3.5-4b
+$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\model\training\datasets\training').Path
+..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
 后端（Windows PowerShell）：
@@ -154,7 +154,7 @@ npm run dev
 
 - Qwen3.5-4B 只输出受限标签、结构化发现和置信度，不生成最终临床报告。
 - 原始病例和影像只允许发送到项目自有的本地或受控内网模型服务；统一 HTTP 出站钩子会阻止公开主机接收这类数据。
-- RAG 使用 `model/embedding` 的 BGE-M3 向量服务和 zvec 索引；索引为空、服务不可用或检索失败时直接跳过。
+- RAG 使用 `bge-m3` 的 BGE-M3 向量服务和 zvec 索引；索引为空、服务不可用或检索失败时直接跳过。
 - 网络搜索支持 Tavily、Brave Search、Serper、Google Programmable Search (CSE)、Bing Web Search、Exa、Perplexity 和自建 SearXNG；管理员可调整尝试顺序并逐项检查，单个提供方失败后继续下一个，全部失败只跳过搜索分支。搜索词只使用模型标签和固定医学检索词，绝不包含主诉、病史、病例标识或影像信息。
 - 补充决策模型保持默认关闭，待真实脱敏病例、医生确认标签和独立评测齐备后启用。
 - 工具链规划由 AgentScope 承担：规划代理只决定本次运行哪些可选技能，执行顺序、超时与失败处理仍由后端确定性代码控制。规划关闭、依赖缺失、凭据不完整或规划失败时回退到确定性顺序，病例分析照常完成。细则见 [AgentScope 工具链编排](docs/2026-10-27-agent-toolchain-plan.html)。
@@ -167,10 +167,10 @@ npm run dev
 
 ## 向量模型服务（BGE-M3）
 
-BGE-M3 统一在 `model/embedding/` 作为独立 FastAPI 服务运行，默认端口 `8011`；backend 不再内嵌模型权重，只通过 `APP_RETRIEVAL_SERVICE_URL` 获取向量。权重通过 ModelScope 固定来源 `BAAI/bge-m3` 下载到 `model/embedding/models/bge-m3/`（约 2.3 GB，已加入 `.gitignore`）：
+BGE-M3 统一在 `bge-m3/` 作为独立 FastAPI 服务运行，默认端口 `8011`；backend 不再内嵌模型权重，只通过 `APP_RETRIEVAL_SERVICE_URL` 获取向量。权重通过 ModelScope 固定来源 `BAAI/bge-m3` 下载到 `bge-m3/models/bge-m3/`（约 2.3 GB，已加入 `.gitignore`）：
 
 ```powershell
-.\backend\.venv\Scripts\python.exe -c "from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='model/embedding/models/bge-m3')"
+.\backend\.venv\Scripts\python.exe -c "from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='bge-m3/models/bge-m3')"
 ```
 
 服务首次收到向量化请求时加载权重并常驻 CPU，`GET /health` 不触发加载。默认配置如下：
@@ -180,17 +180,17 @@ APP_VECTOR_PROVIDER=remote
 APP_RETRIEVAL_SERVICE_URL=http://127.0.0.1:8011
 ```
 
-设置 `APP_INTERNAL_SERVICE_TOKEN` 后，backend 与向量服务之间使用 `X-Internal-Service-Token` 头。接口契约、环境变量与本地启动方式见 `model/embedding/README.md`。
+设置 `APP_INTERNAL_SERVICE_TOKEN` 后，backend 与向量服务之间使用 `X-Internal-Service-Token` 头。接口契约、环境变量与本地启动方式见 `bge-m3/README.md`。
 
 ## 知识检索
 
-向量数据库选用 [zvec](https://github.com/alibaba/zvec)，作为嵌入式本地索引运行在 backend 进程内。BGE-M3 由独立的 `model/embedding` FastAPI 服务提供向量，zvec 负责向量的持久化、HNSW 检索和标量过滤。默认索引目录为 `backend/data/zvec/`，集合名为 `uveitis_knowledge`，维度为 1024。
+向量数据库选用 [zvec](https://github.com/alibaba/zvec)，作为嵌入式本地索引运行在 backend 进程内。BGE-M3 由独立的 `bge-m3` FastAPI 服务提供向量，zvec 负责向量的持久化、HNSW 检索和标量过滤。默认索引目录为 `backend/data/zvec/`，集合名为 `uveitis_knowledge`，维度为 1024。
 
 - `POST /api/v1/knowledge/documents`：写入知识文档。可以传 `vector`；未传时使用当前 embedding provider。
 - `POST /api/v1/knowledge/search`：按文本或向量检索，支持 `category` 过滤。
 - `GET /api/v1/knowledge/status`：查看 zvec 集合、文档数和向量维度。
 
-`APP_VECTOR_PROVIDER=remote` 调用 `model/embedding` 服务。`memory` 只用于无模型的链路测试，确定性哈希向量不具备语义检索质量。切换 embedding provider 后不要复用旧集合的向量，应重建 zvec 索引，避免不同向量空间混检。zvec 集合默认按单写进程使用，生产部署不要让多个 Uvicorn worker 同时写同一集合。
+`APP_VECTOR_PROVIDER=remote` 调用 `bge-m3` 服务。`memory` 只用于无模型的链路测试，确定性哈希向量不具备语义检索质量。切换 embedding provider 后不要复用旧集合的向量，应重建 zvec 索引，避免不同向量空间混检。zvec 集合默认按单写进程使用，生产部署不要让多个 Uvicorn worker 同时写同一集合。
 
 ## 补充决策模型
 

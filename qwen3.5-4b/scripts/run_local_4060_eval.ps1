@@ -12,9 +12,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$root = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
+$root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $python = Join-Path $root "model\training\.venv-local\Scripts\python.exe"
-$evaluator = Join-Path $root "model\runtime\code\local_qwen4b_eval.py"
+$evaluator = Join-Path $root "qwen3.5-4b\code\local_qwen4b_eval.py"
 $adapter = if ([System.IO.Path]::IsPathRooted($AdapterDir)) {
     $AdapterDir
 } else {

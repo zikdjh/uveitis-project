@@ -16,9 +16,10 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_MANIFEST = ROOT / "training" / "datasets" / "training" / "manifest.csv"
+DEFAULT_MANIFEST = ROOT / "model" / "training" / "datasets" / "training" / "manifest.csv"
 DEFAULT_CANDIDATE = (
     ROOT
+    / "model"
     / "training"
     / "assets"
     / "qwen3.5-4b"
@@ -29,6 +30,7 @@ DEFAULT_CANDIDATE = (
 DEFAULT_BASELINE = DEFAULT_CANDIDATE.with_name("..") / "step100" / "predictions.json"
 DEFAULT_OUTPUT = (
     ROOT
+    / "model"
     / "training"
     / "assets"
     / "qwen3.5-4b"

@@ -4,7 +4,7 @@
 
 这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除早期 smoke adapter、历史中间 checkpoint、`training_state.pt` 和第二、第三阶段实验权重，并保留第 4、5 阶段实验目录供本轮审计；当前保留两组工作 adapter、阶段实验指标、摘要、决策文件、错误来源分析和受控推理 smoke。实验 adapter 不作为运行候选。完整训练状态仍以 Modal `uveitis-runs` 为唯一真相源。
 
-本目录属于训练侧。模型运行服务只读取 adapter，不在 `model/runtime/` 复制权重。
+本目录属于训练侧。模型运行服务只读取 adapter，不在 `qwen3.5-4b/` 复制权重。
 
 ## Qwen3.5-4B
 

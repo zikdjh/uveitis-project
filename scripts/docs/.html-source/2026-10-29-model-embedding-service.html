@@ -24,7 +24,7 @@
   </div>
   <h1>向量模型服务</h1>
   <p class="doc-summary">BGE-M3 独立 FastAPI 服务、接口契约、启动与对接方式</p>
-  <p class="doc-source">规范入口：<code>model/embedding/README.md</code></p>
+  <p class="doc-source">规范入口：<code>bge-m3/README.md</code></p>
   <article class="html-body">
 <p>BGE-M3 向量模型统一在本目录作为独立 FastAPI 服务运行：backend 不再加载模型权重，只通过 HTTP 接口获取文本向量。zvec 向量库仍留在 backend 进程内，负责持久化与检索。</p>
 <ul>
@@ -40,13 +40,13 @@
 </ul>
 <h2>模型下载</h2>
 <p>权重通过 ModelScope 固定来源 <code>BAAI/bge-m3</code> 下载到本目录（约 2.3 GB，不进 Git）：</p>
-<pre><code class="language-powershell">.\backend\.venv\Scripts\python.exe -c &quot;from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='model/embedding/models/bge-m3')&quot;
+<pre><code class="language-powershell">.\backend\.venv\Scripts\python.exe -c &quot;from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='bge-m3/models/bge-m3')&quot;
 </code></pre>
-<p>如果权重已在旧位置 <code>backend/models/bge-m3/</code>，直接移动到 <code>model/embedding/models/bge-m3/</code> 即可，无需重新下载。</p>
+<p>如果权重仍在旧位置 <code>backend/models/bge-m3/</code>，直接移动到 <code>bge-m3/models/bge-m3/</code> 即可，无需重新下载。</p>
 <h2>本地启动</h2>
-<pre><code class="language-powershell">cd model\embedding
+<pre><code class="language-powershell">cd bge-m3
 $env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
-..\..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
+..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
 </code></pre>
 <p>首次向量化请求加载权重并常驻 CPU；<code>GET /health</code> 不触发加载。可用环境变量：</p>
 <table>

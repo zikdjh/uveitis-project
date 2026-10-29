@@ -13,8 +13,8 @@
 ## 健康检查
 
 ```powershell
-cd model\runtime
-..\..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+cd qwen3.5-4b
+..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
 打开 `http://127.0.0.1:8010/health`。返回 `ready` 表示基座目录和 adapter 文件均可定位；返回 `degraded` 表示路径缺失，服务本身仍可启动。`/v1/models` 提供感知模型、adapter 和补充决策模型的角色索引，不会触发 GPU 加载。
@@ -30,10 +30,10 @@ cd model\runtime
 运行服务必须使用 CUDA 版 PyTorch，不能把 CPU 版 `backend/.venv` 加入 `PYTHONPATH`。已验证的启动方式：
 
 ```powershell
-cd model\runtime
+cd qwen3.5-4b
 $env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\training\datasets\training').Path
 $env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
-..\..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
 真实基座与第 20 步 adapter 的本地烟测已完成：首次请求约 22 秒，热请求约 2.4–3.6 秒；常驻显存约 3.5 GiB，单图推理峰值分配 `3.275485 GiB`、峰值保留 `3.355469 GiB`。8 个并发请求经串行保护全部返回 HTTP 200，最慢约 14 秒。该结果只证明运行链路可用，不代表新增准确率证据；单图预测和受控 smoke 均不能替代独立外部验证。证据清单位于 `model/training/assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json`。
@@ -63,7 +63,7 @@ $env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
 ## 本地评估
 
 ```powershell
-.\model\runtime\scripts\run_local_4060_eval.ps1 `
+.\qwen3.5-4b\scripts\run_local_4060_eval.ps1 `
   -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
   -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
   -Tasks 'oct_aux_4class' -SamplesPerClass 4

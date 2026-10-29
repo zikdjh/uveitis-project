@@ -15,10 +15,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DATASET_ROOT = ROOT / "training" / "datasets"
-DEFAULT_MODEL_DIR = ROOT / "training" / "models" / "qwen" / "Qwen3.5-4B"
+DATASET_ROOT = ROOT / "model" / "training" / "datasets"
+DEFAULT_MODEL_DIR = ROOT / "model" / "training" / "models" / "qwen" / "Qwen3.5-4B"
 DEFAULT_ADAPTER_DIR = (
     ROOT
+    / "model"
     / "training"
     / "assets"
     / "qwen3.5-4b"
