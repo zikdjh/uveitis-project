@@ -76,11 +76,22 @@ uveitis-project/
 - 鉴权、角色权限、账号维护和会话安全统一见 [`2026-10-26-auth-access-control.html`](docs/2026-10-26-auth-access-control.html) 与 [`2026-10-27-auth-account-provisioning.html`](docs/2026-10-27-auth-account-provisioning.html)。
 - 本页 HTML 版本为 [`2026-10-26-project-overview.html`](docs/2026-10-26-project-overview.html)。
 - 文档总索引：[`docs/index.html`](docs/index.html)。
+- 系统操作手册（前置条件、登录、医生工作流、管理员操作、常见问题）已并入本 README。
 - 专题文档统一使用 HTML；除目录级 `README.md` 外，不保留专题 Markdown。重建与校验命令为 `.\model\training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py`。
 - 数据集重新下载后先放 `model/training/datasets/raw/`；解压、核验后按 `model/training/datasets/extracted/<数据集名>/` 组织，并清理已展开的临时 ZIP。
 - 训练评估和验证快照放入 `model/training/assets/qwen3.5-4b/<run-id>/`；最终运行产物（基座、best_adapter、冻结契约）在 `qwen3.5-4b/` 包内，训练数据集与中间态产物验收后可整体清理；完整 adapter 和优化器状态仍以 Modal `uveitis-runs` 为真相源。
 - 训练子集位于 `model/training/datasets/training/`；逐文件数据清单位于 `model/training/datasets/extracted/manifests/`，已删除归档的来源账本也在那里。
 - 检索脚本仅供归档复用，运行方式见各子目录内 round-*.mjs（ego-browser 环境）。
+
+## 前置条件
+
+| 项 | 要求 |
+|---|---|
+| GPU | NVIDIA RTX 4060（8 GB）或更高；真实模型推理需要 CUDA 版 PyTorch |
+| 数据库 | PostgreSQL 16（必填），Redis（用于会话与队列） |
+| Python | 3.12+，后端依赖在 `backend/.venv`，运行服务依赖在 `.venv-runtime-smoke` |
+| Node.js | 18+，前端依赖在 `frontend/node_modules` |
+| 模型文件 | Qwen3.5-4B 基座和 adapter 在 `qwen3.5-4b/models/`，向量模型权重在 `bge-m3/models/bge-m3/`；训练数据集与中间态产物已清理，不影响运行 |
 
 ## 本地启动
 
@@ -98,7 +109,7 @@ $env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
 
 ```powershell
 cd qwen3.5-4b
-$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\model\training\datasets\training').Path
+$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\backend\data\uploads').Path
 ..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
@@ -137,6 +148,80 @@ npm run dev
 打开 `http://127.0.0.1:5173`。API 文档位于 `http://127.0.0.1:8000/docs`。
 
 默认 `APP_MODEL_MODE=mock`，只验证业务链路，不生成临床结论。核心路径先完成病例结构化、影像理解、证据检索与医生复核；接入相应服务后切换为 `remote`。补充决策模型由 `APP_DECISION_ENABLED=false` 默认关闭，不作为核心流程的前置条件。
+
+## 登录
+
+| 角色 | 入口 | 说明 |
+|---|---|---|
+| 医生 | `http://127.0.0.1:5173/login` | 账号由管理员创建；首次登录后可修改密码 |
+| 管理员 | `http://127.0.0.1:5173/admin/login` | 用户名固定为 `root`，密码只能通过修改 `t_data_dictionary` 中的加密哈希变更 |
+
+系统不提供自助注册。医生会话为双 Token 无感刷新（15 分钟 access + 30 天 refresh）；管理员会话为单一 10 分钟短期令牌，每次操作成功后自动续期。
+
+## 医生工作流
+
+创建病例：
+
+1. 进入病例页，点击新建病例。
+2. 填写患者年龄、性别、受累眼和主诉。
+3. 上传 OCT 或眼底影像（JPG/PNG，最大 25 MB）。
+4. 勾选数据授权确认，点击提交。
+
+辅助分析：
+
+1. 进入病例详情，切换到辅助分析标签。
+2. 点击启动辅助分析。系统按 intake → planning → preprocess → Qwen 判断 → 检索 → 安全复核 → 报告的顺序执行。
+3. 真实推理冷启动约 22 秒，热请求约 3.4 秒，页面自动轮询任务状态。
+4. 分析完成后病例进入待复核状态。
+
+医生复核：
+
+1. 在病例详情的复核标签中审阅分析结果。
+2. 填写复核决定（接受/修改/拒绝）、最终印象和备注。
+3. 提交后病例状态变为已复核。模型输出不会自动成为诊断，必须经医生确认。
+
+报告：在报告标签中查看医生确认后的结构化报告，只展示医生确认的内容，刷新页面后状态不丢失。
+
+## 管理员操作
+
+账号管理（账号权限页）：
+
+1. 点击创建医生账号，输入用户名、显示名和密码（至少 12 位）。
+2. 停用账号后该账号所有会话立即失效。
+3. 重置密码后旧会话全部撤销，旧密码不可再登录。
+
+服务配置（服务配置页）：
+
+1. 配置外部总结 API，支持 OpenAI Responses、OpenAI Chat Completions 和 Anthropic Messages 三种协议。
+2. 配置网络搜索服务商（Tavily、Brave、Serper 等 8 家），可调整尝试顺序并逐项启用/禁用。
+3. 点击检查连接验证凭据可用性；API Key 加密只写不回显，保存后立即作用于后端调用链。
+
+知识库管理（知识库页）：
+
+1. 上传临床指南或文献（分类 guideline / literature / case / other）。
+2. 向量由独立 BGE-M3 服务（端口 8011）提供，权重在首次检索时加载并常驻内存。
+3. 辅助分析通过 RAG 检索命中条目并注入结果；服务不可用时检索分支自动跳过。
+
+活跃会话审计：在账号权限页下方查看当前在线账号的角色、登录 IP、最近活跃和过期时间。
+
+## 停止服务
+
+```powershell
+Get-NetTCPConnection -LocalPort 8000,5173,8010,8011 | ForEach-Object { Stop-Process -Id $_.OwningProcess }
+```
+
+PostgreSQL 和 Redis 是 Docker Compose 容器，执行 `docker compose down` 停止。
+
+## 常见问题
+
+| 问题 | 原因 | 解决 |
+|---|---|---|
+| 后端启动报 `APP_DATABASE_URL` 错误 | PostgreSQL 未启动或连接配置缺失 | 先启动数据库，确认 `backend/.env` 中 `APP_DATABASE_URL` 正确 |
+| 分析时 Qwen 判断阶段返回 403 | 模型运行服务的 `MODEL_RUNTIME_UPLOAD_ROOT` 未指向后端上传目录 | 重启模型服务并设置 `MODEL_RUNTIME_UPLOAD_ROOT` 为 `backend/data/uploads` 绝对路径 |
+| 分析长时间卡在排队 | Worker 未启动且 Web 进程任务处理较慢 | 启动独立 Worker：`python -m app.worker` |
+| 页面提示"请先登录" | Access 令牌已过期且刷新令牌不可用 | 重新登录即可；医生令牌过期时前端会自动刷新 |
+| 管理员端刷新返回 401 | 管理员短期令牌 10 分钟超时 | 重新登录；使用期间系统自动续期，通常不会触发 |
+| 模型推理超时 | 冷启动加载时间较长 | 后端默认等待 `APP_PERCEPTION_TIMEOUT_SECONDS=90`；服务恢复后重新分析 |
 
 ## 混合判断链路
 

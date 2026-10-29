@@ -69,7 +69,6 @@ PAGES = (
     Page(Path("scripts/docs/.html-source/2026-10-27-model-runtime-business-integration.html"), "2026-10-27-model-runtime-business-integration.html", "真实模型运行与业务回写", "运行", "本地 Qwen3.5-4B 上传影像调用、adapter 审计元数据、超时边界和病例持久化验收", "2026-10-27", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-28-model-runtime-failure-recovery.html"), "2026-10-28-model-runtime-failure-recovery.html", "分析任务失败恢复回归", "运行", "运行服务不可用、推理超时、真实回写与服务恢复四个阶段的端到端验收证据", "2026-10-28", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-29-full-test-report.html"), "2026-10-29-full-test-report.html", "第一轮全量测试报告", "测试", "接口测试与浏览器实际点击测试的合并验收结果", "2026-10-29", "html"),
-    Page(Path("scripts/docs/.html-source/2026-10-29-usage-guide.html"), "2026-10-29-usage-guide.html", "系统使用说明", "项目", "本地启动、登录入口、核心工作流、管理员维护和常见问题的操作指引", "2026-10-29", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-23-cn-eye-datasets.html"), "2026-10-23-cn-eye-datasets.html", "国内眼科数据集核验", "数据", "国内开源免费眼科数据集的许可、规模和可用性", "2026-10-23", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-23-intl-eye-datasets.html"), "2026-10-23-intl-eye-datasets.html", "国外眼科数据集核验", "数据", "国外开源免费眼科数据集的许可、规模和申请方式", "2026-10-23", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-23-manual-download-links.html"), "2026-10-23-manual-download-links.html", "手动下载清单", "数据", "数据集条目页、下载入口与人工下载状态", "2026-10-23", "html"),
