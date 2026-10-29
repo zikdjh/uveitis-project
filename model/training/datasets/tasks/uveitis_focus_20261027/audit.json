@@ -1,0 +1,42 @@
+{
+  "status": "ok",
+  "task_dir": "model/training/datasets/tasks/uveitis_focus_20261027",
+  "rows": 915,
+  "split_counts": {
+    "test": 82,
+    "train": 833
+  },
+  "task_counts": {
+    "fundus_toxo_binary": 412,
+    "uwf_uveitis_binary": 503
+  },
+  "task_split_counts": {
+    "fundus_toxo_binary::test": 82,
+    "fundus_toxo_binary::train": 330,
+    "uwf_uveitis_binary::train": 503
+  },
+  "label_counts": {
+    "fundus_toxo_binary::healthy": 132,
+    "fundus_toxo_binary::toxoplasmosis": 280,
+    "uwf_uveitis_binary::non_uveitis": 423,
+    "uwf_uveitis_binary::uveitis": 80
+  },
+  "patient_groups": {
+    "toxo_train": 330,
+    "toxo_test": 82,
+    "uwf_train": 431
+  },
+  "toxo_train_test_group_overlap": 0,
+  "uwf_train_vs_consumed_test_group_overlap": 0,
+  "excluded_consumed_rows": {
+    "uwf_test": 90,
+    "uwf_validation": 107,
+    "run": "uwf-binary-eval-test-20261026-01"
+  },
+  "manifest_sha256": "be63f8846fb2613d5f125bb6734113d75635245c2a9cbc9c13a4d1b158fae04f",
+  "source_manifest_sha256": {
+    "training/manifest.csv": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+    "tasks/open_uwf_uveitis_binary/manifest.csv": "bacc37ed9c37676570a4e4f49036b60fe472e7a86fb7b537387a734551c2b253"
+  },
+  "note": "ToxoFundus supplies doctor-assigned labels without patient IDs; Open UWF supplies patient-isolated groups. The Open UWF test and validation rows are excluded because that patient-isolated test split was already evaluated once and must not be reused."
+}

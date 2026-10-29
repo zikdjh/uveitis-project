@@ -1,0 +1,2102 @@
+[
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1035_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1035_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1054_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1054_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1097_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1097_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/114_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/114_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1166_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1166_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1393_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1393_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1503_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/1503_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/16_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/16_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/183_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/183_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/184_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/184_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/194_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/194_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2095_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2095_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2197_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2197_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2218_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2218_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2333_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2333_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2339_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2339_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2342_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2342_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2348_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2348_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2357_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2357_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2361_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2361_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2362_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2362_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2365_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2365_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2392_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2392_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2406_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2406_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2483_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2483_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2492_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2492_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2526_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2526_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2533_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2533_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2546_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2546_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2583_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2583_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2589_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2589_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2590_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2590_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2595_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2595_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2616_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2616_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2621_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2621_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2627_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2627_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2635_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2635_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2641_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2641_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2642_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2642_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2644_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2644_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2653_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2653_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2658_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2658_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2662_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2662_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2668_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2668_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2671_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2671_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2702_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2702_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2710_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2710_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2711_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2711_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2720_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2720_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2729_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2729_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2736_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2736_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2739_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2739_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2765_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2765_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2774_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2774_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2790_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2790_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2796_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2796_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2799_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2799_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2806_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2806_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2812_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2812_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2818_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2818_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2825_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2825_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2834_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2834_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2858_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2858_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2859_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2859_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2871_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2871_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2876_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2876_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2878_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2878_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2890_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2890_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2897_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2897_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2898_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2898_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2899_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2899_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/290_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/290_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2902_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2902_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2904_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2904_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/291_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/291_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2910_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2910_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2923_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2923_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2940_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2940_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2965_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2965_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2966_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2966_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2968_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2968_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2971_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2971_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2976_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2976_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2985_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2985_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2993_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/2993_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3003_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3003_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3018_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3018_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3028_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3028_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3051_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3051_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3058_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3058_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3107_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3107_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3124_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3124_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3135_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3135_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3157_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3157_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3161_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3161_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3179_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3179_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3189_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3189_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3199_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3199_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3205_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3205_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3206_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3206_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3210_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3210_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3211_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3211_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3224_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3224_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3269_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3269_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3273_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3273_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3282_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3282_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3293_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3293_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/33_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/33_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3303_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3303_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3331_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3331_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3355_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3355_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3358_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3358_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3364_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3364_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3367_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3367_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3377_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3377_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3404_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3404_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3410_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3410_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3411_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3411_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3417_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3417_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3445_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/3445_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/353_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/353_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4026_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4026_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/405_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/405_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4056_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4056_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4057_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4057_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4058_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4058_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4130_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4130_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4146_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4146_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/418_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/418_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4219_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4219_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/426_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/426_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4261_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4261_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4271_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4271_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/434_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/434_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/438_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/438_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4392_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4392_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4594_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4594_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4614_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4614_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4672_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/4672_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/513_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/513_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/554_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/554_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/588_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/588_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/599_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/599_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/633_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/633_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/66_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/66_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/737_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/737_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/800_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/800_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/822_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/822_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/915_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/915_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/97_left.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/04_odir5k/04_odir5k_preprocessed/ODIR-5K/ODIR-5K/Training Images/97_right.jpg",
+    "task": "fundus_toxo_binary",
+    "expected": "healthy",
+    "predicted": "toxoplasmosis",
+    "raw": "{\"label\":\"toxoplasmosis\",\"requires_human_review\":true}\n"
+  }
+]

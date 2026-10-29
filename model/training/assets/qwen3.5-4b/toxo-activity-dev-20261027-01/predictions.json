@@ -1,0 +1,464 @@
+[
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/14796.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/18246.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/2078.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/2336.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/110.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/559.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/18236.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/479.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/2745.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/158.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/784.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/3544.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/248.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/18248.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "active",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/36.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/IM0062RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0518RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/4.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/40.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0486RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/IM0053RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0483RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/2.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/15.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/65.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/74.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/3.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0539RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0557RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/51.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0479RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/63.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/56.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0555RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "healthy",
+    "raw": "{\"label\":\"healthy\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0556RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "healthy",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/2312.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/17607.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/696.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0661RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/122.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/99.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0606RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/16614.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/18103.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/17633.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/474.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0291RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/17996.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0531RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/1833.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/17989.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/16380.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/138.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OD0601RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/135.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/107.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/IM0151RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0395RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/16149.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/(742).jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/115.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/2559.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/OS0390RE.JPG",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/131.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/476.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "inactive",
+    "raw": "{\"label\":\"inactive\",\"requires_human_review\":true}\n"
+  },
+  {
+    "image": "data/02_toxofundus/02_toxofundus/images/477.jpg",
+    "task": "fundus_toxo_activity_3class",
+    "expected": "inactive",
+    "predicted": "active",
+    "raw": "{\"label\":\"active\",\"requires_human_review\":true}\n"
+  }
+]

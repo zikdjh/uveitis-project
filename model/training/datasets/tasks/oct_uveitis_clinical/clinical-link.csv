@@ -1,0 +1,76 @@
+dataset,task,image,source_image,category,clinical_row,age,sex,visual_acuity,vit_rpe_intensity,etiology,patient_proxy_key,mapping_confidence
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 1.jpg,RRD-PVR 1.jpg,RRD-PVR,1,34,M,0.9,0.463,,01:RRD-PVR:34:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 2.jpg,RRD-PVR 2.jpg,RRD-PVR,2,59,F,0.1,0.358,,01:RRD-PVR:59:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 3.jpeg,RRD-PVR 3.jpeg,RRD-PVR,3,41,M,0.5,0.735,,01:RRD-PVR:41:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 4.jpg,RRD-PVR 4.jpg,RRD-PVR,4,55,F,0.1,0.186,,01:RRD-PVR:55:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 5.jpg,RRD-PVR 5.jpg,RRD-PVR,5,50,F,0,0.267,,01:RRD-PVR:50:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 6.jpeg,RRD-PVR 6.jpeg,RRD-PVR,6,30,M,0.5,0.791,,01:RRD-PVR:30:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 7.jpeg,RRD-PVR 7.jpeg,RRD-PVR,7,41,M,0.7,0.514,,01:RRD-PVR:41:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 8.jpeg,RRD-PVR 8.jpeg,RRD-PVR,8,32,M,0,0.505,,01:RRD-PVR:32:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 9.jpeg,RRD-PVR 9.jpeg,RRD-PVR,9,54,M,0.7,0.361,,01:RRD-PVR:54:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 10.jpeg,RRD-PVR 10.jpeg,RRD-PVR,10,52,M,1.8,0.339,,01:RRD-PVR:52:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 11.jpeg,RRD-PVR 11.jpeg,RRD-PVR,11,39,F,0,0.497,,01:RRD-PVR:39:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 12.jpeg,RRD-PVR 12.jpeg,RRD-PVR,12,29,M,0.7,0.532,,01:RRD-PVR:29:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 13.jpg,RRD-PVR 13.jpg,RRD-PVR,13,50,F,0.7,0.503,,01:RRD-PVR:50:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 14.jpg,RRD-PVR 14.jpg,RRD-PVR,14,68,M,2.5,0.223,,01:RRD-PVR:68:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 15.jpg,RRD-PVR 15.jpg,RRD-PVR,15,21,F,0,0.205,,01:RRD-PVR:21:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 16.jpg,RRD-PVR 16.jpg,RRD-PVR,16,41,M,0.3,0.314,,01:RRD-PVR:41:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 17.jpg,RRD-PVR 17.jpg,RRD-PVR,17,31,M,0.9,0.192,,01:RRD-PVR:31:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 18.jpeg,RRD-PVR 18.jpeg,RRD-PVR,18,33,F,0.7,0.607,,01:RRD-PVR:33:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/RRD-PVR 19.jpeg,RRD-PVR 19.jpeg,RRD-PVR,19,20,M,1.7,0.295,,01:RRD-PVR:20:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 1.jpeg,Int+Post Uveitis 1.jpeg,Intermediate+Posterior Uveitis,20,21,M,0.6,0.223,Toxoplasma,01:Intermediate+Posterior Uveitis:21:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 2.jpeg,Int+Post Uveitis 2.jpeg,Intermediate+Posterior Uveitis,21,24,F,2.08,0.24,Toxoplasma,01:Intermediate+Posterior Uveitis:24:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 3.jpeg,Int+Post Uveitis 3.jpeg,Intermediate+Posterior Uveitis,22,46,F,2.08,0.237,Paraneoplastic syndrome,01:Intermediate+Posterior Uveitis:46:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 4.jpeg,Int+Post Uveitis 4.jpeg,Intermediate+Posterior Uveitis,23,56,F,2.08,0.258,Paraneoplastic syndrome,01:Intermediate+Posterior Uveitis:56:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 5.jpeg,Int+Post Uveitis 5.jpeg,Intermediate+Posterior Uveitis,24,23,F,1.78,0.28,Sifilis,01:Intermediate+Posterior Uveitis:23:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 6.jpeg,Int+Post Uveitis 6.jpeg,Intermediate+Posterior Uveitis,25,20,F,1.78,0.297,Sifilis,01:Intermediate+Posterior Uveitis:20:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 7.jpeg,Int+Post Uveitis 7.jpeg,Intermediate+Posterior Uveitis,26,28,F,0.48,0.206,CMV,01:Intermediate+Posterior Uveitis:28:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 8.jpeg,Int+Post Uveitis 8.jpeg,Intermediate+Posterior Uveitis,27,31,M,1.3,0.233,Tuberculosis,01:Intermediate+Posterior Uveitis:31:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 9.jpeg,Int+Post Uveitis 9.jpeg,Intermediate+Posterior Uveitis,28,52,M,1.78,0.302,Sifilis,01:Intermediate+Posterior Uveitis:52:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 10.jpeg,Int+Post Uveitis 10.jpeg,Intermediate+Posterior Uveitis,29,43,M,2.08,0.171,Sifilis,01:Intermediate+Posterior Uveitis:43:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 11.jpeg,Int+Post Uveitis 11.jpeg,Intermediate+Posterior Uveitis,30,37,M,2.48,0.176,Toxoplasma,01:Intermediate+Posterior Uveitis:37:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Int+Post Uveitis 12.jpeg,Int+Post Uveitis 12.jpeg,Intermediate+Posterior Uveitis,31,41,M,0.3,0.212,Toxoplasma,01:Intermediate+Posterior Uveitis:41:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 1.jpeg,Panuveitis 1.jpeg,Panuveitis,32,41,M,0.7,0.42,Sifilis,01:Panuveitis:41:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 2.jpeg,Panuveitis 2.jpeg,Panuveitis,33,31,F,0.54,0.353,Tuberculosis,01:Panuveitis:31:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 3.jpeg,Panuveitis 3.jpeg,Panuveitis,34,33,F,0.3,0.299,Toxoplasma,01:Panuveitis:33:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 4.jpeg,Panuveitis 4.jpeg,Panuveitis,35,20,F,0.4,0.224,Idiopathic,01:Panuveitis:20:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 5.jpeg,Panuveitis 5.jpeg,Panuveitis,36,28,F,0.54,0.18,VKH,01:Panuveitis:28:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 6.jpeg,Panuveitis 6.jpeg,Panuveitis,37,27,F,2.7,0.261,Toxoplasma,01:Panuveitis:27:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 7.jpeg,Panuveitis 7.jpeg,Panuveitis,38,46,M,0.4,0.274,Sifilis,01:Panuveitis:46:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 8.jpeg,Panuveitis 8.jpeg,Panuveitis,39,36,M,1,0.325,Sifilis,01:Panuveitis:36:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 9.jpeg,Panuveitis 9.jpeg,Panuveitis,40,18,M,0.52,0.377,Tuberculosis,01:Panuveitis:18:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 10.jpeg,Panuveitis 10.jpeg,Panuveitis,41,39,M,1,0.314,Idiopathic,01:Panuveitis:39:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 11.jpeg,Panuveitis 11.jpeg,Panuveitis,42,56,F,1.3,0.268,Idiopathic,01:Panuveitis:56:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 12.jpeg,Panuveitis 12.jpeg,Panuveitis,43,45,F,1.78,0.275,Tuberculosis,01:Panuveitis:45:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 13.jpeg,Panuveitis 13.jpeg,Panuveitis,44,31,F,1.48,0.244,Toxoplasma,01:Panuveitis:31:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 14.jpeg,Panuveitis 14.jpeg,Panuveitis,45,48,F,1.3,0.232,Tuberculosis,01:Panuveitis:48:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 15.jpeg,Panuveitis 15.jpeg,Panuveitis,46,48,F,1.78,0.409,Tuberculosis,01:Panuveitis:48:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Panuveitis 16.jpeg,Panuveitis 16.jpeg,Panuveitis,47,37,M,2.08,0.373,Toxoplasma,01:Panuveitis:37:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 1.jpeg,Normal 1.jpeg,Normal,48,30,F,0,0.162,,01:Normal:30:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 2.jpeg,Normal 2.jpeg,Normal,49,30,F,0,0.167,,01:Normal:30:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 3.jpeg,Normal 3.jpeg,Normal,50,29,F,0,0.166,,01:Normal:29:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 4.jpeg,Normal 4.jpeg,Normal,51,29,F,0,0.194,,01:Normal:29:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 5.jpeg,Normal 5.jpeg,Normal,52,31,M,0,0.162,,01:Normal:31:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 6.jpeg,Normal 6.jpeg,Normal,53,31,M,0,0.163,,01:Normal:31:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 7.jpeg,Normal 7.jpeg,Normal,54,28,F,0,0.18,,01:Normal:28:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 8.jpeg,Normal 8.jpeg,Normal,55,28,F,0,0.197,,01:Normal:28:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 9.jpeg,Normal 9.jpeg,Normal,56,27,F,0,0.171,,01:Normal:27:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 10.jpeg,Normal 10.jpeg,Normal,57,27,F,0,0.173,,01:Normal:27:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 11.jpeg,Normal 11.jpeg,Normal,58,29,F,0,0.186,,01:Normal:29:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 12.jpeg,Normal 12.jpeg,Normal,59,29,F,0,0.193,,01:Normal:29:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 13.jpeg,Normal 13.jpeg,Normal,60,29,F,0,0.176,,01:Normal:29:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 14.jpeg,Normal 14.jpeg,Normal,61,29,F,0,0.167,,01:Normal:29:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 15.jpeg,Normal 15.jpeg,Normal,62,28,M,0,0.161,,01:Normal:28:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 16.jpeg,Normal 16.jpeg,Normal,63,28,M,0,0.152,,01:Normal:28:M,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 17.jpeg,Normal 17.jpeg,Normal,64,29,F,0,0.17,,01:Normal:29:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 18.jpeg,Normal 18.jpeg,Normal,65,29,F,0,0.176,,01:Normal:29:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 19.jpeg,Normal 19.jpeg,Normal,66,30,F,0,0.164,,01:Normal:30:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 20.jpeg,Normal 20.jpeg,Normal,67,30,F,0,0.166,,01:Normal:30:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 21.jpeg,Normal 21.jpeg,Normal,68,28,F,0,0.181,,01:Normal:28:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 22.jpeg,Normal 22.jpeg,Normal,69,28,F,0,0.177,,01:Normal:28:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 23.jpeg,Normal 23.jpeg,Normal,70,32,F,0,0.185,,01:Normal:32:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 24.jpeg,Normal 24.jpeg,Normal,71,32,F,0,0.166,,01:Normal:32:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 25.jpeg,Normal 25.jpeg,Normal,72,27,F,0,0.181,,01:Normal:27:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 26.jpeg,Normal 26.jpeg,Normal,73,27,F,0,0.184,,01:Normal:27:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 27.jpeg,Normal 27.jpeg,Normal,74,30,F,0,0.181,,01:Normal:30:F,inferred_from_category_index
+01_uveitis_oct,oct_uveitis_clinical,data/Normal 28.jpeg,Normal 28.jpeg,Normal,75,30,F,0,0.199,,01:Normal:30:F,inferred_from_category_index

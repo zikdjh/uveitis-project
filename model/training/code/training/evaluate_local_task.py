@@ -24,7 +24,10 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--adapter", type=Path, required=True)
     parser.add_argument("--task", required=True)
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--image-pixels", type=int, default=16_384)
+    # Match the training configuration. The 2026-10-27 activity run showed a
+    # 0.089 macro-F1 swing between 16,384 and 65,536 px on the same adapter, so
+    # an evaluator default that differs from training silently misreports.
+    parser.add_argument("--image-pixels", type=int, default=65_536)
     parser.add_argument("--max-length", type=int, default=256)
     return parser.parse_args()
 

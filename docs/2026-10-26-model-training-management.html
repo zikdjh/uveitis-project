@@ -52,7 +52,7 @@
 <p><code>models/qwen/Qwen3.5-4B/</code> 是本地基座副本，当前 14 个模型文件、9,342,907,469 字节（不含单独的 <code>pull-manifest.json</code>），包含两份 safetensors 分片、索引、配置和 tokenizer。它不替代 Modal 上的 <code>uveitis-models</code>；本地正式训练直接使用本地副本，Modal 卷仍是远端备份和训练恢复来源。</p>
 <p>本地加载需要支持 <code>qwen3_5</code> 架构的 Transformers。项目训练脚本固定使用 <code>50e35cc0ca18ec19b80653690de553e6decf74f5</code>；后端当前的 Transformers 4.51.3 不识别该架构，不能直接用它加载这个模型目录。本地校验清单见 <code>models/qwen/Qwen3.5-4B/pull-manifest.json</code>。</p>
 <p>本地 4060 使用独立的 <code>model/training/.venv-local/</code>，其中是 CUDA 12.8 的 PyTorch 和 Transformers 5.20.2，不使用 <code>backend/.venv</code> 的 CPU PyTorch。该环境已完成 4-bit NF4、bfloat16、LoRA 前向/反向、optimizer step、周期验证和可恢复正式训练实测；状态见 <code>docs/2026-10-26-model-training-status.html</code>，产物索引见 <code>assets/README.md</code>。</p>
-<p>2026-10-26 已清理旧 smoke run、历史中间 checkpoint、<code>training_state.pt</code>、早期实验权重和重复 processor。当前保留两组工作 adapter、第二至第五阶段的指标、摘要和决策文件、错误来源分析、受控推理 smoke，以及冻结评估断点；第 4、5 阶段新生成的实验权重仍留在各自目录，均不作为运行候选。完整 checkpoint 与优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</p>
+<p>2026-10-26 已清理旧 smoke run、历史中间 checkpoint、<code>training_state.pt</code>、早期实验权重和重复 processor。当前保留两组 OCT 工作 adapter、一个弓形虫病辅助研究 adapter、第二至第五阶段的指标、摘要和决策文件、错误来源分析、受控推理 smoke，以及冻结评估断点；第 4、5 阶段新生成的实验权重仍留在各自目录，均不作为运行候选。完整 checkpoint 与优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</p>
 <h2>当前训练路线</h2>
 <ul>
 <li>主模型：Qwen3.5-4B，4-bit QLoRA，本地 RTX 4060 单卡训练。</li>
@@ -62,6 +62,8 @@
 <li>真相源：本轮训练使用本地 <code>datasets/training/manifest.csv</code> 和 <code>models/qwen/Qwen3.5-4B/</code>；checkpoint、验证指标和 adapter 位于 <code>assets/qwen3.5-4b/</code>。</li>
 <li>当前冻结评估基线：<code>local-4060-grouped-cont-20261025-01/best_adapter</code>，第 100 步。</li>
 <li>当前选定的 OCT 运行候选：第 20 步 adapter，最终产物已迁至 <code>qwen3.5-4b/models/best_adapter</code>。</li>
+<li>弓形虫病辅助研究 adapter：<code>local-4060-uveitis-focus-20261027-01/best_adapter</code>，第 200 步；仅使用 ToxoFundus 训练行和 Open UWF 训练行，已排除 Open UWF 已消费的测试与验证行。</li>
+<li>弓形虫病冻结评估：<code>toxo-test-20261027-01/evaluation.json</code>；82 条图像级测试 accuracy <code>0.914634</code>、macro-F1 <code>0.907345</code>、JSON 有效率 <code>100%</code>。</li>
 <li>发布状态：第 20 步候选和基线均已完成 1,000 条同源 OCT 冻结测试；候选 macro-F1 <code>0.947245</code>，基线 <code>0.918252</code>，提升 <code>+0.028993</code>，通过 <code>0.02</code> 选型门槛。当前尚未作为临床模型发布。</li>
 <li>错误来源：第 20 步候选主要错误为 <code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条；相对第 100 步基线，DRUSEN 纠正 38 条，但 CNV 退化 6 条、NORMAL 退化 4 条。</li>
 <li>受控推理 smoke：第 20 步候选在四类各 4 条本地测试中正确 16/16，JSON 有效率 100%，峰值保留显存 <code>3.31 GiB</code>；结果只证明链路可用，不作为泛化精度证据。</li>
@@ -69,6 +71,7 @@
 <li>冻结候选：2026-10-28 提前冻结第 20 步候选，目录已迁至 <code>qwen3.5-4b/assets/freeze-step20-20261028-01/</code>。机器可读清单、模型卡、运行契约和已知限制分别见 <code>freeze-manifest.json</code>、<code>model-card.html</code>、<code>runtime-contract.json</code>、<code>known-limitations.html</code>；冻结状态仅为研究用途候选，不是临床发布。</li>
 <li>11.10 前收口条件：冻结第 20 步候选 adapter、模型卡、指标文件和运行读取路径，并保留数据来源及患者隔离限制。adapter、模型卡和运行契约已提前冻结；剩余重点是患者隔离验证路径、端到端复跑和最终交付边界确认。</li>
 <li>Open UWF 700：CC BY 4.0，7 类与葡萄膜炎二分类任务清单位于 <code>datasets/tasks/</code>；数据直接从 <code>datasets/extracted/14_open_uwf700/</code> 读取。患者组键必须包含诊断，因为源 <code>Patient ID</code> 在不同诊断队列中复用。</li>
+<li>弓形虫病辅助任务：ToxoFundus 标签由眼科医生确认，但没有患者 ID，现有 train/test 为图像级切分；该 adapter 只作研究补充，不报告患者级外部验证，也不替换第 20 步 OCT 运行候选。</li>
 </ul>
 <p>2026-10-28 冻结记录：候选 adapter 权重 SHA256 为 <code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code>，训练 manifest SHA256 为 <code>0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580</code>，冻结 selection SHA256 为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。冻结清单同时登记基座 config、索引、两个 safetensors 分片、tokenizer 和训练/评估证据的哈希。该冻结没有新增训练、没有启动 Modal GPU、没有读取已消费测试集进行调参。</p>
 <p>2026-10-26 已完成第二阶段受控复核：分别从第 20 步候选初始化，以 <code>5e-6</code> 和 <code>1e-5</code> 学习率、OCT 任务权重 4 训练 30 步上限。两次运行都在第 10 步因连续两次验证未改善而早停；第 5、10 步验证 macro-F1 为 <code>0.867725</code>，低于入口的 <code>0.873358</code>，JSON 有效率仍为 <code>100%</code>。因此没有产生新的提升候选，运行候选继续保留第 20 步 adapter，第二阶段 final adapter 不提升、不覆盖。结构化记录见 <code>assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>。</p>

@@ -1,0 +1,13 @@
+{
+  "step": 200,
+  "validation_loss": 0.017978377096629368,
+  "validation_macro_f1": 1.0,
+  "validation_json_valid_rate": 1.0,
+  "best_loss": 0.017978377096629368,
+  "best_step": 200,
+  "best_score": [
+    1.0,
+    1.0,
+    -0.017978377096629368
+  ]
+}

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>葡萄膜炎数据获取与申请材料 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-uveitis-open-data-audit.html">上一份</a>
+    <a href="2026-10-27-uveitis-focus-training.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>数据</span>
+    <span>2026-10-27</span>
+  </div>
+  <h1>葡萄膜炎数据获取与申请材料</h1>
+  <p class="doc-summary">公开渠道穷尽后的现实路径：补齐自有病例矩阵，或通过 DUA／联系作者取得患者级医生标注数据</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-uveitis-data-acquisition.html</code></p>
+  <article class="html-body">
+<p>机器可读清单：<code>model/training/datasets/audits/data-acquisition-plan-20261027.json</code>。访问方式：本地代理 <code>http://127.0.0.1:7890</code>。</p>
+
+<h2>1. 结论</h2>
+<ul>
+  <li>公开、可直接下载、同时满足<b>患者级隔离</b>与<b>医生确认标签</b>的葡萄膜炎影像数据，经三轮检索后确认不存在。</li>
+  <li>因此"拿到新的外部数据"只剩两条现实路径：<b>补回自有病例矩阵</b>，或<b>走受控访问／联系作者</b>。</li>
+  <li>受控访问里只有 Birdshot-WIDE 三项条件齐备，且它的元数据使用 SHA-256 伪匿名患者 ID，天然支持患者隔离切分。</li>
+  <li>自有病例矩阵 <code>docs/Uvéites_25_etiologies_group_0626.csv</code> 目前只有表头、没有数据行，无法进入训练。</li>
+</ul>
+
+<h2>2. 本轮新增证据</h2>
+<table>
+<thead>
+<tr><th>对象</th><th>检查结果</th><th>影响</th></tr>
+</thead>
+<tbody>
+<tr><td><code>docs/Uvéites_25_etiologies_group_0626.csv</code></td><td>2320 字节，153 列，<b>0 个数据行</b>，最后一列为 <code>Etiology</code></td><td>缺少数据行，无法训练或评估</td></tr>
+<tr><td><code>data/uveitis.db</code></td><td>只有 <code>cases</code> 一张表，<b>0 行</b></td><td>本地没有可用真实病例记录</td></tr>
+<tr><td>本地训练进程</td><td>无 python 训练进程，无未完成的 Modal 作业</td><td>没有在跑的作业需要接管</td></tr>
+</tbody>
+</table>
+
+<h3>2.1 自有病例矩阵的补齐格式</h3>
+<p>要把这份矩阵接入训练，需要满足以下结构：</p>
+<ul>
+  <li>首行表头保持现在的 153 列，最后一列仍为 <code>Etiology</code>。</li>
+  <li>每个病例一行；自变量列填写数值编码；<code>Etiology</code> 填病因分类。</li>
+  <li>若同一患者的双眼都入组，请额外提供 <code>patient_id</code> 与 <code>eye</code> 两列，否则无法做患者隔离切分，只能退化为行级划分。</li>
+  <li>缺失值用显式空值表示，不要用 0 代替"未记录"。</li>
+</ul>
+
+<h2>3. 检索复检（R3）</h2>
+<p>在 R1、R2 之后又补了一轮，覆盖此前未系统核对的数据平台与搜索引擎：</p>
+<table>
+<thead>
+<tr><th>来源</th><th>结果</th></tr>
+</thead>
+<tbody>
+<tr><td>Mendeley Data 公开检索 API</td><td>端点返回 404，无法结构化核查</td></tr>
+<tr><td>GigaDB API</td><td>返回 404</td></tr>
+<tr><td>Science Data Bank API</td><td>返回 404</td></tr>
+<tr><td>Brave Search</td><td>429 Too Many Requests</td></tr>
+<tr><td>Mojeek</td><td>403 Forbidden</td></tr>
+<tr><td>DuckDuckGo（lite 与 html 入口）</td><td>返回无结果页，索引不可用</td></tr>
+<tr><td>Bing</td><td>返回与查询无关的结果集，不可采信</td></tr>
+</tbody>
+</table>
+<p>结论与前两轮一致：<b>没有新的可直接下载的患者级医生标注葡萄膜炎影像数据集</b>。</p>
+
+<h2>4. P0：Birdshot-WIDE 受控访问</h2>
+<table>
+<thead>
+<tr><th>项目</th><th>内容</th></tr>
+</thead>
+<tbody>
+<tr><td>数据集</td><td>Birdshot-WIDE</td></tr>
+<tr><td>DOI</td><td><code>10.5281/zenodo.19474623</code></td></tr>
+<tr><td>入口</td><td><a href="https://zenodo.org/records/19474623">zenodo.org/records/19474623</a></td></tr>
+<tr><td>代码仓库</td><td><a href="https://github.com/thomasb6/Birdshot-WIDE">github.com/thomasb6/Birdshot-WIDE</a>（MIT）</td></tr>
+<tr><td>许可</td><td>数据集 CC BY 4.0，代码 MIT</td></tr>
+<tr><td>访问方式</td><td>Zenodo controlled access，需提交 access request 并同意公开 DUA</td></tr>
+<tr><td>模态</td><td>超广角眼底（Optos Silverstone）</td></tr>
+<tr><td>规模</td><td>5042 张 BSCR 眼底图，覆盖 742 眼；1310 张年龄性别匹配健康对照图，覆盖 742 眼</td></tr>
+<tr><td>患者隔离</td><td>元数据经 SHA-256 伪匿名，可按患者 ID 严格切分</td></tr>
+<tr><td>医生标注</td><td>逐图人工质量审核并标注主导病灶亚型；队列标签为 BSCR 与 Control</td></tr>
+<tr><td>引用</td><td>Foulonneau et al., Scientific Data, 2026</td></tr>
+</tbody>
+</table>
+<p>申请流程：在 Zenodo 页面提交访问请求，并在申请中同意仓库公开的数据使用协议。协议要点为机构内存储、不再分发、不做再识别尝试、仅限非商业研究、成果引用原文。</p>
+
+<h2>5. DUA 申请草稿</h2>
+<p>主题：<code>Data access request for Birdshot-WIDE (DOI 10.5281/zenodo.19474623)</code></p>
+<pre>Dear Birdshot-WIDE authors,
+
+We are requesting controlled access to the Birdshot-WIDE dataset
+(DOI 10.5281/zenodo.19474623) for a non-commercial research project on
+computer-aided ophthalmic decision support.
+
+Purpose: we are building a locally run, clinician-supervised assistant for
+uveitis triage. We intend to use Birdshot-WIDE to (1) fine-tune a
+vision-language model for birdshot chorioretinitis recognition, and (2) run a
+patient-isolated external validation, splitting strictly by the pseudonymized
+patient identifier so that no patient appears in more than one split.
+
+We accept the published Data Usage Agreement: data will be stored on
+institution-controlled storage, will not be redistributed or used for
+re-identification attempts, will be used for non-commercial research only,
+and all derived publications will cite Foulonneau et al.
+(Scientific Data, 2026).
+
+Principal investigator: &lt;name&gt;
+Institution and department: &lt;institution&gt;
+Institutional email: &lt;email&gt;
+Intended retention period: &lt;period&gt;
+Data steward: &lt;person&gt;
+Ethics approval or exemption reference: &lt;reference&gt;
+
+Sincerely,
+&lt;principal investigator&gt;</pre>
+<p>草稿中所有尖括号字段都还没有真实信息。填入申请人身份与机构信息后方可提交。</p>
+
+<h3>5.1 需要同意的 DUA 条款（Birdshot-Wide Data Usage Agreement 1.0.0）</h3>
+<ol>
+  <li>Non-Identification：不尝试识别数据中任何个体。</li>
+  <li>Disclosure Avoidance：在发表与沟通中避免泄露个体身份。</li>
+  <li>Non-Redistribution：不向他人分享访问权限，<b>所有使用者必须各自申请并签署</b>。</li>
+  <li>Data Security：数据须托管在安全基础设施并维持合理安全措施。</li>
+  <li>Reporting Vulnerabilities：发现可能可识别个体的信息须立即邮件报告通讯作者。</li>
+  <li>Lawful Use：仅用于合法科学研究。</li>
+  <li>Ethical Compliance：研究须符合机构伦理与适用数据保护法规。</li>
+  <li>Statement of Intent：申请中须说明数据使用的一般目的。</li>
+  <li>Citation Requirement：发表成果须引用数据集与原文。</li>
+  <li>Termination of Agreement：协议可由任一方终止，终止后义务继续有效。</li>
+</ol>
+
+<h3>5.2 体积约束</h3>
+<p>Zenodo 记录标注该数据集<b>总体积 1.0 TB</b>。这远超本地 4060 机器的磁盘与代理带宽，因此获授权后必须分阶段处理：</p>
+<ul>
+  <li>先取 metadata 与文件清单，确认图像格式、分辨率与单文件体积。</li>
+  <li>再按随访 visit 或按眼抽样下载子集，不做全量落地。</li>
+  <li>若确需全量，改在云端完成预处理与特征提取，只回传特征与清单。</li>
+</ul>
+
+<h2>6. P1：联系作者路线</h2>
+<table>
+<thead>
+<tr><th>资源</th><th>内容</th><th>获取方式</th></tr>
+</thead>
+<tbody>
+<tr><td>RV_CME_ML</td><td>207 张晚期 FA、117 患者，含患者级 CME 标签</td><td>联系作者</td></tr>
+<tr><td>UveAI（Jules-Gonin）</td><td>644 眼、369 患者 FA 数据集，数据未公开</td><td>联系作者</td></tr>
+<tr><td>Stanford UWFFP 炎症检测</td><td>非感染性葡萄膜炎炎症检测，超广角眼底</td><td>合理请求</td></tr>
+</tbody>
+</table>
+<p>这三条都属于私有或受控数据，写信时需要一并说明身份、研究目的、数据保管方式和伦理安排。它们可以作为 Birdshot-WIDE 之外的补充来源。</p>
+
+<h2>7. 需要补齐的信息</h2>
+<ul>
+  <li>25 病因矩阵的<b>数据行</b>，以及可选的 <code>patient_id</code> 与 <code>eye</code> 两列。</li>
+  <li>Birdshot-WIDE 申请所需的申请人姓名、机构与院系、机构邮箱、数据保管责任人、保存期限、伦理审查或豁免编号。</li>
+  <li>是否同意以研究、非商业用途提交该申请。</li>
+</ul>
+
+<h3>7.1 数据到位即可直接训练</h3>
+<p>已经把入口准备好：<code>model/training/scripts/datasets/build_etiology_task.py</code>。它做四件事——校验表头与目标列、要求 <code>patient_id</code> 与 <code>eye</code>、按患者哈希做确定性三分、输出 <code>dataset.csv</code> 与 <code>audit.json</code>。</p>
+<p>本轮对它做了端到端验证：</p>
+<table>
+<thead>
+<tr><th>场景</th><th>结果</th></tr>
+</thead>
+<tbody>
+<tr><td>合成样例 80 行 / 40 患者</td><td>切分为 train 44 行 22 患者、validation 18 行 9 患者、test 18 行 9 患者</td></tr>
+<tr><td>患者跨切分检查</td><td><b>0 个患者跨切分</b></td></tr>
+<tr><td>缺少 <code>patient_id</code>/<code>eye</code> 且开启 <code>--require-patient</code></td><td>退出码 2，明确报出缺失列</td></tr>
+<tr><td>真实矩阵（0 数据行）</td><td>退出码 2，提示 export the case rows before training</td></tr>
+</tbody>
+</table>
+
+<h2>8. 训练侧约束</h2>
+<ul>
+  <li>不重复消费任何已冻结的测试集，包括 Open UWF 已消费的 90 条测试与 107 条验证，以及 ToxoFundus 82 条冻结测试。</li>
+  <li>不引入网络抓取图像或 SMOTE 合成样本充当独立验证。</li>
+  <li>在取得患者级数据之前，不对外宣称任何"患者级外部验证"结论。</li>
+</ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>葡萄膜炎数据获取与申请材料 · 2026-10-27</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>
+
