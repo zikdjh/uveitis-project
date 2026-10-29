@@ -41,6 +41,7 @@ qwen3.5-4b/models/
 bge-m3/models/
 frontend/.npm-cache/
 scripts/ui-check-20261025/*.png
+scripts/e2e-*/*.png
 docs/Uv*.csv
 model/training/.venv-local/
 model/training/models/

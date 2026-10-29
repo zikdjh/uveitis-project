@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
@@ -34,6 +35,94 @@ def _seconds_until(value: str) -> int:
     except ValueError:
         return 1
     return max(1, int((expires_at - datetime.now(UTC)).total_seconds()))
+
+
+# Atomic refresh rotation: the retired-token check and the new token pair are
+# written inside one script so parallel refreshes cannot each mint a pair.
+# ARGV: 1 new access, 2 new refresh, 3 access ttl, 4 refresh ttl, 5 grace ttl,
+# 6 ip, 7 user agent, 8 now iso, 9 refresh expiry iso, 10 data prefix,
+# 11 access prefix, 12 refresh prefix, 13 user-session prefix,
+# 14 old refresh id, 15 new access id, 16 new refresh id.
+_ROTATE_SESSION_LUA = """
+local old_refresh_key = KEYS[1]
+local session_id = redis.call('GET', old_refresh_key)
+if not session_id then
+  return nil
+end
+
+local data_key = ARGV[10] .. session_id
+local flat = redis.call('HGETALL', data_key)
+if #flat == 0 then
+  redis.call('DEL', old_refresh_key)
+  return nil
+end
+
+local data = {}
+for index = 1, #flat, 2 do
+  data[flat[index]] = flat[index + 1]
+end
+
+local retired = {}
+local decoded = cjson.decode(data['retired_refresh_ids'] or '[]')
+if type(decoded) == 'table' then
+  for _, value in ipairs(decoded) do
+    retired[#retired + 1] = value
+  end
+end
+
+local old_refresh_id = ARGV[14]
+local already_retired = false
+for _, value in ipairs(retired) do
+  if value == old_refresh_id then
+    already_retired = true
+    break
+  end
+end
+
+if already_retired and data['pending_access_token'] and data['pending_refresh_token'] then
+  data['access_token'] = data['pending_access_token']
+  data['refresh_token'] = data['pending_refresh_token']
+  return cjson.encode(data)
+end
+
+retired[#retired + 1] = old_refresh_id
+
+local old_access_id = data['access_id'] or ''
+data['access_id'] = ARGV[15]
+data['refresh_id'] = ARGV[16]
+data['last_seen_at'] = ARGV[8]
+data['refresh_expires_at'] = ARGV[9]
+if ARGV[6] ~= '' then
+  data['ip_address'] = ARGV[6]
+end
+if ARGV[7] ~= '' then
+  data['user_agent'] = ARGV[7]
+end
+data['retired_refresh_ids'] = cjson.encode(retired)
+data['pending_access_token'] = ARGV[1]
+data['pending_refresh_token'] = ARGV[2]
+
+redis.call('DEL', ARGV[11] .. old_access_id)
+redis.call('SET', ARGV[11] .. ARGV[15], session_id, 'EX', ARGV[3])
+redis.call('SET', ARGV[12] .. ARGV[16], session_id, 'EX', ARGV[4])
+redis.call('EXPIRE', old_refresh_key, ARGV[5])
+for _, retired_id in ipairs(retired) do
+  redis.call('EXPIRE', ARGV[12] .. retired_id, ARGV[5])
+end
+
+local flattened = {}
+for key, value in pairs(data) do
+  flattened[#flattened + 1] = key
+  flattened[#flattened + 1] = tostring(value)
+end
+redis.call('HSET', data_key, unpack(flattened))
+redis.call('EXPIRE', data_key, ARGV[4])
+redis.call('EXPIRE', ARGV[13] .. data['user_id'], ARGV[4])
+
+data['access_token'] = ARGV[1]
+data['refresh_token'] = ARGV[2]
+return cjson.encode(data)
+"""
 
 
 class RedisStore:
@@ -138,73 +227,33 @@ class RedisStore:
         user_agent: str = "",
     ) -> dict[str, str] | None:
         old_refresh_id = session_fingerprint(refresh_token)
-        session_id = self.client.get(_mapping_key_by_id("refresh", old_refresh_id))
-        if not session_id:
-            return None
-        data_key = _data_key(str(session_id))
-        values = self.client.hgetall(data_key)
-        if not values:
-            self.client.delete(_mapping_key_by_id("refresh", old_refresh_id))
-            return None
-
-        now = datetime.now(UTC)
-        retired = {
-            item
-            for item in json.loads(values.get("retired_refresh_ids", "[]"))
-            if isinstance(item, str)
-        }
-        if old_refresh_id in retired and values.get("pending_access_token"):
-            return {
-                **{str(key): str(value) for key, value in values.items()},
-                "access_token": values["pending_access_token"],
-                "refresh_token": values["pending_refresh_token"],
-            }
-        refresh_expires_at = now + timedelta(seconds=refresh_ttl_seconds)
         new_access_id = session_fingerprint(new_access_token)
         new_refresh_id = session_fingerprint(new_refresh_token)
-        retired.add(old_refresh_id)
-        old_access_id = values.get("access_id", "")
-        values.update(
-            {
-                "access_id": new_access_id,
-                "refresh_id": new_refresh_id,
-                "last_seen_at": now.isoformat(),
-                "refresh_expires_at": refresh_expires_at.isoformat(),
-                "ip_address": ip_address[:64] or values.get("ip_address", ""),
-                "user_agent": user_agent[:500] or values.get("user_agent", ""),
-                "retired_refresh_ids": json.dumps(sorted(retired)),
-                "pending_access_token": new_access_token,
-                "pending_refresh_token": new_refresh_token,
-            }
+        now = datetime.now(UTC)
+        payload = self.client.eval(
+            _ROTATE_SESSION_LUA,
+            1,
+            _mapping_key_by_id("refresh", old_refresh_id),
+            new_access_token,
+            new_refresh_token,
+            str(access_ttl_seconds),
+            str(refresh_ttl_seconds),
+            str(refresh_grace_seconds),
+            ip_address[:64] if ip_address else "",
+            user_agent[:500] if user_agent else "",
+            now.isoformat(),
+            (now + timedelta(seconds=refresh_ttl_seconds)).isoformat(),
+            "session_data:",
+            "access_session:",
+            "refresh_session:",
+            "user_sessions:",
+            old_refresh_id,
+            new_access_id,
+            new_refresh_id,
         )
-
-        with self.client.pipeline(transaction=True) as pipe:
-            pipe.delete(_mapping_key_by_id("access", old_access_id))
-            pipe.set(
-                _mapping_key_by_id("access", new_access_id),
-                session_id,
-                ex=access_ttl_seconds,
-            )
-            pipe.set(
-                _mapping_key_by_id("refresh", new_refresh_id),
-                session_id,
-                ex=refresh_ttl_seconds,
-            )
-            pipe.expire(_mapping_key_by_id("refresh", old_refresh_id), refresh_grace_seconds)
-            for retired_id in retired:
-                pipe.expire(
-                    _mapping_key_by_id("refresh", retired_id),
-                    refresh_grace_seconds,
-                )
-            pipe.hset(data_key, mapping=values)
-            pipe.expire(data_key, refresh_ttl_seconds)
-            pipe.expire(f"user_sessions:{values['user_id']}", refresh_ttl_seconds)
-            pipe.execute()
-        return {
-            **{str(key): str(value) for key, value in values.items()},
-            "access_token": new_access_token,
-            "refresh_token": new_refresh_token,
-        }
+        if payload is None:
+            return None
+        return {str(key): str(value) for key, value in json.loads(payload).items()}
 
     def touch_session(self, token: str, token_kind: str, ttl_seconds: int) -> None:
         session_id = self.client.get(_mapping_key(token_kind, token))
@@ -381,6 +430,7 @@ class MemorySessionStore:
         self.user_sessions: dict[str, set[str]] = {}
         self.login_failures: dict[str, int] = {}
         self.queue: list[str] = []
+        self._lock = threading.RLock()
 
     def ping(self) -> bool:
         return True
@@ -444,6 +494,32 @@ class MemorySessionStore:
         return dict(session)
 
     def rotate_session(
+        self,
+        refresh_token: str,
+        new_access_token: str,
+        new_refresh_token: str,
+        *,
+        access_ttl_seconds: int,
+        refresh_ttl_seconds: int,
+        refresh_grace_seconds: int,
+        ip_address: str = "",
+        user_agent: str = "",
+    ) -> dict[str, str] | None:
+        # The in-memory store is shared by threads in tests, so the retired
+        # token check and the new pair are written under the store lock.
+        with self._lock:
+            return self._rotate_session(
+                refresh_token,
+                new_access_token,
+                new_refresh_token,
+                access_ttl_seconds=access_ttl_seconds,
+                refresh_ttl_seconds=refresh_ttl_seconds,
+                refresh_grace_seconds=refresh_grace_seconds,
+                ip_address=ip_address,
+                user_agent=user_agent,
+            )
+
+    def _rotate_session(
         self,
         refresh_token: str,
         new_access_token: str,

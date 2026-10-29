@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from uuid import uuid4
 
@@ -737,6 +738,38 @@ def test_concurrent_refresh_reuses_same_tokens(tmp_path: Path) -> None:
     assert second_response.cookies.get("uveitis_refresh") == first_refresh
 
     sessions = first.get("/api/v1/auth/sessions")
+    assert sessions.status_code == 200
+    assert len(sessions.json()) == 1
+
+
+def test_parallel_refresh_returns_single_token_pair(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    old_refresh = client.cookies.get("uveitis_refresh")
+    csrf_token = client.cookies.get("uveitis_csrf")
+    assert old_refresh and csrf_token
+
+    def refresh_once(_: int) -> tuple[int, str | None, str | None]:
+        caller = TestClient(client.app)
+        caller.cookies.set("uveitis_refresh", old_refresh, path="/api/v1/auth/refresh")
+        caller.cookies.set("uveitis_csrf", csrf_token, path="/")
+        caller.headers["X-CSRF-Token"] = csrf_token
+        response = caller.post("/api/v1/auth/refresh")
+        return (
+            response.status_code,
+            response.cookies.get("uveitis_access"),
+            response.cookies.get("uveitis_refresh"),
+        )
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(refresh_once, range(4)))
+
+    assert [code for code, _, _ in results] == [200, 200, 200, 200]
+    assert len({access for _, access, _ in results}) == 1
+    assert len({refresh for _, _, refresh in results}) == 1
+
+    # The pre-refresh access token is retired, so probe with the new one.
+    client.cookies.set("uveitis_access", results[0][1], path="/")
+    sessions = client.get("/api/v1/auth/sessions")
     assert sessions.status_code == 200
     assert len(sessions.json()) == 1
 
