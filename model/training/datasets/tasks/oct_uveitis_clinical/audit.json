@@ -1,0 +1,37 @@
+{
+  "status": "ok",
+  "task": "oct_uveitis_clinical",
+  "images": 75,
+  "category_counts": {
+    "Intermediate+Posterior Uveitis": 12,
+    "Normal": 28,
+    "Panuveitis": 16,
+    "RRD-PVR": 19
+  },
+  "clinical_rows_used": 75,
+  "etiology_labeled_images": 28,
+  "etiology_counts": {
+    "CMV": 1,
+    "Idiopathic": 3,
+    "Paraneoplastic syndrome": 2,
+    "Sifilis": 7,
+    "Toxoplasma": 8,
+    "Tuberculosis": 6,
+    "VKH": 1
+  },
+  "proxy_patient_groups_shared": 11,
+  "mapping_rule": "per-category image index N -> Nth clinical row of that diagnosis",
+  "mapping_confidence": "inferred",
+  "mapping_validated_by": [
+    "category counts match the published clinical table exactly (19/12/16/28)",
+    "uveitis table age/sex/diagnosis matches combined rows 20..47"
+  ],
+  "patient_isolation": "not_confirmed",
+  "external_validation_claim": "prohibited",
+  "clinical_link_sha256": "915d21008c248580c8eec5e76c61bb184877e56f3b092626901bd77ccc198fe1",
+  "source_sha256": {
+    "characteristics_pvr_uveitis_normal.csv": "7c2f3ecc597ec5bc8e5ed70ce25e45859fb3cc6c02d649833ca9450095dc92b6",
+    "characteristics_uveitis_patients.csv": "a4f27492da70c3801ae9e98f7d6f44e156ac6c5932bb9873c1354b2c0975bd5a"
+  },
+  "note": "The image->clinical link is inferred from the per-category index and must be confirmed with the data authors before it is used for patient-level grouping. Etiology labels for the 28 uveitis eyes are as printed in the published clinical table."
+}

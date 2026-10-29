@@ -1,0 +1,33 @@
+{
+  "status": "ok",
+  "probe": "fundus_toxo_crosssource_probe",
+  "task_dir": "model/training/datasets/tasks/fundus_toxo_crosssource_probe",
+  "source": "model/training/datasets/training/manifest.csv (dataset 04_odir5k)",
+  "source_dataset": "ODIR-5K",
+  "source_license": "CC BY 4.0 (ODIR-5K, paloalto / Chinese hospital consortium release)",
+  "probe_task": "fundus_toxo_binary",
+  "probe_label": "healthy",
+  "purpose": "cross_source_specificity_only",
+  "patients_available": 473,
+  "patients_sampled": 150,
+  "rows": 300,
+  "eye_counts": {
+    "left": 150,
+    "right": 150
+  },
+  "patient_group_prefix_counts": {
+    "04_odir5k": 300
+  },
+  "sample_seed": 20261028,
+  "odir_normal_rows_available": 946,
+  "odir_train_task_registered": false,
+  "odir_rows_previously_trained": false,
+  "odir_rows_previously_evaluated": false,
+  "patient_id_available": true,
+  "patient_isolated_sampling": true,
+  "external_validation_claim": "prohibited_no_external_positives",
+  "claim_scope": "cross_source_false_positive_rate_only",
+  "source_manifest_sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+  "manifest_sha256": "b0168cb6347e658ac387408114ba3c3540ffd68042ae3c99a369460de4cfa893",
+  "note": "Normal ODIR fundus photographs relabelled as the healthy class of the frozen fundus_toxo_binary adapter. Sampling is by whole patient group, but the read-out is an image-level false-positive rate, not patient-isolated validation and not an external sensitivity claim. ODIR 'N' means the eight ODIR target diseases are absent; it is not a guarantee of a pathology-free eye. These rows are consumed by the single probe evaluation."
+}

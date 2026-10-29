@@ -1,0 +1,66 @@
+{
+  "status": "ok",
+  "run_id": "toxo-crosssource-odir-20261027-01",
+  "task": "fundus_toxo_binary",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\model/training\\datasets\\tasks\\fundus_toxo_crosssource_probe\\manifest.csv",
+  "manifest_sha256": "b0168cb6347e658ac387408114ba3c3540ffd68042ae3c99a369460de4cfa893",
+  "adapter": "D:\\temp\\gpt\\uveitis-project\\model/training\\assets\\qwen3.5-4b\\local-4060-uveitis-focus-20261027-01\\best_adapter",
+  "adapter_sha256": "8d10d8a81e7915247b9a963e073a92674ab076e37bc12696e4961a55b1c8be13",
+  "test_rows_read": 300,
+  "test_label_counts": {
+    "healthy": 300
+  },
+  "patient_groups": 150,
+  "image_pixels": 65536,
+  "max_length": 256,
+  "metrics": {
+    "loss": 0.023221230554651508,
+    "evaluated": 300,
+    "errors": [],
+    "rows": 300,
+    "accuracy": 0.9166666666666666,
+    "macro_f1": 0.9565217391304348,
+    "json_valid_rate": 1.0,
+    "per_class": {
+      "healthy": {
+        "precision": 1.0,
+        "recall": 0.9166666666666666,
+        "f1": 0.9565217391304348,
+        "support": 300
+      }
+    },
+    "confusion_matrix": {
+      "healthy": {
+        "healthy": 275
+      }
+    },
+    "per_task": {
+      "fundus_toxo_binary": {
+        "samples": 300,
+        "accuracy": 0.9166666666666666,
+        "macro_f1": 0.9565217391304348,
+        "json_valid_rate": 1.0,
+        "per_class": {
+          "healthy": {
+            "precision": 1.0,
+            "recall": 0.9166666666666666,
+            "f1": 0.9565217391304348,
+            "support": 300
+          }
+        },
+        "confusion_matrix": {
+          "healthy": {
+            "healthy": 275
+          }
+        }
+      }
+    }
+  },
+  "peak_allocated_gib": 3.5487985610961914,
+  "peak_reserved_gib": 4.216796875,
+  "total_seconds": 1363.4260864999997,
+  "started_at": "2026-10-27T04:26:00.977529+00:00",
+  "finished_at": "2026-10-27T04:48:44.403316+00:00",
+  "policy": "Single evaluation of the validation-selected adapter. Do not tune hyperparameters or checkpoints from these test outputs.",
+  "clinical_status": "research_only_not_validated"
+}

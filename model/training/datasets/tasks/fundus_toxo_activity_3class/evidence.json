@@ -1,0 +1,69 @@
+{
+  "task": "fundus_toxo_activity_3class",
+  "created": "2026-10-27",
+  "status": "evaluated_internal_dev_only",
+  "training": {
+    "run_id": "fundus-toxo-activity-20261027-01",
+    "steps_completed": 180,
+    "target_steps": 180,
+    "truncated_reason": "early_stopping",
+    "best_step": 125,
+    "best_validation_macro_f1": 1.0,
+    "best_validation_json_valid_rate": 1.0,
+    "best_validation_loss": 0.011423496332200658,
+    "train_rows": 255,
+    "validation_rows": 9,
+    "epoch_equivalent_exposures": 720,
+    "peak_allocated_gib": 5.452396869659424,
+    "peak_reserved_gib": 5.69140625,
+    "total_seconds": 1207.6800807,
+    "best_adapter_sha256": "fa48a65f748eb9d2f29e5e2dd24c5b980680200161032b6bd55670aa971c7b5b",
+    "final_adapter_sha256": "d0e3b6e502fc42b938c6c02ce32fe25f4ff07a1ec665c90b8656da463921da9d",
+    "hardware": "RTX 4060 Laptop 8 GB (local, no Modal GPU)",
+    "note": "The run executed all 180 target steps; the stop reason is recorded as early_stopping because the step 150/175/180 validations did not beat step 125."
+  },
+  "evaluations": [
+    {
+      "run_id": "toxo-activity-dev-20261027-01",
+      "adapter": "best_adapter",
+      "image_pixels": 16384,
+      "rows": 66,
+      "accuracy": 0.5606060606060606,
+      "macro_f1": 0.5787037037037036,
+      "json_valid_rate": 1.0,
+      "peak_reserved_gib": 3.544922,
+      "total_seconds": 189.996,
+      "status": "superseded_resolution_mismatch",
+      "note": "Ran at the evaluator default 16,384 px, not the 65,536 px used in training. Kept as a recorded resolution-sensitivity data point."
+    },
+    {
+      "run_id": "toxo-activity-dev-hires-20261027-01",
+      "adapter": "best_adapter",
+      "image_pixels": 65536,
+      "rows": 66,
+      "accuracy": 0.6515151515151515,
+      "macro_f1": 0.6675475475475476,
+      "json_valid_rate": 1.0,
+      "peak_reserved_gib": 3.648438,
+      "total_seconds": 191.131,
+      "status": "primary",
+      "note": "Resolution-matched primary read-out on the internal development holdout."
+    }
+  ],
+  "holdout_status": "consumed_internal_development",
+  "external_validation_claim": "prohibited_consumed_test",
+  "patient_isolated_split": false,
+  "consumed_binary_test_excluded": 82,
+  "consumed_binary_test_run": "toxo-test-20261027-01",
+  "promotion": "research_auxiliary_only",
+  "known_error_mode": (
+    "At 65,536 px the dominant error is inactive eyes predicted as active "
+    "(17 of 31 inactive rows). Active recall is 0.929, so the failure direction "
+    "is over-calling activity rather than missing active disease."
+  ),
+  "follow_up": (
+    "Any further active/inactive tuning requires a new patient-isolated, "
+    "doctor-labelled holdout; this 66-row split must not be reused for tuning "
+    "or for an external-validation claim."
+  )
+}

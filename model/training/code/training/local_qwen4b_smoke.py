@@ -27,6 +27,7 @@ ARTIFACTS_ROOT = ROOT / "training" / "assets" / "qwen3.5-4b"
 PHASE1_TASKS = {
     "oct_uveitis_4class",
     "fundus_toxo_binary",
+    "fundus_toxo_activity_3class",
     "eye_five_class",
     "oct_aux_4class",
     "uwf_7class",
@@ -41,6 +42,7 @@ TASK_LABELS = {
         "RRD-PVR",
     ],
     "fundus_toxo_binary": ["healthy", "toxoplasmosis"],
+    "fundus_toxo_activity_3class": ["active", "healthy", "inactive"],
     "eye_five_class": [
         "Cataract",
         "Conjunctivitis",

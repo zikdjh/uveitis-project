@@ -1,0 +1,135 @@
+{
+  "steps": 180,
+  "grad_accum": 4,
+  "train_rows": 255,
+  "validation_rows": 9,
+  "train_groups": 255,
+  "validation_groups": 9,
+  "validation_selection_sha256": "5a8ce9133b4d487149e63422b3c501e9432ed7ea1f052cf2c400dff647098197",
+  "schedule_sha256": "cbc8cc578409b600bde6ac30cbfdf27f32bd004027a5a2968e268af5b4fe63ac",
+  "schedule_exposures": 720,
+  "task_weights": {
+    "fundus_toxo_binary": 1,
+    "uwf_7class": 1,
+    "oct_uveitis_4class": 1,
+    "eye_five_class": 1,
+    "uwf_uveitis_binary": 1,
+    "fundus_toxo_activity_3class": 1,
+    "oct_aux_4class": 1
+  },
+  "selected_tasks": [
+    "fundus_toxo_activity_3class"
+  ],
+  "group_offset": 0,
+  "difficulty_groups": {},
+  "split_snapshot": null,
+  "class_exposures": {
+    "fundus_toxo_activity_3class::active": 240,
+    "fundus_toxo_activity_3class::healthy": 240,
+    "fundus_toxo_activity_3class::inactive": 240
+  },
+  "validation_rows_detail": [
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "inactive",
+      "source_group": "02_toxofundus:Hospital de Clínicas Medical Center",
+      "group_key": "02:02_toxofundus/images/148.jpg",
+      "image": "data/02_toxofundus/02_toxofundus/images/148.jpg"
+    },
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "inactive",
+      "source_group": "02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center",
+      "group_key": "02:02_toxofundus/images/OD0334RE.JPG",
+      "image": "data/02_toxofundus/02_toxofundus/images/OD0334RE.JPG"
+    },
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "healthy",
+      "source_group": "02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center",
+      "group_key": "02:02_toxofundus/images/OS0387RE.JPG",
+      "image": "data/02_toxofundus/02_toxofundus/images/OS0387RE.JPG"
+    },
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "active",
+      "source_group": "02_toxofundus:Hospital de Clínicas Medical Center",
+      "group_key": "02:02_toxofundus/images/104.jpg",
+      "image": "data/02_toxofundus/02_toxofundus/images/104.jpg"
+    },
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "healthy",
+      "source_group": "02_toxofundus:Hospital de Clínicas Medical Center",
+      "group_key": "02:02_toxofundus/images/26.jpg",
+      "image": "data/02_toxofundus/02_toxofundus/images/26.jpg"
+    },
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "healthy",
+      "source_group": "02_toxofundus:Hospital de Clínicas Medical Center",
+      "group_key": "02:02_toxofundus/images/57.jpg",
+      "image": "data/02_toxofundus/02_toxofundus/images/57.jpg"
+    },
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "active",
+      "source_group": "02_toxofundus:Hospital de Clínicas Medical Center",
+      "group_key": "02:02_toxofundus/images/749.jpg",
+      "image": "data/02_toxofundus/02_toxofundus/images/749.jpg"
+    },
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "inactive",
+      "source_group": "02_toxofundus:Hospital General Pediátrico Acosta Ñu Medical Center",
+      "group_key": "02:02_toxofundus/images/OS0527RE.JPG",
+      "image": "data/02_toxofundus/02_toxofundus/images/OS0527RE.JPG"
+    },
+    {
+      "dataset": "02_toxofundus",
+      "task": "fundus_toxo_activity_3class",
+      "label": "active",
+      "source_group": "02_toxofundus:Hospital de Clínicas Medical Center",
+      "group_key": "02:02_toxofundus/images/159.jpg",
+      "image": "data/02_toxofundus/02_toxofundus/images/159.jpg"
+    }
+  ],
+  "test_intersection_audit": {
+    "policy": "13=label+patient_id; 03=label+stem_with_aug_prefix_removed; 02=image_path; 01=excluded",
+    "datasets": {
+      "02_toxofundus": {
+        "train_rows": 264,
+        "eligible_rows": 264,
+        "excluded_rows": 0,
+        "test_rows": 66,
+        "train_groups": 264,
+        "eligible_groups": 264,
+        "test_groups": 66,
+        "shared_train_test_groups": 0
+      }
+    },
+    "excluded_rows": 0,
+    "exclusion_counts": {},
+    "eligible_rows": 264,
+    "eligible_groups": 264,
+    "eligible_test_group_overlap": 0,
+    "test_images_read": false
+  },
+  "note": "Whole groups are held out. 01 is excluded because it has no patient IDs and every source group overlaps test. 13 uses label plus patient ID to avoid splitting a label of the same patient while preserving multi-label patients. 03 is grouped by label and augmentation-stripped stem; 02 has no patient metadata, so each image remains its own group.",
+  "schedule_history": [
+    {
+      "steps": 180,
+      "grad_accum": 4,
+      "schedule_exposures": 720,
+      "schedule_sha256": "cbc8cc578409b600bde6ac30cbfdf27f32bd004027a5a2968e268af5b4fe63ac"
+    }
+  ]
+}
