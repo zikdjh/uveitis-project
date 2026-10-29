@@ -285,13 +285,35 @@
 </table>
 <p>运维提示：本机后端以单进程方式运行（沙箱下 <code>--reload</code> 的 multiprocessing 命名管道会被系统拒绝），代码改动后需手动重启 8000 端口进程才会生效。</p>
 
+<h3>R-10 真实模型端到端与失败恢复复跑（2026-10-29）</h3>
+<p>范围：在三包重构后的真实运行栈（前端 <code>5173</code>、后端 <code>8000</code>、Qwen 运行服务 <code>8010</code>、BGE-M3 <code>8011</code>、PostgreSQL/Redis）上用浏览器真实点击复跑医生主链路，并在同一条链路上验证运行服务中断后的降级与恢复。TaskSpace：<code>uveitis round two e2e 20261029</code>（spaceId 2）；脚本：<code>scripts/e2e-round-two-20261029/round-17-real-model-e2e.mjs</code>、<code>round-18-degraded-run.mjs</code>、<code>round-19-recovery-run.mjs</code>。</p>
+<p>测试影像以本项目此前的上传副本为输入（<code>backend/data/uploads/ff09b405…/f330c45d….jpg</code>，公开 OCT 合集图片，不含真实患者信息）。它只用于合成链路验证，不作为临床样本，也不构成准确率或置信度证据。</p>
+<table>
+  <thead><tr><th>阶段</th><th>检查项</th><th>实际</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>B-01</td><td>运行服务读取上传影像</td><td><code>POST /v1/judge</code> 直连探针 HTTP 200；此前未配置上传根时返回 403，本次 <code>MODEL_RUNTIME_UPLOAD_ROOT</code> 已指向 <code>backend/data/uploads</code></td><td>通过</td></tr>
+    <tr><td>B-01</td><td>表单建档与影像上传</td><td>填写主诉、病史、患眼与 OCT 影像后提交，跳转 <code>/doctor/cases/47bd1e4c…/summary</code>，页面显示「影像 1 张」</td><td>通过</td></tr>
+    <tr><td>B-01</td><td>真实模型分析</td><td>任务入队后 <code>completed</code>，执行尝试 1/2，病例转为 <code>awaiting_review</code>，<code>model_mode=remote</code></td><td>通过</td></tr>
+    <tr><td>B-01</td><td>Adapter 指纹与显存</td><td><code>adapter_sha256=00ebeb2c791e…</code> 与冻结候选一致；峰值保留显存 3.311 GiB</td><td>通过</td></tr>
+    <tr><td>B-01</td><td>阶段完整性</td><td>intake、planning、preprocess、qwen_judgment、retrieval、web_search、external_summary、safety、report 全部 <code>completed</code>；decision <code>skipped</code>（槽位保留）</td><td>通过</td></tr>
+    <tr><td>B-01</td><td>增强链路真实产出</td><td>RAG 返回 1 条证据；网络搜索完成 <code>tavily</code>（5 条来源）；外部 API 总结完成 <code>deepseek-flash</code> 并渲染结构化梳理</td><td>通过</td></tr>
+    <tr><td>B-01</td><td>模型输出边界</td><td>Qwen 返回 DME 且置信度 0.0、无 impression，页面显示「本次未形成可复核的临床结论」；与既有 CNV/Uveitis 错误边界一致，仅证明链路可用</td><td>记录</td></tr>
+    <tr><td>B-02</td><td>停止 8010 后重新分析</td><td><code>qwen_judgment</code> 单独 <code>failed</code>（<code>ConnectError: [WinError 10061]</code>）；job 仍 <code>completed</code>，其余阶段 <code>completed</code>，safety 记录降级说明，病例仍进入 <code>awaiting_review</code></td><td>通过</td></tr>
+    <tr><td>B-02</td><td>恢复 8010 后重新分析</td><td>冷启动后 <code>qwen_judgment</code> 回到 <code>completed</code>，推理时延 22.569 秒（含首次模型加载），adapter 指纹与 B-01 一致，无需人工干预</td><td>通过</td></tr>
+    <tr><td>B-02</td><td>截图留证</td><td><code>shot-r17-real-model.png</code>、<code>shot-r18-degraded.png</code>、<code>shot-r19-recovery.png</code></td><td>完成</td></tr>
+  </tbody>
+</table>
+<p>运行服务重启方式（本机）：<code>cd qwen3.5-4b</code> 后设置 <code>MODEL_RUNTIME_UPLOAD_ROOT</code> 为 <code>…\backend\data\uploads</code>，再用 <code>.venv-runtime-smoke</code> 的 Python 执行 <code>-m uvicorn app.main:app --host 127.0.0.1 --port 8010</code>。未设置该变量时浏览器上传影像会在 Qwen 阶段返回 403。</p>
+
 <h2>下一步</h2>
 <ol>
   <li>基于第一轮验收结果冻结第一版测试基线。</li>
   <li>同步项目开发进度文档与进度跟踪文档。</li>
   <li>R-08 记录的 D-01、D-02、D-03 已全部修复并验证（见 R-09）；账号生命周期、审计面板与管理员端 390px 回归亦已完成（见 R-07）。</li>
+  <li>B-01 真实模型端到端与 B-02 失败恢复已在重构后的运行栈复跑通过（见 R-10）。</li>
   <li>为外部总结连通性测试增加失败自动重试，避免一次瞬时失败被判定为不可用。</li>
   <li>补齐至少一家搜索服务商凭据后重跑搜索批量测试，验证外部检索结果进入链路。</li>
+  <li>剩余待办：B-04 双 Token 无感刷新浏览器验收、B-05 知识检索端到端、B-03 390px 移动端连续流程、B-06 文档冻结（<code>build_docs.py --check</code> 与 <code>git diff --check</code>）、P-08 决策模型 11-03 门槛复核。</li>
 </ol>
 
   </article>
