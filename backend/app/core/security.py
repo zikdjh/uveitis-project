@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from hmac import compare_digest
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request, Response, status
 
 from app.schemas.auth import Permission, ROLE_PERMISSIONS, UserRead, UserRole
 
@@ -51,6 +51,31 @@ def require_permission(request: Request, *permissions: Permission) -> UserRead:
             detail="当前账号缺少所需权限",
         )
     return user
+
+
+def renew_admin_access_cookie(request: Request, response: Response) -> None:
+    """Re-issue the admin access cookie so its lifetime slides with activity.
+
+    Admin accounts get a single short-lived token with no refresh token, so the
+    lifetime promised to the browser has to follow the server side session
+    instead of expiring at a fixed point after login.
+    """
+    token = request.cookies.get(ACCESS_COOKIE)
+    if not token:
+        return
+    auth = request.app.state.auth_service
+    user = auth.session_user(token, "access")
+    if user is None or not user.is_active or user.role != "admin":
+        return
+    response.set_cookie(
+        ACCESS_COOKIE,
+        token,
+        max_age=auth.admin_access_ttl_seconds,
+        httponly=True,
+        samesite="lax",
+        secure=request.app.state.settings.cookie_secure,
+        path="/",
+    )
 
 
 def validate_csrf(request: Request) -> None:
