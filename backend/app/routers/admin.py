@@ -11,6 +11,7 @@ from app.core.security import (
     require_permission,
 )
 from app.schemas.auth import (
+    ActiveSessionRead,
     AuthAuditEventPage,
     PasswordReset,
     Permission,
@@ -65,6 +66,42 @@ def _audit(
 def list_users(request: Request) -> list[UserRead]:
     require_permission(request, Permission.USER_READ)
     return request.app.state.user_store.list()
+
+
+@router.get("/active-sessions", response_model=list[ActiveSessionRead])
+def list_active_sessions(request: Request) -> list[ActiveSessionRead]:
+    require_permission(request, Permission.AUDIT_READ)
+    sessions = request.app.state.redis_store.list_all_sessions()
+    result: list[ActiveSessionRead] = []
+    users_by_id: dict[str, UserRead | None] = {}
+    for session in sessions:
+        user_id = session.get("user_id", "")
+        if user_id not in users_by_id:
+            users_by_id[user_id] = request.app.state.user_store.get(user_id)
+        user = users_by_id[user_id]
+        if user is None:
+            continue
+        try:
+            created_at = datetime.fromisoformat(session["created_at"])
+            last_seen_at = datetime.fromisoformat(session["last_seen_at"])
+            expires_at = datetime.fromisoformat(session["refresh_expires_at"])
+        except (KeyError, ValueError):
+            continue
+        result.append(
+            ActiveSessionRead(
+                session_id=session.get("session_id", ""),
+                user_id=user_id,
+                username=user.username,
+                display_name=user.display_name,
+                role=user.role,
+                ip_address=session.get("ip_address", ""),
+                user_agent=session.get("user_agent", ""),
+                created_at=created_at,
+                last_seen_at=last_seen_at,
+                expires_at=expires_at,
+            )
+        )
+    return result
 
 
 @router.post("/users", response_model=UserRead, status_code=201)

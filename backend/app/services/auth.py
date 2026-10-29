@@ -26,6 +26,7 @@ class AuthService:
         access_ttl_seconds: int,
         refresh_ttl_seconds: int,
         *,
+        admin_access_ttl_seconds: int = 600,
         refresh_grace_seconds: int = 30,
         login_max_attempts: int = 5,
         login_window_seconds: int = 15 * 60,
@@ -35,6 +36,7 @@ class AuthService:
         self.redis_store = redis_store
         self.access_ttl_seconds = access_ttl_seconds
         self.refresh_ttl_seconds = refresh_ttl_seconds
+        self.admin_access_ttl_seconds = admin_access_ttl_seconds
         self.refresh_grace_seconds = refresh_grace_seconds
         self.login_max_attempts = login_max_attempts
         self.login_window_seconds = login_window_seconds
@@ -90,14 +92,17 @@ class AuthService:
         ip_address: str = "",
         user_agent: str = "",
     ) -> tuple[SessionTokens, LoginResponse]:
+        is_admin = user.role == "admin"
+        access_ttl = self.admin_access_ttl_seconds if is_admin else self.access_ttl_seconds
+        refresh_ttl = access_ttl if is_admin else self.refresh_ttl_seconds
         access_token = token_urlsafe(32)
         refresh_token = token_urlsafe(48)
         session = self.redis_store.create_session(
             access_token,
             refresh_token,
             user.id,
-            access_ttl_seconds=self.access_ttl_seconds,
-            refresh_ttl_seconds=self.refresh_ttl_seconds,
+            access_ttl_seconds=access_ttl,
+            refresh_ttl_seconds=refresh_ttl,
             ip_address=ip_address,
             user_agent=user_agent,
         )
@@ -106,7 +111,7 @@ class AuthService:
             refresh_token=refresh_token,
             session_id=session["session_id"],
         )
-        return tokens, self._login_response(user)
+        return tokens, self._login_response(user, ttl_seconds=access_ttl)
 
     def refresh_session(
         self,
@@ -115,12 +120,10 @@ class AuthService:
         ip_address: str = "",
         user_agent: str = "",
     ) -> tuple[SessionTokens, LoginResponse] | None:
-        new_access_token = token_urlsafe(32)
-        new_refresh_token = token_urlsafe(48)
         session = self.redis_store.rotate_session(
             refresh_token,
-            new_access_token,
-            new_refresh_token,
+            token_urlsafe(32),
+            token_urlsafe(48),
             access_ttl_seconds=self.access_ttl_seconds,
             refresh_ttl_seconds=self.refresh_ttl_seconds,
             refresh_grace_seconds=self.refresh_grace_seconds,
@@ -133,9 +136,12 @@ class AuthService:
         if user is None or not user.is_active:
             self.redis_store.delete_session_id(session["user_id"], session["session_id"])
             return None
+        if user.role == "admin":
+            self.redis_store.delete_session_id(session["user_id"], session["session_id"])
+            return None
         tokens = SessionTokens(
-            access_token=new_access_token,
-            refresh_token=new_refresh_token,
+            access_token=session["access_token"],
+            refresh_token=session["refresh_token"],
             session_id=session["session_id"],
         )
         return tokens, self._login_response(user)
@@ -148,6 +154,10 @@ class AuthService:
         if user is None or not user.is_active:
             self.redis_store.delete_session_id(session["user_id"], session["session_id"])
             return None
+        if user.role == "admin":
+            self.redis_store.touch_session(
+                access_token, "access", self.admin_access_ttl_seconds
+            )
         return user
 
     def session_user(self, token: str, token_kind: str = "refresh") -> UserRead | None:
@@ -231,10 +241,11 @@ class AuthService:
             return None
         return session
 
-    def _login_response(self, user: UserRead) -> LoginResponse:
+    def _login_response(self, user: UserRead, *, ttl_seconds: int | None = None) -> LoginResponse:
+        ttl = ttl_seconds if ttl_seconds is not None else self.access_ttl_seconds
         return LoginResponse(
             user=user,
-            expires_at=datetime.now(UTC) + timedelta(seconds=self.access_ttl_seconds),
+            expires_at=datetime.now(UTC) + timedelta(seconds=ttl),
         )
 
     def _password_hash_for(self, user: UserRead) -> str:

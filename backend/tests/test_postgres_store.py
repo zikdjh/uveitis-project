@@ -196,6 +196,34 @@ def test_postgres_analysis_job_lease_round_trip() -> None:
     assert jobs.get(job.job_key).status == "completed"
 
 
+def test_postgres_latest_analysis_job_is_scoped_to_case() -> None:
+    case_store = PostgresCaseStore(TEST_DATABASE_URL, connect_timeout_seconds=3)
+    now = datetime.now(UTC)
+    case = CaseRead(
+        id=str(uuid4()),
+        owner_id="contract-doctor",
+        patient_age=42,
+        patient_sex="F",
+        complaint="最新分析任务查询契约测试",
+        medical_history="",
+        affected_eye="OS",
+        consent_confirmed=True,
+        status="analyzing",
+        created_at=now,
+        updated_at=now,
+    )
+    case_store.save(case)
+    jobs = PostgresAnalysisJobStore(case_store._session_factory)
+    old = jobs.enqueue(case.id, max_attempts=2)
+    newest = jobs.enqueue(case.id, max_attempts=2)
+
+    latest = jobs.get_latest_for_case(case.id)
+
+    assert latest is not None
+    assert latest.job_key == newest.job_key
+    assert latest.job_key != old.job_key
+
+
 def test_postgres_analysis_job_renews_only_current_owner() -> None:
     case_store = PostgresCaseStore(TEST_DATABASE_URL, connect_timeout_seconds=3)
     now = datetime.now(UTC)

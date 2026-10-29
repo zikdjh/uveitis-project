@@ -234,6 +234,50 @@ def test_summary_protocol_adapters(tmp_path) -> None:
     assert requests[2].headers["anthropic-version"] == "2023-06-01"
 
 
+def test_truncated_summary_keeps_only_complete_summary_text() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "choices": [
+                    {
+                        "message": {
+                            "content": (
+                                '{"summary":"截断前的摘要",'
+                                '"recommendations":["复核'
+                            )
+                        }
+                    }
+                ]
+            },
+        )
+
+    store = _store()
+    store.update(
+        IntegrationUpdate(
+            summary_enabled=True,
+            summary_protocol="openai_chat_completions",
+            summary_base_url="https://summary.local/v1",
+            summary_model="test-model",
+            summary_api_key="chat-key",
+        ),
+        actor_id="admin",
+    )
+    integrations = OptionalIntegrations(
+        Settings(model_mode="remote"),
+        config_store=store,
+        client_factory=lambda **kwargs: httpx.Client(
+            transport=httpx.MockTransport(handler), **kwargs
+        ),
+    )
+
+    result = integrations.external_summary(make_case(), {}, {}, [], [])
+
+    assert result.status == "completed"
+    assert result.data["summary"] == "截断前的摘要"
+    assert result.data["recommendations"] == []
+
+
 def test_summary_connection_probe_uses_selected_protocol() -> None:
     requests: list[httpx.Request] = []
 
@@ -305,6 +349,148 @@ def test_summary_connection_probe_reports_unreachable_service() -> None:
     assert result.ok is False
     assert "连接失败" in result.detail
     assert "503" in result.detail
+
+
+def test_planner_connection_probe_uses_selected_protocol() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path.endswith("/responses"):
+            return httpx.Response(200, json={"output_text": "OK"})
+        if request.url.path.endswith("/messages"):
+            return httpx.Response(
+                200,
+                json={"content": [{"type": "text", "text": "OK"}]},
+            )
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": "OK"}}]},
+        )
+
+    settings = Settings(model_mode="remote")
+    for protocol, base_url in (
+        ("openai_responses", "https://planner.local/v1"),
+        ("openai_chat_completions", "https://planner.local/v1"),
+        ("anthropic_messages", "https://planner.local/v1"),
+    ):
+        store = _store()
+        store.update(
+            IntegrationUpdate(
+                planner_protocol=protocol,
+                planner_base_url=base_url,
+                planner_model="planner-probe-model",
+                planner_api_key="planner-probe-key",
+            ),
+            actor_id="admin",
+        )
+        integrations = OptionalIntegrations(
+            settings,
+            config_store=store,
+            client_factory=lambda **kwargs: httpx.Client(
+                transport=httpx.MockTransport(handler),
+                **kwargs,
+            ),
+        )
+        result = integrations.test_planner()
+        assert result.ok is True, result.detail
+        assert result.detail == "连接成功，模型 planner-probe-model 已返回响应"
+        assert result.attempts == 1
+
+    assert len(requests) == 3
+    assert requests[0].url.path.endswith("/responses")
+    assert requests[1].url.path.endswith("/chat/completions")
+    assert requests[2].url.path.endswith("/messages")
+    assert requests[2].headers["x-api-key"] == "planner-probe-key"
+
+
+def test_planner_secret_is_encrypted_and_not_returned_publicly() -> None:
+    store = _store()
+    updated = store.update(
+        IntegrationUpdate(
+            planner_protocol="anthropic_messages",
+            planner_base_url="https://planner.local/anthropic",
+            planner_model="planner-model",
+            planner_api_key="planner-secret-value-123456",
+        ),
+        actor_id="admin-1",
+    )
+
+    assert updated.planner_api_key_configured is True
+    assert updated.planner_api_key_hint == "已配置"
+    assert not hasattr(updated, "planner_api_key")
+    assert store.secrets()["planner_api_key"] == "planner-secret-value-123456"
+    assert "planner-secret-value-123456" not in json.dumps(store.raw())
+
+
+def test_planner_connection_probe_reuses_configured_summary_credentials() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": "OK"}}]},
+        )
+
+    store = _store()
+    store.update(
+        IntegrationUpdate(
+            summary_protocol="openai_chat_completions",
+            summary_base_url="https://summary.local/v1",
+            summary_model="summary-model",
+            summary_api_key="summary-key",
+        ),
+        actor_id="admin",
+    )
+    integrations = OptionalIntegrations(
+        Settings(model_mode="remote"),
+        config_store=store,
+        client_factory=lambda **kwargs: httpx.Client(
+            transport=httpx.MockTransport(handler),
+            **kwargs,
+        ),
+    )
+
+    result = integrations.test_planner()
+
+    assert result.ok is True, result.detail
+    assert result.detail.startswith("规划模型复用总结 API：")
+    assert "summary-model" in result.detail
+
+
+def test_external_http_clients_ignore_process_proxy_by_default() -> None:
+    captured: list[dict[str, object]] = []
+
+    def client_factory(**kwargs: object) -> httpx.Client:
+        captured.append(kwargs)
+        return httpx.Client(
+            transport=httpx.MockTransport(
+                lambda request: httpx.Response(
+                    200,
+                    json={"choices": [{"message": {"content": "OK"}}]},
+                )
+            ),
+            **kwargs,
+        )
+
+    store = _store()
+    store.update(
+        IntegrationUpdate(
+            summary_enabled=True,
+            summary_protocol="openai_chat_completions",
+            summary_base_url="https://summary.local/v1",
+            summary_model="probe-model",
+            summary_api_key="probe-key",
+        ),
+        actor_id="admin",
+    )
+    result = OptionalIntegrations(
+        Settings(model_mode="remote"),
+        config_store=store,
+        client_factory=client_factory,
+    ).test_summary()
+
+    assert result.ok is True, result.detail
+    assert captured[0]["trust_env"] is False
+    assert "proxy" not in captured[0]
 
 
 def test_search_connection_probe_stops_after_first_available_provider() -> None:

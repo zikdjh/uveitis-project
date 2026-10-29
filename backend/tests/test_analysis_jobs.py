@@ -99,6 +99,22 @@ def test_analysis_completion_keeps_more_than_previous_fixed_page_limit() -> None
     assert jobs.get(job.job_key).status == "completed"
 
 
+def test_latest_job_lookup_is_scoped_to_case() -> None:
+    jobs = MemoryAnalysisJobStore()
+    first_case_id = str(uuid4())
+    second_case_id = str(uuid4())
+    first = jobs.enqueue(first_case_id)
+    jobs.enqueue(second_case_id)
+    newest = jobs.enqueue(first_case_id)
+
+    latest = jobs.get_latest_for_case(first_case_id)
+
+    assert latest is not None
+    assert latest.job_key == newest.job_key
+    assert latest.job_key != first.job_key
+    assert jobs.get_latest_for_case(str(uuid4())) is None
+
+
 def test_retryable_failure_requeues_job() -> None:
     jobs = MemoryAnalysisJobStore()
     cases = MemoryCaseStore()

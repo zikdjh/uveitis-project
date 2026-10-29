@@ -37,6 +37,19 @@ export type Session = {
   user_agent: string;
 };
 
+export type ActiveSession = {
+  session_id: string;
+  user_id: string;
+  username: string;
+  display_name: string;
+  role: "doctor" | "admin";
+  ip_address: string;
+  user_agent: string;
+  created_at: string;
+  last_seen_at: string;
+  expires_at: string;
+};
+
 export type AuthAuditEvent = {
   id: number;
   event: string;
@@ -97,6 +110,10 @@ export function logout(): Promise<void> {
 
 export function listSessions(): Promise<Session[]> {
   return request("/api/v1/auth/sessions");
+}
+
+export function listActiveSessions(): Promise<ActiveSession[]> {
+  return request("/api/v1/admin/active-sessions");
 }
 
 export function revokeSession(sessionId: string): Promise<void> {

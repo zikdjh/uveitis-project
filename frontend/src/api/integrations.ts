@@ -22,6 +22,11 @@ export type IntegrationConfig = {
   summary_model: string;
   summary_api_key_configured: boolean;
   summary_api_key_hint: string;
+  planner_protocol: SummaryProtocol;
+  planner_base_url: string;
+  planner_model: string;
+  planner_api_key_configured: boolean;
+  planner_api_key_hint: string;
   web_search_enabled: boolean;
   web_search_max_results: number;
   search_provider_order: SearchProvider[];
@@ -53,6 +58,11 @@ export type IntegrationUpdate = Partial<{
   summary_model: string;
   summary_api_key: string;
   clear_summary_api_key: boolean;
+  planner_protocol: SummaryProtocol;
+  planner_base_url: string;
+  planner_model: string;
+  planner_api_key: string;
+  clear_planner_api_key: boolean;
   web_search_enabled: boolean;
   web_search_max_results: number;
   search_provider_order: SearchProvider[];
@@ -103,7 +113,7 @@ export function updateIntegrationConfig(input: IntegrationUpdate): Promise<Integ
 }
 
 export function testIntegration(input: {
-  kind: "summary" | "search";
+  kind: "summary" | "planner" | "search";
   provider?: SearchProvider;
   query?: string;
 }): Promise<IntegrationTestResult> {

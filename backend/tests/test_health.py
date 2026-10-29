@@ -92,6 +92,7 @@ def test_case_analysis_and_review_workflow(tmp_path: Path) -> None:
     )
     assert created.status_code == 201
     case_id = created.json()["id"]
+    assert client.get(f"/api/v1/cases/{case_id}/analysis-job").json() is None
 
     upload = client.post(
         f"/api/v1/cases/{case_id}/images",
@@ -103,6 +104,11 @@ def test_case_analysis_and_review_workflow(tmp_path: Path) -> None:
 
     analyzed = client.post(f"/api/v1/cases/{case_id}/analyze")
     assert analyzed.status_code == 202
+    job = client.get(f"/api/v1/cases/{case_id}/analysis-job")
+    assert job.status_code == 200
+    assert job.json()["status"] == "completed"
+    assert job.json()["attempt_count"] == 1
+    assert job.json()["max_attempts"] >= 1
     case = client.get(f"/api/v1/cases/{case_id}").json()
     assert case["status"] == "awaiting_review"
     assert case["analysis"]["status"] == "completed"
@@ -171,6 +177,7 @@ def test_doctor_cannot_access_another_doctors_case(tmp_path: Path) -> None:
     assert own_overview["stats"]["total"] == 1
     assert other_overview["stats"]["total"] == 0
     assert doctor_b.get(f"/api/v1/cases/{case_id}").status_code == 404
+    assert doctor_b.get(f"/api/v1/cases/{case_id}/analysis-job").status_code == 404
     assert doctor_b.post(f"/api/v1/cases/{case_id}/analyze").status_code == 404
     assert doctor_b.patch(
         f"/api/v1/cases/{case_id}/review",
@@ -649,6 +656,186 @@ def test_root_admin_cannot_be_disabled_or_reset(tmp_path: Path) -> None:
         },
     )
     assert self_change.status_code == 409
+
+
+def test_admin_reset_password_revokes_sessions_and_reenables_login(
+    tmp_path: Path,
+) -> None:
+    admin = make_client(tmp_path, role="admin")
+    created = admin.post(
+        "/api/v1/admin/users",
+        json={
+            "username": "reset.target",
+            "display_name": "重置目标",
+            "password": "original-password",
+        },
+    ).json()
+
+    doctor_client = TestClient(admin.app)
+    login = doctor_client.post(
+        "/api/v1/auth/login",
+        json={"username": "reset.target", "password": "original-password"},
+    )
+    assert login.status_code == 200
+    old_access = doctor_client.cookies.get("uveitis_access")
+    old_refresh = doctor_client.cookies.get("uveitis_refresh")
+    assert old_access and old_refresh
+
+    reset = admin.post(
+        f"/api/v1/admin/users/{created['id']}/password",
+        json={"new_password": "replacement-password"},
+    )
+    assert reset.status_code == 204
+
+    stale_access = TestClient(admin.app)
+    stale_access.cookies.set("uveitis_access", old_access, path="/")
+    assert stale_access.get("/api/v1/auth/me").status_code == 401
+
+    stale_refresh = TestClient(admin.app)
+    stale_refresh.cookies.set("uveitis_refresh", old_refresh, path="/api/v1/auth/refresh")
+    stale_refresh.cookies.set("uveitis_csrf", "unused", path="/")
+    stale_refresh.headers["X-CSRF-Token"] = "unused"
+    assert stale_refresh.post("/api/v1/auth/refresh").status_code == 401
+
+    old_password = TestClient(admin.app)
+    assert old_password.post(
+        "/api/v1/auth/login",
+        json={"username": "reset.target", "password": "original-password"},
+    ).status_code == 401
+
+    new_password = TestClient(admin.app)
+    relogin = new_password.post(
+        "/api/v1/auth/login",
+        json={"username": "reset.target", "password": "replacement-password"},
+    )
+    assert relogin.status_code == 200
+    assert relogin.json()["user"]["role"] == "doctor"
+
+
+def test_concurrent_refresh_reuses_same_tokens(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    old_refresh = client.cookies.get("uveitis_refresh")
+    csrf_token = client.cookies.get("uveitis_csrf")
+    assert old_refresh and csrf_token
+
+    first = TestClient(client.app)
+    first.cookies.set("uveitis_refresh", old_refresh, path="/api/v1/auth/refresh")
+    first.cookies.set("uveitis_csrf", csrf_token, path="/")
+    first.headers["X-CSRF-Token"] = csrf_token
+    first_response = first.post("/api/v1/auth/refresh")
+    assert first_response.status_code == 200
+    first_access = first_response.cookies.get("uveitis_access")
+    first_refresh = first_response.cookies.get("uveitis_refresh")
+
+    second = TestClient(client.app)
+    second.cookies.set("uveitis_refresh", old_refresh, path="/api/v1/auth/refresh")
+    second.cookies.set("uveitis_csrf", csrf_token, path="/")
+    second.headers["X-CSRF-Token"] = csrf_token
+    second_response = second.post("/api/v1/auth/refresh")
+    assert second_response.status_code == 200
+    assert second_response.cookies.get("uveitis_access") == first_access
+    assert second_response.cookies.get("uveitis_refresh") == first_refresh
+
+    sessions = first.get("/api/v1/auth/sessions")
+    assert sessions.status_code == 200
+    assert len(sessions.json()) == 1
+
+
+def test_disabled_doctor_sessions_revoked(tmp_path: Path) -> None:
+    admin = make_client(tmp_path, role="admin")
+    created = admin.post(
+        "/api/v1/admin/users",
+        json={
+            "username": "disable.target",
+            "display_name": "停用目标",
+            "password": "disable-password",
+        },
+    ).json()
+
+    doctor_client = TestClient(admin.app)
+    login = doctor_client.post(
+        "/api/v1/auth/login",
+        json={"username": "disable.target", "password": "disable-password"},
+    )
+    assert login.status_code == 200
+    old_access = doctor_client.cookies.get("uveitis_access")
+    old_refresh = doctor_client.cookies.get("uveitis_refresh")
+    assert old_access and old_refresh
+
+    disabled = admin.patch(
+        f"/api/v1/admin/users/{created['id']}",
+        json={"is_active": False},
+    )
+    assert disabled.status_code == 200
+
+    stale_access = TestClient(admin.app)
+    stale_access.cookies.set("uveitis_access", old_access, path="/")
+    assert stale_access.get("/api/v1/auth/me").status_code == 401
+
+    stale_refresh = TestClient(admin.app)
+    stale_refresh.cookies.set("uveitis_refresh", old_refresh, path="/api/v1/auth/refresh")
+    stale_refresh.cookies.set("uveitis_csrf", "unused", path="/")
+    stale_refresh.headers["X-CSRF-Token"] = "unused"
+    assert stale_refresh.post("/api/v1/auth/refresh").status_code == 401
+
+
+def test_admin_session_uses_short_token_without_refresh(tmp_path: Path) -> None:
+    client = make_client(tmp_path, role="admin")
+    assert client.cookies.get("uveitis_refresh") is None
+    assert client.cookies.get("uveitis_access") is not None
+    assert client.get("/api/v1/auth/me").status_code == 200
+
+    refreshed = client.post("/api/v1/auth/refresh")
+    assert refreshed.status_code == 401
+
+
+def test_admin_session_slides_on_each_request(tmp_path: Path) -> None:
+    import time as time_module
+
+    client = make_client(tmp_path, role="admin")
+    access_token = client.cookies.get("uveitis_access")
+    assert access_token
+
+    sessions_before = client.get("/api/v1/auth/sessions").json()
+    assert len(sessions_before) == 1
+    first_expiry = sessions_before[0]["expires_at"]
+
+    time_module.sleep(1.1)
+    client.get("/api/v1/auth/me")
+
+    sessions_after = client.get("/api/v1/auth/sessions").json()
+    assert len(sessions_after) == 1
+    second_expiry = sessions_after[0]["expires_at"]
+    assert second_expiry > first_expiry
+
+
+def test_admin_active_sessions_shows_users_and_ips(tmp_path: Path) -> None:
+    admin = make_client(tmp_path, role="admin")
+
+    doctor_client = TestClient(admin.app)
+    login = doctor_client.post(
+        "/api/v1/auth/login",
+        json={"username": "doctor", "password": "test-password"},
+    )
+    assert login.status_code == 200
+
+    active = admin.get("/api/v1/admin/active-sessions")
+    assert active.status_code == 200
+    items = active.json()
+    assert len(items) >= 2
+    roles = {item["role"] for item in items}
+    assert "admin" in roles
+    assert "doctor" in roles
+    for item in items:
+        assert item["username"]
+        assert item["session_id"]
+
+    denied = TestClient(admin.app)
+    denied.post(
+        "/api/v1/auth/login",
+        json={"username": "doctor", "password": "test-password"},
+    )
+    assert denied.get("/api/v1/admin/active-sessions").status_code == 403
 
 
 def test_bootstrap_creates_only_root_and_demotes_legacy_admin(tmp_path: Path) -> None:

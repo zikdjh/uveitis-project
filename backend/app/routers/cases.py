@@ -17,6 +17,7 @@ from fastapi.responses import FileResponse
 
 from app.core.security import require_permission
 from app.schemas.case import (
+    AnalysisJobRead,
     CaseCreate,
     CaseImage,
     CaseListPage,
@@ -175,6 +176,27 @@ def list_cases(
 def get_case(case_id: str, request: Request) -> CaseRead:
     actor = require_permission(request, Permission.CASE_READ)
     return _get_case(request, case_id, actor)
+
+
+@router.get("/{case_id}/analysis-job", response_model=AnalysisJobRead | None)
+def get_analysis_job(case_id: str, request: Request) -> AnalysisJobRead | None:
+    actor = require_permission(request, Permission.CASE_READ)
+    _get_case(request, case_id, actor)
+    job = request.app.state.analysis_job_service.get_latest_for_case(case_id)
+    if job is None:
+        return None
+    return AnalysisJobRead(
+        id=job.id,
+        case_id=job.case_id,
+        status=job.status,
+        attempt_count=job.attempt_count,
+        max_attempts=job.max_attempts,
+        error=job.error,
+        created_at=job.created_at,
+        updated_at=job.updated_at,
+        started_at=job.started_at,
+        completed_at=job.completed_at,
+    )
 
 
 @router.post("/{case_id}/images", response_model=CaseRead)

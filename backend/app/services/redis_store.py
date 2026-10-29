@@ -148,14 +148,20 @@ class RedisStore:
             return None
 
         now = datetime.now(UTC)
-        refresh_expires_at = now + timedelta(seconds=refresh_ttl_seconds)
-        new_access_id = session_fingerprint(new_access_token)
-        new_refresh_id = session_fingerprint(new_refresh_token)
         retired = {
             item
             for item in json.loads(values.get("retired_refresh_ids", "[]"))
             if isinstance(item, str)
         }
+        if old_refresh_id in retired and values.get("pending_access_token"):
+            return {
+                **{str(key): str(value) for key, value in values.items()},
+                "access_token": values["pending_access_token"],
+                "refresh_token": values["pending_refresh_token"],
+            }
+        refresh_expires_at = now + timedelta(seconds=refresh_ttl_seconds)
+        new_access_id = session_fingerprint(new_access_token)
+        new_refresh_id = session_fingerprint(new_refresh_token)
         retired.add(old_refresh_id)
         old_access_id = values.get("access_id", "")
         values.update(
@@ -167,6 +173,8 @@ class RedisStore:
                 "ip_address": ip_address[:64] or values.get("ip_address", ""),
                 "user_agent": user_agent[:500] or values.get("user_agent", ""),
                 "retired_refresh_ids": json.dumps(sorted(retired)),
+                "pending_access_token": new_access_token,
+                "pending_refresh_token": new_refresh_token,
             }
         )
 
@@ -192,7 +200,27 @@ class RedisStore:
             pipe.expire(data_key, refresh_ttl_seconds)
             pipe.expire(f"user_sessions:{values['user_id']}", refresh_ttl_seconds)
             pipe.execute()
-        return {str(key): str(value) for key, value in values.items()}
+        return {
+            **{str(key): str(value) for key, value in values.items()},
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+        }
+
+    def touch_session(self, token: str, token_kind: str, ttl_seconds: int) -> None:
+        session_id = self.client.get(_mapping_key(token_kind, token))
+        if not session_id:
+            return
+        data_key = _data_key(str(session_id))
+        values = self.client.hgetall(data_key)
+        if not values:
+            return
+        user_id = values.get("user_id", "")
+        with self.client.pipeline(transaction=True) as pipe:
+            pipe.expire(_mapping_key(token_kind, token), ttl_seconds)
+            pipe.expire(data_key, ttl_seconds)
+            if user_id:
+                pipe.expire(f"user_sessions:{user_id}", ttl_seconds)
+            pipe.execute()
 
     def list_sessions(self, user_id: str) -> list[dict[str, str]]:
         session_ids = self.client.smembers(f"user_sessions:{user_id}")
@@ -207,6 +235,30 @@ class RedisStore:
             sessions.append({str(key): str(value) for key, value in values.items()})
         if stale:
             self.client.srem(f"user_sessions:{user_id}", *stale)
+        return sorted(
+            sessions,
+            key=lambda item: item.get("last_seen_at", ""),
+            reverse=True,
+        )
+
+    def list_all_sessions(self) -> list[dict[str, str]]:
+        session_ids = self.client.keys(_data_key("*"))
+        now = datetime.now(UTC)
+        sessions: list[dict[str, str]] = []
+        for key in session_ids:
+            values = self.client.hgetall(key)
+            if not values:
+                continue
+            session_id = key.replace(_data_key(""), "")
+            expires_at = values.get("refresh_expires_at", "")
+            if expires_at:
+                try:
+                    if datetime.fromisoformat(expires_at) <= now:
+                        continue
+                except ValueError:
+                    continue
+            values["session_id"] = session_id
+            sessions.append({str(k): str(v) for k, v in values.items()})
         return sorted(
             sessions,
             key=lambda item: item.get("last_seen_at", ""),
@@ -413,10 +465,16 @@ class MemorySessionStore:
             return None
 
         now = datetime.now(UTC)
+        retired = set(json.loads(session.get("retired_refresh_ids", "[]")))
+        if old_refresh_id in retired and session.get("pending_access_token"):
+            return {
+                **session,
+                "access_token": session["pending_access_token"],
+                "refresh_token": session["pending_refresh_token"],
+            }
         old_access_id = session["access_id"]
         new_access_id = session_fingerprint(new_access_token)
         new_refresh_id = session_fingerprint(new_refresh_token)
-        retired = set(json.loads(session.get("retired_refresh_ids", "[]")))
         retired.add(old_refresh_id)
         refresh_expires_at = now + timedelta(seconds=refresh_ttl_seconds)
         session.update(
@@ -428,6 +486,8 @@ class MemorySessionStore:
                 "ip_address": ip_address[:64] or session.get("ip_address", ""),
                 "user_agent": user_agent[:500] or session.get("user_agent", ""),
                 "retired_refresh_ids": json.dumps(sorted(retired)),
+                "pending_access_token": new_access_token,
+                "pending_refresh_token": new_refresh_token,
             }
         )
         self._delete_token_mapping("access", old_access_id)
@@ -438,7 +498,23 @@ class MemorySessionStore:
         self.token_expiries["refresh"][old_refresh_id] = now + timedelta(seconds=refresh_grace_seconds)
         for retired_id in retired:
             self.token_expiries["refresh"][retired_id] = now + timedelta(seconds=refresh_grace_seconds)
-        return dict(session)
+        return {
+            **session,
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+        }
+
+    def touch_session(self, token: str, token_kind: str, ttl_seconds: int) -> None:
+        token_id = session_fingerprint(token)
+        session_id = self.token_sessions[token_kind].get(token_id)
+        if not session_id:
+            return
+        session = self.session_data.get(session_id)
+        if session is None:
+            return
+        now = datetime.now(UTC)
+        self.token_expiries[token_kind][token_id] = now + timedelta(seconds=ttl_seconds)
+        session["refresh_expires_at"] = (now + timedelta(seconds=ttl_seconds)).isoformat()
 
     def list_sessions(self, user_id: str) -> list[dict[str, str]]:
         now = datetime.now(UTC)
@@ -462,6 +538,23 @@ class MemorySessionStore:
         session_id = self.token_sessions[token_kind].get(session_fingerprint(token))
         session = self.session_data.get(session_id) if session_id else None
         return session.get("user_id") if session else None
+
+    def list_all_sessions(self) -> list[dict[str, str]]:
+        now = datetime.now(UTC)
+        sessions: list[dict[str, str]] = []
+        for session_id, session in self.session_data.items():
+            try:
+                expires_at = datetime.fromisoformat(session["refresh_expires_at"])
+            except (KeyError, ValueError):
+                continue
+            if expires_at <= now:
+                continue
+            sessions.append({**session, "session_id": session_id})
+        return sorted(
+            sessions,
+            key=lambda item: item.get("last_seen_at", ""),
+            reverse=True,
+        )
 
     def delete_session(
         self,

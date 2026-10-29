@@ -63,6 +63,18 @@ def _json_object(text: str) -> dict[str, Any] | None:
         return None
 
 
+def _summary_from_unparsed_json(text: str) -> str:
+    """Recover the summary string when a model response is truncated JSON."""
+
+    match = re.search(r'"summary"\s*:\s*"((?:\\.|[^"\\])*)"', text)
+    if match is None:
+        return text.strip()
+    try:
+        return str(json.loads(f'"{match.group(1)}"')).strip()
+    except json.JSONDecodeError:
+        return match.group(1).strip()
+
+
 def _confidence(value: Any, default: float = 0.0) -> float:
     try:
         number = float(value)
@@ -189,6 +201,10 @@ class OptionalIntegrations:
                     "summary_base_url": self.settings.external_summary_base_url,
                     "summary_model": self.settings.external_summary_model,
                     "summary_api_key": self.settings.external_summary_api_key,
+                    "planner_protocol": self.settings.agent_planner_protocol,
+                    "planner_base_url": self.settings.agent_planner_base_url,
+                    "planner_model": self.settings.agent_planner_model,
+                    "planner_api_key": self.settings.agent_planner_api_key,
                     "web_search_enabled": self.settings.web_search_enabled,
                     "web_search_max_results": self.settings.web_search_max_results,
                     "search_provider_order": [
@@ -236,25 +252,64 @@ class OptionalIntegrations:
             "api_key": str(config.get("summary_api_key") or ""),
         }
 
+    def external_planner_credentials(self) -> dict[str, Any]:
+        """Return administrator-managed AgentScope planner credentials."""
+
+        config = self._config()
+        return {
+            "protocol": str(
+                config.get("planner_protocol") or "openai_chat_completions"
+            ),
+            "base_url": str(config.get("planner_base_url") or ""),
+            "model": str(config.get("planner_model") or ""),
+            "api_key": str(config.get("planner_api_key") or ""),
+        }
+
     def test_summary(self) -> IntegrationTestOutcome:
+        return self._test_model_endpoint("summary")
+
+    def test_planner(self) -> IntegrationTestOutcome:
+        config = self._config()
+        planner_fields = (
+            "planner_base_url",
+            "planner_model",
+            "planner_api_key",
+        )
+        planner_partially_configured = any(
+            str(config.get(key) or "").strip() for key in planner_fields
+        )
+        summary_configured = all(
+            str(config.get(key) or "").strip()
+            for key in ("summary_base_url", "summary_model", "summary_api_key")
+        )
+        if not planner_partially_configured and summary_configured:
+            outcome = self._test_model_endpoint("summary")
+            prefix = "规划模型复用总结 API："
+            outcome.detail = prefix + outcome.detail
+            return outcome
+        return self._test_model_endpoint("planner")
+
+    def _test_model_endpoint(self, prefix: str) -> IntegrationTestOutcome:
         started = time.perf_counter()
         try:
             config = self._config()
             missing = [
                 label
                 for key, label in (
-                    ("summary_base_url", "API 地址"),
-                    ("summary_model", "模型名称"),
-                    ("summary_api_key", "API Key"),
+                    (f"{prefix}_base_url", "API 地址"),
+                    (f"{prefix}_model", "模型名称"),
+                    (f"{prefix}_api_key", "API Key"),
                 )
                 if not str(config.get(key) or "").strip()
             ]
             if missing:
                 raise ValueError("尚未配置：" + "、".join(missing))
-            protocol = str(config.get("summary_protocol") or "openai_chat_completions")
-            model = str(config.get("summary_model") or "")
-            url = str(config.get("summary_base_url") or "").rstrip("/")
-            api_key = str(config.get("summary_api_key") or "")
+            protocol = str(
+                config.get(f"{prefix}_protocol") or "openai_chat_completions"
+            )
+            model = str(config.get(f"{prefix}_model") or "")
+            url = str(config.get(f"{prefix}_base_url") or "").rstrip("/")
+            api_key = str(config.get(f"{prefix}_api_key") or "")
             probe = "Reply with OK. Do not add any other text."
             if protocol == "anthropic_messages":
                 if not url.endswith("/messages"):
@@ -441,10 +496,7 @@ class OptionalIntegrations:
             BOUNDARY_ALLOW_CASE_DATA: allow_case_data,
             BOUNDARY_SERVICE: service,
         }
-        with self.client_factory(
-            timeout=timeout,
-            event_hooks={"request": [external_request_guard]},
-        ) as client:
+        with self.client_factory(**self._client_options(timeout)) as client:
             response = client.post(
                 url,
                 json=payload,
@@ -471,10 +523,7 @@ class OptionalIntegrations:
             BOUNDARY_ALLOW_CASE_DATA: allow_case_data,
             BOUNDARY_SERVICE: service,
         }
-        with self.client_factory(
-            timeout=timeout,
-            event_hooks={"request": [external_request_guard]},
-        ) as client:
+        with self.client_factory(**self._client_options(timeout)) as client:
             response = client.get(
                 url,
                 params=params,
@@ -486,6 +535,17 @@ class OptionalIntegrations:
         if not isinstance(data, dict):
             raise ValueError("服务响应不是 JSON 对象")
         return data
+
+    def _client_options(self, timeout: float) -> dict[str, Any]:
+        options: dict[str, Any] = {
+            "timeout": timeout,
+            "event_hooks": {"request": [external_request_guard]},
+            "trust_env": self.settings.external_network_trust_env,
+        }
+        proxy = self.settings.external_network_proxy.strip()
+        if proxy:
+            options["proxy"] = proxy
+        return options
 
     def qwen_judgment(self, case: CaseRead) -> IntegrationResult:
         if not self.qwen_available:
@@ -1024,7 +1084,7 @@ class OptionalIntegrations:
                     url,
                     {
                         "model": model,
-                        "max_tokens": 1200,
+                        "max_tokens": 2400,
                         "temperature": 0.1,
                         "system": messages[0]["content"],
                         "messages": [messages[1]],
@@ -1051,6 +1111,7 @@ class OptionalIntegrations:
                         "model": model,
                         "instructions": messages[0]["content"],
                         "input": messages[1]["content"],
+                        "max_output_tokens": 2400,
                     },
                     timeout=self.settings.summary_timeout_seconds,
                     headers=self._headers(api_key),
@@ -1074,6 +1135,7 @@ class OptionalIntegrations:
                         "model": model,
                         "messages": messages,
                         "temperature": 0.1,
+                        "max_tokens": 2400,
                     },
                     timeout=self.settings.summary_timeout_seconds,
                     headers=self._headers(api_key),
@@ -1084,7 +1146,7 @@ class OptionalIntegrations:
                 content = choices[0].get("message", {}).get("content", "")
             parsed = _json_object(str(content)) if content else None
             if parsed is None and content:
-                parsed = {"summary": str(content).strip()}
+                parsed = {"summary": _summary_from_unparsed_json(str(content))}
             if not parsed or not str(parsed.get("summary") or "").strip():
                 raise ValueError("外部总结响应为空")
             return IntegrationResult(

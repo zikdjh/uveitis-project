@@ -10,8 +10,13 @@ from app.agents.toolchain import (
 )
 from app.core.config import Settings
 from app.schemas.case import CaseRead
+from app.schemas.integrations import IntegrationConfigUpdate
 from app.services.analysis import AnalysisService
 from app.core.external_boundary import find_external_violations
+from app.services.integration_settings import (
+    MemoryIntegrationSettingsStore,
+    SecretBox,
+)
 from app.services.integrations import OptionalIntegrations
 
 
@@ -153,6 +158,70 @@ def test_planner_reuses_summary_credentials(monkeypatch) -> None:
     assert captured["task"] == "plan_tool_chain"
     assert "case_context" not in captured
     assert find_external_violations(captured) == []
+
+
+def test_planner_prefers_administrator_planner_credentials() -> None:
+    settings = Settings(
+        model_mode="remote",
+        agent_planner_api_key="env-planner-key",
+        agent_planner_base_url="https://env-planner.local/v1",
+        agent_planner_model="env-planner-model",
+        external_summary_api_key="summary-key",
+        external_summary_base_url="https://summary.local/v1",
+        external_summary_model="summary-model",
+        agent_planner_use_summary_credentials=True,
+    )
+    store = MemoryIntegrationSettingsStore(
+        SecretBox("test-integration-master-key-at-least-32-characters")
+    )
+    store.update(
+        IntegrationConfigUpdate(
+            planner_protocol="anthropic_messages",
+            planner_base_url="https://admin-planner.local/anthropic",
+            planner_model="admin-planner-model",
+            planner_api_key="admin-planner-key",
+        ),
+        actor_id="admin",
+    )
+    integrations = OptionalIntegrations(settings, config_store=store)
+    planner = ToolchainPlanner(settings, integrations=integrations)
+
+    credentials = planner.credentials()
+
+    assert credentials.source == "integration_settings"
+    assert credentials.protocol == "anthropic_messages"
+    assert credentials.base_url == "https://admin-planner.local/anthropic"
+    assert credentials.model == "admin-planner-model"
+    assert credentials.api_key == "admin-planner-key"
+
+
+def test_planner_falls_back_to_administrator_summary_credentials() -> None:
+    settings = Settings(
+        model_mode="remote",
+        agent_planner_use_summary_credentials=True,
+    )
+    store = MemoryIntegrationSettingsStore(
+        SecretBox("test-integration-master-key-at-least-32-characters")
+    )
+    store.update(
+        IntegrationConfigUpdate(
+            summary_protocol="openai_chat_completions",
+            summary_base_url="https://summary.local/v1",
+            summary_model="summary-model",
+            summary_api_key="summary-key",
+        ),
+        actor_id="admin",
+    )
+    integrations = OptionalIntegrations(settings, config_store=store)
+    planner = ToolchainPlanner(settings, integrations=integrations)
+
+    credentials = planner.credentials()
+
+    assert credentials.source == "external_summary_settings"
+    assert credentials.protocol == "openai_chat_completions"
+    assert credentials.base_url == "https://summary.local/v1"
+    assert credentials.model == "summary-model"
+    assert credentials.api_key == "summary-key"
 
 
 def test_planner_falls_back_when_backend_raises(monkeypatch) -> None:
