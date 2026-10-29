@@ -27,13 +27,13 @@
   <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-25-redundant-archives.html</code></p>
   <article class="html-body">
 <p>整理日期：2026-10-25</p>
-<p>本轮删除了 18 个已完成解压和逐成员校验的 ZIP：14 个根目录下载包，以及 4 个重复内层 ZIP。删除前后没有移动或删除 <code>model-training/datasets/extracted/</code> 中的图像和标签。</p>
+<p>本轮删除了 18 个已完成解压和逐成员校验的 ZIP：14 个根目录下载包，以及 4 个重复内层 ZIP。删除前后没有移动或删除 <code>model/training/datasets/extracted/</code> 中的图像和标签。</p>
 <p>删除依据：</p>
 <ul>
 <li>17 个归档的 182,754 个数据成员全部找到对应解压文件。</li>
 <li>文件大小与 CRC 不一致均为 0。</li>
-<li><code>model-training/datasets/extracted/manifests/extracted-files.csv</code> 的 180,456 条保留记录均可定位。</li>
-<li><code>model-training/datasets/training/manifest.csv</code> 的 16,638 条训练记录均可定位。</li>
+<li><code>model/training/datasets/extracted/manifests/extracted-files.csv</code> 的 180,456 条保留记录均可定位。</li>
+<li><code>model/training/datasets/training/manifest.csv</code> 的 16,638 条训练记录均可定位。</li>
 </ul>
 <p>逐包删除账本：<code>archive-cleanup-2026-10-25.csv</code>，记录原始路径、字节数、校验状态和删除动作。</p>
 <p>删除容量：</p>
@@ -69,10 +69,10 @@
 </table>
 <p>后续规则：</p>
 <ol>
-<li>新下载包先放 <code>model-training/datasets/raw/</code>。</li>
-<li>解压到 <code>model-training/datasets/extracted/&lt;数据集名&gt;/</code>，保留原划分和标签文件。</li>
+<li>新下载包先放 <code>model/training/datasets/raw/</code>。</li>
+<li>解压到 <code>model/training/datasets/extracted/&lt;数据集名&gt;/</code>，保留原划分和标签文件。</li>
 <li>校验逐文件清单、训练清单和相关标签。</li>
-<li>确认完整后清理 <code>model-training/datasets/raw/</code> 中对应的临时 ZIP。</li>
+<li>确认完整后清理 <code>model/training/datasets/raw/</code> 中对应的临时 ZIP。</li>
 <li>不在 <code>datasets/</code> 根目录长期散放压缩包。</li>
 </ol>
   </article>

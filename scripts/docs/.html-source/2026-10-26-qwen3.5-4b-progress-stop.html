@@ -163,17 +163,17 @@
 </table>
 <p>第 20 步候选产物：</p>
 <ul>
-<li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_metrics.json</code></li>
-<li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_summary.json</code></li>
-<li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_manifest.json</code></li>
-<li><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/predictions.json</code></li>
+<li><code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_metrics.json</code></li>
+<li><code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_summary.json</code></li>
+<li><code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_manifest.json</code></li>
+<li><code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/predictions.json</code></li>
 </ul>
 <h3>第 100 步基线：已完成并与候选同源比较</h3>
 <ul>
 <li>状态：<code>ok</code>，<code>1000/1000</code> 条完成，生成错误 <code>0</code></li>
 <li>准确率：<code>0.918</code>；macro-F1：<code>0.9182517052346422</code>；严格 JSON 有效率：<code>1.0</code></li>
 <li>续跑起点：<code>145/1000</code>；本次完成 <code>855</code> 条，耗时 <code>2012.583</code> 秒</li>
-<li>结果文件：<code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/</code></li>
+<li>结果文件：<code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/</code></li>
 <li>selection SHA256：<code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>，与第 20 步一致</li>
 <li>基线 adapter SHA256：<code>517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a</code></li>
 </ul>
@@ -218,15 +218,15 @@
 </tr>
 </tbody>
 </table>
-<p>第 20 步入口验证为 macro-F1 <code>0.873358</code>、OCT macro-F1 <code>0.791503</code>。两组实验的最佳点都停留在初始化第 0 步，全部峰值保留显存均为 <code>5.69140625 GiB</code>。结构化结论见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>，决定为 <code>retain_step20_candidate</code>。</p>
+<p>第 20 步入口验证为 macro-F1 <code>0.873358</code>、OCT macro-F1 <code>0.791503</code>。两组实验的最佳点都停留在初始化第 0 步，全部峰值保留显存均为 <code>5.69140625 GiB</code>。结构化结论见 <code>model/training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>，决定为 <code>retain_step20_candidate</code>。</p>
 <h2>恢复方式</h2>
 <p>以下命令是 2026-10-26 历史断点恢复方式，基线补全已经完成，除非重新做可复现实验，否则不需要再次执行。不要添加 <code>-Overwrite</code>。</p>
 <pre><code class="language-powershell">powershell -NoProfile -ExecutionPolicy Bypass -File `
-  'model-training\scripts\run_local_4060_eval.ps1' `
-  -AdapterDir 'model-training\artifacts\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
-  -OutputDir 'model-training\artifacts\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01\step100' `
+  'model\training\scripts\run_local_4060_eval.ps1' `
+  -AdapterDir 'model\training\artifacts\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
+  -OutputDir 'model\training\artifacts\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01\step100' `
   -Tasks 'oct_aux_4class' *&gt; `
-  'model-training\artifacts\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01.step100.log'
+  'model\training\artifacts\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01.step100.log'
 </code></pre>
 <p>完成后至少核对：</p>
 <ol>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>第一轮全量测试报告 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-28-model-runtime-failure-recovery.html">上一份</a>
+    <a href="2026-10-29-usage-guide.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>测试</span>
+    <span>2026-10-29</span>
+  </div>
+  <h1>第一轮全量测试报告</h1>
+  <p class="doc-summary">接口测试与浏览器实际点击测试的合并验收结果</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-29-full-test-report.html</code></p>
+  <article class="html-body">
+<h2>测试环境</h2>
+<table>
+  <thead><tr><th>服务</th><th>地址</th><th>状态</th></tr></thead>
+  <tbody>
+    <tr><td>前端 Vite 开发服务</td><td><code>http://127.0.0.1:5173</code></td><td>HTTP 200</td></tr>
+    <tr><td>后端 FastAPI</td><td><code>http://127.0.0.1:8000</code></td><td>健康检查 200；<code>APP_MODEL_MODE=remote</code></td></tr>
+    <tr><td>模型运行服务</td><td><code>http://127.0.0.1:8010</code></td><td>基座与 adapter ready；<code>MODEL_RUNTIME_IMAGE_ROOT</code> 指向后端上传目录</td></tr>
+    <tr><td>PostgreSQL</td><td><code>127.0.0.1:5432</code></td><td>正常</td></tr>
+    <tr><td>Redis</td><td><code>127.0.0.1:6380</code></td><td>正常</td></tr>
+  </tbody>
+</table>
+
+<h2>接口测试（后端 pytest）</h2>
+<p>命令：<code>backend\.venv\Scripts\python.exe -m pytest backend\tests\ -q</code></p>
+<p><strong>结果：94 passed, 7 skipped。</strong>跳过项为 PostgreSQL 集成测试（需要独立数据库环境）。</p>
+<table>
+  <thead><tr><th>测试域</th><th>覆盖内容</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>鉴权与会话</td><td>登录、CSRF、双 Token 轮换、并发刷新幂等重放、管理员 10 分钟滑动会话、停用后旧令牌失效、重置密码后会话撤销、注册入口 404、root 不可停用或重置</td><td>通过</td></tr>
+    <tr><td>病例与分析任务</td><td>建档、影像上传、分析任务入队、任务完成、复核回写、任务查询</td><td>通过</td></tr>
+    <tr><td>知识检索</td><td>文档写入、搜索、索引状态；医生只读权限边界</td><td>通过</td></tr>
+    <tr><td>外部集成</td><td>管理员配置、密钥只写不读、版本冲突 409</td><td>通过</td></tr>
+    <tr><td>Agent 工具链</td><td>AgentScope 规划、确定性回退、技能编排</td><td>通过</td></tr>
+    <tr><td>数据库命名</td><td><code>t_</code> 表前缀、<code>f_</code> 字段前缀、自增主键与业务唯一键</td><td>通过</td></tr>
+  </tbody>
+</table>
+
+<h2>浏览器实际点击测试（ego-browser）</h2>
+
+<h3>B-01 真实模型端到端复跑</h3>
+<p>脚本：<code>scripts/e2e-full-test-20261029/round-03-real-analysis.mjs</code></p>
+<table>
+  <thead><tr><th>检查项</th><th>预期</th><th>实际</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>分析模式</td><td><code>remote</code></td><td><code>remote</code></td><td>通过</td></tr>
+    <tr><td>Qwen 判断阶段</td><td><code>completed</code></td><td><code>completed</code></td><td>通过</td></tr>
+    <tr><td>Adapter 指纹</td><td>与冻结候选一致</td><td><code>00ebeb2c791e</code></td><td>通过</td></tr>
+    <tr><td>任务状态</td><td><code>completed</code></td><td><code>completed</code>, attempt 1</td><td>通过</td></tr>
+    <tr><td>病例状态</td><td><code>awaiting_review</code></td><td><code>awaiting_review</code></td><td>通过</td></tr>
+    <tr><td>全部阶段</td><td>intake/planning/preprocess/retrieval/web_search/external_summary/safety/report 完成</td><td>均完成</td><td>通过</td></tr>
+  </tbody>
+</table>
+
+<h3>B-02 失败恢复</h3>
+<p>脚本：<code>scripts/e2e-full-test-20261029/round-04-failure-recovery.mjs</code></p>
+<table>
+  <thead><tr><th>场景</th><th>预期</th><th>实际</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>停用模型服务 8010 后重新分析</td><td>Qwen 阶段独立失败，主链路不阻断，病例仍进入待复核</td><td>Qwen 阶段 <code>failed</code>（连接拒绝）；job <code>completed</code>；病例 <code>awaiting_review</code></td><td>通过</td></tr>
+    <tr><td>恢复模型服务后重新分析</td><td>Qwen 阶段自动恢复为 <code>completed</code></td><td><code>completed</code>，adapter SHA 与冻结一致</td><td>通过</td></tr>
+  </tbody>
+</table>
+
+<h3>B-04 双 Token 无感刷新</h3>
+<p>脚本：<code>scripts/e2e-dual-token-20261029/round-01 至 round-06</code></p>
+<table>
+  <thead><tr><th>检查项</th><th>预期</th><th>实际</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>医生登录后 cookie</td><td>access + refresh + csrf 三 cookie 齐备</td><td>均存在</td><td>通过</td></tr>
+    <tr><td>Access 失效自动刷新</td><td>401 → 刷新 200 → 重试 200，令牌轮换</td><td>符合</td><td>通过</td></tr>
+    <tr><td>并发刷新</td><td>3 个并发请求均通过刷新后重试成功</td><td>全部 200</td><td>通过</td></tr>
+    <tr><td>幂等重放</td><td>同一旧刷新令牌二次刷新返回相同令牌</td><td><code>replayReturnsFirstToken: true</code></td><td>通过</td></tr>
+    <tr><td>退出清理</td><td>三 cookie 全清，<code>/auth/me</code> 401</td><td>符合</td><td>通过</td></tr>
+    <tr><td>管理员短期会话</td><td>仅 access cookie，无 refresh cookie</td><td>符合</td><td>通过</td></tr>
+  </tbody>
+</table>
+
+<h3>B-05 知识检索端到端</h3>
+<p>脚本：<code>scripts/e2e-full-test-20261029/round-06-knowledge.mjs</code></p>
+<table>
+  <thead><tr><th>检查项</th><th>预期</th><th>实际</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>知识搜索 API</td><td>返回相关命中</td><td>HTTP 200，hitCount 1，score 0.603</td><td>通过</td></tr>
+    <tr><td>医生写入知识</td><td>403（医生无 knowledge:write）</td><td>403</td><td>通过（权限边界正确）</td></tr>
+    <tr><td>分析链路 RAG 阶段</td><td><code>retrieval: completed</code></td><td><code>completed</code></td><td>通过</td></tr>
+  </tbody>
+</table>
+
+<h3>B-03 移动端 390px 回归</h3>
+<p>脚本：<code>scripts/e2e-full-test-20261029/round-07-mobile.mjs</code> 与 <code>round-07d-admin-mobile.mjs</code></p>
+<table>
+  <thead><tr><th>页面</th><th>横向溢出</th><th>可操作按钮</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>医生工作台</td><td>无</td><td>4</td><td>通过</td></tr>
+    <tr><td>医生病例列表</td><td>无</td><td>6</td><td>通过</td></tr>
+    <tr><td>病例详情</td><td>无</td><td>4</td><td>通过</td></tr>
+    <tr><td>病例辅助分析</td><td>无</td><td>5</td><td>通过</td></tr>
+    <tr><td>病例复核</td><td>无</td><td>4</td><td>通过</td></tr>
+    <tr><td>病例报告</td><td>无</td><td>4</td><td>通过</td></tr>
+    <tr><td>医生知识检索</td><td>无</td><td>5</td><td>通过</td></tr>
+    <tr><td>医生账号安全</td><td>无</td><td>14</td><td>通过</td></tr>
+    <tr><td>管理员概览</td><td>无</td><td>5</td><td>通过</td></tr>
+    <tr><td>管理员服务配置</td><td>无</td><td>33</td><td>通过</td></tr>
+    <tr><td>管理员账号权限</td><td>无</td><td>24</td><td>通过</td></tr>
+    <tr><td>管理员知识库</td><td>无</td><td>5</td><td>通过</td></tr>
+  </tbody>
+</table>
+
+<h2>前端生产构建</h2>
+<p>命令：<code>npm run build</code></p>
+<p><strong>结果：构建成功。</strong>存在 chunk 大于 500 kB 的提示，不影响功能，后续可通过 code-splitting 优化。</p>
+
+<h2>测试过程中发现并修复的问题</h2>
+<table>
+  <thead><tr><th>问题</th><th>原因</th><th>修复</th></tr></thead>
+  <tbody>
+    <tr><td>真实模型分析 Qwen 阶段 403</td><td>模型运行服务只允许读数据集目录，无法访问后端上传影像</td><td>启动模型服务时设置 <code>MODEL_RUNTIME_IMAGE_ROOT</code> 指向 <code>backend/data/uploads</code></td></tr>
+  </tbody>
+</table>
+
+<h2>已知限制</h2>
+<ul>
+  <li>Qwen 判断结果仍须医生复核，系统不自动生成诊断结论。</li>
+  <li>分析链路未做患者级独立外部验证，冻结测试结果仅作为研究证据。</li>
+  <li>PostgreSQL 集成测试需独立环境，本轮以隔离内存仓储为主。</li>
+  <li>管理员登录页用户名字段为固定只读（<code>root</code>），这是设计决定，不是缺陷。</li>
+  <li>前端 chunk 尺寸警告待后续优化，不影响功能。</li>
+  <li>病例详情等页面在 390px 下有 1 个装饰性元素略微超出视口但被裁剪，页面本身不滚动。</li>
+</ul>
+
+<h2>下一步</h2>
+<ol>
+  <li>基于本轮验收结果冻结第一版测试基线。</li>
+  <li>同步项目开发进度文档与进度跟踪文档。</li>
+  <li>11-04 前完成第二轮全量测试（含管理员配置外部 API 的真实调用链验证）。</li>
+</ol>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>第一轮全量测试报告 · 2026-10-29</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

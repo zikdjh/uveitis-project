@@ -39,12 +39,12 @@
 ├── datasets/                  数据集存放区
 │   ├── raw/                   新下载压缩包的临时暂存区
 │   └── extracted/             完整解压数据集与 manifests/ 清单
-├── model-runtime/             模型运行服务、评估与部署入口
+├── model/runtime/             模型运行服务、评估与部署入口
 │   ├── app/                   模型健康检查 API
 │   ├── code/                  本地评估代码
 │   ├── scripts/               运行脚本
 │   └── assets/                运行资产索引
-├── model-training/            模型训练统一管理入口
+├── model/training/            模型训练统一管理入口
 │   ├── code/training/         Qwen QLoRA 和 Modal 训练代码
 │   ├── scripts/modal/         训练子集与 Volume 同步脚本
 │   ├── datasets/training/     训练数据与 manifest
@@ -78,20 +78,20 @@
 <h2>使用说明</h2>
 <ul>
 <li>HTML 文档统一从 <code>docs/index.html</code> 进入；文件名采用 <code>YYYY-MM-DD-kebab-case.html</code>。</li>
-<li>模型训练统一从站点内的“模型训练管理”页或 <code>model-training/README.md</code> 管理；训练任务、数据入口和产物入口都从这里查找。</li>
+<li>模型训练统一从站点内的“模型训练管理”页或 <code>model/training/README.md</code> 管理；训练任务、数据入口和产物入口都从这里查找。</li>
 <li>本页 HTML 版本为 <a href="2026-10-26-project-overview.html"><code>2026-10-26-project-overview.html</code></a>。</li>
 <li>文档总索引：<a href="index.html"><code>docs/index.html</code></a>。</li>
-<li>专题文档统一使用 HTML；除目录级 <code>README.md</code> 外，不保留专题 Markdown。重建与校验命令为 <code>.\model-training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py</code>。</li>
-<li>数据集重新下载后先放 <code>model-training/datasets/raw/</code>；解压、核验后按 <code>model-training/datasets/extracted/&lt;数据集名&gt;/</code> 组织，并清理已展开的临时 ZIP。</li>
-<li>训练评估和验证快照放入 <code>model-training/assets/qwen3.5-4b/&lt;run-id&gt;/</code>；模型运行与评估入口统一在 <code>model-runtime/</code>；完整 adapter 和优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</li>
-<li>训练子集位于 <code>model-training/datasets/training/</code>；逐文件数据清单位于 <code>model-training/datasets/extracted/manifests/</code>，已删除归档的来源账本也在那里。</li>
+<li>专题文档统一使用 HTML；除目录级 <code>README.md</code> 外，不保留专题 Markdown。重建与校验命令为 <code>.\model\training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py</code>。</li>
+<li>数据集重新下载后先放 <code>model/training/datasets/raw/</code>；解压、核验后按 <code>model/training/datasets/extracted/&lt;数据集名&gt;/</code> 组织，并清理已展开的临时 ZIP。</li>
+<li>训练评估和验证快照放入 <code>model/training/assets/qwen3.5-4b/&lt;run-id&gt;/</code>；模型运行与评估入口统一在 <code>model/runtime/</code>；完整 adapter 和优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</li>
+<li>训练子集位于 <code>model/training/datasets/training/</code>；逐文件数据清单位于 <code>model/training/datasets/extracted/manifests/</code>，已删除归档的来源账本也在那里。</li>
 <li>检索脚本仅供归档复用，运行方式见各子目录内 round-*.mjs（ego-browser 环境）。</li>
 </ul>
 <h2>本地启动</h2>
 <p>模型运行服务（可选；先启动再让后端连接）：</p>
-<pre><code class="language-powershell">cd model-runtime
-$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\model-training\datasets\training').Path
-..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+<pre><code class="language-powershell">cd model\runtime
+$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\training\datasets\training').Path
+..\..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 </code></pre>
 <p>后端（Windows PowerShell）：</p>
 <pre><code class="language-powershell">cd backend
