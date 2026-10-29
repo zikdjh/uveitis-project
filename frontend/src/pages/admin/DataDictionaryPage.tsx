@@ -148,7 +148,7 @@ export default function DataDictionaryPage() {
     <section className="page">
       <div className="page-heading">
         <div>
-          <Title level={2}>数据字典</Title>
+          <Title level={1}>数据字典</Title>
           <Text type="secondary">
             系统配置与敏感凭据的统一索引，密钥值不会在管理端回显。
           </Text>

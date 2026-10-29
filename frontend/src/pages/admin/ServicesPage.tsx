@@ -455,7 +455,7 @@ export default function AntdServicesPage() {
       <section className="page antd-services-page">
         <div className="antd-services-titlebar">
           <div>
-            <Title level={2}>服务配置</Title>
+            <Title level={1}>服务配置</Title>
             {dirty && <Tag color="gold">修改尚未保存</Tag>}
           </div>
           <Space wrap>

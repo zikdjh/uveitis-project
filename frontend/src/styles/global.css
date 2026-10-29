@@ -2695,7 +2695,7 @@ a {
   gap: 10px;
 }
 
-.antd-services-titlebar h2.ant-typography {
+.antd-services-titlebar h1.ant-typography {
   margin: 0;
   color: #193a30;
   font-size: 24px;

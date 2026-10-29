@@ -19,6 +19,19 @@ from app.schemas.case import (
 from app.services.integrations import IntegrationResult, OptionalIntegrations
 
 
+_PROTOCOL_LABELS = {
+    "openai_responses": "OpenAI Responses API",
+    "openai_chat_completions": "OpenAI Chat Completions API",
+    "anthropic_messages": "Anthropic Messages API",
+}
+
+
+def _protocol_label(protocol: str | None) -> str:
+    """Human-readable name for the configured external summary protocol."""
+
+    return _PROTOCOL_LABELS.get(str(protocol or ""), "外部总结 API")
+
+
 class AnalysisService:
     """Coordinates optional judgment branches without gating the core workflow."""
 
@@ -79,7 +92,7 @@ class AnalysisService:
             ),
             ModelService(
                 role="外部总结（可选）",
-                name=self.settings.external_summary_model or "OpenAI-compatible API",
+                name=config.summary_model or _protocol_label(config.summary_protocol),
                 status=self._configured(self.integrations.summary_available),
                 required=False,
                 enabled=config.summary_enabled,
