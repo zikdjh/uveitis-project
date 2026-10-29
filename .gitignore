@@ -27,7 +27,6 @@ logs/
 datasets/*
 !datasets/.gitkeep
 backend/data/
-backend/models/
 backend/.zvec-smoke*/
 backend/.zvec-test-data/
 backend/.pytest-temp/
@@ -38,6 +37,7 @@ backend/.uv-cache/
 model/runtime/.test-tmp/
 model/runtime/.tmp-test/
 model/runtime/pytest-cache-files-*/
+model/embedding/models/
 frontend/.npm-cache/
 scripts/ui-check-20261025/*.png
 docs/Uv*.csv

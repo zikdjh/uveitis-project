@@ -75,10 +75,7 @@ class Settings(BaseSettings):
     integration_secret_key: str = ""
     vector_collection_name: str = "uveitis_knowledge"
     vector_dimension: int = 1024
-    vector_provider: Literal["memory", "local", "remote"] = "local"
-    bge_m3_model_path: Path = Path("models/bge-m3")
-    bge_m3_batch_size: int = 8
-    bge_m3_max_length: int = 1024
+    vector_provider: Literal["memory", "remote"] = "memory"
     vector_top_k: int = 5
     agent_orchestration_enabled: bool = False
     agent_planner_protocol: Literal[

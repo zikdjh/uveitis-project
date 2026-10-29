@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>向量模型服务 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-model-runtime.html">上一份</a>
+    <a href="2026-10-26-training-assets-index.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>运行</span>
+    <span>2026-10-29</span>
+  </div>
+  <h1>向量模型服务</h1>
+  <p class="doc-summary">BGE-M3 独立 FastAPI 服务、接口契约、启动与对接方式</p>
+  <p class="doc-source">规范入口：<code>model/embedding/README.md</code></p>
+  <article class="html-body">
+<p>BGE-M3 向量模型统一在本目录作为独立 FastAPI 服务运行：backend 不再加载模型权重，只通过 HTTP 接口获取文本向量。zvec 向量库仍留在 backend 进程内，负责持久化与检索。</p>
+<ul>
+<li><code>app/</code>：向量模型 API，默认监听 <code>8011</code>。</li>
+<li><code>tests/</code>：接口契约测试（健康检查、内部令牌、输入校验、模型缺失降级）。</li>
+<li><code>models/bge-m3/</code>：模型权重目录（已加入 <code>.gitignore</code>，不随代码提交）。</li>
+</ul>
+<h2>接口契约</h2>
+<ul>
+<li><code>GET /health</code>：返回服务状态、模型路径、维度与加载状态。权重目录缺少 <code>config.json</code> 时返回 <code>degraded</code>，服务本身仍可启动。</li>
+<li><code>POST /v1/embeddings</code>：输入 <code>{&quot;input&quot;: &quot;文本&quot;}</code>，返回 <code>{&quot;embedding&quot;: [...], &quot;dimension&quot;: 1024, &quot;model&quot;: &quot;BAAI/bge-m3&quot;, &quot;latency_ms&quot;: ..., &quot;generated_at&quot;: ...}</code>。响应同时兼容 OpenAI 风格调用方的 <code>data[0].embedding</code> 解析路径。</li>
+<li>设置 <code>EMBEDDING_INTERNAL_TOKEN</code> 后，所有 <code>/v1/embeddings</code> 请求必须携带 <code>X-Internal-Service-Token</code>，与 Qwen 运行服务的内部令牌约定一致。</li>
+</ul>
+<h2>模型下载</h2>
+<p>权重通过 ModelScope 固定来源 <code>BAAI/bge-m3</code> 下载到本目录（约 2.3 GB，不进 Git）：</p>
+<pre><code class="language-powershell">.\backend\.venv\Scripts\python.exe -c &quot;from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='model/embedding/models/bge-m3')&quot;
+</code></pre>
+<p>如果权重已在旧位置 <code>backend/models/bge-m3/</code>，直接移动到 <code>model/embedding/models/bge-m3/</code> 即可，无需重新下载。</p>
+<h2>本地启动</h2>
+<pre><code class="language-powershell">cd model\embedding
+$env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
+..\..\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
+</code></pre>
+<p>首次向量化请求加载权重并常驻 CPU；<code>GET /health</code> 不触发加载。可用环境变量：</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th style="text-align:right">默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EMBEDDING_MODEL_PATH</code></td>
+<td style="text-align:right">本目录 <code>models/bge-m3</code></td>
+<td>权重目录</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_MODEL_NAME</code></td>
+<td style="text-align:right"><code>BAAI/bge-m3</code></td>
+<td>健康检查与响应中的模型名</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_DIMENSION</code></td>
+<td style="text-align:right"><code>1024</code></td>
+<td>校验输出向量维度</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_BATCH_SIZE</code></td>
+<td style="text-align:right"><code>8</code></td>
+<td>单次编码 batch 上限</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_MAX_LENGTH</code></td>
+<td style="text-align:right"><code>1024</code></td>
+<td>单条文本最大 token 长度</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_INTERNAL_TOKEN</code></td>
+<td style="text-align:right">空</td>
+<td>非空时要求 <code>X-Internal-Service-Token</code></td>
+</tr>
+</tbody>
+</table>
+<h2>与 backend 对接</h2>
+<p>backend 通过 <code>APP_VECTOR_PROVIDER=remote</code> 与 <code>APP_RETRIEVAL_SERVICE_URL=http://127.0.0.1:8011</code> 使用本服务；<code>APP_INTERNAL_SERVICE_TOKEN</code> 非空时以内部令牌头调用。embedding 服务不可用时知识检索分支按既有约定跳过，不阻塞病例分析与医生复核。切换 provider 或向量空间后必须重建 zvec 索引，避免新旧向量混检。</p>
+
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>向量模型服务 · 2026-10-29</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

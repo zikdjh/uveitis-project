@@ -15,6 +15,9 @@ uveitis-project/
 │   ├── 2026-10-25-training-budget-plan-modal-l40s.html 训练预算计划
 │   └── 2026-10-26-model-runtime-evaluation.html 评估与推理说明
 ├── model/                     模型域统一目录
+│   ├── embedding/             BGE-M3 向量模型 FastAPI 服务
+│   │   ├── app/               向量 API 与健康检查
+│   │   └── models/            BGE-M3 权重（gitignore）
 │   ├── runtime/               模型运行服务、评估与部署入口
 │   │   ├── app/               模型健康检查 API
 │   │   ├── code/              本地评估代码
@@ -53,8 +56,8 @@ uveitis-project/
 - [x] PostgreSQL 病例、账号、审计与服务配置持久化
 - [x] 核心模型适配边界与演示模式
 - [x] zvec 嵌入式知识库适配层：文档写入、过滤检索与本地持久化
-- [x] BGE-M3 通过 ModelScope 下载到本地，使用 CPU 生成 1024 维向量
-- [x] zvec 检索使用本地 BGE-M3，管理端展示向量数据库状态
+- [x] BGE-M3 通过 ModelScope 下载到 `model/embedding`，以独立 FastAPI 服务提供 1024 维向量
+- [x] zvec 检索通过接口调用独立 BGE-M3 向量服务，管理端展示向量数据库状态
 - [x] 混合判断编排：Qwen 判断、RAG、补充决策、网络搜索和外部总结均为可跳过增强分支
 - [x] 项目目录完成训练资产、运行服务和项目文档归类；索引见 `docs/2026-10-26-project-layout.html`
 - [x] 前端首轮工作区界面完善：桌面/移动端导航、账号权限概览、账号列表移动卡片化和权限页空状态
@@ -68,7 +71,7 @@ uveitis-project/
 
 - HTML 文档统一从 `docs/index.html` 进入；文件名采用 `YYYY-MM-DD-kebab-case.html`。
 - 模型训练统一从站点内的“模型训练管理”页或 `model/training/README.md` 管理；训练任务、数据入口和产物入口都从这里查找。
-- 模型运行、评估与部署统一从站点内的“模型运行服务”页或 `model/runtime/README.md` 管理。
+- 模型运行、评估与部署统一从站点内的“模型运行服务”页或 `model/runtime/README.md` 管理；向量模型服务统一见 `model/embedding/README.md`。
 - 鉴权、角色权限、账号维护和会话安全统一见 [`2026-10-26-auth-access-control.html`](docs/2026-10-26-auth-access-control.html) 与 [`2026-10-27-auth-account-provisioning.html`](docs/2026-10-27-auth-account-provisioning.html)。
 - 本页 HTML 版本为 [`2026-10-26-project-overview.html`](docs/2026-10-26-project-overview.html)。
 - 文档总索引：[`docs/index.html`](docs/index.html)。
@@ -79,6 +82,16 @@ uveitis-project/
 - 检索脚本仅供归档复用，运行方式见各子目录内 round-*.mjs（ego-browser 环境）。
 
 ## 本地启动
+
+向量模型服务（可选；知识检索使用时先启动再让后端连接）：
+
+```powershell
+cd model\embedding
+uv venv .venv
+uv pip install --python .venv\Scripts\python.exe --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+$env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
+```
 
 模型运行服务（可选；先启动再让后端连接）：
 
@@ -141,7 +154,7 @@ npm run dev
 
 - Qwen3.5-4B 只输出受限标签、结构化发现和置信度，不生成最终临床报告。
 - 原始病例和影像只允许发送到项目自有的本地或受控内网模型服务；统一 HTTP 出站钩子会阻止公开主机接收这类数据。
-- RAG 使用本地 BGE-M3 和 zvec；索引为空、模型缺失或检索失败时直接跳过。
+- RAG 使用 `model/embedding` 的 BGE-M3 向量服务和 zvec 索引；索引为空、服务不可用或检索失败时直接跳过。
 - 网络搜索支持 Tavily、Brave Search、Serper、Google Programmable Search (CSE)、Bing Web Search、Exa、Perplexity 和自建 SearXNG；管理员可调整尝试顺序并逐项检查，单个提供方失败后继续下一个，全部失败只跳过搜索分支。搜索词只使用模型标签和固定医学检索词，绝不包含主诉、病史、病例标识或影像信息。
 - 补充决策模型保持默认关闭，待真实脱敏病例、医生确认标签和独立评测齐备后启用。
 - 工具链规划由 AgentScope 承担：规划代理只决定本次运行哪些可选技能，执行顺序、超时与失败处理仍由后端确定性代码控制。规划关闭、依赖缺失、凭据不完整或规划失败时回退到确定性顺序，病例分析照常完成。细则见 [AgentScope 工具链编排](docs/2026-10-27-agent-toolchain-plan.html)。
@@ -152,35 +165,32 @@ npm run dev
 
 外部服务的操作性配置在管理端“服务配置”页维护，包括接口协议、API 地址、模型、密钥和搜索服务商顺序。系统不提供“发送病例文本”或“发送影像”开关，隐私边界由代码强制校验。运行时始终读取数据库中的管理员配置，不把环境变量作为外部 API 或网络搜索的运营配置入口；部署文件只保留启动主密钥 `APP_INTEGRATION_SECRET_KEY`。不要将第三方 API Key 提交到仓库。环境变量样例位于仓库的 `backend/.env.example`。外部 API 启用前需要完成数据处理和合规评估；项目 MIT License 只覆盖代码，不覆盖第三方数据、影像、模型权重或外部 API 内容。
 
-## 本地 BGE-M3
+## 向量模型服务（BGE-M3）
 
-模型通过 ModelScope 固定来源 `BAAI/bge-m3` 下载到 `backend/models/bge-m3/`。该目录已加入 `.gitignore`，不随代码提交。首次启动 API 时不加载模型，第一次写入知识或执行文本检索时才加载权重并常驻 CPU。
+BGE-M3 统一在 `model/embedding/` 作为独立 FastAPI 服务运行，默认端口 `8011`；backend 不再内嵌模型权重，只通过 `APP_RETRIEVAL_SERVICE_URL` 获取向量。权重通过 ModelScope 固定来源 `BAAI/bge-m3` 下载到 `model/embedding/models/bge-m3/`（约 2.3 GB，已加入 `.gitignore`）：
 
 ```powershell
-cd backend
-.\.venv\Scripts\python.exe -c "from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='models/bge-m3')"
+.\backend\.venv\Scripts\python.exe -c "from modelscope.hub.snapshot_download import snapshot_download; snapshot_download('BAAI/bge-m3', local_dir='model/embedding/models/bge-m3')"
 ```
 
-推理依赖包括 CPU 版 `torch`、`torchvision`、`modelscope` 和 `FlagEmbedding`。默认配置如下：
+服务首次收到向量化请求时加载权重并常驻 CPU，`GET /health` 不触发加载。默认配置如下：
 
 ```dotenv
-APP_VECTOR_PROVIDER=local
-APP_BGE_M3_MODEL_PATH=models/bge-m3
-APP_BGE_M3_BATCH_SIZE=8
-APP_BGE_M3_MAX_LENGTH=1024
+APP_VECTOR_PROVIDER=remote
+APP_RETRIEVAL_SERVICE_URL=http://127.0.0.1:8011
 ```
 
-本地提供者固定使用 `devices=["cpu"]`、`use_fp16=False` 和稠密 `dense_vecs`。默认只会使用最多 8 个 PyTorch CPU 线程。模型首次加载需要数秒到数十秒；后续请求复用已加载权重。
+设置 `APP_INTERNAL_SERVICE_TOKEN` 后，backend 与向量服务之间使用 `X-Internal-Service-Token` 头。接口契约、环境变量与本地启动方式见 `model/embedding/README.md`。
 
 ## 知识检索
 
-向量数据库选用 [zvec](https://github.com/alibaba/zvec)，作为嵌入式本地索引运行在 FastAPI 进程内。BGE-M3 负责将知识文档和查询转换为向量，zvec 负责向量的持久化、HNSW 检索和标量过滤。默认索引目录为 `backend/data/zvec/`，集合名为 `uveitis_knowledge`，维度为 1024。
+向量数据库选用 [zvec](https://github.com/alibaba/zvec)，作为嵌入式本地索引运行在 backend 进程内。BGE-M3 由独立的 `model/embedding` FastAPI 服务提供向量，zvec 负责向量的持久化、HNSW 检索和标量过滤。默认索引目录为 `backend/data/zvec/`，集合名为 `uveitis_knowledge`，维度为 1024。
 
 - `POST /api/v1/knowledge/documents`：写入知识文档。可以传 `vector`；未传时使用当前 embedding provider。
 - `POST /api/v1/knowledge/search`：按文本或向量检索，支持 `category` 过滤。
 - `GET /api/v1/knowledge/status`：查看 zvec 集合、文档数和向量维度。
 
-`APP_VECTOR_PROVIDER=local` 使用本地 CPU BGE-M3。`memory` 只用于无模型的链路测试，确定性哈希向量不具备语义检索质量；`remote` 则调用 `APP_RETRIEVAL_SERVICE_URL`。切换 embedding provider 后不要复用旧集合的向量，应重建 zvec 索引，避免不同向量空间混检。zvec 集合默认按单写进程使用，生产部署不要让多个 Uvicorn worker 同时写同一集合。
+`APP_VECTOR_PROVIDER=remote` 调用 `model/embedding` 服务。`memory` 只用于无模型的链路测试，确定性哈希向量不具备语义检索质量。切换 embedding provider 后不要复用旧集合的向量，应重建 zvec 索引，避免不同向量空间混检。zvec 集合默认按单写进程使用，生产部署不要让多个 Uvicorn worker 同时写同一集合。
 
 ## 补充决策模型
 

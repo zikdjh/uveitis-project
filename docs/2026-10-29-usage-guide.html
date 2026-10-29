@@ -53,7 +53,14 @@ $env:MODEL_RUNTIME_IMAGE_ROOT = (Resolve-Path '..\..\backend\data\uploads').Path
 </code></pre>
 <p><code>MODEL_RUNTIME_IMAGE_ROOT</code> 必须指向后端的上传目录，否则模型服务会拒绝读取病例影像（403）。启动后访问 <code>http://127.0.0.1:8010/health</code> 确认返回 <code>"status":"ok"</code>。</p>
 
-<h3>3. 后端</h3>
+<h3>3. 向量模型服务（使用知识检索时启动）</h3>
+<pre><code>cd model\embedding
+$env:EMBEDDING_INTERNAL_TOKEN = 'replace-with-shared-token'
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
+</code></pre>
+<p>启动后访问 <code>http://127.0.0.1:8011/health</code> 确认返回 <code>"status":"ok"</code>。backend 通过 <code>APP_VECTOR_PROVIDER=remote</code> 与 <code>APP_RETRIEVAL_SERVICE_URL</code> 调用该服务；不启动时知识检索分支自动跳过，不影响核心流程。</p>
+
+<h3>4. 后端</h3>
 <pre><code>cd backend
 .\.venv\Scripts\uvicorn.exe app.asgi:app --host 127.0.0.1 --port 8000
 </code></pre>
@@ -126,7 +133,7 @@ npm run dev
 <ol>
   <li>进入 <strong>知识库</strong> 页。</li>
   <li>上传临床指南或文献（分类：guideline / literature / case / other）。</li>
-  <li>写入后 BGE-M3 模型在首次检索时加载并常驻内存。</li>
+  <li>向量由独立的 BGE-M3 服务（<code>model/embedding</code>，端口 8011）提供；服务权重在首次检索时加载并常驻内存。</li>
   <li>医生的辅助分析会通过 RAG 检索命中相关条目并注入结果。</li>
 </ol>
 
@@ -134,7 +141,7 @@ npm run dev
 <p>在 <strong>账号权限</strong> 页下方查看当前所有在线账号的角色、登录 IP、最近活跃和过期时间。</p>
 
 <h2>停止服务</h2>
-<pre><code>Get-NetTCPConnection -LocalPort 8000,5173,8010 | Stop-Process -Id { $_.OwningProcess }
+<pre><code>Get-NetTCPConnection -LocalPort 8000,5173,8010,8011 | Stop-Process -Id { $_.OwningProcess }
 </code></pre>
 <p>PostgreSQL 和 Redis 是 Docker Compose 容器，可执行 <code>docker compose down</code> 停止。</p>
 

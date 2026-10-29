@@ -49,8 +49,8 @@
 </tr>
 <tr>
 <td><code>backend/</code></td>
-<td>FastAPI、PostgreSQL、BGE-M3 和后台测试</td>
-<td>代码保留；<code>.venv/</code>、<code>models/</code> 可重建</td>
+<td>FastAPI、PostgreSQL、zvec 索引和后台测试</td>
+<td>代码保留；<code>.venv/</code>、<code>data/</code> 可重建</td>
 </tr>
 <tr>
 <td><code>frontend/</code></td>
@@ -66,6 +66,11 @@
 <td><code>model/runtime/</code></td>
 <td>模型运行服务、评估代码、运行脚本和部署说明</td>
 <td>运行管理，保留</td>
+</tr>
+<tr>
+<td><code>model/embedding/</code></td>
+<td>BGE-M3 向量模型独立 FastAPI 服务：向量 API、接口测试和权重目录</td>
+<td>运行管理，保留；<code>models/</code> 可重建</td>
 </tr>
 <tr>
 <td><code>model/training/environment/</code></td>
