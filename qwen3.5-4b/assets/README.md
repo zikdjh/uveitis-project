@@ -1,8 +1,8 @@
 # 模型运行资产
 
-运行资产不复制权重，统一从 `model/training/assets/qwen3.5-4b/` 读取。
+运行权重在本包 `models/`；训练过程证据（指标与决策 JSON）在 `model/training/assets/qwen3.5-4b/`。
 
-- 冻结评估基线：`model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter`（训练侧留存）
+- 冻结评估基线：第 100 步 adapter（权重已随中间态清理，证据以 Modal `uveitis-runs` 卷与 freeze-manifest SHA256 为准）
 - 选定的 OCT 运行候选：本包 `models/best_adapter`（第 20 步，已从训练 run 目录迁入）
 - 冻结评估：`eval-oct-step20-vs-step100-20261025-01/`
 - 错误来源分析：`eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json`

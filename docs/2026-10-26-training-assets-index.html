@@ -58,10 +58,10 @@
 <li><code>step100-eval-metrics-paired40.json</code>、<code>step100-eval-predictions-paired40.json</code>：固定 40 样本评估。</li>
 </ul>
 <h3>pilot 与 smoke</h3>
-<p><code>pilot/</code> 保存 pilot run 的验证和评估快照；<code>smoke/</code> 保存早期配置、旧指标和中断步元数据。<code>local-4060-*</code> 冒烟目录中的 adapter、processor 和 checkpoint 已清理，只保留小型指标文件。smoke 指标只证明链路曾运行，不作为准确率证据。</p>
+<p><code>pilot/</code> 保存 pilot run 的验证和评估快照；<code>smoke/</code> 保存早期配置、旧指标和中断步元数据。全部 run 的中间态权重（<code>checkpoints/</code>、<code>best_adapter/</code>、<code>final_adapter/</code>）已清理，只保留小型指标与决策文件；完整 run 和优化器状态以 Modal <code>uveitis-runs</code> 卷为真相源。smoke 指标只证明链路曾运行，不作为准确率证据。</p>
 <h3>当前本地工作适配器</h3>
 <ul>
-<li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：第 100 步同源冻结评估基线。</li>
+<li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：第 100 步同源冻结评估基线，adapter 权重已随中间态清理，SHA256 见 <code>qwen3.5-4b/assets/freeze-step20-20261028-01/freeze-manifest.json</code>。</li>
 <li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：第 20 步选定 OCT 运行候选，最终产物已迁至 <code>qwen3.5-4b/models/best_adapter</code>（run 目录保留训练过程记录，可随中间态清理）。</li>
 <li><code>eval-oct-step20-vs-step100-20261025-01/</code>：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 <code>selection_decision.json</code>。</li>
 <li><code>local-4060-oct-stage2-20261026-01/</code>、<code>local-4060-oct-stage2b-20261026-01/</code>：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。</li>

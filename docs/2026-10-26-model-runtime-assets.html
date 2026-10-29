@@ -26,9 +26,9 @@
   <p class="doc-summary">运行 adapter、冻结评估结果和路径读取约定</p>
   <p class="doc-source">规范入口：<code>qwen3.5-4b/assets/README.md</code></p>
   <article class="html-body">
-<p>运行资产不复制权重，统一从 <code>model/training/assets/qwen3.5-4b/</code> 读取。</p>
+<p>运行权重在本包 <code>models/</code>；训练过程证据（指标与决策 JSON）在 <code>model/training/assets/qwen3.5-4b/</code>。</p>
 <ul>
-<li>冻结评估基线：<code>model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code>（训练侧留存）</li>
+<li>冻结评估基线：第 100 步 adapter（权重已随中间态清理，证据以 Modal <code>uveitis-runs</code> 卷与 freeze-manifest SHA256 为准）</li>
 <li>选定的 OCT 运行候选：本包 <code>models/best_adapter</code>（第 20 步，已从训练 run 目录迁入）</li>
 <li>冻结评估：<code>eval-oct-step20-vs-step100-20261025-01/</code></li>
 <li>错误来源分析：<code>eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code></li>

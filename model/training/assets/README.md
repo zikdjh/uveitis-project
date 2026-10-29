@@ -46,11 +46,11 @@ step 100、200、300 的内部验证 loss 分别为 `0.018165`、`0.020989`、`0
 
 ### pilot 与 smoke
 
-`pilot/` 保存 pilot run 的验证和评估快照；`smoke/` 保存早期配置、旧指标和中断步元数据。`local-4060-*` 冒烟目录中的 adapter、processor 和 checkpoint 已清理，只保留小型指标文件。smoke 指标只证明链路曾运行，不作为准确率证据。
+`pilot/` 保存 pilot run 的验证和评估快照；`smoke/` 保存早期配置、旧指标和中断步元数据。全部 run 的中间态权重（`checkpoints/`、`best_adapter/`、`final_adapter/`）已清理，只保留小型指标与决策文件；完整 run 和优化器状态以 Modal `uveitis-runs` 卷为真相源。smoke 指标只证明链路曾运行，不作为准确率证据。
 
 ### 当前本地工作适配器
 
-- `local-4060-grouped-cont-20261025-01/best_adapter`：第 100 步同源冻结评估基线。
+- `local-4060-grouped-cont-20261025-01/best_adapter`：第 100 步同源冻结评估基线，adapter 权重已随中间态清理，SHA256 见 `qwen3.5-4b/assets/freeze-step20-20261028-01/freeze-manifest.json`。
 - `local-4060-oct-focus-cont-20261025-01/best_adapter`：第 20 步选定 OCT 运行候选，最终产物已迁至 `qwen3.5-4b/models/best_adapter`（run 目录保留训练过程记录，可随中间态清理）。
 - `eval-oct-step20-vs-step100-20261025-01/`：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 `selection_decision.json`。
 - `local-4060-oct-stage2-20261026-01/`、`local-4060-oct-stage2b-20261026-01/`：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。
