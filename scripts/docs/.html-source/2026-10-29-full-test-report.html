@@ -305,6 +305,34 @@
 </table>
 <p>运行服务重启方式（本机）：<code>cd qwen3.5-4b</code> 后设置 <code>MODEL_RUNTIME_UPLOAD_ROOT</code> 为 <code>…\backend\data\uploads</code>，再用 <code>.venv-runtime-smoke</code> 的 Python 执行 <code>-m uvicorn app.main:app --host 127.0.0.1 --port 8010</code>。未设置该变量时浏览器上传影像会在 Qwen 阶段返回 403。</p>
 
+<h3>R-11 B-03 移动端连续流程、B-04 双 Token、B-05 知识检索（2026-10-29）</h3>
+<p>范围：在真实运行栈上完成剩余三项 P1 验收。脚本：<code>scripts/e2e-dual-token-20261029/round-07-b04-auto-refresh.mjs</code>、<code>round-08-b04-admin-sliding-session.mjs</code>、<code>scripts/e2e-round-two-20261029/round-20-b05-knowledge.py</code>、<code>round-21-b03-mobile-flow.mjs</code>。</p>
+<table>
+  <thead><tr><th>条目</th><th>检查项</th><th>实际</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>B-04</td><td>医生令牌过期后无感刷新</td><td>删除 access cookie 后重载工作台，6 次 <code>/auth/me</code> 只触发 1 次 <code>/auth/refresh</code>，URL 仍在 <code>/doctor/workbench</code>，access/refresh/csrf 三 cookie 齐备且 refresh 已轮换</td><td>通过</td></tr>
+    <tr><td>B-04</td><td>管理员 10 分钟滑动会话（修复前）</td><td>access cookie 剩余 898 秒（医生 900 秒档），活动后到期时间不前移，重登录后还残留医生 refresh cookie</td><td>不通过，见 D-04</td></tr>
+    <tr><td>B-04</td><td>管理员 10 分钟滑动会话（修复后）</td><td>登录后仅 access + csrf 两枚 cookie，TTL 598 秒，管理员操作后到期时间前移并重置为 600 秒，URL 仍在 <code>/admin</code></td><td>通过</td></tr>
+    <tr><td>B-05</td><td>管理员写入知识条目</td><td><code>POST /api/v1/knowledge/documents</code> 返回 201；索引文档数 1 → 2，embedding 模式 <code>remote</code>（bge-m3 服务）</td><td>通过</td></tr>
+    <tr><td>B-05</td><td>医生检索命中</td><td>用条目标记检索返回该条目，score 0.4914，位列第一</td><td>通过</td></tr>
+    <tr><td>B-05</td><td>检索证据注入分析</td><td>标记进入主诉后分析 <code>completed</code>，retrieval 阶段「RAG 返回 2 条证据」，病例 <code>evidence</code> 含该条目（score 0.6708）</td><td>通过</td></tr>
+    <tr><td>B-03</td><td>390px 医生连续流程</td><td>工作台、病例列表、资料摘要、影像、辅助分析、医生复核、报告、临床知识 8 个路由均 <code>clientWidth = scrollWidth = 390</code>，无横向溢出</td><td>通过</td></tr>
+    <tr><td>B-03</td><td>移动端复核与报告</td><td>390px 下完成复核保存，病例转 <code>reviewed</code>，报告页渲染医生确认内容</td><td>通过</td></tr>
+    <tr><td>B-03</td><td>390px 管理员端</td><td>运行状态、服务配置、医生账号三个路由无横向溢出，服务配置页 50 个可用控件</td><td>通过</td></tr>
+    <tr><td>B-03</td><td>控制台与截图</td><td>全程 <code>Runtime.consoleAPICalled</code> 无 error/assert；截图 <code>shot-r21-mobile-report.png</code>、<code>shot-r21-mobile-admin-services.png</code></td><td>通过</td></tr>
+  </tbody>
+</table>
+<p>观察项 N-01：病例详情页签条在 390px 下是横向滚动容器，末位页签超出视口约 39px，页面本身无横向溢出，页签可滚动到达；属于可接受的移动端折中，暂不改动。</p>
+
+<h3>R-12 缺陷修复与验证（D-04、D-05）</h3>
+<table>
+  <thead><tr><th>编号</th><th>问题</th><th>影响</th><th>修复与验证</th></tr></thead>
+  <tbody>
+    <tr><td>D-04</td><td>管理员会话 cookie 使用医生档 TTL（900 秒）而非管理员档 600 秒，且滑动续期只更新服务端会话、不重发 cookie；管理员登录也不清理遗留的医生 refresh cookie</td><td>浏览器侧会话在登录后固定 900 秒失效，与「每次操作请求成功自动延长」不符；跨角色切换后可能残留医生刷新令牌</td><td><code>AuthService.access_ttl_for()</code> 按角色返回 TTL；<code>_set_auth_cookies</code> 接受该 TTL 并用于 access 与 admin csrf cookie；管理员登录显式删除 refresh cookie；新增中间件在成功的 <code>/api/</code> 响应上重发管理员 access cookie 实现浏览器侧滑动。浏览器复跑：仅 access + csrf、TTL 598 秒、活动后前移</td></tr>
+    <tr><td>D-05</td><td>上述中间件在首次实现时会在登录响应上重发请求里携带的旧管理员 cookie，导致同一浏览器从管理员切到医生后仍以管理员身份访问</td><td>角色切换后越权进入管理员页面（B-03 复跑时命中）</td><td>中间件在响应已带 access cookie（登录、刷新）时跳过一次滑动续期。新增回归用例 <code>test_doctor_login_after_admin_login_keeps_doctor_identity</code>，断言切换后 <code>/auth/me</code> 返回医生身份；后端全量 <strong>97 passed, 7 skipped</strong></td></tr>
+  </tbody>
+</table>
+
 <h2>下一步</h2>
 <ol>
   <li>基于第一轮验收结果冻结第一版测试基线。</li>
@@ -313,7 +341,9 @@
   <li>B-01 真实模型端到端与 B-02 失败恢复已在重构后的运行栈复跑通过（见 R-10）。</li>
   <li>为外部总结连通性测试增加失败自动重试，避免一次瞬时失败被判定为不可用。</li>
   <li>补齐至少一家搜索服务商凭据后重跑搜索批量测试，验证外部检索结果进入链路。</li>
-  <li>剩余待办：B-04 双 Token 无感刷新浏览器验收、B-05 知识检索端到端、B-03 390px 移动端连续流程、B-06 文档冻结（<code>build_docs.py --check</code> 与 <code>git diff --check</code>）、P-08 决策模型 11-03 门槛复核。</li>
+  <li>B-04 双 Token 无感刷新、B-05 知识检索端到端、B-03 390px 移动端连续流程均已验收通过，并修复 D-04、D-05（见 R-11、R-12）。</li>
+  <li>B-06 文档冻结本轮执行：<code>build_docs.py</code> 重建 48 页、<code>--check</code> 通过、<code>git diff --check</code> 无输出；后端全量 <strong>97 passed, 7 skipped</strong>。</li>
+  <li>剩余待办：P-08 决策模型 11-03 门槛复核；外部总结连通性自动重试与搜索服务商凭据补齐仍待数据与密钥到位。</li>
 </ol>
 
   </article>

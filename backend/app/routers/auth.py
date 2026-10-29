@@ -63,6 +63,7 @@ def _set_auth_cookies(
     request: Request,
     tokens: SessionTokens,
     csrf_token: str,
+    access_ttl_seconds: int,
     set_refresh: bool = True,
 ) -> None:
     settings = request.app.state.settings
@@ -70,7 +71,7 @@ def _set_auth_cookies(
     response.set_cookie(
         ACCESS_COOKIE,
         tokens.access_token,
-        max_age=auth.access_ttl_seconds,
+        max_age=access_ttl_seconds,
         httponly=True,
         samesite="lax",
         secure=settings.cookie_secure,
@@ -86,10 +87,13 @@ def _set_auth_cookies(
             secure=settings.cookie_secure,
             path="/api/v1/auth/refresh",
         )
+    else:
+        # The admin console never keeps a refresh token; drop any doctor one.
+        response.delete_cookie(REFRESH_COOKIE, path="/api/v1/auth/refresh")
     response.set_cookie(
         CSRF_COOKIE,
         csrf_token,
-        max_age=auth.refresh_ttl_seconds,
+        max_age=auth.refresh_ttl_seconds if set_refresh else access_ttl_seconds,
         httponly=False,
         samesite="lax",
         secure=settings.cookie_secure,
@@ -170,6 +174,7 @@ def _login_response(
         request=request,
         tokens=tokens,
         csrf_token=token_urlsafe(32),
+        access_ttl_seconds=auth.access_ttl_for(user),
         set_refresh=user.role != "admin",
     )
     _audit(
@@ -209,7 +214,8 @@ def refresh(request: Request) -> Response:
     refresh_token = request.cookies.get(REFRESH_COOKIE)
     if not refresh_token:
         return _unauthorized_response()
-    result = request.app.state.auth_service.refresh_session(
+    auth = request.app.state.auth_service
+    result = auth.refresh_session(
         refresh_token,
         ip_address=request_ip(request),
         user_agent=request_user_agent(request),
@@ -231,6 +237,7 @@ def refresh(request: Request) -> Response:
         request=request,
         tokens=tokens,
         csrf_token=token_urlsafe(32),
+        access_ttl_seconds=auth.access_ttl_seconds,
     )
     _audit(
         request,

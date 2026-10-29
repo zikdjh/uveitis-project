@@ -842,6 +842,106 @@ def test_admin_session_slides_on_each_request(tmp_path: Path) -> None:
     assert second_expiry > first_expiry
 
 
+def test_admin_access_cookie_follows_short_ttl_and_renews(tmp_path: Path) -> None:
+    users = MemoryUserStore()
+    sessions = MemorySessionStore()
+    app = create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=sessions,
+        bootstrap_users=False,
+    )
+    password = app.state.auth_service.hash_password("test-password")
+    users.ensure_user("doctor", password, "测试医生", "doctor")
+    users.ensure_single_admin(ROOT_ADMIN_USERNAME, password, "测试管理员")
+    client = TestClient(app)
+
+    # A doctor session leaves a refresh cookie in the jar that the admin
+    # console must not inherit.
+    doctor_login = client.post(
+        "/api/v1/auth/login",
+        json={"username": "doctor", "password": "test-password"},
+    )
+    assert doctor_login.status_code == 200
+    assert client.cookies.get("uveitis_refresh")
+
+    admin_login = client.post(
+        "/api/v1/auth/admin/login",
+        json={"username": ROOT_ADMIN_USERNAME, "password": "test-password"},
+    )
+    assert admin_login.status_code == 200
+
+    login_cookies = admin_login.headers.get_list("set-cookie")
+    access_headers = [item for item in login_cookies if item.startswith("uveitis_access=")]
+    assert access_headers, "admin login must set the access cookie"
+    assert "Max-Age=600" in access_headers[0]
+    refresh_headers = [item for item in login_cookies if item.startswith("uveitis_refresh=")]
+    assert refresh_headers, "admin login must clear the doctor refresh cookie"
+    assert "Max-Age=0" in refresh_headers[0]
+    assert client.cookies.get("uveitis_refresh") is None
+
+    client.headers["X-CSRF-Token"] = client.cookies.get("uveitis_csrf")
+    me = client.get("/api/v1/auth/me")
+    assert me.status_code == 200
+    renewed = [item for item in me.headers.get_list("set-cookie") if item.startswith("uveitis_access=")]
+    assert renewed, "admin activity must re-issue the access cookie"
+    assert "Max-Age=600" in renewed[0]
+
+    doctor_client = TestClient(app)
+    doctor_client.post(
+        "/api/v1/auth/login",
+        json={"username": "doctor", "password": "test-password"},
+    )
+    doctor_me = doctor_client.get("/api/v1/auth/me")
+    assert doctor_me.status_code == 200
+    doctor_access_headers = [
+        item for item in doctor_me.headers.get_list("set-cookie")
+        if item.startswith("uveitis_access=")
+    ]
+    assert doctor_access_headers == []
+
+
+def test_doctor_login_after_admin_login_keeps_doctor_identity(tmp_path: Path) -> None:
+    users = MemoryUserStore()
+    sessions = MemorySessionStore()
+    app = create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=sessions,
+        bootstrap_users=False,
+    )
+    password = app.state.auth_service.hash_password("test-password")
+    users.ensure_user("doctor", password, "测试医生", "doctor")
+    users.ensure_single_admin(ROOT_ADMIN_USERNAME, password, "测试管理员")
+    client = TestClient(app)
+
+    admin_login = client.post(
+        "/api/v1/auth/admin/login",
+        json={"username": ROOT_ADMIN_USERNAME, "password": "test-password"},
+    )
+    assert admin_login.status_code == 200
+    assert client.get("/api/v1/auth/me").json()["role"] == "admin"
+
+    # Switching roles in the same browser must not leave the admin token in
+    # place: the sliding-renewal middleware has to leave a fresh login alone.
+    doctor_login = client.post(
+        "/api/v1/auth/login",
+        json={"username": "doctor", "password": "test-password"},
+    )
+    assert doctor_login.status_code == 200
+    client.headers["X-CSRF-Token"] = client.cookies.get("uveitis_csrf")
+    me = client.get("/api/v1/auth/me")
+    assert me.status_code == 200
+    assert me.json()["role"] == "doctor"
+    assert me.json()["username"] == "doctor"
+
+
 def test_admin_active_sessions_shows_users_and_ips(tmp_path: Path) -> None:
     admin = make_client(tmp_path, role="admin")
 

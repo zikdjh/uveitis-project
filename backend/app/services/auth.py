@@ -85,6 +85,18 @@ class AuthService:
     def clear_login_failures(self, identity: str) -> None:
         self.redis_store.clear_login_failures(identity)
 
+    def access_ttl_for(self, user: UserRead) -> int:
+        """Access token lifetime for a role.
+
+        Admins only receive a short sliding session, so their cookie and the
+        server side session must share the same lifetime.
+        """
+        return (
+            self.admin_access_ttl_seconds
+            if user.role == "admin"
+            else self.access_ttl_seconds
+        )
+
     def create_session(
         self,
         user: UserRead,
@@ -93,7 +105,7 @@ class AuthService:
         user_agent: str = "",
     ) -> tuple[SessionTokens, LoginResponse]:
         is_admin = user.role == "admin"
-        access_ttl = self.admin_access_ttl_seconds if is_admin else self.access_ttl_seconds
+        access_ttl = self.access_ttl_for(user)
         refresh_ttl = access_ttl if is_admin else self.refresh_ttl_seconds
         access_token = token_urlsafe(32)
         refresh_token = token_urlsafe(48)

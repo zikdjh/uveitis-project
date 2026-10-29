@@ -11,6 +11,7 @@ from app.core.auth_policy import (
     ROOT_PASSWORD_SENTINEL,
 )
 from app.core.config import settings
+from app.core.security import ACCESS_COOKIE, renew_admin_access_cookie
 from app.core.secret_box import SecretBox
 from app.db import PostgresCaseStore
 from app.db.analysis_jobs import MemoryAnalysisJobStore, PostgresAnalysisJobStore
@@ -159,6 +160,16 @@ def create_app(
     @app.middleware("http")
     async def security_headers(request, call_next):
         response = await call_next(request)
+        sets_access_cookie = any(
+            header.startswith(f"{ACCESS_COOKIE}=")
+            for header in response.headers.getlist("set-cookie")
+        )
+        if (
+            request.url.path.startswith("/api/")
+            and response.status_code < 400
+            and not sets_access_cookie
+        ):
+            renew_admin_access_cookie(request, response)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "same-origin"
