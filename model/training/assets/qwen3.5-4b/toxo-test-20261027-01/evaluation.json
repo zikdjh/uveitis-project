@@ -1,0 +1,89 @@
+{
+  "status": "ok",
+  "run_id": "toxo-test-20261027-01",
+  "task": "fundus_toxo_binary",
+  "manifest": "D:\\temp\\gpt\\uveitis-project\\model/training\\datasets\\tasks\\uveitis_focus_20261027\\manifest.csv",
+  "manifest_sha256": "be63f8846fb2613d5f125bb6734113d75635245c2a9cbc9c13a4d1b158fae04f",
+  "adapter": "D:\\temp\\gpt\\uveitis-project\\model/training\\assets\\qwen3.5-4b\\local-4060-uveitis-focus-20261027-01\\best_adapter",
+  "adapter_sha256": "8d10d8a81e7915247b9a963e073a92674ab076e37bc12696e4961a55b1c8be13",
+  "test_rows_read": 82,
+  "test_label_counts": {
+    "healthy": 26,
+    "toxoplasmosis": 56
+  },
+  "patient_groups": 2,
+  "image_pixels": 65536,
+  "max_length": 256,
+  "metrics": {
+    "loss": 0.011808949120677426,
+    "evaluated": 82,
+    "errors": [],
+    "rows": 82,
+    "accuracy": 0.9146341463414634,
+    "macro_f1": 0.9073446327683616,
+    "json_valid_rate": 1.0,
+    "per_class": {
+      "healthy": {
+        "precision": 0.7878787878787878,
+        "recall": 1.0,
+        "f1": 0.8813559322033898,
+        "support": 26
+      },
+      "toxoplasmosis": {
+        "precision": 1.0,
+        "recall": 0.875,
+        "f1": 0.9333333333333333,
+        "support": 56
+      }
+    },
+    "confusion_matrix": {
+      "healthy": {
+        "healthy": 26,
+        "toxoplasmosis": 0
+      },
+      "toxoplasmosis": {
+        "healthy": 7,
+        "toxoplasmosis": 49
+      }
+    },
+    "per_task": {
+      "fundus_toxo_binary": {
+        "samples": 82,
+        "accuracy": 0.9146341463414634,
+        "macro_f1": 0.9073446327683616,
+        "json_valid_rate": 1.0,
+        "per_class": {
+          "healthy": {
+            "precision": 0.7878787878787878,
+            "recall": 1.0,
+            "f1": 0.8813559322033898,
+            "support": 26
+          },
+          "toxoplasmosis": {
+            "precision": 1.0,
+            "recall": 0.875,
+            "f1": 0.9333333333333333,
+            "support": 56
+          }
+        },
+        "confusion_matrix": {
+          "healthy": {
+            "healthy": 26,
+            "toxoplasmosis": 0
+          },
+          "toxoplasmosis": {
+            "healthy": 7,
+            "toxoplasmosis": 49
+          }
+        }
+      }
+    }
+  },
+  "peak_allocated_gib": 3.532266616821289,
+  "peak_reserved_gib": 3.697265625,
+  "total_seconds": 236.86964989999979,
+  "started_at": "2026-10-27T02:54:22.537550+00:00",
+  "finished_at": "2026-10-27T02:58:19.407348+00:00",
+  "policy": "Single evaluation of the validation-selected adapter. Do not tune hyperparameters or checkpoints from these test outputs.",
+  "clinical_status": "research_only_not_validated"
+}

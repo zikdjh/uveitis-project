@@ -14,7 +14,7 @@
   <nav aria-label="文档导航">
     <a href="2026-10-26-document-catalog.html">文档索引</a>
     <a href="2026-10-25-training-budget-plan-modal-l40s.html">上一份</a>
-    <a href="2026-10-26-modal-training-storage.html">下一份</a>
+    <a href="2026-10-27-uveitis-open-data-audit.html">下一份</a>
   </nav>
 </header>
 <main id="doc-content" class="doc-page">
@@ -291,7 +291,7 @@
 <h3>4.2 分割和定位样本</h3>
 <ul>
 <li>02 的 <code>masks/</code> 与 <code>images/</code> 按文件名匹配；当前有 144 张图像可匹配到掩膜，只对这些样本做病灶分割。</li>
-<li>02 的分类标签表有 1 个文件名差异：标签表列 <code>2809.jpg</code>，实际目录为 <code>2805.jpg</code>。生成清单时必须人工核对原数据后再建立显式映射；无法确认时排除该样本，不能静默错配。</li>
+<li>02 的唯一文件名差异（标签表 <code>2809.jpg</code> 对图像 <code>2805.jpg</code>）已按唯一对应关系显式配对并登记在 <code>model/training/datasets/tasks/fundus_toxo_binary/audit.json</code>；02 没有患者 ID，只能做数据集内评估。</li>
 <li>06 RFMiD 原包有 6 处标签 ID 与图像文件名不一致，且缺少可安全的一一映射依据；训练清单排除这些样本，而不是根据序号猜测配对。</li>
 <li>07、10 的 Fovea 坐标训练回归或 heatmap 定位。</li>
 <li>08、12 的关键点坐标用于房角/黄斑定位辅助。</li>

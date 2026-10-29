@@ -36,7 +36,7 @@ model/training/
 
 本地 4060 使用独立的 `model/training/.venv-local/`，其中是 CUDA 12.8 的 PyTorch 和 Transformers 5.20.2，不使用 `backend/.venv` 的 CPU PyTorch。该环境已完成 4-bit NF4、bfloat16、LoRA 前向/反向、optimizer step、周期验证和可恢复正式训练实测；状态见 `docs/2026-10-26-model-training-status.html`，产物索引见 `assets/README.md`。
 
-2026-10-26 已清理旧 smoke run、历史中间 checkpoint、`training_state.pt`、早期实验权重和重复 processor。当前保留两组工作 adapter、第二至第五阶段的指标、摘要和决策文件、错误来源分析、受控推理 smoke，以及冻结评估断点；第 4、5 阶段新生成的实验权重仍留在各自目录，均不作为运行候选。完整 checkpoint 与优化器状态仍以 Modal `uveitis-runs` 为真相源。
+2026-10-26 已清理旧 smoke run、历史中间 checkpoint、`training_state.pt`、早期实验权重和重复 processor。当前保留两组 OCT 工作 adapter、一个弓形虫病辅助研究 adapter、第二至第五阶段的指标、摘要和决策文件、错误来源分析、受控推理 smoke，以及冻结评估断点；第 4、5 阶段新生成的实验权重仍留在各自目录，均不作为运行候选。完整 checkpoint 与优化器状态仍以 Modal `uveitis-runs` 为真相源。
 
 ## 当前训练路线
 
@@ -47,6 +47,8 @@ model/training/
 - 真相源：本轮训练使用本地 `datasets/training/manifest.csv` 和 `models/qwen/Qwen3.5-4B/`；checkpoint、验证指标和 adapter 位于 `assets/qwen3.5-4b/`。
 - 当前冻结评估基线：`local-4060-grouped-cont-20261025-01/best_adapter`，第 100 步。
 - 当前选定的 OCT 运行候选：第 20 步 adapter，最终产物已迁至 `qwen3.5-4b/models/best_adapter`。
+- 弓形虫病辅助研究 adapter：`local-4060-uveitis-focus-20261027-01/best_adapter`，第 200 步；仅使用 ToxoFundus 训练行和 Open UWF 训练行，已排除 Open UWF 已消费的测试与验证行。
+- 弓形虫病冻结评估：`toxo-test-20261027-01/evaluation.json`；82 条图像级测试 accuracy `0.914634`、macro-F1 `0.907345`、JSON 有效率 `100%`。
 - 发布状态：第 20 步候选和基线均已完成 1,000 条同源 OCT 冻结测试；候选 macro-F1 `0.947245`，基线 `0.918252`，提升 `+0.028993`，通过 `0.02` 选型门槛。当前尚未作为临床模型发布。
 - 错误来源：第 20 步候选主要错误为 `NORMAL->DRUSEN` 18 条、`DRUSEN->CNV` 14 条、`CNV->DME` 8 条；相对第 100 步基线，DRUSEN 纠正 38 条，但 CNV 退化 6 条、NORMAL 退化 4 条。
 - 受控推理 smoke：第 20 步候选在四类各 4 条本地测试中正确 16/16，JSON 有效率 100%，峰值保留显存 `3.31 GiB`；结果只证明链路可用，不作为泛化精度证据。
@@ -54,6 +56,7 @@ model/training/
 - 冻结候选：2026-10-28 提前冻结第 20 步候选，目录已迁至 `qwen3.5-4b/assets/freeze-step20-20261028-01/`。机器可读清单、模型卡、运行契约和已知限制分别见 `freeze-manifest.json`、`model-card.html`、`runtime-contract.json`、`known-limitations.html`；冻结状态仅为研究用途候选，不是临床发布。
 - 11.10 前收口条件：冻结第 20 步候选 adapter、模型卡、指标文件和运行读取路径，并保留数据来源及患者隔离限制。adapter、模型卡和运行契约已提前冻结；剩余重点是患者隔离验证路径、端到端复跑和最终交付边界确认。
 - Open UWF 700：CC BY 4.0，7 类与葡萄膜炎二分类任务清单位于 `datasets/tasks/`；数据直接从 `datasets/extracted/14_open_uwf700/` 读取。患者组键必须包含诊断，因为源 `Patient ID` 在不同诊断队列中复用。
+- 弓形虫病辅助任务：ToxoFundus 标签由眼科医生确认，但没有患者 ID，现有 train/test 为图像级切分；该 adapter 只作研究补充，不报告患者级外部验证，也不替换第 20 步 OCT 运行候选。
 
 2026-10-28 冻结记录：候选 adapter 权重 SHA256 为 `00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f`，训练 manifest SHA256 为 `0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580`，冻结 selection SHA256 为 `84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a`。冻结清单同时登记基座 config、索引、两个 safetensors 分片、tokenizer 和训练/评估证据的哈希。该冻结没有新增训练、没有启动 Modal GPU、没有读取已消费测试集进行调参。
 

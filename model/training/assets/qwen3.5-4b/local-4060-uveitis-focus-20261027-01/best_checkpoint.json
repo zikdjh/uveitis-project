@@ -1,0 +1,13 @@
+{
+  "step": 200,
+  "validation_loss": 0.017978377096629368,
+  "validation_macro_f1": 1.0,
+  "validation_json_valid_rate": 1.0,
+  "selection_score": [
+    1.0,
+    1.0,
+    -0.017978377096629368
+  ],
+  "checkpoint_dir": "model/training\\assets\\qwen3.5-4b\\local-4060-uveitis-focus-20261027-01\\checkpoints\\step-000200",
+  "adapter_sha256": "8d10d8a81e7915247b9a963e073a92674ab076e37bc12696e4961a55b1c8be13"
+}
