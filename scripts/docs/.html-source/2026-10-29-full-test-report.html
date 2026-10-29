@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>第一轮全量测试报告 · 葡萄膜炎辅助诊断项目</title>
+  <title>全量测试报告 · 葡萄膜炎辅助诊断项目</title>
   <link rel="stylesheet" href="assets/docs.css">
   <link rel="stylesheet" href="assets/document-shell.css">
 </head>
@@ -22,8 +22,8 @@
     <span>测试</span>
     <span>2026-10-29</span>
   </div>
-  <h1>第一轮全量测试报告</h1>
-  <p class="doc-summary">接口测试与浏览器实际点击测试的合并验收结果，覆盖真实模型端到端、失败恢复、双 Token 刷新、知识检索和移动端回归</p>
+  <h1>全量测试报告</h1>
+  <p class="doc-summary">第一轮接口与浏览器实测验收，附三包重构与存储清理后的回归记录</p>
   <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-29-full-test-report.html</code></p>
   <article class="html-body">
 
@@ -147,17 +147,31 @@
   <li>病例详情等页面在 390px 下有 1 个装饰性元素略微超出视口但被裁剪，页面本身不滚动。</li>
 </ul>
 
+<h2>变更后回归（2026-10-29）</h2>
+<p>范围：三包重构（qwen3.5-4b、bge-m3 独立根级包）、约 105 GB 训练资源清理和使用手册并入 README 之后的代码级回归。浏览器端到端场景未重跑，第一轮结果仍是最近一次全栈验证。</p>
+<table>
+  <thead><tr><th>检查项</th><th>命令</th><th>结果</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>后端接口测试</td><td><code>backend\.venv\Scripts\python.exe -m pytest backend\tests\ -q</code></td><td>94 passed, 7 skipped（与第一轮一致）</td><td>通过</td></tr>
+    <tr><td>Qwen 运行服务契约测试</td><td><code>pytest tests\</code>（qwen3.5-4b 包）</td><td>10 passed</td><td>通过</td></tr>
+    <tr><td>BGE-M3 向量服务契约测试</td><td><code>pytest tests\</code>（bge-m3 包）</td><td>4 passed</td><td>通过</td></tr>
+    <tr><td>前端生产构建</td><td><code>npm run build</code></td><td>构建成功；chunk 大于 500 kB 警告与第一轮相同</td><td>通过</td></tr>
+    <tr><td>Qwen 服务健康检查（清理后）</td><td><code>GET http://127.0.0.1:8010/health</code></td><td>基座、adapter、推理端点全部 ready</td><td>通过</td></tr>
+  </tbody>
+</table>
+<p>清理验证：数据集与中间态权重删除后，冻结证据锚（<code>manifest.csv</code> SHA256 与 <code>freeze-step20-20261028-01/</code>）保持不变；数据集目录仅保留台账（约 19 MB）。模型权重不进 Git（<code>qwen3.5-4b/models/</code>、<code>bge-m3/models/</code> 在 <code>.gitignore</code>），推送远端的内容不含权重。</p>
+
 <h2>下一步</h2>
 <ol>
-  <li>基于本轮验收结果冻结第一版测试基线。</li>
+  <li>基于第一轮验收结果冻结第一版测试基线。</li>
   <li>同步项目开发进度文档与进度跟踪文档。</li>
-  <li>11-04 前完成第二轮全量测试（含管理员配置外部 API 的真实调用链验证）。</li>
+  <li>11-04 前完成第二轮全量测试（含管理员配置外部 API 的真实调用链验证）；本轮回归已覆盖代码级验证，全栈浏览器场景待复跑。</li>
 </ol>
 
   </article>
 </main>
 <footer class="doc-footer">
-  <span>第一轮全量测试报告 · 2026-10-29</span>
+  <span>全量测试报告 · 2026-10-29</span>
   <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
 </footer>
 </body>
