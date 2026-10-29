@@ -226,6 +226,7 @@ def create_app(
         app.state.redis_store,
         runtime_settings.access_token_ttl_seconds,
         runtime_settings.refresh_token_ttl_seconds,
+        admin_access_ttl_seconds=runtime_settings.admin_access_ttl_seconds,
         refresh_grace_seconds=runtime_settings.refresh_rotation_grace_seconds,
         login_max_attempts=runtime_settings.login_max_attempts,
         login_window_seconds=runtime_settings.login_window_seconds,

@@ -1,4 +1,4 @@
-import { CheckCircle2, FileText } from "lucide-react";
+import { CheckCircle2, FileText, LoaderCircle } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 import { request } from "@/api/client";
@@ -6,6 +6,7 @@ import { request } from "@/api/client";
 export default function AdminKnowledgePage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -13,6 +14,7 @@ export default function AdminKnowledgePage() {
     const form = new FormData(formElement);
     setError(null);
     setNotice(null);
+    setBusy(true);
     try {
       await request("/api/v1/knowledge/documents", {
         method: "POST",
@@ -27,6 +29,8 @@ export default function AdminKnowledgePage() {
       setNotice("知识文档已建立索引。");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "知识文档保存失败");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -47,7 +51,7 @@ export default function AdminKnowledgePage() {
           <label>分类<select name="category" defaultValue="guideline"><option value="guideline">临床指南</option><option value="literature">文献</option><option value="case">病例资料</option><option value="other">其他</option></select></label>
           <label>来源<input name="source" maxLength={1000} placeholder="机构、期刊或链接" /></label>
           <label className="span-2">正文<textarea name="content" required minLength={2} maxLength={20000} /></label>
-          <div className="form-actions span-2"><button className="button primary" type="submit">保存并建立索引</button></div>
+      <div className="form-actions span-2"><button className="button primary" type="submit" disabled={busy}>{busy ? <LoaderCircle className="spin" size={16} /> : <FileText size={16} />} 保存并建立索引</button></div>
         </form>
       </section>
     </section>

@@ -19,10 +19,12 @@ import {
   createUser,
   getCurrentUser,
   listAuthAuditEvents,
+  listActiveSessions,
   listUsers,
   resetUserPassword,
   updateUser,
   type AuthAuditEvent,
+  type ActiveSession,
   type User,
 } from "@/api/auth";
 
@@ -53,6 +55,8 @@ export default function AccessPage() {
   const [events, setEvents] = useState<AuthAuditEvent[]>([]);
   const [eventTotal, setEventTotal] = useState(0);
   const [auditLoading, setAuditLoading] = useState(true);
+  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
   const [auditPage, setAuditPage] = useState(1);
   const [auditPageSize, setAuditPageSize] = useState(20);
   const auditRequestRef = useRef(0);
@@ -93,6 +97,21 @@ export default function AccessPage() {
 
   useEffect(() => {
     void load();
+  }, []);
+
+  async function loadActiveSessions() {
+    setSessionsLoading(true);
+    try {
+      setActiveSessions(await listActiveSessions());
+    } catch {
+      setActiveSessions([]);
+    } finally {
+      setSessionsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadActiveSessions();
   }, []);
 
   useEffect(() => {
@@ -288,6 +307,42 @@ export default function AccessPage() {
           </form>
         </section>
       )}
+
+      <section className="panel active-sessions-panel">
+        <div className="section-heading">
+          <div><h2>活跃会话</h2><span>当前在线账号与登录 IP</span></div>
+          <button className="button secondary" type="button" onClick={() => void loadActiveSessions()} disabled={sessionsLoading}>
+            <RefreshCw size={16} className={sessionsLoading ? "spin" : ""} /> 刷新
+          </button>
+        </div>
+        {sessionsLoading ? (
+          <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取活跃会话</div>
+        ) : (
+          <div className="data-table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>账号</th><th>角色</th><th>登录 IP</th><th>最近活跃</th><th>过期时间</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeSessions.map((session) => (
+                  <tr key={session.session_id}>
+                    <td data-label="账号">{session.display_name || session.username}</td>
+                    <td data-label="角色"><span className={`role-tag ${session.role}`}>{session.role === "admin" ? "管理员" : "医生"}</span></td>
+                    <td data-label="登录 IP">{session.ip_address || "未知"}</td>
+                    <td data-label="最近活跃">{dateFormatter.format(new Date(session.last_seen_at))}</td>
+                    <td data-label="过期时间">{dateFormatter.format(new Date(session.expires_at))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!activeSessions.length && (
+              <div className="empty-state"><Users size={26} /><p>暂无活跃会话</p><span>登录后将在这里显示。</span></div>
+            )}
+          </div>
+        )}
+      </section>
 
       <section className="panel audit-panel">
         <div className="section-heading">

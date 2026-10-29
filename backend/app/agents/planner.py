@@ -14,6 +14,8 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable
 
+import httpx2
+
 from app.agents.toolchain import (
     SkillAvailability,
     ToolchainPlan,
@@ -96,6 +98,19 @@ class ToolchainPlanner:
         deployment that already configured one external model does not need
         a second configuration entry.
         """
+
+        if self.integrations is not None:
+            snapshot = self.integrations.external_planner_credentials()
+            if snapshot.get("api_key") and snapshot.get("model"):
+                return PlannerCredentials(
+                    protocol=str(
+                        snapshot.get("protocol") or "openai_chat_completions"
+                    ),
+                    base_url=str(snapshot.get("base_url") or ""),
+                    api_key=str(snapshot.get("api_key") or ""),
+                    model=str(snapshot.get("model") or ""),
+                    source="integration_settings",
+                )
 
         if self.settings.agent_planner_api_key and self.settings.agent_planner_model:
             return PlannerCredentials(
@@ -250,6 +265,7 @@ class ToolchainPlanner:
             "model": credentials.model,
             "stream": False,
             "max_retries": self.settings.agent_planner_max_retries,
+            "client_kwargs": self._client_kwargs(),
         }
         if protocol == "anthropic_messages":
             return AnthropicChatModel(
@@ -274,6 +290,18 @@ class ToolchainPlanner:
             ),
             **common,
         )
+
+    def _client_kwargs(self) -> dict[str, Any]:
+        """Keep AgentScope HTTP clients aligned with the external boundary."""
+
+        options: dict[str, Any] = {
+            "timeout": self.settings.agent_planner_timeout_seconds,
+            "trust_env": self.settings.external_network_trust_env,
+        }
+        proxy = self.settings.external_network_proxy.strip()
+        if proxy:
+            options["proxy"] = proxy
+        return {"http_client": httpx2.AsyncClient(**options)}
 
     def _agentscope_backend(self, request: dict[str, Any]) -> dict[str, Any]:
         """Run one AgentScope planning conversation.
@@ -338,12 +366,18 @@ class ToolchainPlanner:
         )
 
         async def _run() -> dict[str, Any]:
-            message = UserMsg(
-                name="case-review-service",
-                content=json.dumps(request, ensure_ascii=False),
-            )
-            reply = await agent.reply(message, structured_schema=PlanSchema)
-            return dict(reply.structured_output or {})
+            try:
+                message = UserMsg(
+                    name="case-review-service",
+                    content=json.dumps(request, ensure_ascii=False),
+                )
+                reply = await agent.reply(message, structured_schema=PlanSchema)
+                return dict(reply.structured_output or {})
+            finally:
+                client = getattr(model, "client", None)
+                close = getattr(client, "close", None)
+                if close is not None:
+                    await close()
 
         return _run_coroutine(
             _run(),

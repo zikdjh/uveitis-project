@@ -25,6 +25,7 @@ SearchProvider = Literal[
 SECRET_KEYS = frozenset(
     {
         "summary_api_key",
+        "planner_api_key",
         "tavily_api_key",
         "brave_search_api_key",
         "serper_api_key",
@@ -43,6 +44,11 @@ class IntegrationConfigRead(BaseModel):
     summary_model: str = ""
     summary_api_key_configured: bool = False
     summary_api_key_hint: str = ""
+    planner_protocol: SummaryProtocol = "openai_chat_completions"
+    planner_base_url: str = ""
+    planner_model: str = ""
+    planner_api_key_configured: bool = False
+    planner_api_key_hint: str = ""
     web_search_enabled: bool = False
     web_search_max_results: int = Field(default=5, ge=1, le=10)
     search_provider_order: list[SearchProvider] = Field(
@@ -85,6 +91,11 @@ class IntegrationConfigUpdate(BaseModel):
     summary_model: str | None = Field(default=None, max_length=200)
     summary_api_key: str | None = Field(default=None, max_length=4000)
     clear_summary_api_key: bool = False
+    planner_protocol: SummaryProtocol | None = None
+    planner_base_url: str | None = Field(default=None, max_length=1000)
+    planner_model: str | None = Field(default=None, max_length=200)
+    planner_api_key: str | None = Field(default=None, max_length=4000)
+    clear_planner_api_key: bool = False
     web_search_enabled: bool | None = None
     web_search_max_results: int | None = Field(default=None, ge=1, le=10)
     search_provider_order: list[SearchProvider] | None = None
@@ -115,7 +126,7 @@ class IntegrationConfigUpdate(BaseModel):
 
 
 class IntegrationConfigTestRequest(BaseModel):
-    kind: Literal["summary", "search"]
+    kind: Literal["summary", "planner", "search"]
     provider: SearchProvider | None = None
     query: str = Field(default="uveitis clinical guideline", max_length=500)
 

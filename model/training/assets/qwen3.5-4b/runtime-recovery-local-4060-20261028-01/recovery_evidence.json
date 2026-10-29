@@ -1,0 +1,141 @@
+{
+  "generated_at": "2026-10-28T03:25:41.588462+00:00",
+  "host_gpu": "649 MiB, 8188 MiB",
+  "image": {
+    "path": "D:\\temp\\gpt\\uveitis-project\\model-training\\datasets\\training\\data\\01_uveitis_oct\\01_uveitis_oct\\Optical Coherence Tomography (OCT) Images of Proliferative Vitreoretinopathy, Uveitis, and Normal Eyes\\Intermediate+Posterior Uveitis\\Int+Post Uveitis 4.jpeg",
+    "manifest_label": "Intermediate+Posterior Uveitis"
+  },
+  "runtime_base_url": "http://127.0.0.1:8010",
+  "phases": {
+    "a_runtime_unreachable": {
+      "case_id": "b4ec58f7-0640-4249-be89-aa620fc4b4a7",
+      "job_outcome": "completed",
+      "case_status": "awaiting_review",
+      "analysis_status": "completed",
+      "elapsed_seconds": 2.102,
+      "qwen_stage": {
+        "status": "failed",
+        "detail": "Qwen 微调判断不可用: ConnectError: [WinError 10061] 由于目标计算机积极拒绝，无法连接。"
+      },
+      "impression": "本次未形成可复核的临床结论，请结合检查资料进行判断。",
+      "summary": "当前未获得可复核的模型证据。该内容仅作辅助参考，必须由医生结合原始资料复核。",
+      "safety_flags": [
+        "辅助结果，必须由医生复核",
+        "工具链由确定性规则编排，未使用模型规划",
+        "Qwen 微调判断不可用，已跳过",
+        "RAG 未返回可用证据",
+        "外部总结未使用"
+      ],
+      "runtime_metadata": {},
+      "external_summary_used": false
+    },
+    "b_perception_timeout": {
+      "case_id": "4263b6d4-248d-446c-b4d7-1049898d05d4",
+      "job_outcome": "completed",
+      "case_status": "awaiting_review",
+      "analysis_status": "completed",
+      "elapsed_seconds": 1.583,
+      "qwen_stage": {
+        "status": "failed",
+        "detail": "Qwen 微调判断不可用: ReadTimeout: timed out"
+      },
+      "impression": "本次未形成可复核的临床结论，请结合检查资料进行判断。",
+      "summary": "当前未获得可复核的模型证据。该内容仅作辅助参考，必须由医生结合原始资料复核。",
+      "safety_flags": [
+        "辅助结果，必须由医生复核",
+        "工具链由确定性规则编排，未使用模型规划",
+        "Qwen 微调判断不可用，已跳过",
+        "RAG 未返回可用证据",
+        "外部总结未使用"
+      ],
+      "runtime_metadata": {},
+      "external_summary_used": false
+    },
+    "c_real_writeback": {
+      "case_id": "7fe5bf0e-5bdd-4388-b716-072b468796f2",
+      "job_outcome": "completed",
+      "case_status": "awaiting_review",
+      "analysis_status": "completed",
+      "elapsed_seconds": 37.611,
+      "qwen_stage": {
+        "status": "completed",
+        "detail": "Qwen 微调判断已完成"
+      },
+      "impression": "本次未形成可复核的临床结论，请结合检查资料进行判断。",
+      "summary": "Qwen 判断：CNV。该内容仅作辅助参考，必须由医生结合原始资料复核。",
+      "safety_flags": [
+        "辅助结果，必须由医生复核",
+        "工具链由确定性规则编排，未使用模型规划",
+        "RAG 未返回可用证据",
+        "外部总结未使用"
+      ],
+      "runtime_metadata": {
+        "model": "Qwen3.5-4B",
+        "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+        "latency_ms": 37544,
+        "generated_at": "2026-10-28T03:26:30.741389+00:00",
+        "truncated": false,
+        "peak_allocated_gib": 3.24204158782959,
+        "peak_reserved_gib": 3.310546875,
+        "research_use_only": true
+      },
+      "external_summary_used": false,
+      "gpu_memory_after": "4154 MiB, 8188 MiB"
+    },
+    "d_restart_recovery": {
+      "case_id": "9bf405c8-6ba5-473a-b658-03496b5a8cad",
+      "job_outcome": "completed",
+      "case_status": "awaiting_review",
+      "analysis_status": "completed",
+      "elapsed_seconds": 37.191,
+      "qwen_stage": {
+        "status": "completed",
+        "detail": "Qwen 微调判断已完成"
+      },
+      "impression": "本次未形成可复核的临床结论，请结合检查资料进行判断。",
+      "summary": "Qwen 判断：CNV。该内容仅作辅助参考，必须由医生结合原始资料复核。",
+      "safety_flags": [
+        "辅助结果，必须由医生复核",
+        "工具链由确定性规则编排，未使用模型规划",
+        "RAG 未返回可用证据",
+        "外部总结未使用"
+      ],
+      "runtime_metadata": {
+        "model": "Qwen3.5-4B",
+        "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+        "latency_ms": 37139,
+        "generated_at": "2026-10-28T03:27:10.275337+00:00",
+        "truncated": false,
+        "peak_allocated_gib": 3.24204158782959,
+        "peak_reserved_gib": 3.310546875,
+        "research_use_only": true
+      },
+      "external_summary_used": false
+    }
+  },
+  "runtime_health": {
+    "status": "ok",
+    "service": "model-runtime",
+    "gpu_required": true,
+    "model": {
+      "name": "Qwen3.5-4B",
+      "path": "D:\\temp\\gpt\\uveitis-project\\model-training\\models\\qwen\\Qwen3.5-4B",
+      "status": "ready"
+    },
+    "adapter": {
+      "path": "D:\\temp\\gpt\\uveitis-project\\model-training\\assets\\qwen3.5-4b\\local-4060-oct-focus-cont-20261025-01\\best_adapter",
+      "status": "ready"
+    },
+    "inference": {
+      "endpoint": "/v1/judge",
+      "status": "ready",
+      "loaded": false,
+      "task": "oct_aux_4class",
+      "requires_human_review": true
+    },
+    "decision_model": {
+      "name": "Intern-Decision-4B",
+      "status": "disabled"
+    }
+  }
+}

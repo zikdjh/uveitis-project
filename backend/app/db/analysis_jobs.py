@@ -23,6 +23,10 @@ class AnalysisJob(Protocol):
     error: str
     lease_owner: str
     lease_expires_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+    started_at: datetime | None
+    completed_at: datetime | None
 
 
 class AnalysisJobStore(Protocol):
@@ -34,6 +38,8 @@ class AnalysisJobStore(Protocol):
     ) -> AnalysisJob: ...
 
     def get(self, job_id: str) -> AnalysisJob | None: ...
+
+    def get_latest_for_case(self, case_id: str) -> AnalysisJob | None: ...
 
     def claim(
         self,
@@ -120,6 +126,18 @@ class PostgresAnalysisJobStore:
         with self._session_factory() as session:
             return session.scalar(
                 select(AnalysisJobRow).where(AnalysisJobRow.job_key == job_id)
+            )
+
+    def get_latest_for_case(self, case_id: str) -> AnalysisJobRow | None:
+        with self._session_factory() as session:
+            return session.scalar(
+                select(AnalysisJobRow)
+                .where(AnalysisJobRow.case_id == case_id)
+                .order_by(
+                    AnalysisJobRow.created_at.desc(),
+                    AnalysisJobRow.id.desc(),
+                )
+                .limit(1)
             )
 
     def claim(
@@ -371,6 +389,17 @@ class MemoryAnalysisJobStore:
     def get(self, job_id: str):
         job = self._jobs.get(job_id)
         return _MemoryJob(job) if job else None
+
+    def get_latest_for_case(self, case_id: str):
+        jobs = [
+            job
+            for job in self._jobs.values()
+            if job["case_id"] == case_id
+        ]
+        if not jobs:
+            return None
+        latest = max(jobs, key=lambda item: (item["created_at"], item["id"]))
+        return _MemoryJob(latest)
 
     def claim(
         self,

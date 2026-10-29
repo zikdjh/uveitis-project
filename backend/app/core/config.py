@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     database_connect_timeout_seconds: int = 5
     redis_url: str = "redis://127.0.0.1:6380/0"
     access_token_ttl_seconds: int = 15 * 60
+    admin_access_ttl_seconds: int = 600
     refresh_token_ttl_seconds: int = 30 * 24 * 60 * 60
     refresh_rotation_grace_seconds: int = 30
     login_max_attempts: int = 5
@@ -50,6 +51,8 @@ class Settings(BaseSettings):
     integration_timeout_seconds: float = 12.0
     perception_timeout_seconds: float = 90.0
     summary_timeout_seconds: float = 20.0
+    external_network_trust_env: bool = False
+    external_network_proxy: str = ""
     web_search_enabled: bool = False
     web_search_providers: str = "tavily,brave,serper"
     web_search_max_results: int = 5

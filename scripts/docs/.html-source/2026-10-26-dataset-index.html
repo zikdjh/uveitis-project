@@ -24,11 +24,11 @@
   </div>
   <h1>数据集目录索引</h1>
   <p class="doc-summary">已解压数据集的规模、标签、目录和清理后的结构</p>
-  <p class="doc-source">规范入口：<code>model-training/datasets/extracted/README.md</code></p>
+  <p class="doc-source">规范入口：<code>model/training/datasets/extracted/README.md</code></p>
   <article class="html-body">
 <p>整理时间：2026-10-25</p>
 <p>当前结构：</p>
-<pre><code class="language-text">model-training/datasets/
+<pre><code class="language-text">model/training/datasets/
 ├── raw/                        新的临时下载暂存区
 ├── extracted/                  本目录，统一解压后的完整数据集
 │   ├── 01_uveitis_oct/
@@ -41,7 +41,7 @@
 └── training/                   Modal 训练用精简数据与标签
 </code></pre>
 <p>已移除 macOS <code>__MACOSX</code> 与 <code>.DS_Store</code> 元数据，并展开 RFMiD2 与 ZhangLabData 的嵌套压缩包。2026-10-25 已删除 14 个根目录下载 ZIP 和 4 个重复内层 ZIP；删除前，17 个归档的 182,754 个数据成员全部通过文件名、大小和 CRC 校验，未发现缺失或不一致。</p>
-<p>数据集不再从根目录散放的 ZIP 直接使用。以后新下载的包先放 <code>model-training/datasets/raw/</code>，解压、核验并登记后再移入本目录；<code>raw/</code> 不应长期保存已经完整解压的包。</p>
+<p>数据集不再从根目录散放的 ZIP 直接使用。以后新下载的包先放 <code>model/training/datasets/raw/</code>，解压、核验并登记后再移入本目录；<code>raw/</code> 不应长期保存已经完整解压的包。</p>
 <h2>快速入口</h2>
 <table>
 <thead>
@@ -228,7 +228,7 @@
 <li>多套数据之间存在相似或重复来源的可能，跨数据集合并前应做哈希或感知哈希去重。</li>
 <li>当前索引只做目录与文件完整性整理，尚未统一标签命名、患者 ID 或生成训练 manifest。</li>
 </ul>
-<p>机器可读的逐文件清单见 <code>manifests/extracted-files.csv</code>，当前登记 180,456 条记录，不包含已删除的 4 个重复 ZIP。训练子集清单则在 <code>model-training/datasets/training/manifest.csv</code>，两者用途不同。</p>
+<p>机器可读的逐文件清单见 <code>manifests/extracted-files.csv</code>，当前登记 180,456 条记录，不包含已删除的 4 个重复 ZIP。训练子集清单则在 <code>model/training/datasets/training/manifest.csv</code>，两者用途不同。</p>
 
   </article>
 </main>

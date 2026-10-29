@@ -97,6 +97,19 @@ class SessionRead(BaseModel):
     user_agent: str = ""
 
 
+class ActiveSessionRead(BaseModel):
+    session_id: str
+    user_id: str
+    username: str
+    display_name: str
+    role: str
+    ip_address: str = ""
+    user_agent: str = ""
+    created_at: datetime
+    last_seen_at: datetime
+    expires_at: datetime
+
+
 class AuthAuditEventRead(BaseModel):
     id: str
     event: str

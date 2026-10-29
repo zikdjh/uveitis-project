@@ -8,9 +8,11 @@ structured-output handshake of :meth:`ToolchainPlanner._agentscope_backend`.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import Any
 
+import httpx2
 import pytest
 
 pytest.importorskip("agentscope")
@@ -104,6 +106,16 @@ def test_agentscope_backend_returns_structured_plan(monkeypatch) -> None:
     assert proposal["steps"] == PLAN_PAYLOAD["steps"]
     assert proposal["rationale"] == PLAN_PAYLOAD["rationale"]
     assert stub.calls >= 1
+
+
+def test_planner_http_client_uses_httpx2_and_ignores_process_proxy() -> None:
+    planner = ToolchainPlanner(Settings(external_network_trust_env=False))
+
+    client = planner._client_kwargs()["http_client"]
+
+    assert isinstance(client, httpx2.AsyncClient)
+    assert client.trust_env is False
+    asyncio.run(client.aclose())
 
 
 def test_agentscope_backend_result_survives_plan_normalization(monkeypatch) -> None:

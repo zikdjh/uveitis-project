@@ -61,6 +61,8 @@
     <tr><td><code>auth</code></td><td><code>root.password_hash</code></td><td>root 的 Argon2 哈希，AES-GCM 加密保存；<code>t_user.f_password_hash</code> 只保留占位值。</td></tr>
     <tr><td><code>integration</code></td><td><code>summary.base_url</code>、<code>summary.model</code>、<code>summary.protocol</code></td><td>外部总结模型的请求路径、模型名和接口协议。</td></tr>
     <tr><td><code>integration</code></td><td><code>summary.api_key</code></td><td>外部总结 API Key 密文。</td></tr>
+    <tr><td><code>integration</code></td><td><code>planner.base_url</code>、<code>planner.model</code>、<code>planner.protocol</code></td><td>AgentScope 规划模型的请求路径、模型名和接口协议。</td></tr>
+    <tr><td><code>integration</code></td><td><code>planner.api_key</code></td><td>AgentScope 规划模型 API Key 密文；未配置时运行时按环境变量和管理端外部总结凭据顺序回退。</td></tr>
     <tr><td><code>integration</code></td><td><code>search.provider_order</code>、<code>search.max_results</code></td><td>网络搜索运行参数；不保存“发送主诉”一类开关，病例与影像外发由代码硬边界禁止。</td></tr>
     <tr><td><code>integration</code></td><td><code>search.*.api_key</code>、<code>search.google_cse.id</code>、<code>search.searxng.base_url</code></td><td>各搜索服务商连接凭据或地址。</td></tr>
     <tr><td><code>integration</code></td><td><code>_meta.revision</code>、<code>_meta.updated_at</code>、<code>_meta.updated_by</code></td><td>配置版本与审计元数据，不包含秘密值。</td></tr>
@@ -88,7 +90,7 @@
 <h2>验收清单</h2>
 <ol>
   <li>数据字典表存在 <code>namespace + key</code> 唯一约束，敏感项标记为密钥类型。</li>
-  <li>外部总结路径、模型名、搜索顺序和全部 API Key 均可在字典中定位，但 API 响应不含明文。</li>
+  <li>外部总结、AgentScope 规划模型的路径/模型名/协议、搜索顺序和全部 API Key 均可在字典中定位，但 API 响应不含明文。</li>
   <li>root 哈希迁移后，<code>t_user.f_password_hash</code> 不再保存可登录哈希；数据库字典中的哈希仍可完成 root 登录。</li>
   <li>普通命名空间可以按权限读写，系统维护命名空间不能通过通用接口绕过专用流程。</li>
   <li>并发更新返回 409，审计事件覆盖写入和删除动作。</li>

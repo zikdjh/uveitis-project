@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <section className="page patient-page">
       <section className="patient-intro">
-        <div>
+        <div className="patient-intro-copy">
           <p className="eyebrow">葡萄膜炎就诊助手</p>
           <h1>眼部不适时，先确认是否需要尽快就医。</h1>
           <p className="patient-lead">
@@ -25,6 +25,10 @@ export default function HomePage() {
             <Link className="button secondary" to="/doctor">
               <Stethoscope size={16} /> 医生入口
             </Link>
+          </div>
+          <div className="patient-trust-row" aria-label="使用说明">
+            <span><ShieldCheck size={14} /> 线上仅提供就医提示</span>
+            <span><Clock3 size={14} /> 就诊前约三分钟可完成整理</span>
           </div>
         </div>
         <aside className="patient-callout" id="urgent-care">
@@ -50,9 +54,12 @@ export default function HomePage() {
           </div>
         </div>
         <div className="patient-grid">
-          {preparations.map(({ icon: Icon, title, body }) => (
+          {preparations.map(({ icon: Icon, title, body }, index) => (
             <article key={title}>
-              <Icon size={21} />
+              <div className="patient-card-topline">
+                <Icon size={20} />
+                <span>{String(index + 1).padStart(2, "0")}</span>
+              </div>
               <h3>{title}</h3>
               <p>{body}</p>
             </article>

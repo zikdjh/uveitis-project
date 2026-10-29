@@ -42,6 +42,9 @@ class AnalysisJobService:
     def enqueue(self, case_id: str):
         return self.job_store.enqueue(case_id, max_attempts=self.max_attempts)
 
+    def get_latest_for_case(self, case_id: str):
+        return self.job_store.get_latest_for_case(case_id)
+
     def run_job(self, job_id: str) -> JobRunResult:
         job = self.job_store.get(job_id)
         if job is None:

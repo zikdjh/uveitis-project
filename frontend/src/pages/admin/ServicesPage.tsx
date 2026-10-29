@@ -2,6 +2,7 @@ import {
   ApiOutlined,
   KeyOutlined,
   ReloadOutlined,
+  RobotOutlined,
   SaveOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
@@ -11,11 +12,13 @@ import {
   Card,
   Col,
   ConfigProvider,
+  Empty,
   Form,
   Input,
   InputNumber,
   Pagination,
   Row,
+  Segmented,
   Select,
   Space,
   Spin,
@@ -54,6 +57,7 @@ const providerOrderSeed: SearchProvider[] = [
 
 type SecretField =
   | "summary_api_key"
+  | "planner_api_key"
   | "tavily_api_key"
   | "brave_search_api_key"
   | "serper_api_key"
@@ -61,6 +65,8 @@ type SecretField =
   | "bing_search_api_key"
   | "exa_api_key"
   | "perplexity_api_key";
+
+type ProviderFilter = "all" | "enabled" | "disabled";
 
 type ProviderDescriptor = {
   id: SearchProvider;
@@ -133,6 +139,7 @@ const providers: ProviderDescriptor[] = [
 
 const secretFields: SecretField[] = [
   "summary_api_key",
+  "planner_api_key",
   "tavily_api_key",
   "brave_search_api_key",
   "serper_api_key",
@@ -147,6 +154,9 @@ type Draft = {
   summaryProtocol: SummaryProtocol;
   summaryBaseUrl: string;
   summaryModel: string;
+  plannerProtocol: SummaryProtocol;
+  plannerBaseUrl: string;
+  plannerModel: string;
   webSearchEnabled: boolean;
   webSearchMaxResults: number;
   googleCseId: string;
@@ -182,6 +192,9 @@ function draftFromConfig(config: IntegrationConfig): Draft {
     summaryProtocol: config.summary_protocol,
     summaryBaseUrl: config.summary_base_url,
     summaryModel: config.summary_model,
+    plannerProtocol: config.planner_protocol,
+    plannerBaseUrl: config.planner_base_url,
+    plannerModel: config.planner_model,
     webSearchEnabled: config.web_search_enabled,
     webSearchMaxResults: config.web_search_max_results,
     googleCseId: config.google_cse_id,
@@ -198,6 +211,9 @@ function buildUpdate(draft: Draft, revision: number) {
     summary_protocol: draft.summaryProtocol,
     summary_base_url: draft.summaryBaseUrl.trim(),
     summary_model: draft.summaryModel.trim(),
+    planner_protocol: draft.plannerProtocol,
+    planner_base_url: draft.plannerBaseUrl.trim(),
+    planner_model: draft.plannerModel.trim(),
     web_search_enabled: draft.webSearchEnabled,
     web_search_max_results: draft.webSearchMaxResults,
     google_cse_id: draft.googleCseId.trim(),
@@ -222,6 +238,12 @@ function isProviderConfigured(config: IntegrationConfig, provider: ProviderDescr
   return configured;
 }
 
+function matchesProviderFilter(enabled: boolean, filter: ProviderFilter) {
+  if (filter === "enabled") return enabled;
+  if (filter === "disabled") return !enabled;
+  return true;
+}
+
 export default function AntdServicesPage() {
   const [config, setConfig] = useState<IntegrationConfig | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -229,6 +251,7 @@ export default function AntdServicesPage() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
   const [searchChecks, setSearchChecks] = useState<IntegrationTestBatchResult | null>(null);
+  const [providerFilter, setProviderFilter] = useState<ProviderFilter>("all");
   const [providerPage, setProviderPage] = useState(1);
   const [credentialEditor, setCredentialEditor] = useState<SearchProvider | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -239,6 +262,19 @@ export default function AntdServicesPage() {
     () => config ? providers.filter((provider) => isProviderConfigured(config, provider)).length : 0,
     [config],
   );
+  const providerFilterCounts = useMemo(() => {
+    const enabled = draft
+      ? draft.providerOrder.filter((providerId) => draft.providerEnabled[providerId]).length
+      : 0;
+    const total = draft?.providerOrder.length ?? 0;
+    return { total, enabled, disabled: total - enabled };
+  }, [draft]);
+  const filteredProviderIds = useMemo(() => {
+    if (!draft) return [];
+    return draft.providerOrder.filter((providerId) =>
+      matchesProviderFilter(draft.providerEnabled[providerId], providerFilter),
+    );
+  }, [draft, providerFilter]);
 
   async function load() {
     setLoading(true);
@@ -249,6 +285,7 @@ export default function AntdServicesPage() {
       setDraft(draftFromConfig(loaded));
       setDirty(false);
       setSearchChecks(null);
+      setProviderFilter("all");
       setProviderPage(1);
       setCredentialEditor(null);
     } catch (reason) {
@@ -264,9 +301,9 @@ export default function AntdServicesPage() {
 
   useEffect(() => {
     if (!draft) return;
-    const pageCount = Math.ceil(draft.providerOrder.length / PROVIDERS_PER_PAGE);
+    const pageCount = Math.ceil(filteredProviderIds.length / PROVIDERS_PER_PAGE);
     setProviderPage((current) => Math.min(current, Math.max(pageCount, 1)));
-  }, [draft]);
+  }, [draft, filteredProviderIds.length]);
 
   function changeDraft(updater: (current: Draft) => Draft) {
     setDraft((current) => current ? updater(current) : current);
@@ -280,10 +317,16 @@ export default function AntdServicesPage() {
     }));
   }
 
-  function moveProvider(index: number, direction: -1 | 1) {
+  function moveProvider(providerId: SearchProvider, direction: -1 | 1) {
     changeDraft((current) => {
-      const target = index + direction;
-      if (target < 0 || target >= current.providerOrder.length) return current;
+      const visibleIds = current.providerOrder.filter((item) =>
+        matchesProviderFilter(current.providerEnabled[item], providerFilter),
+      );
+      const visibleIndex = visibleIds.indexOf(providerId);
+      const targetProvider = visibleIds[visibleIndex + direction];
+      if (!targetProvider) return current;
+      const index = current.providerOrder.indexOf(providerId);
+      const target = current.providerOrder.indexOf(targetProvider);
       const providerOrder = [...current.providerOrder];
       [providerOrder[index], providerOrder[target]] = [providerOrder[target], providerOrder[index]];
       return { ...current, providerOrder };
@@ -319,6 +362,21 @@ export default function AntdServicesPage() {
       void messageApi.success(`${result.detail}，耗时 ${result.latency_ms} ms。`);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "外部总结检查失败");
+    } finally {
+      setTesting(null);
+    }
+  }
+
+  async function checkPlanner() {
+    if (dirty && !(await persistDraft(false))) return;
+    setTesting("planner");
+    setError(null);
+    try {
+      const result = await testIntegration({ kind: "planner" });
+      if (!result.ok) throw new Error(result.detail);
+      void messageApi.success(`${result.detail}，耗时 ${result.latency_ms} ms。`);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "规划模型检查失败");
     } finally {
       setTesting(null);
     }
@@ -371,7 +429,7 @@ export default function AntdServicesPage() {
   if (loading && !config) {
     return (
       <section className="page antd-services-page antd-services-loading">
-        <Spin size="large" tip="正在读取服务配置"><div className="antd-services-loading-box" /></Spin>
+        <Spin size="large" description="正在读取服务配置"><div className="antd-services-loading-box" /></Spin>
       </section>
     );
   }
@@ -384,8 +442,12 @@ export default function AntdServicesPage() {
     );
   }
 
-  const visibleProviderIds = draft.providerOrder.slice((providerPage - 1) * PROVIDERS_PER_PAGE, providerPage * PROVIDERS_PER_PAGE);
+  const visibleProviderIds = filteredProviderIds.slice((providerPage - 1) * PROVIDERS_PER_PAGE, providerPage * PROVIDERS_PER_PAGE);
   const busy = saving || testing !== null;
+  const plannerUsesSummary = !config.planner_api_key_configured
+    && !draft.plannerModel.trim()
+    && config.summary_api_key_configured
+    && Boolean(config.summary_model.trim());
 
   return (
     <ConfigProvider theme={{ components: { Card: { bodyPadding: 0 } } }}>
@@ -503,6 +565,83 @@ export default function AntdServicesPage() {
         </Card>
 
         <Card
+          id="planner-api"
+          className="antd-service-card"
+          title={<span className="antd-service-heading"><RobotOutlined /> 规划模型</span>}
+          extra={
+            <Space wrap>
+              <Tag color={config.planner_api_key_configured ? "green" : plannerUsesSummary ? "blue" : "default"}>
+                {config.planner_api_key_configured ? "已配置" : plannerUsesSummary ? "继承总结 API" : "未配置"}
+              </Tag>
+              <Button size="small" loading={testing === "planner"} disabled={busy} onClick={() => void checkPlanner()}>
+                检查连接
+              </Button>
+            </Space>
+          }
+        >
+          <div className="antd-service-section">
+            <Text strong>连接参数</Text>
+            <Form layout="vertical" requiredMark={false}>
+              <Form.Item label="API 地址">
+                <Input
+                  value={draft.plannerBaseUrl}
+                  onChange={(event) => changeDraft((current) => ({
+                    ...current,
+                    plannerBaseUrl: event.target.value,
+                  }))}
+                  maxLength={1000}
+                  placeholder="https://api.example.com/v1"
+                />
+              </Form.Item>
+              <Row gutter={[16, 0]}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="接口协议">
+                    <Select
+                      value={draft.plannerProtocol}
+                      options={(Object.keys(protocolLabels) as SummaryProtocol[]).map((protocol) => ({
+                        value: protocol,
+                        label: protocolLabels[protocol],
+                      }))}
+                      onChange={(value: SummaryProtocol) => changeDraft((current) => ({
+                        ...current,
+                        plannerProtocol: value,
+                      }))}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="模型名称">
+                    <Input
+                      value={draft.plannerModel}
+                      onChange={(event) => changeDraft((current) => ({
+                        ...current,
+                        plannerModel: event.target.value,
+                      }))}
+                      maxLength={200}
+                      placeholder="model-id"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+          </div>
+          <div className="antd-service-section">
+            <Form layout="vertical" requiredMark={false}>
+              <Form.Item label="API Key" className="antd-secret-field">
+                <Input.Password
+                  prefix={<KeyOutlined />}
+                  value={draft.secrets.planner_api_key}
+                  onChange={(event) => setSecret("planner_api_key", event.target.value)}
+                  placeholder={config.planner_api_key_configured ? config.planner_api_key_hint || "已配置" : "输入密钥"}
+                  autoComplete="new-password"
+                  maxLength={4000}
+                />
+              </Form.Item>
+            </Form>
+          </div>
+        </Card>
+
+        <Card
           id="search-api"
           className="antd-service-card"
           title={<span className="antd-service-heading"><SearchOutlined /> 网络搜索 API</span>}
@@ -570,15 +709,37 @@ export default function AntdServicesPage() {
           )}
 
           <div className="antd-provider-heading">
-            <Text strong>服务商与尝试顺序</Text>
-            <Text type="secondary">按顺序尝试，不可用时跳过</Text>
+            <div className="antd-provider-heading-copy">
+              <Text strong>服务商与尝试顺序</Text>
+              <Text type="secondary">按顺序尝试，不可用时跳过</Text>
+            </div>
+            <Segmented
+              className="antd-provider-filter"
+              size="small"
+              value={providerFilter}
+              options={[
+                { label: `全部 ${providerFilterCounts.total}`, value: "all" },
+                { label: `已启用 ${providerFilterCounts.enabled}`, value: "enabled" },
+                { label: `已禁用 ${providerFilterCounts.disabled}`, value: "disabled" },
+              ]}
+              onChange={(value) => {
+                setProviderFilter(value as ProviderFilter);
+                setProviderPage(1);
+              }}
+            />
           </div>
 
           <div className="antd-provider-list">
+            {visibleProviderIds.length === 0 && (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={providerFilter === "enabled" ? "暂无已启用的服务商" : "暂无已禁用的服务商"}
+              />
+            )}
             {visibleProviderIds.map((providerId) => {
               const provider = providers.find((item) => item.id === providerId);
               if (!provider) return null;
-              const index = draft.providerOrder.indexOf(providerId);
+              const visibleIndex = filteredProviderIds.indexOf(providerId);
               const savedConfigured = isProviderConfigured(config, provider);
               const participating = draft.providerEnabled[providerId];
               const credentialOpen = credentialEditor === providerId;
@@ -590,7 +751,7 @@ export default function AntdServicesPage() {
                 >
                   <div className="antd-provider-row">
                     <div className="antd-provider-meta">
-                      <span className="antd-provider-index">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="antd-provider-index">{String(visibleIndex + 1).padStart(2, "0")}</span>
                       <Space size={7} wrap>
                         <Text strong>{provider.name}</Text>
                         <Text type="secondary" className="antd-provider-detail">{provider.detail}</Text>
@@ -611,17 +772,17 @@ export default function AntdServicesPage() {
                       </Space>
                       <Button
                         size="small"
-                        disabled={index === 0 || busy}
+                        disabled={visibleIndex === 0 || busy}
                         aria-label={`${provider.name} 上移`}
-                        onClick={() => moveProvider(index, -1)}
+                        onClick={() => moveProvider(providerId, -1)}
                       >
                         上移
                       </Button>
                       <Button
                         size="small"
-                        disabled={index === draft.providerOrder.length - 1 || busy}
+                        disabled={visibleIndex === filteredProviderIds.length - 1 || busy}
                         aria-label={`${provider.name} 下移`}
-                        onClick={() => moveProvider(index, 1)}
+                        onClick={() => moveProvider(providerId, 1)}
                       >
                         下移
                       </Button>
@@ -704,7 +865,7 @@ export default function AntdServicesPage() {
             <Pagination
               current={providerPage}
               pageSize={PROVIDERS_PER_PAGE}
-              total={draft.providerOrder.length}
+              total={filteredProviderIds.length}
               showSizeChanger={false}
               showTotal={(total) => `共 ${total} 家`}
               onChange={setProviderPage}

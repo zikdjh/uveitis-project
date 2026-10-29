@@ -62,6 +62,19 @@ export type AnalysisResult = {
   error: string;
 };
 
+export type AnalysisJobRecord = {
+  id: number;
+  case_id: string;
+  status: "queued" | "running" | "finalizing" | "completed" | "failed";
+  attempt_count: number;
+  max_attempts: number;
+  error: string;
+  created_at: string;
+  updated_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+};
+
 export type CaseReview = {
   decision: "accepted" | "modified" | "rejected";
   final_impression: string;
@@ -156,6 +169,10 @@ export async function listCases(query: CaseListQuery = {}): Promise<CaseListPage
 
 export function getCase(caseId: string): Promise<CaseRecord> {
   return request<CaseRecord>(`/api/v1/cases/${caseId}`);
+}
+
+export function getAnalysisJob(caseId: string): Promise<AnalysisJobRecord | null> {
+  return request<AnalysisJobRecord | null>(`/api/v1/cases/${caseId}/analysis-job`);
 }
 
 export function createCase(input: CaseCreateInput): Promise<CaseRecord> {

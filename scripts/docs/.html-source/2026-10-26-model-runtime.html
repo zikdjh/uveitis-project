@@ -24,7 +24,7 @@
   </div>
   <h1>模型运行服务</h1>
   <p class="doc-summary">运行 API、评估入口、资产读取边界和健康检查</p>
-  <p class="doc-source">规范入口：<code>model-runtime/README.md</code></p>
+  <p class="doc-source">规范入口：<code>model/runtime/README.md</code></p>
   <article class="html-body">
 <p>模型运行侧的代码、健康检查、评估脚本和部署入口统一放在本目录。当前服务提供模型与 adapter 状态查询，完整影像推理链路仍在接入中。</p>
 <ul>
@@ -33,19 +33,19 @@
 <li><code>scripts/run_local_4060_eval.ps1</code>：Windows 本地评估入口。</li>
 <li><code>assets/README.md</code>：可用 adapter 与评估结果索引。</li>
 </ul>
-<p>模型基座和训练产物位于 <code>model-training/</code>，运行服务只读取，不在本目录复制权重。</p>
+<p>模型基座和训练产物位于 <code>model/training/</code>，运行服务只读取，不在本目录复制权重。</p>
 <h2>健康检查</h2>
-<pre><code class="language-powershell">cd model-runtime
-..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+<pre><code class="language-powershell">cd model\runtime
+..\..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 </code></pre>
 <p>打开 <code>http://127.0.0.1:8010/health</code>。返回 <code>ready</code> 表示基座目录和 adapter 文件均可定位；返回 <code>degraded</code> 表示路径缺失，服务本身仍可启动。<code>/v1/models</code> 提供感知模型、adapter 和补充决策模型的角色索引。</p>
 <h2>本地评估</h2>
-<pre><code class="language-powershell">.\model-runtime\scripts\run_local_4060_eval.ps1 `
-  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
-  -OutputDir 'model-training\assets\qwen3.5-4b\eval-layout-smoke-20261026' `
+<pre><code class="language-powershell">.\model\runtime\scripts\run_local_4060_eval.ps1 `
+  -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
+  -OutputDir 'model\training\assets\qwen3.5-4b\eval-layout-smoke-20261026' `
   -Tasks 'oct_aux_4class' -MaxSamples 1
 </code></pre>
-<p>评估会读取 <code>model-training/datasets/training/manifest.csv</code> 和冻结测试图像，不参与训练或 checkpoint 选择。没有 <code>-Overwrite</code> 时会从已有部分预测续跑。</p>
+<p>评估会读取 <code>model/training/datasets/training/manifest.csv</code> 和冻结测试图像，不参与训练或 checkpoint 选择。没有 <code>-Overwrite</code> 时会从已有部分预测续跑。</p>
 
   </article>
 </main>

@@ -1,4 +1,4 @@
-import { ArrowRight, ClipboardPlus, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowRight, ClipboardPlus, LoaderCircle, ShieldCheck, UserRound } from "lucide-react";
 import { Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import { getSystemOverview } from "@/api/system";
 
 export default function WorkbenchPage() {
   const [cases, setCases] = useState<CaseRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [counts, setCounts] = useState({ total: 0, analyzing: 0, awaiting_review: 0, reviewed: 0 });
   const [pendingTotal, setPendingTotal] = useState(0);
@@ -15,6 +16,8 @@ export default function WorkbenchPage() {
   const [pendingPageSize, setPendingPageSize] = useState(8);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     Promise.all([
       listCases({ status: "awaiting_review", page: pendingPage, page_size: pendingPageSize }),
       getSystemOverview(),
@@ -26,7 +29,8 @@ export default function WorkbenchPage() {
       })
       .catch((reason: unknown) =>
         setError(reason instanceof Error ? reason.message : "工作台加载失败"),
-      );
+      )
+      .finally(() => setLoading(false));
   }, [pendingPage, pendingPageSize]);
 
   const pendingPageCount = Math.max(1, Math.ceil(pendingTotal / pendingPageSize));
@@ -66,7 +70,8 @@ export default function WorkbenchPage() {
                 <ArrowRight size={16} />
               </Link>
             ))}
-            {!pendingTotal && <div className="empty-state"><UserRound size={24} /><p>暂无待复核病例</p><span>分析完成的病例会显示在这里。</span></div>}
+            {loading && !cases.length && <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取待复核病例</div>}
+            {!loading && !error && !pendingTotal && <div className="empty-state"><UserRound size={24} /><p>暂无待复核病例</p><span>分析完成的病例会显示在这里。</span></div>}
           </div>
           <div className="workbench-review-footer">
             <Link className="text-link" to="/doctor/cases?status=awaiting_review">查看全部待复核 <ArrowRight size={14} /></Link>
