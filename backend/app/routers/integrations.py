@@ -63,11 +63,15 @@ def update_config(payload: IntegrationConfigUpdate, request: Request) -> Integra
 @router.post("/test", response_model=IntegrationConfigTestResult)
 def test_config(payload: IntegrationConfigTestRequest, request: Request) -> IntegrationConfigTestResult:
     require_permission(request, Permission.INTEGRATION_MANAGE)
-    outcome = (
-        request.app.state.integrations.test_search(payload.provider, payload.query)
-        if payload.kind == "search"
-        else request.app.state.integrations.test_summary()
-    )
+    if payload.kind == "search":
+        outcome = request.app.state.integrations.test_search(
+            payload.provider,
+            payload.query,
+        )
+    elif payload.kind == "planner":
+        outcome = request.app.state.integrations.test_planner()
+    else:
+        outcome = request.app.state.integrations.test_summary()
     return IntegrationConfigTestResult(**outcome.__dict__)
 
 

@@ -10,18 +10,22 @@ import {
   UserX,
   Users,
 } from "lucide-react";
-import { type FormEvent, useEffect, useState } from "react";
+import { Button, DatePicker, Input, Pagination, Select } from "antd";
+import dayjs, { type Dayjs } from "dayjs";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import {
   createUser,
   getCurrentUser,
   listAuthAuditEvents,
+  listActiveSessions,
   listUsers,
   resetUserPassword,
   updateUser,
   type AuthAuditEvent,
+  type ActiveSession,
   type User,
-  type UserRole,
 } from "@/api/auth";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -33,6 +37,8 @@ const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
 
 const eventLabels: Record<string, string> = {
   login: "登录",
+  doctor_login: "医生登录",
+  admin_login: "管理员登录",
   token_refresh: "令牌刷新",
   logout: "退出",
   session_revoke: "撤销会话",
@@ -44,8 +50,16 @@ const eventLabels: Record<string, string> = {
 };
 
 export default function AccessPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
   const [events, setEvents] = useState<AuthAuditEvent[]>([]);
+  const [eventTotal, setEventTotal] = useState(0);
+  const [auditLoading, setAuditLoading] = useState(true);
+  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditPageSize, setAuditPageSize] = useState(20);
+  const auditRequestRef = useRef(0);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [resettingUser, setResettingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,19 +70,23 @@ export default function AccessPage() {
   const activeUsers = users.filter((user) => user.is_active).length;
   const adminUsers = users.filter((user) => user.role === "admin").length;
   const inactiveUsers = users.length - activeUsers;
-  const failedEvents = events.filter((event) => event.outcome !== "success").length;
+  const selectedEvent = searchParams.get("event") ?? "all";
+  const selectedOutcome = searchParams.get("outcome") ?? "all";
+  const auditSearch = searchParams.get("search") ?? "";
+  const from = validDate(searchParams.get("from"));
+  const to = validDate(searchParams.get("to"));
+  const auditDateRange: [Dayjs, Dayjs] | null = from && to ? [dayjs(from), dayjs(to)] : null;
+  const hasAuditFilters = selectedEvent !== "all" || selectedOutcome !== "all" || Boolean(auditSearch || from || to);
 
   async function load() {
     setLoading(true);
     setError(null);
     try {
-      const [userList, auditEvents, me] = await Promise.all([
+      const [userList, me] = await Promise.all([
         listUsers(),
-        listAuthAuditEvents(80),
         getCurrentUser(),
       ]);
       setUsers(userList);
-      setEvents(auditEvents);
       setCurrentUser(me);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "权限数据加载失败");
@@ -81,6 +99,63 @@ export default function AccessPage() {
     void load();
   }, []);
 
+  async function loadActiveSessions() {
+    setSessionsLoading(true);
+    try {
+      setActiveSessions(await listActiveSessions());
+    } catch {
+      setActiveSessions([]);
+    } finally {
+      setSessionsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadActiveSessions();
+  }, []);
+
+  useEffect(() => {
+    const requestId = ++auditRequestRef.current;
+    setAuditLoading(true);
+    setError(null);
+    listAuthAuditEvents({
+      page: auditPage,
+      page_size: auditPageSize,
+      event: selectedEvent === "all" ? undefined : selectedEvent,
+      outcome: selectedOutcome === "all" ? undefined : selectedOutcome,
+      from,
+      to,
+      search: auditSearch,
+    })
+      .then((result) => {
+        if (requestId !== auditRequestRef.current) return;
+        setEvents(result.items);
+        setEventTotal(result.total);
+      })
+      .catch((reason: unknown) => {
+        if (requestId !== auditRequestRef.current) return;
+        setError(reason instanceof Error ? reason.message : "鉴权审计加载失败");
+      })
+      .finally(() => {
+        if (requestId === auditRequestRef.current) setAuditLoading(false);
+      });
+  }, [auditPage, auditPageSize, auditSearch, from, selectedEvent, selectedOutcome, to]);
+
+  useEffect(() => {
+    const pageCount = Math.max(1, Math.ceil(eventTotal / auditPageSize));
+    setAuditPage((current) => Math.min(current, pageCount));
+  }, [auditPageSize, eventTotal]);
+
+  function updateAuditFilters(next: Partial<Record<"event" | "outcome" | "from" | "to" | "search", string>>) {
+    const params = new URLSearchParams(searchParams);
+    Object.entries(next).forEach(([key, value]) => {
+      if (!value || value === "all") params.delete(key);
+      else params.set(key, value);
+    });
+    setSearchParams(params, { replace: true });
+    setAuditPage(1);
+  }
+
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formElement = event.currentTarget;
@@ -92,7 +167,6 @@ export default function AccessPage() {
       await createUser({
         username: String(form.get("username") ?? ""),
         display_name: String(form.get("display_name") ?? ""),
-        role: String(form.get("role") ?? "doctor") as UserRole,
         password: String(form.get("password") ?? ""),
       });
       formElement.reset();
@@ -105,7 +179,7 @@ export default function AccessPage() {
     }
   }
 
-  async function handleUpdate(user: User, values: Partial<Pick<User, "role" | "is_active">>) {
+  async function handleUpdate(user: User, values: Partial<Pick<User, "is_active">>) {
     setBusy(true);
     setError(null);
     setNotice(null);
@@ -148,7 +222,7 @@ export default function AccessPage() {
   return (
     <section className="page">
       <div className="page-heading">
-        <div><h1>账号与权限</h1><p className="page-lead">管理账号角色、启用状态和鉴权审计记录。</p></div>
+        <div><h1>医生账号管理</h1><p className="page-lead">唯一管理员 root 维护医生账号，系统不提供自助注册。</p></div>
         <button className="button secondary" type="button" onClick={() => void load()} disabled={loading || busy}>
           <RefreshCw size={16} className={loading ? "spin" : ""} /> 刷新
         </button>
@@ -158,15 +232,15 @@ export default function AccessPage() {
 
       <div className="metric-grid access-metric-grid">
         <AccessMetric icon={Users} label="有效账号" value={activeUsers} note="当前可登录" />
-        <AccessMetric icon={ShieldCheck} label="管理员" value={adminUsers} note="系统管理权限" />
+        <AccessMetric icon={ShieldCheck} label="唯一管理员" value={adminUsers} note="固定 root 账号" />
         <AccessMetric icon={UserX} label="已停用" value={inactiveUsers} note="不可登录" />
-        <AccessMetric icon={History} label="异常审计" value={failedEvents} note="最近 80 条" />
+        <AccessMetric icon={History} label="审计事件" value={eventTotal} note="当前筛选总量" />
       </div>
 
       <div className="access-layout">
         <section className="panel">
           <div className="section-heading">
-            <div><h2>账号列表</h2><span>{users.length} 个账号</span></div>
+            <div><h2>账号列表</h2><span>{users.length} 个账号，仅管理员可维护医生账号</span></div>
             <Users size={20} />
           </div>
           {loading && !users.length ? (
@@ -184,48 +258,37 @@ export default function AccessPage() {
                           <span><strong>{user.display_name}</strong><small>@{user.username}</small></span>
                         </div>
                       </td>
-                      <td data-label="角色">
-                        <select
-                          value={user.role}
-                          disabled={busy || user.id === currentUser?.id}
-                          onChange={(event) => void handleUpdate(user, { role: event.target.value as UserRole })}
-                          aria-label={`${user.display_name} 的角色`}
-                        >
-                          <option value="doctor">医生</option>
-                          <option value="admin">系统管理员</option>
-                        </select>
-                      </td>
+                      <td data-label="角色">{user.is_root ? "唯一管理员" : "医生"}</td>
                       <td data-label="状态">
                         <button
                           className={`status-toggle ${user.is_active ? "active" : "disabled"}`}
                           type="button"
-                          disabled={busy || user.id === currentUser?.id}
+                          disabled={busy || user.id === currentUser?.id || user.is_root}
                           onClick={() => void handleUpdate(user, { is_active: !user.is_active })}
                         >
                           {user.is_active ? "启用" : "停用"}
                         </button>
                       </td>
-                      <td data-label="操作"><button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button></td>
+                      <td data-label="操作">{user.is_root ? <span className="muted">系统固定</span> : <button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button>}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {!users.length && <div className="empty-state"><Users size={26} /><p>暂无账号</p><span>创建账号后可在这里管理权限。</span></div>}
+              {!users.length && <div className="empty-state"><Users size={26} /><p>暂无账号</p><span>创建医生账号后可在这里维护。</span></div>}
             </div>
           )}
         </section>
 
         <section className="panel">
           <div className="section-heading">
-            <div><h2>新建账号</h2><span>密码至少 12 位</span></div>
+            <div><h2>新建医生账号</h2><span>由管理员设置初始密码，密码至少 12 位</span></div>
             <UserPlus size={20} />
           </div>
           <form className="form-grid compact" onSubmit={(event) => void handleCreate(event)}>
             <label>姓名<input name="display_name" required maxLength={100} /></label>
             <label>登录账号<input name="username" required minLength={3} maxLength={100} pattern="[A-Za-z0-9._-]+" /></label>
-            <label>角色<select name="role" defaultValue="doctor"><option value="doctor">医生</option><option value="admin">系统管理员</option></select></label>
             <label>初始密码<input name="password" type="password" required minLength={12} maxLength={200} autoComplete="new-password" /></label>
-            <div className="form-actions span-2"><button className="button primary" type="submit" disabled={busy}><UserPlus size={16} /> 创建账号</button></div>
+            <div className="form-actions span-2"><button className="button primary" type="submit" disabled={busy}><UserPlus size={16} /> 创建医生账号</button></div>
           </form>
         </section>
       </div>
@@ -245,10 +308,95 @@ export default function AccessPage() {
         </section>
       )}
 
+      <section className="panel active-sessions-panel">
+        <div className="section-heading">
+          <div><h2>活跃会话</h2><span>当前在线账号与登录 IP</span></div>
+          <button className="button secondary" type="button" onClick={() => void loadActiveSessions()} disabled={sessionsLoading}>
+            <RefreshCw size={16} className={sessionsLoading ? "spin" : ""} /> 刷新
+          </button>
+        </div>
+        {sessionsLoading ? (
+          <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取活跃会话</div>
+        ) : (
+          <div className="data-table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>账号</th><th>角色</th><th>登录 IP</th><th>最近活跃</th><th>过期时间</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeSessions.map((session) => (
+                  <tr key={session.session_id}>
+                    <td data-label="账号">{session.display_name || session.username}</td>
+                    <td data-label="角色"><span className={`role-tag ${session.role}`}>{session.role === "admin" ? "管理员" : "医生"}</span></td>
+                    <td data-label="登录 IP">{session.ip_address || "未知"}</td>
+                    <td data-label="最近活跃">{dateFormatter.format(new Date(session.last_seen_at))}</td>
+                    <td data-label="过期时间">{dateFormatter.format(new Date(session.expires_at))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!activeSessions.length && (
+              <div className="empty-state"><Users size={26} /><p>暂无活跃会话</p><span>登录后将在这里显示。</span></div>
+            )}
+          </div>
+        )}
+      </section>
+
       <section className="panel audit-panel">
         <div className="section-heading">
           <div><h2>鉴权审计</h2><span>最近的登录、账号与会话操作</span></div>
           <History size={20} />
+        </div>
+        <div className="audit-filters">
+          <Select
+            value={selectedEvent}
+            onChange={(value) => updateAuditFilters({ event: value })}
+            options={[
+              { value: "all", label: "全部事件" },
+              ...Object.entries(eventLabels).map(([value, label]) => ({ value, label })),
+            ]}
+            aria-label="按审计事件筛选"
+          />
+          <Select
+            value={selectedOutcome}
+            onChange={(value) => updateAuditFilters({ outcome: value })}
+            options={[
+              { value: "all", label: "全部结果" },
+              { value: "success", label: "成功" },
+              { value: "failed", label: "失败" },
+              { value: "blocked", label: "阻止" },
+            ]}
+            aria-label="按审计结果筛选"
+          />
+          <DatePicker.RangePicker
+            classNames={{ popup: { root: "case-date-range-popup" } }}
+            value={auditDateRange}
+            onChange={(dates) => {
+              const [start, end] = dates ?? [null, null];
+              updateAuditFilters({
+                from: start?.format("YYYY-MM-DD") ?? "",
+                to: end?.format("YYYY-MM-DD") ?? "",
+              });
+            }}
+            allowClear
+            placeholder={["开始日期", "结束日期"]}
+            aria-label="按审计时间筛选"
+          />
+          <Input.Search
+            defaultValue={auditSearch}
+            key={auditSearch}
+            placeholder="账号或说明"
+            allowClear
+            onSearch={(value) => updateAuditFilters({ search: value.trim() })}
+            aria-label="搜索审计账号或说明"
+          />
+          {hasAuditFilters && (
+            <Button onClick={() => updateAuditFilters({ event: "", outcome: "", from: "", to: "", search: "" })}>
+              重置
+            </Button>
+          )}
         </div>
         <div className="audit-list">
           {events.map((event) => (
@@ -258,12 +406,32 @@ export default function AccessPage() {
               <time dateTime={event.created_at}>{dateFormatter.format(new Date(event.created_at))}</time>
             </div>
           ))}
-          {!events.length && <div className="empty-state"><History size={26} /><p>暂无审计记录</p><span>登录与会话操作会显示在这里。</span></div>}
+          {!auditLoading && !events.length && <div className="empty-state"><History size={26} /><p>{hasAuditFilters ? "没有符合条件的审计记录" : "暂无审计记录"}</p><span>{hasAuditFilters ? "请调整筛选条件。" : "登录与会话操作会显示在这里。"}</span></div>}
         </div>
+        {eventTotal > 0 && (
+          <Pagination
+            className="case-list-pagination"
+            current={auditPage}
+            pageSize={auditPageSize}
+            total={eventTotal}
+            showSizeChanger
+            pageSizeOptions={[20, 40, 80]}
+            showTotal={(total) => `共 ${total} 条`}
+            onChange={(page, pageSize) => {
+              const changed = pageSize !== auditPageSize;
+              setAuditPageSize(pageSize);
+              setAuditPage(changed ? 1 : page);
+            }}
+          />
+        )}
       </section>
 
     </section>
   );
+}
+
+function validDate(value: string | null) {
+  return value && /^\d{4}-\d{2}-\d{2}$/.test(value) && dayjs(value).isValid() ? value : "";
 }
 
 function AccessMetric({ icon: Icon, label, value, note }: { icon: typeof Users; label: string; value: number; note: string }) {

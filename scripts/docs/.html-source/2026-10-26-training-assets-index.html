@@ -13,8 +13,8 @@
   <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
   <nav aria-label="文档导航">
     <a href="2026-10-26-document-catalog.html">文档索引</a>
-    <a href="2026-10-26-model-runtime.html">上一份</a>
-    <a href="2026-10-26-qwen3.5-4b-progress-stop.html">下一份</a>
+    <a href="2026-10-29-model-embedding-service.html">上一份</a>
+    <a href="2026-10-28-qwen3.5-4b-model-card.html">下一份</a>
   </nav>
 </header>
 <main id="doc-content" class="doc-page">
@@ -24,14 +24,14 @@
   </div>
   <h1>训练产物索引</h1>
   <p class="doc-summary">当前 adapter、训练指标、冻结评估结果和保存约定</p>
-  <p class="doc-source">规范入口：<code>model-training/assets/README.md</code></p>
+  <p class="doc-source">规范入口：<code>model/training/assets/README.md</code></p>
   <article class="html-body">
 <p>整理日期：2026-10-26</p>
-<p>这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除本地 smoke adapter、中间 checkpoint、<code>training_state.pt</code>、重复 processor 和非当前 final adapter；当前仅保留两组工作 adapter、指标和冻结评估断点。完整训练状态仍以 Modal <code>uveitis-runs</code> 为唯一真相源。</p>
-<p>本目录属于训练侧。模型运行服务只读取 adapter，不在 <code>model-runtime/</code> 复制权重。</p>
+<p>这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除早期 smoke adapter、历史中间 checkpoint、<code>training_state.pt</code> 和第二、第三阶段实验权重，并保留第 4、5 阶段实验目录供本轮审计；当前保留两组工作 adapter、阶段实验指标、摘要、决策文件、错误来源分析和受控推理 smoke。实验 adapter 不作为运行候选。完整训练状态仍以 Modal <code>uveitis-runs</code> 为唯一真相源。</p>
+<p>本目录属于训练侧。模型运行服务只读取 adapter，不在 <code>qwen3.5-4b/</code> 复制权重。</p>
 <h2>Qwen3.5-4B</h2>
-<h3>focus01-20261025-02</h3>
-<p>当前实验最佳候选是 step 250。它不是正式部署 adapter，也没有自动覆盖旧 run 的 <code>best_adapter/</code>。</p>
+<h3>focus01-20261025-02（历史实验）</h3>
+<p>该 run 的 step 250 是当时的小样本固定评估候选，不是当前工作 adapter，也不是正式部署 adapter，没有自动覆盖旧 run 的 <code>best_adapter/</code>。</p>
 <ul>
 <li><code>step250-fixed-40/eval_manifest.json</code>：固定 40 样本的选择指纹和类别构成。</li>
 <li><code>step250-fixed-40/eval_metrics.json</code>：01 <code>0.6833</code>、02 <code>1.0</code>、03 <code>1.0</code>、13 <code>0.9</code> 的 macro-F1，以及混淆矩阵。</li>
@@ -61,13 +61,46 @@
 <p><code>pilot/</code> 保存 pilot run 的验证和评估快照；<code>smoke/</code> 保存早期配置、旧指标和中断步元数据。<code>local-4060-*</code> 冒烟目录中的 adapter、processor 和 checkpoint 已清理，只保留小型指标文件。smoke 指标只证明链路曾运行，不作为准确率证据。</p>
 <h3>当前本地工作适配器</h3>
 <ul>
-<li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：当前冻结评估基线，第 100 步。</li>
-<li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：当前 OCT 候选，第 20 步。</li>
-<li><code>eval-oct-step20-vs-step100-20261025-01/</code>：两个 adapter 的同集冻结评估、候选完整结果和基线断点。</li>
-<li><code>uwf-stage1-20261026-01/</code>、<code>uwf-binary-stage1-20261026-01/</code>：Open UWF 7 类与二分类的指标、切分和实验 adapter；均不作为运行候选。</li>
-<li><code>uwf-binary-eval-test-20261026-01/</code>：二分类 adapter 的唯一一次 90 条患者隔离测试；输出冻结，不用于调参。</li>
-<li><code>eval-open-uwf-stage1-20261026-01/decision.json</code>：UWF 数据复核、验证/测试差距和“保留第 20 步 OCT 候选”的结构化决定。</li>
+<li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：第 100 步同源冻结评估基线。</li>
+<li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：第 20 步选定 OCT 运行候选。</li>
+<li><code>eval-oct-step20-vs-step100-20261025-01/</code>：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 <code>selection_decision.json</code>。</li>
+<li><code>local-4060-oct-stage2-20261026-01/</code>、<code>local-4060-oct-stage2b-20261026-01/</code>：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。</li>
+<li><code>eval-oct-stage2-20261026-01/stage2_decision.json</code>：第二阶段结论，决定保留第 20 步候选，不提升实验 final adapter。</li>
+<li><code>local-4060-oct-stage3-hires-20261026-01/</code>：高分率受控复核指标、切分快照和实验日志；6 步后早停，最佳点仍远低于第 20 步候选。</li>
+<li><code>eval-oct-stage3-20261026-01/stage3_decision.json</code>：第三阶段结论，决定保留第 20 步候选，不提升高分率实验 adapter。</li>
+<li><code>local-4060-oct-stage4-difficulty-20261026-01/</code>：训练集困难组加权实验的指标、切分和摘要；3 步后早停，分类指标无提升。</li>
+<li><code>eval-oct-stage4-20261026-01/stage4_decision.json</code>：第四阶段结论，决定保留第 20 步候选，不提升同名 loss-best adapter。</li>
+<li><code>local-4060-oct-hard-groups-20261026-01/</code>：训练集全量困难度扫描的 <code>groups.json</code> 和清单；未读取冻结测试图像。</li>
+<li><code>local-4060-oct-hard-groups-balanced-20261026-01/</code>：按 OCT 四类各 6 组生成的 24 组平衡权重清单。</li>
+<li><code>local-4060-oct-stage5-newgroups-20261026-01/</code>：新患者组轮换实验的指标、切分和摘要；15 步后早停，分类指标无提升。</li>
+<li><code>eval-oct-stage5-20261026-01/stage5_decision.json</code>：第五阶段结论，确认 138 个 OCT 训练组零重叠只证明调度覆盖，不证明泛化提升，决定继续保留第 20 步候选。</li>
+<li><code>eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code>：第 20 步候选的类别、患者/来源组错误分析，以及与第 100 步基线的逐类变化。</li>
+<li><code>eval-oct-step20-runtime-smoke-20261026-01/</code>：第 20 步候选的四类均衡本地推理 smoke，记录 16 条预测、指标、抽样模式和显存峰值。</li>
+<li><code>uwf-stage1-20261026-01/</code>：Open UWF 7 类研究实验；60 步后验证 macro-F1 <code>0.214286</code>，葡萄膜炎 F1 为 0，不可用。</li>
+<li><code>uwf-binary-stage1-20261026-01/</code>：Open UWF 葡萄膜炎二分类研究实验；最佳 step 50，验证 macro-F1 <code>0.676136</code>，best adapter SHA256 <code>097d4293eb0e...c9d3e</code>。</li>
+<li><code>uwf-binary-eval-test-20261026-01/</code>：二分类 adapter 的唯一一次 90 条患者隔离测试；macro-F1 <code>0.338235</code>，输出冻结，不用于调参。</li>
+<li><code>eval-open-uwf-stage1-20261026-01/decision.json</code>：UWF 数据契约、验证/测试差距、测试冻结政策和不晋级决定。</li>
 </ul>
+<p>选型决定为 <code>promote_step20_candidate</code>：候选 macro-F1 <code>0.947245</code>，基线 <code>0.918252</code>，提升 <code>+0.028993</code>，JSON 有效率均为 <code>100%</code>。该结果仍受数据来源、增强图和患者隔离限制约束。</p>
+<h3>第 20 步冻结候选</h3>
+<p>2026-10-28 提前完成候选冻结，目录为 <code>freeze-step20-20261028-01/</code>。目录内包含：</p>
+<ul>
+<li><code>model-card.html</code>：模型身份、训练数据、同源评估、运行证据、允许用途和禁止用途。</li>
+<li><code>freeze-manifest.json</code>：基座、adapter、训练摘要、评估证据、指纹和冻结决定。</li>
+<li><code>runtime-contract.json</code>：<code>POST /v1/judge</code> 输入输出、环境变量、显存证据、失败行为和本地数据边界。</li>
+<li><code>known-limitations.html</code>：患者隔离缺失、置信度校准、标签范围、外推风险、隐私边界和解除限制条件。</li>
+</ul>
+<p>冻结标识保持只读：后续 adapter、指标或运行契约变化必须建立新的冻结目录，不能覆盖本记录。冻结候选的 adapter 权重 SHA256 为 <code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code>，训练 manifest SHA256 为 <code>0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580</code>，与选型证据中的记录一致。</p>
+<p>第二阶段复核使用 <code>5e-6</code> 和 <code>1e-5</code> 两个学习率，均从第 20 步候选初始化，OCT 任务权重保持 4。两次运行的第 5、10 步验证 macro-F1 均为 <code>0.867725</code>，OCT macro-F1 均为 <code>0.774603</code>，低于入口的 <code>0.873358</code> / <code>0.791503</code>，因此都在第 10 步触发早停。该结果说明继续同一数据、同一任务权重和同一 8 GB 配置下的短程续训没有带来收益；后续优先检查数据和错误来源，而不是继续增加步数。</p>
+<p>第三阶段把图像输入预算提高到 <code>131,072</code> 像素，保持第 20 步初始化、OCT 任务权重 4 和 <code>2.5e-6</code> 学习率，目标是增加 CNV/DRUSEN 边界细节。高分率初始化的 55 条验证只有 macro-F1 <code>0.826256</code>、OCT <code>0.718769</code>；最佳第 2 步为 <code>0.832019</code> / <code>0.736058</code>，第 4 步持平，第 6 步回落后早停。高分率改变了输入分布但未提高指标，因此运行候选仍为低分辨率第 20 步 adapter。</p>
+<p>第四阶段先只用训练集挖掘困难患者组，扫描 <code>12,101</code> 条训练样本、<code>5,184</code> 组，冻结测试图像读取为 <code>false</code>，峰值保留显存 <code>7.310546875 GiB</code>。按 OCT 四类各 6 组生成 24 组权重 2 的清单，再从第 20 步候选以 <code>1e-6</code> 学习率训练。第 1 步 loss 从 <code>0.0350562277</code> 降到 <code>0.0350383057</code>，但 55 条验证的 macro-F1 和 OCT 四步均保持 <code>0.8733582322</code> / <code>0.7915032680</code>；第 2、3 步 loss 回升后早停。实验峰值分配显存 <code>5.452396869659424 GiB</code>、峰值保留 <code>5.689453125 GiB</code>，Modal 费用 <code>$0.00</code>。该 <code>best_adapter</code> 只是同分下 loss 的次要排序，不提升为运行候选；结论见 <code>eval-oct-stage4-20261026-01/stage4_decision.json</code>。</p>
+<p>筛选验证包含 55 条、33 个患者组，OCT 的 34 条分布为 CNV 8、DME 5、DRUSEN 18、NORMAL 3。该集合只能用于快速筛选，不能作为类别级泛化证据。后续训练门槛调整为患者隔离验证数据或明确的数据/标签修正，不再重复相同数据上的短程步数、高分率或困难组加权。</p>
+<p>第五阶段新增 <code>group_offset=50</code> 的可复现训练组轮换。偏移后 138 个 OCT 训练组与初始批次零重叠，前 50 步按类别计划的曝光为 CNV 35、DME 35、DRUSEN 33、NORMAL 35；验证 selection SHA256 保持 <code>b58be38480a47892fcb7f5eef5b1d1ab904abb0f7eb4979d2422c392d62c7ef8</code>，冻结测试图像未读取。实验从第 20 步候选以 <code>1e-6</code> 学习率、OCT 任务权重 4、<code>65,536</code> 像素训练，目标 50 步、每 5 步验证、早停 patience 3，实际 15 步后早停。第 1、5、10 步 macro-F1 / OCT 保持 <code>0.8733582322</code> / <code>0.7915032680</code>，第 15 步降为 <code>0.8677248677</code> / <code>0.7746031746</code>；JSON 有效率始终 <code>100%</code>。峰值分配显存 <code>5.452396869659424 GiB</code>、峰值保留 <code>5.69140625 GiB</code>，总耗时约 <code>690.96</code> 秒，Modal 费用 <code>$0.00</code>。该实验不产生提升候选，结论见 <code>eval-oct-stage5-20261026-01/stage5_decision.json</code>。第 4、5 阶段实验权重仍可追溯，累计约 <code>780 MB</code>；它们不属于运行候选，清理前应先取得明确批准。</p>
+<p>错误来源分析显示，第 20 步候选在 1,000 条测试中的主要错误为 <code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条，另有 <code>CNV-&gt;DRUSEN</code> 4 条、<code>DME-&gt;DRUSEN</code> 4 条、<code>DME-&gt;CNV</code> 3 条及两条其他错误。685 个患者/来源组中有 50 组存在错误，前 10 个错误组占全部错误约 <code>24.53%</code>。相对第 100 步基线，DRUSEN 纠正 38 条是主要收益，同时 CNV 退化 6 条、NORMAL 退化 4 条、DME 净改善 1 条。后续实验应围绕 NORMAL/DRUSEN 与 CNV/DME 的边界，而不是继续增加同配置步数或输入像素。</p>
+<p>受控推理 smoke 使用第 20 步 adapter、<code>65,536</code> 像素、每类 4 条共 16 条，selection SHA256 为 <code>77a65218744fe84896bb06d7d216bdb9b2329fc06e2de90bdba428dcf9a6a0ee</code>。结果为 16/16 正确、JSON 有效率 <code>100%</code>、生成错误 0；adapter 加载后分配显存 <code>3.114870 GiB</code>，峰值分配 <code>3.233283 GiB</code>，峰值保留 <code>3.310547 GiB</code>，总耗时约 63 秒。该结果不构成准确率或泛化证据。</p>
+<p>真实运行服务烟测证据位于 <code>runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code>：修正后热请求 <code>3.363 秒</code>，单图峰值保留 <code>3.355469 GiB</code>，8 并发全部返回 HTTP 200，无 OOM。单张 CNV 训练图返回 DRUSEN、置信度 0，仅证明运行链路和结构契约可用。</p>
+<p>Open UWF 7 类与二分类实验均在本机 4060 完成，新增 Modal GPU 费用 <code>$0.00</code>。二分类验证 best step 50 的 accuracy 为 <code>0.684211</code>、macro-F1 为 <code>0.676136</code>，但唯一一次患者隔离测试降至 accuracy <code>0.377778</code>、macro-F1 <code>0.338235</code>；82 个阴性样本中 54 个被误报为阳性。该落差表明当前验证面板和阴性组构成不足以证明特异性，UWF 实验 adapter 不进入运行候选。</p>
+<p>两份 UWF manifest 各 700 行，图像存在性、患者组跨切分、内容去重和 SHA256 已复核：缺图 0、跨切分患者组 0、重复内容 0。患者组键是 <code>14_open_uwf700:&lt;diagnosis&gt;:&lt;Patient ID&gt;</code>；源 Patient ID 不跨诊断队列唯一。测试输出已经消费，不得据其继续调参。</p>
 <h2>参考材料</h2>
 <p><code>reference/</code> 保存 24 GB GPU 云价格表的 HTML 和 XLSX。价格是历史调研快照，使用前应核对供应商当前报价。</p>
 <h2>完整权重的保存约定</h2>

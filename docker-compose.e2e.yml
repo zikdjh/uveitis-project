@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:18.6
+    ports: !override
+      - "15432:5432"
+
+  redis:
+    image: redis:8.10.2
+    ports: !override
+      - "16380:6379"
+
+  model-runtime:
+    ports: !override
+      - "18010:8010"
+
+  backend:
+    ports: !override
+      - "18000:8000"
+    environment:
+      APP_ENVIRONMENT: test
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:-}
+
+  frontend:
+    ports: !override
+      - "15173:5173"
+    environment:
+      VITE_API_BASE_URL: http://127.0.0.1:18000

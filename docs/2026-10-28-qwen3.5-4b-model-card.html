@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qwen3.5-4B 第 20 步模型卡 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-training-assets-index.html">上一份</a>
+    <a href="2026-10-28-qwen3.5-4b-known-limitations.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>训练</span>
+    <span>2026-10-28</span>
+  </div>
+  <h1>Qwen3.5-4B 第 20 步模型卡</h1>
+  <p class="doc-summary">冻结候选、训练范围、同源评估、运行边界和允许用途</p>
+  <p class="doc-source">HTML 源文件：<code>qwen3.5-4b/assets/freeze-step20-20261028-01/model-card.html</code></p>
+  <article class="html-body">
+<h2>结论摘要</h2>
+    <p>本冻结项记录 Qwen3.5-4B 的本地 QLoRA 第 20 步 adapter，作为葡萄膜炎辅助分析链路中的可选影像判断组件。它在同源 OCT 四类测试集上的 macro-F1 为 <code>0.947245</code>，高于第 100 步基线的 <code>0.918252</code>，提升为 <code>+0.028993</code>。该结果只说明候选在当前同源测评上优于基线，不构成临床验证、独立外部验证或诊断结论。</p>
+    <p>冻结状态是 <strong>研究用途候选</strong>。运行服务必须继续返回 <code>requires_human_review=true</code>，病例影像和病例文本不得发送到外部总结或网络搜索 API。</p>
+
+    <h2>模型身份</h2>
+    <table>
+      <thead><tr><th>项目</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>基座模型</td><td>Qwen3.5-4B，架构 <code>qwen3_5</code></td></tr>
+        <tr><td>微调方式</td><td>4-bit NF4 QLoRA，bfloat16 compute、双量化，LoRA r=8、alpha=16</td></tr>
+        <tr><td>候选 run</td><td><code>local-4060-oct-focus-cont-20261025-01</code>，best step 20</td></tr>
+        <tr><td>adapter 路径</td><td><code>model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code></td></tr>
+        <tr><td>adapter SHA256</td><td><code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code></td></tr>
+        <tr><td>任务</td><td><code>oct_aux_4class</code>，标签为 CNV、DME、DRUSEN、NORMAL</td></tr>
+        <tr><td>运行定位</td><td>可选第二意见；不能替代医生诊断、分诊、治疗选择或疾病排除</td></tr>
+      </tbody>
+    </table>
+
+    <h2>数据与训练范围</h2>
+    <table>
+      <thead><tr><th>项目</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>训练 manifest</td><td><code>model/training/datasets/training/manifest.csv</code></td></tr>
+        <tr><td>manifest SHA256</td><td><code>0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580</code></td></tr>
+        <tr><td>清单规模</td><td>16,638 行；train / validation / test 为 14,734 / 177 / 1,727</td></tr>
+        <tr><td>实际分组训练</td><td>12,101 训练行、55 验证行；5,184 训练组、33 验证组；冻结测试图片未参与训练</td></tr>
+        <tr><td>冻结 OCT 测试</td><td>1,000 条，CNV、DME、DRUSEN、NORMAL 各 250 条；来自 <code>13_zhanglab_oct</code></td></tr>
+        <tr><td>selection SHA256</td><td><code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code></td></tr>
+      </tbody>
+    </table>
+    <p>训练审计排除了 71 行测试重叠或隔离不足的样本：数据 01 的 60 行因缺少患者 ID 且全部来源组与测试重叠而排除，数据 03 的 11 行因组与测试重叠而排除。该处理降低了训练泄漏风险，但没有把当前测试集变成患者隔离的外部验证。</p>
+
+    <h2>冻结评估</h2>
+    <table>
+      <thead><tr><th>指标</th><th>第 100 步基线</th><th>第 20 步候选</th><th>变化</th></tr></thead>
+      <tbody>
+        <tr><td>Accuracy</td><td>0.918</td><td>0.947</td><td>+0.029</td></tr>
+        <tr><td>Macro-F1</td><td>0.918252</td><td>0.947245</td><td>+0.028993</td></tr>
+        <tr><td>JSON 有效率</td><td>1.0</td><td>1.0</td><td>持平</td></tr>
+        <tr><td>CNV F1</td><td>0.877256</td><td>0.940476</td><td>+0.063220</td></tr>
+        <tr><td>DME F1</td><td>0.971888</td><td>0.970060</td><td>-0.001828</td></tr>
+        <tr><td>DRUSEN F1</td><td>0.854664</td><td>0.919765</td><td>+0.065101</td></tr>
+        <tr><td>NORMAL F1</td><td>0.969199</td><td>0.958678</td><td>-0.010521</td></tr>
+      </tbody>
+    </table>
+    <p>第 20 步候选共有 53 条错误，主要错误对是 <code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条。相对基线，DRUSEN 纠正 38 条是主要收益，同时 CNV 退化 6 条、NORMAL 退化 4 条。总体提升不能解释为所有类别都获得改善。</p>
+
+    <h2>运行证据</h2>
+    <table>
+      <thead><tr><th>项目</th><th>观测值</th></tr></thead>
+      <tbody>
+        <tr><td>已验证 GPU</td><td>NVIDIA GeForce RTX 4060 Laptop GPU，总显存约 7.9956 GiB</td></tr>
+        <tr><td>训练峰值</td><td>allocated <code>5.452397 GiB</code>；reserved <code>5.691406 GiB</code></td></tr>
+        <tr><td>评估峰值</td><td>allocated <code>3.242014 GiB</code>；reserved <code>3.310547 GiB</code></td></tr>
+        <tr><td>单图推理峰值</td><td>allocated <code>3.275485 GiB</code>；reserved <code>3.355469 GiB</code></td></tr>
+        <tr><td>时延</td><td>冷启动约 22 秒；修正后热请求约 3.363 秒</td></tr>
+        <tr><td>并发行为</td><td>进程内锁串行化；8 个并发请求全部返回 HTTP 200，无 OOM</td></tr>
+        <tr><td>推理入口</td><td><code>POST /v1/judge</code>，默认本地 <code>127.0.0.1:8010</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>使用边界</h2>
+    <ul>
+      <li>仅作为医生复核前的可选研究型第二意见，输出不得直接进入诊断、处方、处置或分诊自动化。</li>
+      <li>当前任务只做 CNV、DME、DRUSEN、NORMAL 四类 OCT 辅助分类，不等同完整葡萄膜炎病因诊断，也不直接回答“是否为葡萄膜炎”。</li>
+      <li>置信度未校准，运行烟测曾出现置信度 0 和空 impression；这些输出不能用于阈值判断或风险分层。</li>
+      <li>病例文本和影像必须留在本地运行边界内。外部总结模型和网络搜索 API 只能接收脱敏、无影像的聚合问题，不得接收原始病例内容。</li>
+      <li>在患者隔离外部验证、医生确认标签、亚组评价和设备泛化评价完成前，不得以临床产品或诊断系统名义发布。</li>
+    </ul>
+
+    <h2>冻结证据</h2>
+    <ul>
+      <li><code>freeze-manifest.json</code>：基座、adapter、训练和评估证据的 SHA256 清单。</li>
+      <li><code>runtime-contract.json</code>：服务输入输出、环境变量、资源证据、失败行为和本地数据边界。</li>
+      <li><code>known-limitations.html</code>：已知限制和禁止用途。</li>
+      <li><code>../eval-oct-step20-vs-step100-20261025-01/</code>：1,000 条同源冻结评估、逐样本预测和选型决定。</li>
+      <li><code>../eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code>：类别和组级错误分析。</li>
+      <li><code>../runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code>：真实本地运行服务烟测。</li>
+    </ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>Qwen3.5-4B 第 20 步模型卡 · 2026-10-28</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

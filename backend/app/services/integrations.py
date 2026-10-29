@@ -12,6 +12,13 @@ import httpx
 from app.core.config import Settings
 from app.schemas.case import CaseRead, Evidence, WebEvidence
 from app.schemas.integrations import IntegrationConfigRead
+from app.core.external_boundary import (
+    BOUNDARY_ALLOW_CASE_DATA,
+    BOUNDARY_SERVICE,
+    assert_external_text,
+    external_request_guard,
+    prepare_external_payload,
+)
 from app.services.integration_settings import integration_defaults
 
 
@@ -54,6 +61,18 @@ def _json_object(text: str) -> dict[str, Any] | None:
         return payload if isinstance(payload, dict) else None
     except json.JSONDecodeError:
         return None
+
+
+def _summary_from_unparsed_json(text: str) -> str:
+    """Recover the summary string when a model response is truncated JSON."""
+
+    match = re.search(r'"summary"\s*:\s*"((?:\\.|[^"\\])*)"', text)
+    if match is None:
+        return text.strip()
+    try:
+        return str(json.loads(f'"{match.group(1)}"')).strip()
+    except json.JSONDecodeError:
+        return match.group(1).strip()
 
 
 def _confidence(value: Any, default: float = 0.0) -> float:
@@ -111,6 +130,55 @@ def _normalize_recommendations(value: Any) -> list[str]:
     return result
 
 
+def _safe_text(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def _safe_judgment(value: dict[str, Any]) -> dict[str, Any]:
+    """Project a model judgment onto the fields allowed to leave the app."""
+
+    return {
+        "label": _safe_text(value.get("label")),
+        "confidence": _confidence(value.get("confidence")),
+        "findings": [
+            {
+                "label": item["label"],
+                "location": item.get("location", ""),
+                "confidence": item["confidence"],
+            }
+            for item in _normalize_findings(value.get("findings"))
+        ],
+    }
+
+
+def _safe_decision(value: dict[str, Any]) -> dict[str, Any]:
+    """Project a decision result onto the fields allowed to leave the app."""
+
+    differential: list[dict[str, Any]] = []
+    for item in value.get("differential") or value.get("differentials") or []:
+        if isinstance(item, dict):
+            label = _safe_text(item.get("label") or item.get("class"))
+            if label:
+                differential.append(
+                    {
+                        "label": label,
+                        "confidence": _confidence(item.get("confidence")),
+                    }
+                )
+    urgency = _safe_text(value.get("urgency") or "unknown").lower()
+    if urgency not in {"low", "medium", "high", "unknown"}:
+        urgency = "unknown"
+    return {
+        "primary_class": _safe_text(
+            value.get("primary_class")
+            or value.get("label")
+        ),
+        "confidence": _confidence(value.get("confidence")),
+        "differential": differential,
+        "urgency": urgency,
+    }
+
+
 class OptionalIntegrations:
     """HTTP adapters for optional model, search and summarization services."""
 
@@ -132,10 +200,12 @@ class OptionalIntegrations:
                     "summary_enabled": self.settings.external_summary_enabled,
                     "summary_base_url": self.settings.external_summary_base_url,
                     "summary_model": self.settings.external_summary_model,
-                    "summary_include_clinical_text": self.settings.external_summary_include_clinical_text,
                     "summary_api_key": self.settings.external_summary_api_key,
+                    "planner_protocol": self.settings.agent_planner_protocol,
+                    "planner_base_url": self.settings.agent_planner_base_url,
+                    "planner_model": self.settings.agent_planner_model,
+                    "planner_api_key": self.settings.agent_planner_api_key,
                     "web_search_enabled": self.settings.web_search_enabled,
-                    "web_search_include_complaint": self.settings.web_search_include_complaint,
                     "web_search_max_results": self.settings.web_search_max_results,
                     "search_provider_order": [
                         item.strip()
@@ -164,25 +234,82 @@ class OptionalIntegrations:
             return IntegrationConfigRead()
         return self.config_store.public()
 
+    def external_summary_credentials(self) -> dict[str, Any]:
+        """Return the external summary endpoint configuration in clear text.
+
+        Used by the tool-chain planner so that a deployment which already
+        configured an external summary model does not need a second set of
+        credentials. The returned key stays server-side.
+        """
+
+        config = self._config()
+        return {
+            "protocol": str(
+                config.get("summary_protocol") or "openai_chat_completions"
+            ),
+            "base_url": str(config.get("summary_base_url") or ""),
+            "model": str(config.get("summary_model") or ""),
+            "api_key": str(config.get("summary_api_key") or ""),
+        }
+
+    def external_planner_credentials(self) -> dict[str, Any]:
+        """Return administrator-managed AgentScope planner credentials."""
+
+        config = self._config()
+        return {
+            "protocol": str(
+                config.get("planner_protocol") or "openai_chat_completions"
+            ),
+            "base_url": str(config.get("planner_base_url") or ""),
+            "model": str(config.get("planner_model") or ""),
+            "api_key": str(config.get("planner_api_key") or ""),
+        }
+
     def test_summary(self) -> IntegrationTestOutcome:
+        return self._test_model_endpoint("summary")
+
+    def test_planner(self) -> IntegrationTestOutcome:
+        config = self._config()
+        planner_fields = (
+            "planner_base_url",
+            "planner_model",
+            "planner_api_key",
+        )
+        planner_partially_configured = any(
+            str(config.get(key) or "").strip() for key in planner_fields
+        )
+        summary_configured = all(
+            str(config.get(key) or "").strip()
+            for key in ("summary_base_url", "summary_model", "summary_api_key")
+        )
+        if not planner_partially_configured and summary_configured:
+            outcome = self._test_model_endpoint("summary")
+            prefix = "规划模型复用总结 API："
+            outcome.detail = prefix + outcome.detail
+            return outcome
+        return self._test_model_endpoint("planner")
+
+    def _test_model_endpoint(self, prefix: str) -> IntegrationTestOutcome:
         started = time.perf_counter()
         try:
             config = self._config()
             missing = [
                 label
                 for key, label in (
-                    ("summary_base_url", "API 地址"),
-                    ("summary_model", "模型名称"),
-                    ("summary_api_key", "API Key"),
+                    (f"{prefix}_base_url", "API 地址"),
+                    (f"{prefix}_model", "模型名称"),
+                    (f"{prefix}_api_key", "API Key"),
                 )
                 if not str(config.get(key) or "").strip()
             ]
             if missing:
                 raise ValueError("尚未配置：" + "、".join(missing))
-            protocol = str(config.get("summary_protocol") or "openai_chat_completions")
-            model = str(config.get("summary_model") or "")
-            url = str(config.get("summary_base_url") or "").rstrip("/")
-            api_key = str(config.get("summary_api_key") or "")
+            protocol = str(
+                config.get(f"{prefix}_protocol") or "openai_chat_completions"
+            )
+            model = str(config.get(f"{prefix}_model") or "")
+            url = str(config.get(f"{prefix}_base_url") or "").rstrip("/")
+            api_key = str(config.get(f"{prefix}_api_key") or "")
             probe = "Reply with OK. Do not add any other text."
             if protocol == "anthropic_messages":
                 if not url.endswith("/messages"):
@@ -362,9 +489,20 @@ class OptionalIntegrations:
         *,
         timeout: float,
         headers: dict[str, str] | None = None,
+        service: str = "外部服务",
+        allow_case_data: bool = False,
     ) -> dict[str, Any]:
-        with self.client_factory(timeout=timeout) as client:
-            response = client.post(url, json=payload, headers=headers or self._headers())
+        extensions = {
+            BOUNDARY_ALLOW_CASE_DATA: allow_case_data,
+            BOUNDARY_SERVICE: service,
+        }
+        with self.client_factory(**self._client_options(timeout)) as client:
+            response = client.post(
+                url,
+                json=payload,
+                headers=headers or self._headers(),
+                extensions=extensions,
+            )
             response.raise_for_status()
             data = response.json()
         if not isinstance(data, dict):
@@ -378,14 +516,36 @@ class OptionalIntegrations:
         timeout: float,
         params: dict[str, Any],
         headers: dict[str, str] | None = None,
+        service: str = "外部服务",
+        allow_case_data: bool = False,
     ) -> dict[str, Any]:
-        with self.client_factory(timeout=timeout) as client:
-            response = client.get(url, params=params, headers=headers or self._headers())
+        extensions = {
+            BOUNDARY_ALLOW_CASE_DATA: allow_case_data,
+            BOUNDARY_SERVICE: service,
+        }
+        with self.client_factory(**self._client_options(timeout)) as client:
+            response = client.get(
+                url,
+                params=params,
+                headers=headers or self._headers(),
+                extensions=extensions,
+            )
             response.raise_for_status()
             data = response.json()
         if not isinstance(data, dict):
             raise ValueError("服务响应不是 JSON 对象")
         return data
+
+    def _client_options(self, timeout: float) -> dict[str, Any]:
+        options: dict[str, Any] = {
+            "timeout": timeout,
+            "event_hooks": {"request": [external_request_guard]},
+            "trust_env": self.settings.external_network_trust_env,
+        }
+        proxy = self.settings.external_network_proxy.strip()
+        if proxy:
+            options["proxy"] = proxy
+        return options
 
     def qwen_judgment(self, case: CaseRead) -> IntegrationResult:
         if not self.qwen_available:
@@ -403,6 +563,7 @@ class OptionalIntegrations:
             "task": "oct_aux_4class",
             "case": {
                 "case_id": case.id,
+                "owner_id": case.owner_id,
                 "patient_age": case.patient_age,
                 "patient_sex": case.patient_sex,
                 "complaint": case.complaint,
@@ -435,6 +596,8 @@ class OptionalIntegrations:
                 url,
                 payload,
                 timeout=self.settings.perception_timeout_seconds,
+                service="Qwen 模型服务",
+                allow_case_data=True,
             )
             data = response.get("result") if isinstance(response.get("result"), dict) else response
             findings = _normalize_findings(data.get("findings"))
@@ -469,6 +632,26 @@ class OptionalIntegrations:
                     "requires_human_review": bool(
                         data.get("requires_human_review", True)
                     ),
+                    "runtime": {
+                        "model": _safe_text(response.get("model")),
+                        "adapter_sha256": _safe_text(
+                            response.get("adapter_sha256")
+                        ),
+                        "latency_ms": response.get("latency_ms"),
+                        "generated_at": _safe_text(
+                            response.get("generated_at")
+                        ),
+                        "truncated": bool(response.get("truncated", False)),
+                        "peak_allocated_gib": response.get(
+                            "peak_allocated_gib"
+                        ),
+                        "peak_reserved_gib": response.get(
+                            "peak_reserved_gib"
+                        ),
+                        "research_use_only": bool(
+                            response.get("research_use_only", True)
+                        ),
+                    },
                 },
                 int((time.perf_counter() - started) * 1000),
             )
@@ -510,6 +693,8 @@ class OptionalIntegrations:
                 url,
                 payload,
                 timeout=self.settings.integration_timeout_seconds,
+                service="决策模型服务",
+                allow_case_data=True,
             )
             data = response.get("result") if isinstance(response.get("result"), dict) else response
             primary = str(
@@ -570,9 +755,15 @@ class OptionalIntegrations:
         judgment: dict[str, Any],
         decision: dict[str, Any],
     ) -> str:
+        """Build a search query from model labels only.
+
+        The case record is intentionally unused: complaints, history and
+        other patient fields must never reach a third-party search API. The
+        parameter is kept so the call site stays explicit.
+        """
+
+        del case
         terms: list[str] = []
-        if self._config().get("web_search_include_complaint") and case.complaint.strip():
-            terms.append(case.complaint.strip())
         for item in judgment.get("findings", []):
             if isinstance(item, dict) and item.get("label"):
                 terms.append(str(item["label"]))
@@ -598,7 +789,15 @@ class OptionalIntegrations:
         if self.settings.model_mode != "remote" or not config.get("web_search_enabled"):
             return IntegrationResult("skipped", "网络搜索 API 未启用")
         started = time.perf_counter()
-        query = self._search_query(case, judgment, decision)
+        try:
+            query = self._search_query(case, judgment, decision)
+            query = assert_external_text(query, case, service="网络搜索")
+        except Exception as exc:
+            return IntegrationResult(
+                "failed",
+                f"网络搜索已阻止外发: {type(exc).__name__}: {exc}",
+                latency_ms=int((time.perf_counter() - started) * 1000),
+            )
         providers = [str(item).strip().lower() for item in config.get("search_provider_order", []) if str(item).strip()]
         results: list[WebEvidence] = []
         failures: list[str] = []
@@ -837,40 +1036,43 @@ class OptionalIntegrations:
         if not self.summary_available:
             return IntegrationResult("skipped", "外部总结 API 未启用")
         started = time.perf_counter()
-        payload: dict[str, Any] = {
-            "judgment": judgment,
-            "decision": decision,
-            "rag_evidence": [
-                item.model_dump(mode="json") for item in evidence[:8]
-            ],
-            "web_evidence": [
-                item.model_dump(mode="json") for item in web_evidence[:8]
-            ],
-        }
         config = self._config()
-        if config.get("summary_include_clinical_text"):
-            payload["clinical_context"] = {
-                "complaint": case.complaint,
-                "medical_history": case.medical_history,
-                "affected_eye": case.affected_eye,
-            }
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You summarize structured ophthalmology research signals. "
-                    "You are not the diagnostician. Do not invent facts, do not "
-                    "make a definitive diagnosis, and do not add patient data. "
-                    "Return compact JSON with keys summary, recommendations, "
-                    "uncertainties, and evidence_ids."
-                ),
-            },
-            {
-                "role": "user",
-                "content": json.dumps(payload, ensure_ascii=False),
-            },
-        ]
+        # Images and the case record never leave the deployment: the payload
+        # carries an explicit allowlist of model output and retrieved evidence
+        # only; upstream dictionaries are never forwarded verbatim.
         try:
+            payload: dict[str, Any] = {
+                "judgment": _safe_judgment(judgment),
+                "decision": _safe_decision(decision),
+                "rag_evidence": [
+                    item.model_dump(mode="json") for item in evidence[:8]
+                ],
+                "web_evidence": [
+                    item.model_dump(mode="json") for item in web_evidence[:8]
+                ],
+            }
+            payload = prepare_external_payload(payload, service="外部总结")
+            assert_external_text(
+                json.dumps(payload, ensure_ascii=False),
+                case,
+                service="外部总结",
+            )
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You summarize structured ophthalmology research signals. "
+                        "You are not the diagnostician. Do not invent facts, do not "
+                        "make a definitive diagnosis, and do not add patient data. "
+                        "Return compact JSON with keys summary, recommendations, "
+                        "uncertainties, and evidence_ids."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(payload, ensure_ascii=False),
+                },
+            ]
             protocol = str(config.get("summary_protocol") or "openai_chat_completions")
             url = str(config.get("summary_base_url") or "").rstrip("/")
             model = str(config.get("summary_model") or "")
@@ -882,7 +1084,7 @@ class OptionalIntegrations:
                     url,
                     {
                         "model": model,
-                        "max_tokens": 1200,
+                        "max_tokens": 2400,
                         "temperature": 0.1,
                         "system": messages[0]["content"],
                         "messages": [messages[1]],
@@ -909,6 +1111,7 @@ class OptionalIntegrations:
                         "model": model,
                         "instructions": messages[0]["content"],
                         "input": messages[1]["content"],
+                        "max_output_tokens": 2400,
                     },
                     timeout=self.settings.summary_timeout_seconds,
                     headers=self._headers(api_key),
@@ -932,6 +1135,7 @@ class OptionalIntegrations:
                         "model": model,
                         "messages": messages,
                         "temperature": 0.1,
+                        "max_tokens": 2400,
                     },
                     timeout=self.settings.summary_timeout_seconds,
                     headers=self._headers(api_key),
@@ -942,7 +1146,7 @@ class OptionalIntegrations:
                 content = choices[0].get("message", {}).get("content", "")
             parsed = _json_object(str(content)) if content else None
             if parsed is None and content:
-                parsed = {"summary": str(content).strip()}
+                parsed = {"summary": _summary_from_unparsed_json(str(content))}
             if not parsed or not str(parsed.get("summary") or "").strip():
                 raise ValueError("外部总结响应为空")
             return IntegrationResult(

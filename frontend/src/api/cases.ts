@@ -48,11 +48,31 @@ export type AnalysisResult = {
   summary: string;
   external_summary_used: boolean;
   external_payload: Record<string, unknown>;
+  toolchain_plan: {
+    planner: string;
+    steps: string[];
+    skipped: Record<string, string>;
+    rationale: string;
+    notes: string[];
+  };
   confidence: number;
   safety_flags: string[];
   started_at: string;
   completed_at: string | null;
   error: string;
+};
+
+export type AnalysisJobRecord = {
+  id: number;
+  case_id: string;
+  status: "queued" | "running" | "finalizing" | "completed" | "failed";
+  attempt_count: number;
+  max_attempts: number;
+  error: string;
+  created_at: string;
+  updated_at: string;
+  started_at: string | null;
+  completed_at: string | null;
 };
 
 export type CaseReview = {
@@ -65,6 +85,8 @@ export type CaseReview = {
 
 export type CaseRecord = {
   id: string;
+  owner_id: string;
+  owner_name: string;
   patient_age: number;
   patient_sex: "F" | "M" | "U";
   complaint: string;
@@ -77,6 +99,21 @@ export type CaseRecord = {
   review: CaseReview | null;
   created_at: string;
   updated_at: string;
+};
+
+export type CaseListPage = {
+  items: CaseRecord[];
+  total: number;
+  page: number;
+  page_size: number;
+};
+
+export type CaseListQuery = {
+  page?: number;
+  page_size?: number;
+  status?: CaseStatus;
+  from?: string;
+  to?: string;
 };
 
 export type CaseCreateInput = {
@@ -95,12 +132,47 @@ export type ReviewInput = {
   reviewer: string;
 };
 
-export function listCases(): Promise<CaseRecord[]> {
-  return request<CaseRecord[]>("/api/v1/cases");
+function parseCaseListPage(value: unknown): CaseListPage {
+  if (!value || typeof value !== "object") {
+    throw new Error("病例列表响应格式异常，请刷新后重试");
+  }
+  const candidate = value as Partial<CaseListPage>;
+  if (
+    !Array.isArray(candidate.items)
+    || typeof candidate.total !== "number"
+    || typeof candidate.page !== "number"
+    || typeof candidate.page_size !== "number"
+  ) {
+    throw new Error("病例列表响应格式异常，请刷新后重试");
+  }
+  return {
+    items: candidate.items.map((item) => ({
+      ...item,
+      images: Array.isArray(item.images) ? item.images : [],
+      analysis: item.analysis ?? null,
+      review: item.review ?? null,
+    })),
+    total: candidate.total,
+    page: candidate.page,
+    page_size: candidate.page_size,
+  };
+}
+
+export async function listCases(query: CaseListQuery = {}): Promise<CaseListPage> {
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  });
+  const suffix = params.size ? `?${params.toString()}` : "";
+  return parseCaseListPage(await request<unknown>(`/api/v1/cases${suffix}`));
 }
 
 export function getCase(caseId: string): Promise<CaseRecord> {
   return request<CaseRecord>(`/api/v1/cases/${caseId}`);
+}
+
+export function getAnalysisJob(caseId: string): Promise<AnalysisJobRecord | null> {
+  return request<AnalysisJobRecord | null>(`/api/v1/cases/${caseId}/analysis-job`);
 }
 
 export function createCase(input: CaseCreateInput): Promise<CaseRecord> {

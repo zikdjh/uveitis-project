@@ -18,6 +18,7 @@ def _case(upload_dir: Path) -> CaseRead:
     now = datetime.now(UTC)
     return CaseRead(
         id="case-contract",
+        owner_id="doctor-1",
         patient_age=48,
         patient_sex="F",
         complaint="左眼视物模糊",
@@ -58,7 +59,15 @@ def test_qwen_runtime_contract_sends_task_and_reads_nested_result(
                     "impression": "黄斑区可见异常信号",
                     "findings": [],
                     "requires_human_review": True,
-                }
+                },
+                "model": "Qwen3.5-4B",
+                "adapter_sha256": "a" * 64,
+                "latency_ms": 2400,
+                "generated_at": "2026-10-27T10:00:00+00:00",
+                "truncated": False,
+                "peak_allocated_gib": 3.27,
+                "peak_reserved_gib": 3.36,
+                "research_use_only": True,
             },
         )
 
@@ -85,6 +94,13 @@ def test_qwen_runtime_contract_sends_task_and_reads_nested_result(
     assert received[0]["case"]["images"][0]["local_path"].endswith(
         "image-1.png"
     )
+    assert received[0]["case"]["owner_id"] == "doctor-1"
+    runtime = result.data["runtime"]
+    assert runtime["model"] == "Qwen3.5-4B"
+    assert runtime["adapter_sha256"] == "a" * 64
+    assert runtime["latency_ms"] == 2400
+    assert runtime["truncated"] is False
+    assert runtime["peak_reserved_gib"] == 3.36
 
 
 def test_qwen_runtime_failure_does_not_raise(tmp_path: Path) -> None:

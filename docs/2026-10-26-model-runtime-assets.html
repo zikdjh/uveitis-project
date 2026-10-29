@@ -24,19 +24,20 @@
   </div>
   <h1>模型运行资产索引</h1>
   <p class="doc-summary">运行 adapter、冻结评估结果和路径读取约定</p>
-  <p class="doc-source">规范入口：<code>model-runtime/assets/README.md</code></p>
+  <p class="doc-source">规范入口：<code>qwen3.5-4b/assets/README.md</code></p>
   <article class="html-body">
-<p>运行资产不复制权重，统一从 <code>model-training/assets/qwen3.5-4b/</code> 读取。</p>
+<p>运行权重在本包 <code>models/</code>；训练过程证据（指标与决策 JSON）在 <code>model/training/assets/qwen3.5-4b/</code>。</p>
 <ul>
-<li>冻结评估基线：<code>local-4060-grouped-cont-20261025-01/best_adapter</code></li>
-<li>选定的 OCT 运行候选：<code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>，第 20 步</li>
+<li>冻结评估基线：第 100 步 adapter（权重已随中间态清理，证据以 Modal <code>uveitis-runs</code> 卷与 freeze-manifest SHA256 为准）</li>
+<li>选定的 OCT 运行候选：本包 <code>models/best_adapter</code>（第 20 步，已从训练 run 目录迁入）</li>
 <li>冻结评估：<code>eval-oct-step20-vs-step100-20261025-01/</code></li>
 <li>错误来源分析：<code>eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code></li>
 <li>本地受控推理 smoke：<code>eval-oct-step20-runtime-smoke-20261026-01/</code></li>
 <li>真实运行服务烟测：<code>runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code></li>
 </ul>
 <p>当前运行服务默认索引选定的第 20 步 OCT adapter，并通过 <code>POST /v1/judge</code> 执行真实本地推理。同源冻结测试显示其 macro-F1 为 <code>0.947245</code>，比第 100 步基线提升 <code>0.028993</code>。切换 adapter 时设置 <code>MODEL_RUNTIME_ADAPTER_DIR</code>，不需要移动权重文件。</p>
-<p>2026-10-26 的第二阶段受控续训没有产生更好的验证候选：<code>5e-6</code> 和 <code>1e-5</code> 两组都在第 10 步早停，最佳点仍是初始化时的第 20 步 adapter。运行侧默认 adapter 不变，不读取第二阶段的实验 <code>final_adapter</code>。决策证据见 <code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>。</p>
+<p>第 20 步候选的服务级冻结契约位于本目录 <code>freeze-step20-20261028-01/runtime-contract.json</code>，模型卡和已知限制位于同目录。运行侧必须继续遵守本地图像路径白名单、串行推理、超时降级、<code>requires_human_review=true</code> 和“病例文本与影像不发送外部 API”的边界。</p>
+<p>2026-10-26 的第二阶段受控续训没有产生更好的验证候选：<code>5e-6</code> 和 <code>1e-5</code> 两组都在第 10 步早停，最佳点仍是初始化时的第 20 步 adapter。运行侧默认 adapter 不变，不读取第二阶段的实验 <code>final_adapter</code>。决策证据见 <code>model/training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>。</p>
 <p>第 20 步候选的 1,000 条错误分析显示，主要错误为 <code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条；相对第 100 步基线，DRUSEN 纠正 38 条，但 CNV 退化 6 条、NORMAL 退化 4 条。四类各 4 条的本地推理 smoke 为 16/16 正确、JSON 有效率 100%，峰值保留显存 <code>3.31 GiB</code>。该 smoke 只用于验证运行链路，不作为准确率依据。</p>
 
   </article>

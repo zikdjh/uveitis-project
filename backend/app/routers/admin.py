@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, time, timedelta
+
 from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME
 from app.core.security import (
     request_ip,
     request_user_agent,
     require_permission,
 )
 from app.schemas.auth import (
-    AuthAuditEventRead,
+    ActiveSessionRead,
+    AuthAuditEventPage,
     PasswordReset,
     Permission,
     UserCreate,
@@ -18,6 +22,22 @@ from app.schemas.auth import (
 
 
 router = APIRouter(prefix="/api/v1/admin", tags=["administration"])
+
+AUDIT_EVENTS = {
+    "login",
+    "doctor_login",
+    "admin_login",
+    "token_refresh",
+    "logout",
+    "session_revoke",
+    "session_revoke_others",
+    "password_change",
+    "password_reset",
+    "user_create",
+    "user_update",
+    "integration_config_update",
+}
+AUDIT_OUTCOMES = {"success", "failed", "blocked"}
 
 
 def _audit(
@@ -48,16 +68,54 @@ def list_users(request: Request) -> list[UserRead]:
     return request.app.state.user_store.list()
 
 
+@router.get("/active-sessions", response_model=list[ActiveSessionRead])
+def list_active_sessions(request: Request) -> list[ActiveSessionRead]:
+    require_permission(request, Permission.AUDIT_READ)
+    sessions = request.app.state.redis_store.list_all_sessions()
+    result: list[ActiveSessionRead] = []
+    users_by_id: dict[str, UserRead | None] = {}
+    for session in sessions:
+        user_id = session.get("user_id", "")
+        if user_id not in users_by_id:
+            users_by_id[user_id] = request.app.state.user_store.get(user_id)
+        user = users_by_id[user_id]
+        if user is None:
+            continue
+        try:
+            created_at = datetime.fromisoformat(session["created_at"])
+            last_seen_at = datetime.fromisoformat(session["last_seen_at"])
+            expires_at = datetime.fromisoformat(session["refresh_expires_at"])
+        except (KeyError, ValueError):
+            continue
+        result.append(
+            ActiveSessionRead(
+                session_id=session.get("session_id", ""),
+                user_id=user_id,
+                username=user.username,
+                display_name=user.display_name,
+                role=user.role,
+                ip_address=session.get("ip_address", ""),
+                user_agent=session.get("user_agent", ""),
+                created_at=created_at,
+                last_seen_at=last_seen_at,
+                expires_at=expires_at,
+            )
+        )
+    return result
+
+
 @router.post("/users", response_model=UserRead, status_code=201)
 def create_user(payload: UserCreate, request: Request) -> UserRead:
     actor = require_permission(request, Permission.USER_MANAGE)
     auth = request.app.state.auth_service
+    if payload.username.strip().lower() == ROOT_ADMIN_USERNAME:
+        raise HTTPException(status_code=409, detail="root 管理员账号已由系统保留")
     try:
         user = auth.users.create(
             payload.username,
             auth.hash_password(payload.password),
             payload.display_name,
-            payload.role,
+            "doctor",
         )
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -68,7 +126,7 @@ def create_user(payload: UserCreate, request: Request) -> UserRead:
         username=user.username,
         user_id=user.id,
         actor_id=actor.id,
-        detail=f"创建 {user.role} 账号",
+        detail="管理员创建医生账号",
     )
     return user
 
@@ -81,25 +139,20 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
     if current is None:
         raise HTTPException(status_code=404, detail="账号不存在")
 
-    next_role = payload.role or current.role
     next_active = current.is_active if payload.is_active is None else payload.is_active
-    removes_admin = current.role == "admin" and (
-        next_role != "admin" or next_active is False
-    )
-    if removes_admin and users.count_active_admins(excluding_user_id=current.id) == 0:
-        raise HTTPException(status_code=409, detail="系统必须保留至少一个启用的管理员")
+    if current.username == ROOT_ADMIN_USERNAME and next_active is False:
+        raise HTTPException(status_code=409, detail="固定管理员账号不能停用")
     if current.id == actor.id and next_active is False:
         raise HTTPException(status_code=409, detail="不能停用当前登录账号")
 
     updated = users.update(
         user_id,
         display_name=payload.display_name,
-        role=payload.role,
         is_active=payload.is_active,
     )
     if updated is None:
         raise HTTPException(status_code=404, detail="账号不存在")
-    if not updated.is_active or updated.role != current.role:
+    if not updated.is_active:
         request.app.state.auth_service.revoke_all_sessions(updated.id)
     _audit(
         request,
@@ -108,7 +161,7 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
         username=updated.username,
         user_id=updated.id,
         actor_id=actor.id,
-        detail=f"角色 {updated.role}，状态 {'启用' if updated.is_active else '停用'}",
+        detail=f"账号状态 {'启用' if updated.is_active else '停用'}",
     )
     return updated
 
@@ -124,6 +177,8 @@ def reset_password(
     user = request.app.state.user_store.get(user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="账号不存在")
+    if user.username == ROOT_ADMIN_USERNAME:
+        raise HTTPException(status_code=409, detail="固定管理员账号密码不能由后台重置")
     auth.users.set_password(user.id, auth.hash_password(payload.new_password))
     auth.revoke_all_sessions(user.id)
     _audit(
@@ -138,10 +193,58 @@ def reset_password(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/audit-events", response_model=list[AuthAuditEventRead])
+def _audit_date_bounds(from_date: str | None, to_date: str | None):
+    try:
+        start = (
+            datetime.combine(datetime.fromisoformat(from_date).date(), time.min, UTC)
+            if from_date
+            else None
+        )
+        end = (
+            datetime.combine(
+                datetime.fromisoformat(to_date).date() + timedelta(days=1),
+                time.min,
+                UTC,
+            )
+            if to_date
+            else None
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="日期格式应为 YYYY-MM-DD") from exc
+    if start and end and start >= end:
+        raise HTTPException(status_code=422, detail="开始日期不能晚于结束日期")
+    return start, end
+
+
+@router.get("/audit-events", response_model=AuthAuditEventPage)
 def list_audit_events(
     request: Request,
-    limit: int = Query(default=100, ge=1, le=500),
-) -> list[AuthAuditEventRead]:
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    event: str | None = Query(default=None, max_length=50),
+    outcome: str | None = Query(default=None, max_length=30),
+    from_date: str | None = Query(default=None, alias="from"),
+    to_date: str | None = Query(default=None, alias="to"),
+    search: str | None = Query(default=None, max_length=100),
+) -> AuthAuditEventPage:
     require_permission(request, Permission.AUDIT_READ)
-    return request.app.state.audit_store.list(limit=limit)
+    if event and event not in AUDIT_EVENTS:
+        raise HTTPException(status_code=422, detail="不支持的审计事件")
+    if outcome and outcome not in AUDIT_OUTCOMES:
+        raise HTTPException(status_code=422, detail="不支持的审计结果")
+    from_at, to_at = _audit_date_bounds(from_date, to_date)
+    items, total = request.app.state.audit_store.list_page(
+        page=page,
+        page_size=page_size,
+        event=event,
+        outcome=outcome,
+        from_at=from_at,
+        to_at=to_at,
+        search=search,
+    )
+    return AuthAuditEventPage(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+    )

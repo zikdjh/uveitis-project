@@ -5,7 +5,9 @@ from uuid import uuid4
 
 from sqlalchemy import inspect, text
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME, ROOT_PASSWORD_SENTINEL
 from app.db.models import UserRow
+from app.db.naming import column_name, table_name
 from app.schemas.auth import UserRead, UserRole, permissions_for_role
 
 
@@ -24,6 +26,7 @@ def _user_read(
         display_name=display_name,
         role=normalized_role,
         is_active=is_active,
+        is_root=username == ROOT_ADMIN_USERNAME,
         permissions=permissions_for_role(normalized_role),
     )
 
@@ -38,14 +41,16 @@ class UserStore:
     def _ensure_schema(self) -> None:
         engine = self._session_factory.kw["bind"]
         inspector = inspect(engine)
-        if "users" not in inspector.get_table_names():
+        table = table_name("user")
+        if table not in inspector.get_table_names():
             return
-        columns = {column["name"] for column in inspector.get_columns("users")}
-        if "is_active" not in columns:
+        columns = {column["name"] for column in inspector.get_columns(table)}
+        is_active_column = column_name("is_active")
+        if is_active_column not in columns:
             with engine.begin() as connection:
                 connection.execute(
                     text(
-                        "ALTER TABLE users ADD COLUMN is_active "
+                        f'ALTER TABLE "{table}" ADD COLUMN "{is_active_column}" '
                         "BOOLEAN NOT NULL DEFAULT TRUE"
                     )
                 )
@@ -61,7 +66,7 @@ class UserStore:
 
     def get(self, user_id: str) -> UserRead | None:
         with self._session_factory() as session:
-            row = session.get(UserRow, user_id)
+            row = self._row_by_key(session, user_id)
         return self._from_row(row) if row else None
 
     def list(self) -> list[UserRead]:
@@ -83,7 +88,7 @@ class UserStore:
             if exists is not None:
                 raise ValueError("账号已存在")
             row = UserRow(
-                id=str(uuid4()),
+                user_key=str(uuid4()),
                 username=username,
                 display_name=display_name.strip(),
                 role=role,
@@ -108,7 +113,7 @@ class UserStore:
             ).one_or_none()
             if row is None:
                 row = UserRow(
-                    id=str(uuid4()),
+                    user_key=str(uuid4()),
                     username=username,
                     display_name=display_name,
                     role=role,
@@ -119,6 +124,45 @@ class UserStore:
                 session.add(row)
         return self._from_row(row)
 
+    def ensure_single_admin(
+        self,
+        username: str,
+        password_hash: str | None,
+        display_name: str,
+    ) -> UserRead:
+        username = username.strip().lower()
+        if username != ROOT_ADMIN_USERNAME:
+            raise ValueError(f"系统管理员账号固定为 {ROOT_ADMIN_USERNAME}")
+        with self._session_factory.begin() as session:
+            root = session.query(UserRow).filter(
+                UserRow.username == username
+            ).one_or_none()
+            if root is None:
+                if not password_hash:
+                    raise ValueError("root 管理员首次创建必须提供初始密码")
+                root = UserRow(
+                    user_key=str(uuid4()),
+                    username=username,
+                    display_name=display_name,
+                    role="admin",
+                    password_hash=password_hash,
+                    is_active=True,
+                    created_at=datetime.now(UTC),
+                )
+                session.add(root)
+                session.flush()
+            else:
+                root.display_name = display_name
+                root.role = "admin"
+                root.is_active = True
+            other_admins = session.query(UserRow).filter(
+                UserRow.role == "admin",
+                UserRow.user_key != root.user_key,
+            ).all()
+            for row in other_admins:
+                row.role = "doctor"
+        return self._from_row(root)
+
     def update(
         self,
         user_id: str,
@@ -128,7 +172,7 @@ class UserStore:
         is_active: bool | None = None,
     ) -> UserRead | None:
         with self._session_factory.begin() as session:
-            row = session.get(UserRow, user_id)
+            row = self._row_by_key(session, user_id)
             if row is None:
                 return None
             if display_name is not None:
@@ -141,10 +185,20 @@ class UserStore:
 
     def set_password(self, user_id: str, password_hash: str) -> UserRead | None:
         with self._session_factory.begin() as session:
-            row = session.get(UserRow, user_id)
+            row = self._row_by_key(session, user_id)
             if row is None:
                 return None
             row.password_hash = password_hash
+        return self._from_row(row)
+
+    def clear_password_hash(self, username: str) -> UserRead | None:
+        with self._session_factory.begin() as session:
+            row = session.query(UserRow).filter(
+                UserRow.username == username.strip().lower()
+            ).one_or_none()
+            if row is None:
+                return None
+            row.password_hash = ROOT_PASSWORD_SENTINEL
         return self._from_row(row)
 
     def count_active_admins(self, excluding_user_id: str | None = None) -> int:
@@ -154,13 +208,21 @@ class UserStore:
                 UserRow.is_active.is_(True),
             )
             if excluding_user_id:
-                query = query.filter(UserRow.id != excluding_user_id)
+                query = query.filter(UserRow.user_key != excluding_user_id)
             return query.count()
+
+    @staticmethod
+    def _row_by_key(session, user_key: str) -> UserRow | None:
+        return (
+            session.query(UserRow)
+            .filter(UserRow.user_key == user_key)
+            .one_or_none()
+        )
 
     @staticmethod
     def _from_row(row: UserRow) -> UserRead:
         return _user_read(
-            user_id=row.id,
+            user_id=row.user_key,
             username=row.username,
             display_name=row.display_name,
             role=row.role,
@@ -220,6 +282,47 @@ class MemoryUserStore:
             return current[0]
         return self.create(username, password_hash, display_name, role)
 
+    def ensure_single_admin(
+        self,
+        username: str,
+        password_hash: str | None,
+        display_name: str,
+    ) -> UserRead:
+        username = username.strip().lower()
+        if username != ROOT_ADMIN_USERNAME:
+            raise ValueError(f"系统管理员账号固定为 {ROOT_ADMIN_USERNAME}")
+        for existing_username, (user, existing_password_hash) in list(self._users.items()):
+            if user.username == username:
+                continue
+            if user.role == "admin":
+                self._users[existing_username] = (
+                    user.model_copy(
+                        update={
+                            "role": "doctor",
+                            "permissions": permissions_for_role("doctor"),
+                        }
+                    ),
+                    existing_password_hash,
+                )
+        current = self._users.get(username)
+        if current is not None:
+            self._users[username] = (
+                current[0].model_copy(
+                    update={
+                        "display_name": display_name,
+                        "role": "admin",
+                        "is_active": True,
+                        "is_root": True,
+                        "permissions": permissions_for_role("admin"),
+                    }
+                ),
+                current[1],
+            )
+            return self._users[username][0]
+        if not password_hash:
+            raise ValueError("root 管理员首次创建必须提供初始密码")
+        return self.create(username, password_hash, display_name, "admin")
+
     def update(
         self,
         user_id: str,
@@ -249,6 +352,14 @@ class MemoryUserStore:
                 self._users[username] = (user, password_hash)
                 return user
         return None
+
+    def clear_password_hash(self, username: str) -> UserRead | None:
+        username = username.strip().lower()
+        current = self._users.get(username)
+        if current is None:
+            return None
+        self._users[username] = (current[0], ROOT_PASSWORD_SENTINEL)
+        return current[0]
 
     def count_active_admins(self, excluding_user_id: str | None = None) -> int:
         return sum(

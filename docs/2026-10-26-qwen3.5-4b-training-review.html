@@ -195,12 +195,12 @@
 <p>验证样本量较小，单个样本会造成明显波动。第 125 步的 token loss 最低，但分类表现下降，说明不能继续按 token loss 选模型。</p>
 <h2>产物与复现</h2>
 <ul>
-<li>最佳 adapter：<code>model-training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code></li>
+<li>最佳 adapter：<code>model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code></li>
 <li>最佳 adapter SHA256：<code>517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a</code></li>
 <li>历史最终 adapter SHA256：<code>9249271189cf5cb613e2d22834fc21e4909ccc0a42107caa9db5bc637c4e96eb</code></li>
 <li>本地第 100 步 checkpoint、最终 adapter、重复 processor 和 <code>training_state.pt</code> 已于 2026-10-26 清理；完整版本需从 Modal <code>uveitis-runs</code> 恢复。</li>
-<li>训练 summary：<code>model-training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/training_summary.json</code></li>
-<li>分组审计：<code>model-training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/split.json</code></li>
+<li>训练 summary：<code>model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/training_summary.json</code></li>
+<li>分组审计：<code>model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/split.json</code></li>
 <li>逐步指标：<code>train_metrics.jsonl</code>、<code>validation_metrics.jsonl</code></li>
 <li>显存监听：<code>memory_monitor.jsonl</code></li>
 <li>训练耗时：1,880.95 秒（约 31 分 21 秒）</li>
@@ -311,11 +311,11 @@
 <p>主要改善是 CNV/DRUSEN 的双向混淆减少：18 张 DRUSEN 中错判为 CNV 的数量由 8 张降到 4 张。但 OCT 的 NORMAL 只有 3 张支持，验证集仍然偏小，这一提升不足以构成泛化证明。</p>
 <p>产物：</p>
 <ul>
-<li>OCT 聚焦最佳 adapter：<code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code></li>
+<li>OCT 聚焦最佳 adapter：<code>model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code></li>
 <li>最佳 adapter SHA256：<code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code></li>
 <li>历史最终 adapter SHA256：<code>3e7aab29fbcdda51ec9a7a2095982e337ca9ad41dc70dd6775a42e142497f676</code></li>
-<li>训练 summary：<code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/training_summary.json</code></li>
-<li>验证日志：<code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/validation_metrics.jsonl</code></li>
+<li>训练 summary：<code>model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/training_summary.json</code></li>
+<li>验证日志：<code>model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/validation_metrics.jsonl</code></li>
 <li>本地 checkpoint、最终 adapter、重复 processor 和 <code>training_state.pt</code> 已于 2026-10-26 清理；最佳 adapter 与验证指标保留。</li>
 </ul>
 <h2>2026-10-26 同源冻结测试与选型</h2>
@@ -324,7 +324,7 @@
 <li>两份 <code>selection_sha256</code> 均为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。</li>
 <li>第 100 步基线 macro-F1 <code>0.918252</code>；第 20 步候选 macro-F1 <code>0.947245</code>；提升 <code>+0.028993</code>，超过 <code>0.02</code> 门槛。</li>
 <li>候选的主要改善来自 CNV F1 <code>+0.063220</code> 和 DRUSEN F1 <code>+0.065101</code>；DME 和 NORMAL 有轻微下降，需保留在限制说明中。</li>
-<li>选型决定为 <code>promote_step20_candidate</code>，证据见 <code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/selection_decision.json</code>。</li>
+<li>选型决定为 <code>promote_step20_candidate</code>，证据见 <code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/selection_decision.json</code>。</li>
 <li>该决定只确认研究型运行候选，不代表患者隔离外部验证或临床部署批准。</li>
 </ul>
 <p>下一步应冻结第 20 步 adapter、模型卡、指标文件和运行读取路径。错误来源分析和四类均衡推理 smoke 已完成：53 条错误主要集中在 <code>NORMAL-&gt;DRUSEN</code>、<code>DRUSEN-&gt;CNV</code> 和 <code>CNV-&gt;DME</code>，后续实验应优先检查这些类别的患者、来源和图像分布，而不是继续提高训练步数。</p>
@@ -337,7 +337,7 @@
 <li>实验最佳点都停留在初始化第 0 步，没有生成可替代第 20 步候选的 adapter。因此决定为 <code>retain_step20_candidate</code>，不运行新的冻结测试提升门槛，也不覆盖运行候选。</li>
 <li>这次复核还修正了选择键记录：初始化验证与后续 checkpoint 统一使用“总 Macro-F1 → JSON 有效率 → loss”，避免把 OCT 子任务 F1 写入 JSON 有效率字段。</li>
 </ul>
-<p>证据：<code>model-training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>；训练摘要分别位于两个 run 的 <code>training_summary.json</code>。</p>
+<p>证据：<code>model/training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>；训练摘要分别位于两个 run 的 <code>training_summary.json</code>。</p>
 <p>结论：当前数据、任务权重和 8 GB 配置下，继续同路线增加步数没有收益。后续应先检查 CNV/DRUSEN 错误来源、来源组分布和患者隔离状况，或者把工作重心切到冻结第 20 步证据与受控推理 smoke。</p>
   </article>
 </main>

@@ -1,0 +1,191 @@
+{
+  "status": "ok",
+  "source_run": "uwf-binary-stage1-20261026-01",
+  "manifest": "model/training/datasets/tasks/open_uwf_uveitis_binary/manifest.csv",
+  "manifest_sha256": "bacc37ed9c37676570a4e4f49036b60fe472e7a86fb7b537387a734551c2b253",
+  "selected_tasks": [
+    "uwf_uveitis_binary"
+  ],
+  "validation_policy": "Explicit replay of the validation groups selected by the formal 60-step run",
+  "validation_rows": [
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:AMD:64\t14:14_open_uwf700:AMD:64\tdata/AMD-022.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:AMD:64\t14:14_open_uwf700:AMD:64\tdata/AMD-023.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:AMD:84\t14:14_open_uwf700:AMD:84\tdata/AMD-065.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:DR:38\t14:14_open_uwf700:DR:38\tdata/DR-071.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:DR:38\t14:14_open_uwf700:DR:38\tdata/DR-072.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:DR:50\t14:14_open_uwf700:DR:50\tdata/DR-094.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:DR:50\t14:14_open_uwf700:DR:50\tdata/DR-095.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:Healthy:554\t14:14_open_uwf700:Healthy:554\tdata/Healthy-052.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:RD:430\t14:14_open_uwf700:RD:430\tdata/RD-027.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:RD:460\t14:14_open_uwf700:RD:460\tdata/RD-057.jpg",
+    "uwf_uveitis_binary\tnon_uveitis\t14_open_uwf700:RD:493\t14:14_open_uwf700:RD:493\tdata/RD-090.jpg",
+    "uwf_uveitis_binary\tuveitis\t14_open_uwf700:Uveitis:304\t14:14_open_uwf700:Uveitis:304\tdata/Uveitis-001.jpg",
+    "uwf_uveitis_binary\tuveitis\t14_open_uwf700:Uveitis:312\t14:14_open_uwf700:Uveitis:312\tdata/Uveitis-009.jpg",
+    "uwf_uveitis_binary\tuveitis\t14_open_uwf700:Uveitis:314\t14:14_open_uwf700:Uveitis:314\tdata/Uveitis-011.jpg",
+    "uwf_uveitis_binary\tuveitis\t14_open_uwf700:Uveitis:324\t14:14_open_uwf700:Uveitis:324\tdata/Uveitis-021.jpg",
+    "uwf_uveitis_binary\tuveitis\t14_open_uwf700:Uveitis:351\t14:14_open_uwf700:Uveitis:351\tdata/Uveitis-048.jpg",
+    "uwf_uveitis_binary\tuveitis\t14_open_uwf700:Uveitis:358\t14:14_open_uwf700:Uveitis:358\tdata/Uveitis-055.jpg",
+    "uwf_uveitis_binary\tuveitis\t14_open_uwf700:Uveitis:363\t14:14_open_uwf700:Uveitis:363\tdata/Uveitis-060.jpg",
+    "uwf_uveitis_binary\tuveitis\t14_open_uwf700:Uveitis:401\t14:14_open_uwf700:Uveitis:401\tdata/Uveitis-098.jpg"
+  ],
+  "validation_rows_detail": [
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:AMD:64",
+      "group_key": "14:14_open_uwf700:AMD:64",
+      "image": "data/AMD-022.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:AMD:64",
+      "group_key": "14:14_open_uwf700:AMD:64",
+      "image": "data/AMD-023.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:AMD:84",
+      "group_key": "14:14_open_uwf700:AMD:84",
+      "image": "data/AMD-065.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:DR:38",
+      "group_key": "14:14_open_uwf700:DR:38",
+      "image": "data/DR-071.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:DR:38",
+      "group_key": "14:14_open_uwf700:DR:38",
+      "image": "data/DR-072.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:DR:50",
+      "group_key": "14:14_open_uwf700:DR:50",
+      "image": "data/DR-094.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:DR:50",
+      "group_key": "14:14_open_uwf700:DR:50",
+      "image": "data/DR-095.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:Healthy:554",
+      "group_key": "14:14_open_uwf700:Healthy:554",
+      "image": "data/Healthy-052.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:RD:430",
+      "group_key": "14:14_open_uwf700:RD:430",
+      "image": "data/RD-027.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:RD:460",
+      "group_key": "14:14_open_uwf700:RD:460",
+      "image": "data/RD-057.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "non_uveitis",
+      "source_group": "14_open_uwf700:RD:493",
+      "group_key": "14:14_open_uwf700:RD:493",
+      "image": "data/RD-090.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "uveitis",
+      "source_group": "14_open_uwf700:Uveitis:304",
+      "group_key": "14:14_open_uwf700:Uveitis:304",
+      "image": "data/Uveitis-001.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "uveitis",
+      "source_group": "14_open_uwf700:Uveitis:312",
+      "group_key": "14:14_open_uwf700:Uveitis:312",
+      "image": "data/Uveitis-009.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "uveitis",
+      "source_group": "14_open_uwf700:Uveitis:314",
+      "group_key": "14:14_open_uwf700:Uveitis:314",
+      "image": "data/Uveitis-011.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "uveitis",
+      "source_group": "14_open_uwf700:Uveitis:324",
+      "group_key": "14:14_open_uwf700:Uveitis:324",
+      "image": "data/Uveitis-021.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "uveitis",
+      "source_group": "14_open_uwf700:Uveitis:351",
+      "group_key": "14:14_open_uwf700:Uveitis:351",
+      "image": "data/Uveitis-048.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "uveitis",
+      "source_group": "14_open_uwf700:Uveitis:358",
+      "group_key": "14:14_open_uwf700:Uveitis:358",
+      "image": "data/Uveitis-055.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "uveitis",
+      "source_group": "14_open_uwf700:Uveitis:363",
+      "group_key": "14:14_open_uwf700:Uveitis:363",
+      "image": "data/Uveitis-060.jpg"
+    },
+    {
+      "dataset": "14_open_uwf700",
+      "task": "uwf_uveitis_binary",
+      "label": "uveitis",
+      "source_group": "14_open_uwf700:Uveitis:401",
+      "group_key": "14:14_open_uwf700:Uveitis:401",
+      "image": "data/Uveitis-098.jpg"
+    }
+  ],
+  "validation_selection_sha256": "cf103d219977b3a5d3d0492916d32146b1405c2e42049d71ce6c25d87611633d",
+  "train_rows": 484,
+  "validation_rows_count": 19,
+  "train_groups": 415,
+  "validation_groups": 16,
+  "test_images_read": false
+}

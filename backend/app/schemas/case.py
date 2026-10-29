@@ -89,11 +89,29 @@ class AnalysisResult(BaseModel):
     summary: str = ""
     external_summary_used: bool = False
     external_payload: dict[str, Any] = Field(default_factory=dict)
+    runtime_metadata: dict[str, Any] = Field(default_factory=dict)
+    toolchain_plan: dict[str, Any] = Field(default_factory=dict)
     confidence: float = Field(default=0, ge=0, le=1)
     safety_flags: list[str] = Field(default_factory=list)
     started_at: datetime
     completed_at: datetime | None = None
     error: str = ""
+
+
+AnalysisJobStatus = Literal["queued", "running", "finalizing", "completed", "failed"]
+
+
+class AnalysisJobRead(BaseModel):
+    id: int
+    case_id: str
+    status: AnalysisJobStatus
+    attempt_count: int = Field(ge=0)
+    max_attempts: int = Field(ge=1)
+    error: str = ""
+    created_at: datetime
+    updated_at: datetime
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 ReviewDecision = Literal["accepted", "modified", "rejected"]
@@ -118,6 +136,8 @@ class CaseReview(ReviewUpdate):
 
 class CaseRead(BaseModel):
     id: str
+    owner_id: str = ""
+    owner_name: str = ""
     patient_age: int
     patient_sex: str
     complaint: str
@@ -130,6 +150,13 @@ class CaseRead(BaseModel):
     review: CaseReview | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class CaseListPage(BaseModel):
+    items: list[CaseRead] = Field(default_factory=list)
+    total: int = Field(default=0, ge=0)
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=8, ge=1)
 
 
 class CaseStats(BaseModel):
@@ -211,9 +238,7 @@ class KnowledgeIndexStatus(BaseModel):
     path: str
     documents: int
     dimension: int
-    embedding_mode: Literal["memory", "local", "remote"]
-    model_path: str = ""
-    device: str = ""
+    embedding_mode: Literal["memory", "remote"]
     ready: bool
 
 

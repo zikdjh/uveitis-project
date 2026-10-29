@@ -27,7 +27,7 @@
   <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-26-dataset-training-map.html</code></p>
   <article class="html-body">
 <p>整理日期：2026-10-25</p>
-<p>目标：把 <code>model-training/datasets/extracted/</code> 中的数据转换成可训练的影像分类、影像定位/分割、结构化决策和文本检索样本，用于 Qwen 多模态、Intern-Decision 与 BGE-M3。</p>
+<p>目标：把 <code>model/training/datasets/extracted/</code> 中的数据转换成可训练的影像分类、影像定位/分割、结构化决策和文本检索样本，用于 Qwen 多模态、Intern-Decision 与 BGE-M3。</p>
 <h2>1. 先确定训练边界</h2>
 <p>当前下载的是多来源公开影像数据，不是带完整病史、诊断依据和医生处置的病人队列。因此分三条链路：</p>
 <table>
@@ -232,14 +232,14 @@
 </tr>
 </tbody>
 </table>
-<p>数量按当前 <code>model-training/datasets/extracted/</code> 实测；预处理副本、掩膜和重复图像都会影响“可用独立样本”的数量。原始下载 ZIP 已在完整性核验后清理，来源账本见 <code>model-training/datasets/extracted/manifests/archive-cleanup-2026-10-25.csv</code>。</p>
+<p>数量按当前 <code>model/training/datasets/extracted/</code> 实测；预处理副本、掩膜和重复图像都会影响“可用独立样本”的数量。原始下载 ZIP 已在完整性核验后清理，来源账本见 <code>model/training/datasets/extracted/manifests/archive-cleanup-2026-10-25.csv</code>。</p>
 <h2>4. 具体怎么构造样本</h2>
 <h3>4.1 影像分类样本</h3>
 <p>视觉语言模型建议使用统一的对话格式：</p>
 <pre><code class="language-json">{
   &quot;id&quot;: &quot;uv_oct_0001&quot;,
   &quot;dataset&quot;: &quot;01_uveitis_oct&quot;,
-  &quot;image&quot;: &quot;model-training/datasets/extracted/01_uveitis_oct/.../Normal 1.jpeg&quot;,
+  &quot;image&quot;: &quot;model/training/datasets/extracted/01_uveitis_oct/.../Normal 1.jpeg&quot;,
   &quot;modality&quot;: &quot;oct&quot;,
   &quot;task&quot;: &quot;classification&quot;,
   &quot;patient_group&quot;: &quot;01_uveitis_oct:source_folder&quot;,
@@ -350,8 +350,8 @@
     <tr><th>任务</th><th>清单</th><th>样本与切分</th><th>使用边界</th></tr>
   </thead>
   <tbody>
-    <tr><td>7 类</td><td><code>model-training/datasets/tasks/open_uwf_7class/manifest.csv</code></td><td>700；train 503 / validation 107 / test 90</td><td>AMD、DR、Healthy、PM、RD、RVO、Uveitis；60 步试验不可用，不晋级</td></tr>
-    <tr><td>葡萄膜炎二分类</td><td><code>model-training/datasets/tasks/open_uwf_uveitis_binary/manifest.csv</code></td><td>uveitis 100、non_uveitis 600；同一患者隔离切分</td><td>研究代理任务；单次测试已冻结，不与临床“排除炎症”等价</td></tr>
+    <tr><td>7 类</td><td><code>model/training/datasets/tasks/open_uwf_7class/manifest.csv</code></td><td>700；train 503 / validation 107 / test 90</td><td>AMD、DR、Healthy、PM、RD、RVO、Uveitis；60 步试验不可用，不晋级</td></tr>
+    <tr><td>葡萄膜炎二分类</td><td><code>model/training/datasets/tasks/open_uwf_uveitis_binary/manifest.csv</code></td><td>uveitis 100、non_uveitis 600；同一患者隔离切分</td><td>研究代理任务；单次测试已冻结，不与临床“排除炎症”等价</td></tr>
   </tbody>
 </table>
 <p>源 Patient ID 在不同诊断队列中会复用，因此键固定为 <code>14_open_uwf700:&lt;diagnosis&gt;:&lt;Patient ID&gt;</code>。二分类 negative 仅覆盖 AMD、DR、Healthy、PM、RD、RVO；若要增强特异性，应优先增加异质性、医生确认的炎症阴性样本，而不是继续降低测试门槛。</p>

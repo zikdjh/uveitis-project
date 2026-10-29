@@ -12,6 +12,7 @@ TEST_ROOT.mkdir(parents=True, exist_ok=True)
 # remote PostgreSQL instance that is not running during unit tests.
 os.environ["APP_DATABASE_URL"] = ""
 os.environ["APP_DATA_DIR"] = str(TEST_ROOT)
+os.environ["APP_MODEL_MODE"] = "mock"
 
 
 @pytest.fixture

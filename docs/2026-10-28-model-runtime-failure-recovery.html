@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>分析任务失败恢复回归 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-model-runtime-business-integration.html">上一份</a>
+    <a href="2026-10-29-full-test-report.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>运行</span>
+    <span>2026-10-28</span>
+  </div>
+  <h1>分析任务失败恢复回归</h1>
+  <p class="doc-summary">运行服务不可用、推理超时、真实回写与服务恢复四个阶段的端到端验收证据</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-28-model-runtime-failure-recovery.html</code></p>
+  <article class="html-body">
+<p>本页补齐 10-27 业务回写之后剩余的失败恢复回归：验证 Qwen 判断分支在运行服务不可用、推理超时和进程重启场景下独立降级，且病例主链路始终完整进入待复核。回归脚本为 <code>qwen3.5-4b/scripts/run_recovery_regression.py</code>，证据文件为 <code>model/training/assets/qwen3.5-4b/runtime-recovery-local-4060-20261028-01/recovery_evidence.json</code>。</p>
+
+    <h2>回归范围</h2>
+    <ul>
+      <li>后端使用内存适配器与受控上传目录，业务侧以 <code>model_mode=remote</code> 指向本地运行服务；病例影像为冻结测试集中的一张 OCT 图。</li>
+      <li>真实阶段使用 RTX 4060 本机运行服务、Qwen3.5-4B 基座与第 20 步 adapter，并启用 <code>X-Internal-Service-Token</code> 内部鉴权。</li>
+      <li>降级阶段断言：任务结果为 <code>completed</code>、Qwen 阶段为 <code>failed</code>、<code>runtime_metadata</code> 为空、安全标记包含降级说明。</li>
+      <li>真实阶段断言：Qwen 阶段 <code>completed</code>，<code>runtime_metadata</code> 含模型名、64 位 adapter SHA256、推理时延与峰值显存。</li>
+    </ul>
+
+    <h2>四阶段结果</h2>
+    <table>
+      <thead><tr><th>阶段</th><th>场景</th><th>结果</th><th>耗时</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>运行服务端口不可达</td><td>Qwen 阶段 <code>failed</code>（ConnectError），任务完成并回写确定性摘要，病例进入待复核。</td><td>2.1 秒</td></tr>
+        <tr><td>B</td><td>推理端 8 秒无响应、超时上限 1.5 秒</td><td>Qwen 阶段 <code>failed</code>（ReadTimeout），降级路径与阶段 A 一致。</td><td>1.6 秒</td></tr>
+        <tr><td>C</td><td>真实运行服务回写</td><td>返回 CNV 标签；<code>adapter_sha256=00ebeb2c...</code>，峰值保留显存 3.311 GiB，GPU 常驻 4154 MiB。</td><td>37.6 秒（含首次模型加载）</td></tr>
+        <tr><td>D</td><td>停止并重启运行服务后再回写</td><td>再次完成回写，adapter 指纹与阶段 C 一致，证明服务恢复后链路无需人工干预。</td><td>37.2 秒（含重新加载）</td></tr>
+      </tbody>
+    </table>
+
+    <h2>复跑方式</h2>
+    <pre><code>cd qwen3.5-4b
+..\..\backend\.venv\Scripts\python.exe -X utf8 -u scripts\run_recovery_regression.py</code></pre>
+    <p>脚本每次清理并重建 <code>outputs/runtime-recovery-20261028-01/</code> 工作目录，在 8010 端口拉起运行服务、8011 端口拉起慢响应服务，结束后自动停止进程并重写证据 JSON。需要约 2 分钟与约 4 GiB 显存。</p>
+
+    <h2>边界说明</h2>
+    <p>本轮测试图在冻结清单中的标注为 Intermediate+Posterior Uveitis，模型返回 CNV，与此前已记录的 CNV/Uveitis 错误边界一致。该回归只证明任务编排、降级与回写链路可靠，不新增准确率、置信度可信度或临床泛化证据；所有模型输出仍必须由医生复核。</p>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>分析任务失败恢复回归 · 2026-10-28</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>

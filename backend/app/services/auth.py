@@ -6,6 +6,7 @@ from secrets import token_urlsafe
 
 from pwdlib import PasswordHash
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME
 from app.schemas.auth import LoginResponse, SessionRead, UserRead
 from app.services.redis_store import RedisStore, session_fingerprint
 
@@ -25,17 +26,21 @@ class AuthService:
         access_ttl_seconds: int,
         refresh_ttl_seconds: int,
         *,
+        admin_access_ttl_seconds: int = 600,
         refresh_grace_seconds: int = 30,
         login_max_attempts: int = 5,
         login_window_seconds: int = 15 * 60,
+        credential_store=None,
     ) -> None:
         self.users = users
         self.redis_store = redis_store
         self.access_ttl_seconds = access_ttl_seconds
         self.refresh_ttl_seconds = refresh_ttl_seconds
+        self.admin_access_ttl_seconds = admin_access_ttl_seconds
         self.refresh_grace_seconds = refresh_grace_seconds
         self.login_max_attempts = login_max_attempts
         self.login_window_seconds = login_window_seconds
+        self.credential_store = credential_store
         self.password_hash = PasswordHash.recommended()
 
     def hash_password(self, password: str) -> str:
@@ -45,8 +50,11 @@ class AuthService:
         record = self.users.get_by_username(username)
         if record is None:
             return None
-        user, password_hash = record
+        user, _ = record
         if not user.is_active:
+            return None
+        password_hash = self._password_hash_for(user)
+        if not password_hash:
             return None
         if not self.password_hash.verify(password, password_hash):
             return None
@@ -59,7 +67,11 @@ class AuthService:
         record = self.users.get_by_username(user.username)
         if record is None:
             return False
-        return self.password_hash.verify(password, record[1])
+        password_hash = self._password_hash_for(user)
+        return bool(password_hash) and self.password_hash.verify(
+            password,
+            password_hash,
+        )
 
     def login_allowed(self, identity: str) -> bool:
         return self.redis_store.login_failure_count(identity) < self.login_max_attempts
@@ -80,14 +92,17 @@ class AuthService:
         ip_address: str = "",
         user_agent: str = "",
     ) -> tuple[SessionTokens, LoginResponse]:
+        is_admin = user.role == "admin"
+        access_ttl = self.admin_access_ttl_seconds if is_admin else self.access_ttl_seconds
+        refresh_ttl = access_ttl if is_admin else self.refresh_ttl_seconds
         access_token = token_urlsafe(32)
         refresh_token = token_urlsafe(48)
         session = self.redis_store.create_session(
             access_token,
             refresh_token,
             user.id,
-            access_ttl_seconds=self.access_ttl_seconds,
-            refresh_ttl_seconds=self.refresh_ttl_seconds,
+            access_ttl_seconds=access_ttl,
+            refresh_ttl_seconds=refresh_ttl,
             ip_address=ip_address,
             user_agent=user_agent,
         )
@@ -96,7 +111,7 @@ class AuthService:
             refresh_token=refresh_token,
             session_id=session["session_id"],
         )
-        return tokens, self._login_response(user)
+        return tokens, self._login_response(user, ttl_seconds=access_ttl)
 
     def refresh_session(
         self,
@@ -105,12 +120,10 @@ class AuthService:
         ip_address: str = "",
         user_agent: str = "",
     ) -> tuple[SessionTokens, LoginResponse] | None:
-        new_access_token = token_urlsafe(32)
-        new_refresh_token = token_urlsafe(48)
         session = self.redis_store.rotate_session(
             refresh_token,
-            new_access_token,
-            new_refresh_token,
+            token_urlsafe(32),
+            token_urlsafe(48),
             access_ttl_seconds=self.access_ttl_seconds,
             refresh_ttl_seconds=self.refresh_ttl_seconds,
             refresh_grace_seconds=self.refresh_grace_seconds,
@@ -123,9 +136,12 @@ class AuthService:
         if user is None or not user.is_active:
             self.redis_store.delete_session_id(session["user_id"], session["session_id"])
             return None
+        if user.role == "admin":
+            self.redis_store.delete_session_id(session["user_id"], session["session_id"])
+            return None
         tokens = SessionTokens(
-            access_token=new_access_token,
-            refresh_token=new_refresh_token,
+            access_token=session["access_token"],
+            refresh_token=session["refresh_token"],
             session_id=session["session_id"],
         )
         return tokens, self._login_response(user)
@@ -138,6 +154,10 @@ class AuthService:
         if user is None or not user.is_active:
             self.redis_store.delete_session_id(session["user_id"], session["session_id"])
             return None
+        if user.role == "admin":
+            self.redis_store.touch_session(
+                access_token, "access", self.admin_access_ttl_seconds
+            )
         return user
 
     def session_user(self, token: str, token_kind: str = "refresh") -> UserRead | None:
@@ -221,8 +241,21 @@ class AuthService:
             return None
         return session
 
-    def _login_response(self, user: UserRead) -> LoginResponse:
+    def _login_response(self, user: UserRead, *, ttl_seconds: int | None = None) -> LoginResponse:
+        ttl = ttl_seconds if ttl_seconds is not None else self.access_ttl_seconds
         return LoginResponse(
             user=user,
-            expires_at=datetime.now(UTC) + timedelta(seconds=self.access_ttl_seconds),
+            expires_at=datetime.now(UTC) + timedelta(seconds=ttl),
         )
+
+    def _password_hash_for(self, user: UserRead) -> str:
+        if user.username == ROOT_ADMIN_USERNAME and self.credential_store is not None:
+            value = self.credential_store.get_value(
+                "auth",
+                "root.password_hash",
+                default="",
+            )
+            if value:
+                return str(value)
+        record = self.users.get_by_username(user.username)
+        return record[1] if record else ""

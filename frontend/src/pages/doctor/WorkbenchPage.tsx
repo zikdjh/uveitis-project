@@ -1,24 +1,43 @@
-import { ArrowRight, ClipboardPlus, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowRight, ClipboardPlus, LoaderCircle, ShieldCheck, UserRound } from "lucide-react";
+import { Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { listCases, type CaseRecord } from "@/api/cases";
+import { getSystemOverview } from "@/api/system";
 
 export default function WorkbenchPage() {
   const [cases, setCases] = useState<CaseRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [counts, setCounts] = useState({ total: 0, analyzing: 0, awaiting_review: 0, reviewed: 0 });
+  const [pendingTotal, setPendingTotal] = useState(0);
+  const [pendingPage, setPendingPage] = useState(1);
+  const [pendingPageSize, setPendingPageSize] = useState(8);
 
   useEffect(() => {
-    listCases()
-      .then(setCases)
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      listCases({ status: "awaiting_review", page: pendingPage, page_size: pendingPageSize }),
+      getSystemOverview(),
+    ])
+      .then(([result, overview]) => {
+        setCases(result.items);
+        setPendingTotal(result.total);
+        setCounts(overview.stats);
+      })
       .catch((reason: unknown) =>
         setError(reason instanceof Error ? reason.message : "工作台加载失败"),
-      );
-  }, []);
+      )
+      .finally(() => setLoading(false));
+  }, [pendingPage, pendingPageSize]);
 
-  const pending = cases.filter((item) => item.status === "awaiting_review");
-  const inProgress = cases.filter((item) => item.status === "analyzing");
-  const reviewed = cases.filter((item) => item.status === "reviewed");
+  const pendingPageCount = Math.max(1, Math.ceil(pendingTotal / pendingPageSize));
+
+  useEffect(() => {
+    setPendingPage((current) => Math.min(current, pendingPageCount));
+  }, [pendingPageCount]);
 
   return (
     <section className="page">
@@ -33,40 +52,45 @@ export default function WorkbenchPage() {
       </div>
       {error && <div className="notice error-notice">{error}</div>}
       <div className="metric-grid">
-        <Metric label="待复核" value={pending.length} note="需要医生判断" />
-        <Metric label="分析中" value={inProgress.length} note="正在处理" />
-        <Metric label="已复核" value={reviewed.length} note="已完成记录" />
-        <Metric label="全部病例" value={cases.length} note="当前工作区" />
+        <Metric label="待复核" value={counts.awaiting_review} note="需要医生判断" />
+        <Metric label="分析中" value={counts.analyzing} note="正在处理" />
+        <Metric label="已复核" value={counts.reviewed} note="已完成记录" />
+        <Metric label="全部病例" value={counts.total} note="当前工作区" />
       </div>
-      <div className="workbench-grid">
+      <div className="workbench-grid workbench-review">
         <section className="panel">
           <div className="section-heading">
-            <div><h2>待复核病例</h2><span>优先处理最近更新的病例</span></div>
+            <div><h2>待复核病例</h2></div>
             <ShieldCheck size={20} />
           </div>
           <div className="case-table compact">
-            {pending.slice(0, 6).map((item) => (
+            {cases.map((item) => (
               <Link to={`/doctor/cases/${item.id}/review`} key={item.id}>
                 <div><strong>{item.patient_age} 岁 · {item.complaint}</strong><small>{new Date(item.updated_at).toLocaleString("zh-CN")}</small></div>
                 <ArrowRight size={16} />
               </Link>
             ))}
-            {!pending.length && <div className="empty-state"><UserRound size={24} /><p>暂无待复核病例</p><span>分析完成的病例会显示在这里。</span></div>}
+            {loading && !cases.length && <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取待复核病例</div>}
+            {!loading && !error && !pendingTotal && <div className="empty-state"><UserRound size={24} /><p>暂无待复核病例</p><span>分析完成的病例会显示在这里。</span></div>}
           </div>
-          <Link className="text-link" to="/doctor/reviews">查看全部待复核 <ArrowRight size={14} /></Link>
-        </section>
-        <section className="panel">
-          <div className="section-heading"><div><h2>最近记录</h2><span>最近更新的病例</span></div></div>
-          <div className="case-table compact">
-            {cases.slice(0, 5).map((item) => (
-              <Link to={`/doctor/cases/${item.id}/summary`} key={item.id}>
-                <div><strong>{item.complaint}</strong><small>{statusText[item.status]} · {new Date(item.updated_at).toLocaleString("zh-CN")}</small></div>
-                <ArrowRight size={16} />
-              </Link>
-            ))}
-            {!cases.length && <div className="empty-state"><ClipboardPlus size={24} /><p>还没有病例</p><span>创建第一份病例开始记录。</span></div>}
+          <div className="workbench-review-footer">
+            <Link className="text-link" to="/doctor/cases?status=awaiting_review">查看全部待复核 <ArrowRight size={14} /></Link>
+            {pendingTotal > 0 && (
+              <Pagination
+                current={pendingPage}
+                pageSize={pendingPageSize}
+                total={pendingTotal}
+                showSizeChanger
+                pageSizeOptions={[8, 16, 32]}
+                showTotal={(total) => `共 ${total} 例`}
+                onChange={(page, pageSize) => {
+                  const pageSizeChanged = pageSize !== pendingPageSize;
+                  setPendingPageSize(pageSize);
+                  setPendingPage(pageSizeChanged ? 1 : page);
+                }}
+              />
+            )}
           </div>
-          <Link className="text-link" to="/doctor/cases">查看全部病例 <ArrowRight size={14} /></Link>
         </section>
       </div>
     </section>
@@ -76,11 +100,3 @@ export default function WorkbenchPage() {
 function Metric({ label, value, note }: { label: string; value: number; note: string }) {
   return <div className="metric-card"><span>{label}</span><strong>{value}</strong><small>{note}</small></div>;
 }
-
-const statusText: Record<CaseRecord["status"], string> = {
-  created: "待分析",
-  analyzing: "分析中",
-  awaiting_review: "待复核",
-  reviewed: "已复核",
-  failed: "分析失败",
-};

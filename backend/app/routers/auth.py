@@ -6,6 +6,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
+from app.core.auth_policy import ROOT_ADMIN_USERNAME
 from app.core.security import (
     ACCESS_COOKIE,
     CSRF_COOKIE,
@@ -62,6 +63,7 @@ def _set_auth_cookies(
     request: Request,
     tokens: SessionTokens,
     csrf_token: str,
+    set_refresh: bool = True,
 ) -> None:
     settings = request.app.state.settings
     auth = request.app.state.auth_service
@@ -74,15 +76,16 @@ def _set_auth_cookies(
         secure=settings.cookie_secure,
         path="/",
     )
-    response.set_cookie(
-        REFRESH_COOKIE,
-        tokens.refresh_token,
-        max_age=auth.refresh_ttl_seconds,
-        httponly=True,
-        samesite="lax",
-        secure=settings.cookie_secure,
-        path="/api/v1/auth/refresh",
-    )
+    if set_refresh:
+        response.set_cookie(
+            REFRESH_COOKIE,
+            tokens.refresh_token,
+            max_age=auth.refresh_ttl_seconds,
+            httponly=True,
+            samesite="lax",
+            secure=settings.cookie_secure,
+            path="/api/v1/auth/refresh",
+        )
     response.set_cookie(
         CSRF_COOKIE,
         csrf_token,
@@ -167,6 +170,7 @@ def _login_response(
         request=request,
         tokens=tokens,
         csrf_token=token_urlsafe(32),
+        set_refresh=user.role != "admin",
     )
     _audit(
         request,
@@ -335,6 +339,8 @@ def revoke_other_sessions(request: Request) -> Response:
 def change_password(payload: PasswordChange, request: Request) -> Response:
     user = require_user(request)
     auth = request.app.state.auth_service
+    if user.username == ROOT_ADMIN_USERNAME:
+        raise HTTPException(status_code=409, detail="固定管理员账号密码不可修改")
     if not auth.verify_password(user.id, payload.current_password):
         _audit(
             request,

@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 UserRole = Literal["doctor", "admin"]
@@ -21,6 +21,8 @@ class Permission(StrEnum):
     USER_READ = "user:read"
     USER_MANAGE = "user:manage"
     AUDIT_READ = "audit:read"
+    DATA_DICTIONARY_READ = "data_dictionary:read"
+    DATA_DICTIONARY_MANAGE = "data_dictionary:manage"
 
 
 ROLE_PERMISSIONS: dict[UserRole, frozenset[Permission]] = {
@@ -52,19 +54,22 @@ class UserRead(BaseModel):
     display_name: str
     role: UserRole
     is_active: bool = True
+    is_root: bool = False
     permissions: list[Permission] = Field(default_factory=list)
 
 
 class UserCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     username: str = Field(min_length=3, max_length=100, pattern=r"^[A-Za-z0-9._-]+$")
     display_name: str = Field(min_length=1, max_length=100)
-    role: UserRole = "doctor"
     password: str = Field(min_length=12, max_length=200)
 
 
 class UserUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     display_name: str | None = Field(default=None, min_length=1, max_length=100)
-    role: UserRole | None = None
     is_active: bool | None = None
 
 
@@ -92,8 +97,21 @@ class SessionRead(BaseModel):
     user_agent: str = ""
 
 
+class ActiveSessionRead(BaseModel):
+    session_id: str
+    user_id: str
+    username: str
+    display_name: str
+    role: str
+    ip_address: str = ""
+    user_agent: str = ""
+    created_at: datetime
+    last_seen_at: datetime
+    expires_at: datetime
+
+
 class AuthAuditEventRead(BaseModel):
-    id: int
+    id: str
     event: str
     outcome: str
     username: str
@@ -103,3 +121,10 @@ class AuthAuditEventRead(BaseModel):
     user_agent: str
     detail: str
     created_at: datetime
+
+
+class AuthAuditEventPage(BaseModel):
+    items: list[AuthAuditEventRead]
+    total: int
+    page: int
+    page_size: int

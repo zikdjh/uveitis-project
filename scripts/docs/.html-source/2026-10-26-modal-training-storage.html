@@ -128,8 +128,8 @@
 <li>训练完成后生成只读 manifest，记录 adapter、评估结果和基座版本。</li>
 </ul>
 <h2>从 Volume 取回本地</h2>
-<pre><code class="language-powershell">modal volume get uveitis-runs qwen3.5-4b/&lt;run_id&gt; ./model-training/assets/qwen3.5-4b/&lt;run_id&gt;
-modal volume get uveitis-runs intern-decision-4b/&lt;run_id&gt; ./model-training/assets/intern-decision-4b/&lt;run_id&gt;
+<pre><code class="language-powershell">modal volume get uveitis-runs qwen3.5-4b/&lt;run_id&gt; ./model/training/assets/qwen3.5-4b/&lt;run_id&gt;
+modal volume get uveitis-runs intern-decision-4b/&lt;run_id&gt; ./model/training/assets/intern-decision-4b/&lt;run_id&gt;
 </code></pre>
 <p>模型卷中的基座权重不需要取回；如果本地推理需要，可单独下载对应基座。</p>
 <p>如果从本项目的本地 CLI 环境取回：</p>
@@ -138,7 +138,7 @@ $env:HTTPS_PROXY = &quot;&quot;
 $env:ALL_PROXY = &quot;&quot;
 $env:PYTHONUTF8 = &quot;1&quot;
 $env:PYTHONIOENCODING = &quot;utf-8&quot;
-.\model-training\.venv-modal\Scripts\modal.exe volume get uveitis-runs qwen3.5-4b/&lt;run_id&gt; .\model-training\assets\qwen3.5-4b\&lt;run_id&gt;
+.\model\training\.venv-modal\Scripts\modal.exe volume get uveitis-runs qwen3.5-4b/&lt;run_id&gt; .\model\training\assets\qwen3.5-4b\&lt;run_id&gt;
 </code></pre>
 <p>下载多个文件后，先核对最佳 checkpoint 的 adapter 两文件、<code>training_state.pt</code>、<code>best_checkpoint.json</code>、<code>config.json</code> 和 <code>eval_metrics.json</code> 是否齐全，再清理 Modal 上不需要保留的中间 checkpoint。不要只下载 <code>pytorch_lora_weights.safetensors</code>，却遗漏 adapter 配置、processor 或数据版本记录。</p>
   </article>

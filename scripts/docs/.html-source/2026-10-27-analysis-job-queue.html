@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>持久化分析任务队列 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-case-ownership-pagination.html">病例隔离</a>
+    <a href="2026-10-26-progress-tracking.html">进度跟踪</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker"><span>系统设计</span><span>2026-10-27</span></div>
+  <h1>持久化分析任务队列</h1>
+  <p class="doc-summary">PostgreSQL 任务状态、Worker 租约、失败重试、过期回收与幂等完成边界</p>
+  <article class="html-body">
+    <p>分析请求不再依赖 Web 进程内临时后台任务。Web 接口只负责建立病例的排队快照和持久任务，实际分析由 Web 后台执行器或独立 Worker 原子领取；进程重启后可以从 PostgreSQL 恢复未完成任务。</p>
+    <h2>任务生命周期</h2>
+    <table>
+      <thead><tr><th>状态</th><th>含义</th><th>可执行者</th><th>转移条件</th></tr></thead>
+      <tbody>
+        <tr><td><code>queued</code></td><td>等待领取。</td><td>任意活跃 Worker</td><td>原子领取后进入 <code>running</code>。</td></tr>
+        <tr><td><code>running</code></td><td>已被某个 Worker 领取，持有短租约。</td><td>仅租约持有者</td><td>进入结果封口、失败重排、超过次数或租约过期。</td></tr>
+        <tr><td><code>finalizing</code></td><td>推理已结束，持有者正在写病例并关闭任务。</td><td>仅原租约持有者</td><td>写回成功后变为 <code>completed</code>；异常则重排或失败。</td></tr>
+        <tr><td><code>completed</code></td><td>病例分析结果已写入，任务已关闭。</td><td>不再执行</td><td>不可逆；重复触发只返回已完成。</td></tr>
+        <tr><td><code>failed</code></td><td>不可重试或达到最大尝试次数。</td><td>不再自动执行</td><td>需要人工排查后创建新任务。</td></tr>
+      </tbody>
+    </table>
+    <p>任务以 <code>f_job_key</code> UUID 作为业务标识，<code>f_id</code> 仅作数据库自增主键。Service、HTTP 后台回调和任务表查询都只使用 <code>f_job_key</code>，不得把整数主键传入业务接口。</p>
+    <h2>租约与重试</h2>
+    <ul>
+      <li>默认租约为 300 秒，最大尝试次数为 2；可通过 <code>APP_ANALYSIS_JOB_LEASE_SECONDS</code> 和 <code>APP_ANALYSIS_JOB_MAX_ATTEMPTS</code> 调整。</li>
+      <li>领取使用 PostgreSQL 行锁与 <code>SKIP LOCKED</code>，并发 Worker 不会同时领取同一任务。</li>
+      <li>执行前验证 <code>lease_owner</code> 等于当前 Worker 且租约未过期；其他进程即使拿到任务键也只能返回 <code>not_claimed</code>。</li>
+      <li>推理期间由同一 Worker 按租约三分之一周期续租，长推理不会因为固定 300 秒窗口自动失租；续租、封口和关闭都校验当前持有者。</li>
+      <li>推理结束后先原子进入 <code>finalizing</code>，再写病例结果；失去租约的旧 Worker 不能封口或覆盖新结果。</li>
+      <li>暂时性分析异常会写回失败状态并将任务重新排队；达到上限后关闭为 <code>failed</code>。</li>
+      <li>进程异常退出遗留的过期租约，会在 API 启动和 Worker 轮询时回收并重新排队。</li>
+    </ul>
+    <h2>幂等与一致性</h2>
+    <p>病例模型结果与任务状态目前是两个持久化动作，不宣称跨表原子事务。重新执行任务前会检查病例是否已经是 <code>awaiting_review</code> 或 <code>reviewed</code> 且分析结果为 <code>completed</code>；满足时只补写任务完成状态和待复核队列，不重复执行模型。</p>
+    <p>该处理覆盖“病例已保存、任务尚未关闭”的进程中断窗口。病例保存失败时仍由重试机制收敛；如果模型调用本身产生外部副作用，后续接入真实运行服务时仍需保证该调用可安全重放。</p>
+    <h2>启动方式</h2>
+    <pre><code>cd backend
+.\.venv\Scripts\uvicorn.exe app.asgi:app --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m app.worker</code></pre>
+    <p>只启动 Web 进程时，分析仍由 Web 后台执行器完成。生产环境建议单独运行 <code>analysis-worker</code>，让 API 与耗时分析分别扩缩容。Docker Compose 已定义该服务并依赖 PostgreSQL、Redis 和模型运行服务。</p>
+    <h2>验证记录</h2>
+    <table>
+      <thead><tr><th>验证项</th><th>结果</th><th>证据</th></tr></thead>
+      <tbody>
+        <tr><td>隔离单元测试</td><td>通过</td><td>成功完成、失败重排、过期回收、续租、封口、非租约持有者拒绝执行、已完成病例不重复分析。</td></tr>
+        <tr><td>PostgreSQL 契约测试</td><td>通过</td><td>真实仓储入队、精确领取、续租、封口、完整 Service 执行、病例回写和任务关闭；业务键正确关闭任务。</td></tr>
+        <tr><td>真实进程冒烟</td><td>通过</td><td>8001 API 与独立 Worker：管理员登录、创建临时医生、医生建病例并分析；最终任务为 <code>completed</code>、<code>attempt_count=1</code>、租约释放。</td></tr>
+        <tr><td>测试清理</td><td>完成</td><td>本轮临时病例、医生和任务记录已定向删除，残留计数均为 0。</td></tr>
+      </tbody>
+    </table>
+    <p>本轮后端完整测试为 78 项通过、5 项因未配置专用 PostgreSQL 测试库跳过；使用项目 PostgreSQL 单独执行仓储和队列契约测试时 5 项全部通过。前端生产构建、模型运行服务测试和真实模型业务回写均已通过。</p>
+    <h2>剩余边界</h2>
+    <ul>
+      <li>队列持久化已完成，但真实模型运行服务尚未完成后端业务回写验收。</li>
+      <li>分析结果与任务状态没有单一数据库事务；当前依靠 <code>finalizing</code> 封口、幂等完成逻辑和重试收敛。后续若引入任务以外的业务副作用，仍需评估共享事务或 outbox。</li>
+      <li>任务没有独立管理页面；当前通过病例状态、PostgreSQL 任务表和运行日志排查。</li>
+      <li>任务完成不等于临床验证通过。医生复核仍是强制业务边界。</li>
+      <li>完整容器启动仍受基础镜像拉取阻塞。默认与隔离端口 Compose 配置均已通过解析，但不能替代真实跨容器验收。</li>
+    </ul>
+  </article>
+</main>
+<footer class="doc-footer"><span>持久化分析任务队列 · 2026-10-27</span><span><a href="index.html">返回文档索引</a></span></footer>
+</body>
+</html>

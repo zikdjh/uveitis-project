@@ -49,8 +49,8 @@
 </tr>
 <tr>
 <td><code>backend/</code></td>
-<td>FastAPI、PostgreSQL、BGE-M3 和后台测试</td>
-<td>代码保留；<code>.venv/</code>、<code>models/</code> 可重建</td>
+<td>FastAPI、PostgreSQL、zvec 索引和后台测试</td>
+<td>代码保留；<code>.venv/</code>、<code>data/</code> 可重建</td>
 </tr>
 <tr>
 <td><code>frontend/</code></td>
@@ -58,47 +58,52 @@
 <td>代码保留；本次已删除 <code>node_modules/</code>、<code>dist/</code>，可用 npm 重建</td>
 </tr>
 <tr>
-<td><code>model-training/</code></td>
+<td><code>model/training/</code></td>
 <td>模型训练统一入口：训练代码、环境、基座、数据、产物、计划和报告</td>
 <td>训练管理，保留</td>
 </tr>
 <tr>
-<td><code>model-runtime/</code></td>
+<td><code>qwen3.5-4b/</code></td>
 <td>模型运行服务、评估代码、运行脚本和部署说明</td>
 <td>运行管理，保留</td>
 </tr>
 <tr>
-<td><code>model-training/environment/</code></td>
+<td><code>bge-m3/</code></td>
+<td>BGE-M3 向量模型独立 FastAPI 服务：向量 API、接口测试和权重目录</td>
+<td>运行管理，保留；<code>models/</code> 可重建</td>
+</tr>
+<tr>
+<td><code>model/training/environment/</code></td>
 <td>Python/Modal/远端依赖锁定、doctor 预检和实际探测报告</td>
 <td>环境定义，保留</td>
 </tr>
 <tr>
-<td><code>model-training/code/training/</code></td>
+<td><code>model/training/code/training/</code></td>
 <td>Qwen QLoRA、Modal Volume 和训练检查代码</td>
 <td>训练代码，保留</td>
 </tr>
 <tr>
-<td><code>model-training/scripts/modal/</code></td>
+<td><code>model/training/scripts/modal/</code></td>
 <td>训练子集构建、Volume 同步和上传</td>
 <td>训练脚本，保留</td>
 </tr>
 <tr>
-<td><code>model-training/models/qwen/Qwen3.5-4B/</code></td>
+<td><code>model/training/models/qwen/Qwen3.5-4B/</code></td>
 <td>本地 Qwen3.5-4B 基座权重，与 Modal 模型卷对应</td>
 <td>体积大，保留</td>
 </tr>
 <tr>
-<td><code>model-training/datasets/training/</code></td>
+<td><code>model/training/datasets/training/</code></td>
 <td>训练精简数据、manifest 和标签</td>
 <td>可从 <code>extracted/</code> 重建，但成本较高</td>
 </tr>
 <tr>
-<td><code>model-training/assets/qwen3.5-4b/</code></td>
+<td><code>model/training/assets/qwen3.5-4b/</code></td>
 <td>训练产物、当前 best adapter 与冻结评估快照</td>
 <td>重要证据，保留</td>
 </tr>
 <tr>
-<td><code>model-runtime/assets/</code></td>
+<td><code>qwen3.5-4b/assets/</code></td>
 <td>运行 adapter 索引，不复制权重</td>
 <td>保留</td>
 </tr>
@@ -113,12 +118,12 @@
 <td>保留，按日期检索</td>
 </tr>
 <tr>
-<td><code>model-training/datasets/raw/</code></td>
+<td><code>model/training/datasets/raw/</code></td>
 <td>新下载压缩包的临时暂存区</td>
 <td>空目录保留；解压和核验后清理</td>
 </tr>
 <tr>
-<td><code>model-training/datasets/extracted/</code></td>
+<td><code>model/training/datasets/extracted/</code></td>
 <td>解压后的完整眼科数据集与逐文件清单</td>
 <td>原始数据，体积大，不重建</td>
 </tr>
@@ -146,12 +151,12 @@
 </table>
 <h2>训练产物入口</h2>
 <ul>
-<li>统一训练入口：<code>model-training/README.md</code></li>
-<li>统一运行入口：<code>model-runtime/README.md</code></li>
+<li>统一训练入口：<code>model/training/README.md</code></li>
+<li>统一运行入口：<code>qwen3.5-4b/README.md</code></li>
 <li>当前训练状态：<code>docs/2026-10-26-model-training-status.html</code></li>
-<li>当前冻结评估基线：<code>model-training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code></li>
-<li>当前 OCT 候选：<code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code></li>
-<li>当前冻结测试评估：<code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/</code></li>
+<li>当前冻结评估基线：<code>model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code></li>
+<li>当前 OCT 候选：<code>model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code></li>
+<li>当前冻结测试评估：<code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/</code></li>
 <li>完整 adapter 和优化器状态：Modal Volume <code>uveitis-runs</code>，不是本地运行目录</li>
 <li>数据集清单：<code>docs/2026-10-26-dataset-index.html</code></li>
 <li>训练数据 map：<code>docs/2026-10-26-dataset-training-map.html</code></li>
@@ -160,14 +165,14 @@
 <h2>占用与清理</h2>
 <p>初始扫描时项目约 101 GB：</p>
 <ul>
-<li><code>model-training/datasets/extracted</code> 约 63.37 GB</li>
-<li><code>model-training/datasets/training</code> 约 1.46 GB</li>
-<li><code>model-training/models/qwen/Qwen3.5-4B</code> 约 9.34 GB</li>
+<li><code>model/training/datasets/extracted</code> 约 63.37 GB</li>
+<li><code>model/training/datasets/training</code> 约 1.46 GB</li>
+<li><code>model/training/models/qwen/Qwen3.5-4B</code> 约 9.34 GB</li>
 <li><code>backend/models</code> 约 4.37 GB</li>
 <li><code>backend/.venv</code> 约 3.62 GB</li>
 <li>顶层 <code>uv</code> 缓存曾达到约 11.12 GiB</li>
 </ul>
-<p>本次已删除 14 个根目录 ZIP（24,212,809,851 字节）和 4 个重复内层 ZIP（8,504,821,552 字节），合计约 30.5 GiB。删除账本见 <code>model-training/datasets/extracted/manifests/archive-cleanup-2026-10-25.csv</code>。</p>
+<p>本次已删除 14 个根目录 ZIP（24,212,809,851 字节）和 4 个重复内层 ZIP（8,504,821,552 字节），合计约 30.5 GiB。删除账本见 <code>model/training/datasets/extracted/manifests/archive-cleanup-2026-10-25.csv</code>。</p>
 <p>2026-10-26 又完成一次全项目清理，预计回收约 <code>15.67 GiB</code>：</p>
 <table>
 <thead>
@@ -209,19 +214,19 @@
 </table>
 <p>清理后仍保留以下不可轻易重建资产：</p>
 <ul>
-<li><code>model-training/datasets/extracted/</code>、<code>model-training/datasets/training/</code> 和训练 manifest。</li>
-<li><code>model-training/models/qwen/Qwen3.5-4B/</code>。</li>
-<li><code>backend/models/</code>、<code>backend/.venv/</code> 和 <code>model-training/.venv-local/</code>。</li>
+<li><code>model/training/datasets/extracted/</code>、<code>model/training/datasets/training/</code> 和训练 manifest。</li>
+<li><code>model/training/models/qwen/Qwen3.5-4B/</code>。</li>
+<li><code>backend/models/</code>、<code>backend/.venv/</code> 和 <code>model/training/.venv-local/</code>。</li>
 <li>当前冻结评估基线与 OCT 候选的 <code>best_adapter/</code>。</li>
 <li><code>eval-oct-step20-vs-step100-20261025-01/step100/predictions.partial.jsonl</code> 断点。</li>
 </ul>
-<p>不要清理 <code>model-training/datasets/extracted/01_uveitis_oct</code>、<code>02_toxofundus</code>、<code>03_eye_five_class</code> 或 <code>13_zhanglab</code> 中训练 manifest 指向的图像。其他数据集是否保留取决于后续实验计划。</p>
-<p>已解压数据直接以 <code>model-training/datasets/extracted/</code> 为准，不要求保留原 ZIP。新下载内容先放 <code>model-training/datasets/raw/</code>；只有完成解压、完整性核验和清单更新后，才删除对应的临时包。</p>
+<p>不要清理 <code>model/training/datasets/extracted/01_uveitis_oct</code>、<code>02_toxofundus</code>、<code>03_eye_five_class</code> 或 <code>13_zhanglab</code> 中训练 manifest 指向的图像。其他数据集是否保留取决于后续实验计划。</p>
+<p>已解压数据直接以 <code>model/training/datasets/extracted/</code> 为准，不要求保留原 ZIP。新下载内容先放 <code>model/training/datasets/raw/</code>；只有完成解压、完整性核验和清单更新后，才删除对应的临时包。</p>
 <h2>验证状态</h2>
 <ul>
-<li><code>model-training/datasets/training/manifest.csv</code> 的 16,638 条记录均能定位到本地图像，训练数据路径未被本次整理破坏。</li>
+<li><code>model/training/datasets/training/manifest.csv</code> 的 16,638 条记录均能定位到本地图像，训练数据路径未被本次整理破坏。</li>
 <li>删除前，17 个归档的 182,754 个数据成员全部通过名称、大小和 CRC 校验；0 缺失、0 大小不一致、0 CRC 不一致。</li>
-<li><code>model-training/datasets/extracted/manifests/extracted-files.csv</code> 的 180,456 条保留记录均可定位；删除的 4 个重复 ZIP 已移除记录并收入删除账本。</li>
+<li><code>model/training/datasets/extracted/manifests/extracted-files.csv</code> 的 180,456 条保留记录均可定位；删除的 4 个重复 ZIP 已移除记录并收入删除账本。</li>
 <li>Modal 训练、评估和训练子集构建脚本语法检查通过。</li>
 <li>当前两份 <code>best_adapter</code>、完整冻结评估结果和第 100 步断点文件均通过存在性复核。</li>
 <li>清理后没有训练或评估进程，RTX 4060 显存占用为 <code>0 MiB</code>。</li>

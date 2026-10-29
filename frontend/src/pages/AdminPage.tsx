@@ -69,7 +69,7 @@ export default function AdminPage() {
           </div>
 
           <div className="admin-grid">
-            <section className="panel">
+            <section className="panel admin-boundary-panel">
               <div className="section-heading">
                 <div><h2>服务状态</h2><span>辅助分析与检索服务</span></div>
                 <Boxes size={20} />

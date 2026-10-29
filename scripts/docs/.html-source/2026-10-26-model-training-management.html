@@ -13,8 +13,8 @@
   <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
   <nav aria-label="文档导航">
     <a href="2026-10-26-document-catalog.html">文档索引</a>
-    <a href="2026-10-26-project-layout.html">上一份</a>
-    <a href="2026-10-26-model-training-status.html">下一份</a>
+    <a href="2026-10-26-project-overview.html">上一份</a>
+    <a href="2026-10-26-model-runtime.html">下一份</a>
   </nav>
 </header>
 <main id="doc-content" class="doc-page">
@@ -24,12 +24,13 @@
   </div>
   <h1>模型训练管理</h1>
   <p class="doc-summary">训练代码、环境、数据、计划和产物的统一入口</p>
-  <p class="doc-source">规范入口：<code>model-training/README.md</code></p>
+  <p class="doc-source">规范入口：<code>model/training/README.md</code></p>
   <article class="html-body">
 <p>整理日期：2026-10-26</p>
 <p>本目录是模型训练的单一管理入口。代码、Modal 任务、训练计划、预算记录、数据入口和本地产物入口都从这里查找。</p>
+<p>训练工程目标收口日期：<strong>2026-11-10</strong>。统一跟踪见 <code>docs/2026-10-26-progress-tracking.html</code>，阶段汇总见 <code>docs/2026-10-26-model-training-progress.html</code>，当前运行态见 <code>docs/2026-10-26-model-training-status.html</code>。</p>
 <h2>目录结构</h2>
-<pre><code class="language-text">model-training/
+<pre><code class="language-text">model/training/
 ├── README.md
 ├── environment/                版本锁定、环境预检与依赖定义
 ├── code/
@@ -47,70 +48,102 @@
 └── assets/
     └── qwen3.5-4b/             adapter、指标、评估和训练快照
 </code></pre>
-<p>训练数据、基座和产物均位于 <code>model-training/</code> 内，不再依赖根级 junction。模型运行侧只读取这些文件，不复制权重。</p>
-<p><code>models/qwen/Qwen3.5-4B/</code> 是本地基座副本，当前 14 个模型文件、9,342,907,469 字节（不含单独的 <code>pull-manifest.json</code>），包含两份 safetensors 分片、索引、配置和 tokenizer。它不替代 Modal 上的 <code>uveitis-models</code>；正式训练仍从 Modal 卷加载基座。</p>
+<p>完整数据集、训练子集、基座和产物均位于 <code>model/training/</code> 内，不再依赖根级 junction。模型运行侧只读取这些文件，不复制权重。</p>
+<p><code>models/qwen/Qwen3.5-4B/</code> 是本地基座副本，当前 14 个模型文件、9,342,907,469 字节（不含单独的 <code>pull-manifest.json</code>），包含两份 safetensors 分片、索引、配置和 tokenizer。它不替代 Modal 上的 <code>uveitis-models</code>；本地正式训练直接使用本地副本，Modal 卷仍是远端备份和训练恢复来源。</p>
 <p>本地加载需要支持 <code>qwen3_5</code> 架构的 Transformers。项目训练脚本固定使用 <code>50e35cc0ca18ec19b80653690de553e6decf74f5</code>；后端当前的 Transformers 4.51.3 不识别该架构，不能直接用它加载这个模型目录。本地校验清单见 <code>models/qwen/Qwen3.5-4B/pull-manifest.json</code>。</p>
-<p>本地 4060 使用独立的 <code>model-training/.venv-local/</code>，其中是 CUDA 12.8 的 PyTorch 和 Transformers 5.20.2，不使用 <code>backend/.venv</code> 的 CPU PyTorch。该环境已完成 4-bit NF4、bfloat16、LoRA 前向/反向、optimizer step、周期验证和可恢复正式训练实测；状态见 <code>docs/2026-10-26-model-training-status.html</code>，产物索引见 <code>assets/README.md</code>。</p>
-<p>2026-10-26 已清理本地 smoke run、中间 checkpoint、<code>training_state.pt</code>、重复 processor 和非当前 final adapter。当前只保留两组 best adapter、训练指标和冻结评估断点；完整 checkpoint 与优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</p>
+<p>本地 4060 使用独立的 <code>model/training/.venv-local/</code>，其中是 CUDA 12.8 的 PyTorch 和 Transformers 5.20.2，不使用 <code>backend/.venv</code> 的 CPU PyTorch。该环境已完成 4-bit NF4、bfloat16、LoRA 前向/反向、optimizer step、周期验证和可恢复正式训练实测；状态见 <code>docs/2026-10-26-model-training-status.html</code>，产物索引见 <code>assets/README.md</code>。</p>
+<p>2026-10-26 已清理旧 smoke run、历史中间 checkpoint、<code>training_state.pt</code>、早期实验权重和重复 processor。当前保留两组工作 adapter、第二至第五阶段的指标、摘要和决策文件、错误来源分析、受控推理 smoke，以及冻结评估断点；第 4、5 阶段新生成的实验权重仍留在各自目录，均不作为运行候选。完整 checkpoint 与优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</p>
 <h2>当前训练路线</h2>
 <ul>
 <li>主模型：Qwen3.5-4B，4-bit QLoRA，本地 RTX 4060 单卡训练。</li>
-<li>数据集：<code>model-training/datasets/training/manifest.csv</code>，16,638 张图像；训练 14,734、验证 177、冻结测试 1,727。</li>
+<li>数据集：<code>datasets/training/manifest.csv</code>，16,638 张图像；训练 14,734、验证 177、冻结测试 1,727。完整数据与精简训练子集均归 <code>model/training/datasets/</code> 管理。</li>
 <li>基线：Qwen3.5-2B 仅作对照。</li>
-<li>补充决策模型：Intern-Decision-4B；在真实病例文本、医生处置标签和独立评测集到位前默认不训练。</li>
-<li>真相源：本轮训练使用本地 <code>model-training/datasets/training/manifest.csv</code> 和 <code>models/qwen/Qwen3.5-4B/</code>；checkpoint、验证指标和 adapter 位于 <code>assets/qwen3.5-4b/</code>。</li>
+<li>补充决策模型：Intern-Decision-4B；2026-10-27 决定暂缓训练不启动任何训练任务，但在辅助分析调用链中保留该槽位（默认 <code>APP_DECISION_ENABLED=false</code>，结果里标记为跳过）。在真实病例文本、医生处置标签和独立评测集到位前不恢复训练，也不使用弱标签或合成标签生成结论。槽位与规划细则见 <a href="2026-10-27-agent-toolchain-plan.html">AgentScope 工具链编排</a>。</li>
+<li>真相源：本轮训练使用本地 <code>datasets/training/manifest.csv</code> 和 <code>models/qwen/Qwen3.5-4B/</code>；checkpoint、验证指标和 adapter 位于 <code>assets/qwen3.5-4b/</code>。</li>
 <li>当前冻结评估基线：<code>local-4060-grouped-cont-20261025-01/best_adapter</code>，第 100 步。</li>
-<li>当前 OCT 候选：<code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>，第 20 步。</li>
-<li>发布状态：尚未提升候选。第 20 步候选已完成 1,000 条 OCT 冻结测试评估；第 100 步基线的同一评估在 145/1,000 处停止，可断点续跑。停止点与恢复命令见 <code>docs/2026-10-26-qwen3.5-4b-progress-stop.html</code>。</li>
+<li>当前选定的 OCT 运行候选：第 20 步 adapter，最终产物已迁至 <code>qwen3.5-4b/models/best_adapter</code>。</li>
+<li>发布状态：第 20 步候选和基线均已完成 1,000 条同源 OCT 冻结测试；候选 macro-F1 <code>0.947245</code>，基线 <code>0.918252</code>，提升 <code>+0.028993</code>，通过 <code>0.02</code> 选型门槛。当前尚未作为临床模型发布。</li>
+<li>错误来源：第 20 步候选主要错误为 <code>NORMAL-&gt;DRUSEN</code> 18 条、<code>DRUSEN-&gt;CNV</code> 14 条、<code>CNV-&gt;DME</code> 8 条；相对第 100 步基线，DRUSEN 纠正 38 条，但 CNV 退化 6 条、NORMAL 退化 4 条。</li>
+<li>受控推理 smoke：第 20 步候选在四类各 4 条本地测试中正确 16/16，JSON 有效率 100%，峰值保留显存 <code>3.31 GiB</code>；结果只证明链路可用，不作为泛化精度证据。</li>
+<li>真实运行服务：<code>POST /v1/judge</code> 已加载 4-bit 基座和第 20 步 adapter；冷启动约 22 秒，预处理修正后热请求 <code>3.363 秒</code>，单图峰值保留 <code>3.355469 GiB</code>，8 并发无 OOM。单张 CNV 训练图返回 DRUSEN、置信度 0，只证明链路和结构契约可用，不能作为准确率或置信度证据。证据见 <code>assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code>。</li>
+<li>冻结候选：2026-10-28 提前冻结第 20 步候选，目录已迁至 <code>qwen3.5-4b/assets/freeze-step20-20261028-01/</code>。机器可读清单、模型卡、运行契约和已知限制分别见 <code>freeze-manifest.json</code>、<code>model-card.html</code>、<code>runtime-contract.json</code>、<code>known-limitations.html</code>；冻结状态仅为研究用途候选，不是临床发布。</li>
+<li>11.10 前收口条件：冻结第 20 步候选 adapter、模型卡、指标文件和运行读取路径，并保留数据来源及患者隔离限制。adapter、模型卡和运行契约已提前冻结；剩余重点是患者隔离验证路径、端到端复跑和最终交付边界确认。</li>
+<li>Open UWF 700：CC BY 4.0，7 类与葡萄膜炎二分类任务清单位于 <code>datasets/tasks/</code>；数据直接从 <code>datasets/extracted/14_open_uwf700/</code> 读取。患者组键必须包含诊断，因为源 <code>Patient ID</code> 在不同诊断队列中复用。</li>
 </ul>
+<p>2026-10-28 冻结记录：候选 adapter 权重 SHA256 为 <code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code>，训练 manifest SHA256 为 <code>0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580</code>，冻结 selection SHA256 为 <code>84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a</code>。冻结清单同时登记基座 config、索引、两个 safetensors 分片、tokenizer 和训练/评估证据的哈希。该冻结没有新增训练、没有启动 Modal GPU、没有读取已消费测试集进行调参。</p>
+<p>2026-10-26 已完成第二阶段受控复核：分别从第 20 步候选初始化，以 <code>5e-6</code> 和 <code>1e-5</code> 学习率、OCT 任务权重 4 训练 30 步上限。两次运行都在第 10 步因连续两次验证未改善而早停；第 5、10 步验证 macro-F1 为 <code>0.867725</code>，低于入口的 <code>0.873358</code>，JSON 有效率仍为 <code>100%</code>。因此没有产生新的提升候选，运行候选继续保留第 20 步 adapter，第二阶段 final adapter 不提升、不覆盖。结构化记录见 <code>assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json</code>。</p>
+<p>2026-10-26 已启动并完成第三阶段受控复核：从同一条第 20 步候选出发，将图像输入预算由 <code>65,536</code> 提高到 <code>131,072</code> 像素，学习率降到 <code>2.5e-6</code>，每 2 步验证。高分率入口验证只有 macro-F1 <code>0.826256</code>、OCT macro-F1 <code>0.718769</code>；第 2、4 步最佳为 <code>0.832019</code> / <code>0.736058</code>，第 6 步回落并在连续两次未改善后早停。高分率显著低于低分辨率入口，因此没有产生提升候选，也不执行冻结测试提升门槛。结构化记录见 <code>assets/qwen3.5-4b/eval-oct-stage3-20261026-01/stage3_decision.json</code>。</p>
+<p>2026-10-26 已完成第四阶段训练集困难组复核。冻结 adapter 对 <code>12,101</code> 条训练样本、<code>5,184</code> 个患者组计算 loss 和错误，全程未读取冻结测试图像；全量扫描峰值保留显存 <code>7.310546875 GiB</code>。随后按 OCT 四类各 6 组生成 24 组、权重 2 的平衡清单，从第 20 步候选以 <code>1e-6</code> 学习率、OCT 任务权重 4、<code>65,536</code> 像素训练 3 步后早停。macro-F1 和 OCT 四步都保持 <code>0.8733582322</code> / <code>0.7915032680</code>，仅第 1 步 loss 从 <code>0.0350562277</code> 降到 <code>0.0350383057</code>，不能视为提升。峰值分配显存 <code>5.452396869659424 GiB</code>、峰值保留 <code>5.689453125 GiB</code>，Modal 费用 <code>$0.00</code>。结构化记录见 <code>assets/qwen3.5-4b/eval-oct-stage4-20261026-01/stage4_decision.json</code>。</p>
+<p>2026-10-26 已完成第五阶段新患者组轮换复核。为避免续训反复回放首批患者组，训练调度增加可复现的 <code>group_offset=50</code>；偏移后的 138 个 OCT 训练组与初始批次零重叠，前 50 步计划仍保持四类基本均衡。实验从第 20 步候选初始化，以 <code>1e-6</code> 学习率、OCT 任务权重 4、<code>65,536</code> 像素训练，目标 50 步、每 5 步验证、早停 patience 3。实际完成 15 步后早停；第 1、5、10 步 macro-F1 和 OCT 均保持 <code>0.8733582322</code> / <code>0.7915032680</code>，第 15 步退化为 <code>0.8677248677</code> / <code>0.7746031746</code>，JSON 有效率始终 <code>100%</code>。峰值分配显存 <code>5.452396869659424 GiB</code>、峰值保留 <code>5.69140625 GiB</code>，总耗时约 <code>690.96</code> 秒，Modal 费用 <code>$0.00</code>。组轮换证明调度覆盖了新的训练患者，不代表泛化提升；实验 adapter 不提升，运行候选继续保留第 20 步。结构化结论见 <code>assets/qwen3.5-4b/eval-oct-stage5-20261026-01/stage5_decision.json</code>。</p>
+<p>当前 55 条筛选验证包含 33 个患者组，OCT 为 CNV 8、DME 5、DRUSEN 18、NORMAL 3。它适合快速剔除明显退化实验，但不足以证明类别级改善。下一步应优先完成模型卡与运行契约、获取患者隔离验证或明确标签修正；没有新的数据假设时不再重复短程续训、高分率、困难组加权或训练组轮换。</p>
+<p>2026-10-26 已完成 Open UWF 700 两项本地研究实验，均未启动 Modal GPU。7 类任务训练 60 步，最佳验证 accuracy <code>0.2222</code>、macro-F1 <code>0.214286</code>，葡萄膜炎 F1 为 0，判定不可用且未读取测试集。二分类任务训练 60 步，最佳 step 50，验证 accuracy <code>0.684211</code>、macro-F1 <code>0.676136</code>、葡萄膜炎召回 <code>1.00</code>、非葡萄膜炎召回 <code>0.4545</code>；best adapter SHA256 为 <code>097d4293eb0e...c9d3e</code>。两轮训练峰值保留显存最高 <code>5.697265625 GiB</code>，说明本地 8 GB 4060 能完成该 4B QLoRA 配置。</p>
+<p>二分类 adapter 已完成唯一一次患者隔离测试，共 90 张、78 个患者组。测试 accuracy <code>0.377778</code>、macro-F1 <code>0.338235</code>、JSON 有效率 <code>100%</code>；葡萄膜炎召回 <code>0.75</code>、precision <code>0.10</code>，非葡萄膜炎 recall <code>0.341</code>，54 个阴性样本被误报为阳性。该结果已冻结，不用于选择 checkpoint、学习率或其他超参数；UWF adapter 只作为研究实验，不替换第 20 步 OCT 运行候选。结构化决策见 <code>assets/qwen3.5-4b/eval-open-uwf-stage1-20261026-01/decision.json</code>。</p>
+<p>Open UWF 数据处理和隔离审计已复核：两份 manifest 各 700 行，图像缺失 0、患者组跨切分 0、图像内容重复 0；7 类哈希为 <code>6a89bb38...8d498178</code>，二分类为 <code>bacc37ed...551c2b253</code>。二分类的 negative 覆盖 AMD、DR、Healthy、PM、RD、RVO，不等同临床排除全部非葡萄膜炎炎症疾病。下一轮训练应先增加患者隔离阳性、医生确认标签、异质性阴性样本与独立外部验证，不应继续用已消费的测试集调参。</p>
+<p>二分类正式训练的验证选择通过 <code>datasets/tasks/open_uwf_uveitis_binary/validation_split.json</code> 显式固化，避免任务集合扩展后重新抽取验证面板。该快照不包含测试行；训练器会核对 manifest、任务、验证行和 <code>validation_selection_sha256</code>。复现 60 步配置的 DryRun 已得到 <code>484</code> 训练、<code>19</code> 验证、<code>415/16</code> 患者组，验证哈希 <code>cf103d219977...11633d</code>，调度哈希 <code>cae2d1e9e4f6...bea5ea1e</code>，与正式记录一致。</p>
+<p>2026-10-26 已完成第 20 步预测的错误来源分析和受控推理 smoke。错误分析覆盖 1,000 条同源冻结测试，685 个患者/来源组中有 50 组出现错误，前 10 个错误组占全部错误约 <code>24.53%</code>；候选相对第 100 步基线的总体提升几乎全部来自 DRUSEN 修正，同时出现 CNV/NORMAL 退化。smoke 使用类别均衡抽样，每类 4 条，共 16 条，结果 16/16 正确、JSON 有效率 <code>100%</code>、峰值保留显存 <code>3.31 GiB</code>。结构化分析见 <code>assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code>，smoke 证据见 <code>assets/qwen3.5-4b/eval-oct-step20-runtime-smoke-20261026-01/</code>。</p>
 <h2>常用命令</h2>
 <p>所有命令从项目根目录运行。</p>
 <pre><code class="language-powershell"># 构建训练子集
-.\model-training\.venv-modal\Scripts\python.exe model-training\scripts\modal\build_budget_training_subset.py
+.\model\training\.venv-modal\Scripts\python.exe model\training\scripts\modal\build_budget_training_subset.py
 
 # 上传训练数据
-.\model-training\scripts\modal\upload_data_batches.ps1
+.\model\training\scripts\modal\upload_data_batches.ps1
 
 # 运行 Qwen3.5-4B 训练
-.\model-training\.venv-modal\Scripts\modal.exe run model-training\code\training\modal_qwen4b_train.py
+.\model\training\.venv-modal\Scripts\modal.exe run model\training\code\training\modal_qwen4b_train.py
 
 # 运行评估
 $env:UV_RUN_ID = &quot;qwen4b-stage1-20261025-01&quot;
-.\model-training\.venv-modal\Scripts\modal.exe run model-training\code\training\modal_qwen4b_eval.py
+.\model\training\.venv-modal\Scripts\modal.exe run model\training\code\training\modal_qwen4b_eval.py
 
 # 验证本地训练清单
-.\model-training\.venv-modal\Scripts\python.exe scripts\datasets\verify_archive_extraction.py --manifests-only
+.\model\training\.venv-modal\Scripts\python.exe scripts\datasets\verify_archive_extraction.py --manifests-only
 
 # 环境预检；不启动 GPU
-.\model-training\.venv-modal\Scripts\python.exe model-training\environment\doctor.py
+.\model\training\.venv-modal\Scripts\python.exe model\training\environment\doctor.py
 
 # 本地 4060 单步或短程 QLoRA 冒烟；不产生 Modal 费用
-.\model-training\scripts\run_local_4060_smoke.ps1 `
+.\model\training\scripts\run_local_4060_smoke.ps1 `
   -RunId local-4060-smoke-20261025-06 -Steps 3 `
   -ImagePixels 65536 -MaxLength 256
 
 # 本地正式阶段训练：分层验证、类别均衡、checkpoint 与 best adapter
-.\model-training\scripts\run_local_4060_formal.ps1 `
+.\model\training\scripts\run_local_4060_formal.ps1 `
   -RunId local-4060-formal-20261025-01 -Steps 500 -GradAccum 4 `
   -ValidationEvery 25 -SaveEvery 25 -LearningRate 2.5e-5
 
+# 从选定 adapter 初始化的受控续训；先运行 -DryRun 核对切分和调度
+.\model\training\scripts\run_local_4060_formal.ps1 `
+  -RunId local-4060-oct-stage2-20261026-01 -Steps 30 -GradAccum 4 `
+  -ValidationEvery 5 -SaveEvery 10 -EarlyStopPatience 2 -LearningRate 5e-6 `
+  -InitAdapter 'qwen3.5-4b\models\best_adapter' `
+  -TaskWeights 'oct_aux_4class=4' -DryRun
+
+# Open UWF 任务隔离 DryRun；-Task 可重复传入，不会启动训练
+.\model\training\scripts\run_local_4060_formal.ps1 `
+  -RunId uwf-binary-dryrun-20261026-01 -Steps 10 -GradAccum 4 `
+  -Manifest 'model\training\datasets\tasks\open_uwf_uveitis_binary\manifest.csv' `
+  -SplitSnapshot 'model\training\datasets\tasks\open_uwf_uveitis_binary\validation_split.json' `
+  -Task uwf_uveitis_binary -MetricTask uwf_uveitis_binary `
+  -TaskWeights 'uwf_uveitis_binary=1' -DryRun
+
 # 中断后续训；仅在已从 Modal 恢复 checkpoints/ 和 training_state.pt 后使用
-.\model-training\scripts\run_local_4060_formal.ps1 `
+.\model\training\scripts\run_local_4060_formal.ps1 `
   -RunId local-4060-formal-20261025-01 -Steps 500 -GradAccum 4 `
   -ValidationEvery 25 -SaveEvery 25 -LearningRate 2.5e-5 -Resume
 
 # 运行或续跑冻结测试集评估；已有部分预测时不要添加 -Overwrite
 powershell -NoProfile -ExecutionPolicy Bypass -File `
-  'model-runtime\scripts\run_local_4060_eval.ps1' `
-  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
-  -OutputDir 'model-training\assets\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01\step100' `
-  -Tasks 'oct_aux_4class'
+  'qwen3.5-4b\scripts\run_local_4060_eval.ps1' `
+  -AdapterDir 'qwen3.5-4b\models\best_adapter' `
+  -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
+  -Tasks 'oct_aux_4class' -SamplesPerClass 4
 
 # 检查启动参数但不启动 GPU
-.\model-training\scripts\launch_training.ps1 -RunId env-check-20261025 `
+.\model\training\scripts\launch_training.ps1 -RunId env-check-20261025 `
   -AllowedGpuMinutes 5 -BudgetConfirmed -TrainLimit 16 -MaxSteps 1 -DryRun
 </code></pre>
-<p>运行训练前，先在 <code>docs/2026-10-25-training-budget-plan-modal-l40s.html</code> 核对当前预算，在 <code>docs/2026-10-25-training-cost-ledger-modal.html</code> 核对最近一次实际消耗。训练命令依赖 Modal CLI 和 <code>model-training/code/training/modal_volumes.py</code>，不要把训练脚本单独复制到其他位置执行。</p>
+<p>运行训练前，先在 <code>2026-10-25-training-budget-plan-modal-l40s.html</code> 核对当前预算，在 <code>2026-10-25-training-cost-ledger-modal.html</code> 核对最近一次实际消耗。训练命令依赖 Modal CLI 和 <code>model/training/code/training/modal_volumes.py</code>，不要把训练脚本单独复制到其他位置执行。</p>
 <p><code>environment/</code> 中锁定了本机 Modal 控制器、远端 Python/PyTorch/Transformers/PEFT/Accelerate/bitsandbytes 版本，以及数据清单和本地模型的 SHA256 或尺寸。<code>launch_training.ps1</code> 每次都会先运行 <code>doctor.py</code>；必须显式传入 <code>-BudgetConfirmed</code> 和 GPU 分钟上限，避免误启动无界训练。上述两个版本探测应用均无 GPU，运行后已停止。</p>
 <h2>文件边界</h2>
 <table>
@@ -124,17 +157,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -File `
 <tbody>
 <tr>
 <td>训练代码与 Modal 应用</td>
-<td><code>model-training/code/training/</code></td>
+<td><code>model/training/code/training/</code></td>
 <td>是</td>
 </tr>
 <tr>
 <td>环境锁定与启动闸门</td>
-<td><code>model-training/environment/</code>、<code>model-training/scripts/launch_training.ps1</code></td>
+<td><code>model/training/environment/</code>、<code>model/training/scripts/launch_training.ps1</code></td>
 <td>是</td>
 </tr>
 <tr>
 <td>数据准备与上传脚本</td>
-<td><code>model-training/scripts/modal/</code></td>
+<td><code>model/training/scripts/modal/</code></td>
 <td>是</td>
 </tr>
 <tr>
@@ -144,27 +177,37 @@ powershell -NoProfile -ExecutionPolicy Bypass -File `
 </tr>
 <tr>
 <td>Modal 训练精简数据</td>
-<td><code>model-training/datasets/training/</code></td>
+<td><code>model/training/datasets/training/</code></td>
 <td>是</td>
 </tr>
 <tr>
 <td>本地 Qwen3.5-4B 基座</td>
-<td><code>model-training/models/qwen/Qwen3.5-4B/</code></td>
+<td><code>qwen3.5-4b/models/Qwen3.5-4B/</code></td>
 <td>是</td>
 </tr>
 <tr>
 <td>本地评估快照</td>
-<td><code>model-training/assets/qwen3.5-4b/</code></td>
+<td><code>model/training/assets/qwen3.5-4b/</code></td>
+<td>是</td>
+</tr>
+<tr>
+<td>Open UWF 任务清单</td>
+<td><code>model/training/datasets/tasks/</code></td>
 <td>是</td>
 </tr>
 <tr>
 <td>完整解压数据</td>
-<td><code>model-training/datasets/extracted/</code></td>
-<td>否，由数据集清单管理</td>
+<td><code>model/training/datasets/extracted/</code></td>
+<td>是</td>
+</tr>
+<tr>
+<td>新下载数据暂存</td>
+<td><code>model/training/datasets/raw/</code></td>
+<td>是</td>
 </tr>
 <tr>
 <td>模型运行服务与评估</td>
-<td><code>model-runtime/</code></td>
+<td><code>qwen3.5-4b/</code></td>
 <td>否，运行侧管理</td>
 </tr>
 <tr>

@@ -1,13 +1,32 @@
 from pathlib import Path
+import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.auth_policy import (
+    ROOT_ADMIN_DISPLAY_NAME,
+    ROOT_ADMIN_USERNAME,
+    ROOT_PASSWORD_SENTINEL,
+)
 from app.core.config import settings
+from app.core.secret_box import SecretBox
 from app.db import PostgresCaseStore
+from app.db.analysis_jobs import MemoryAnalysisJobStore, PostgresAnalysisJobStore
 from app.db.audit import AuthAuditStore
+from app.db.data_dictionary import DataDictionaryStore, MemoryDataDictionaryStore
 from app.db.users import UserStore
-from app.routers import admin, auth, cases, health, integrations, knowledge, system
+from app.routers import (
+    admin,
+    auth,
+    cases,
+    data_dictionary,
+    health,
+    integrations,
+    knowledge,
+    system,
+)
 from app.services import (
     AnalysisService,
     AuthService,
@@ -15,10 +34,10 @@ from app.services import (
     OptionalIntegrations,
     RedisStore,
 )
+from app.services.analysis_jobs import AnalysisJobService
 from app.services.integration_settings import (
     MemoryIntegrationSettingsStore,
     PostgresIntegrationSettingsStore,
-    SecretBox,
 )
 
 
@@ -35,21 +54,61 @@ class MemoryCaseStore:
     def get(self, case_id):
         return self._cases.get(case_id)
 
-    def list(self, limit: int = 100):
-        return sorted(
-            self._cases.values(),
-            key=lambda case: case.updated_at,
-            reverse=True,
-        )[:limit]
+    def list(
+        self,
+        *,
+        owner_id: str | None = None,
+        status: str | None = None,
+        from_at=None,
+        to_at=None,
+        offset: int = 0,
+        limit: int = 100,
+    ):
+        cases = [
+            case
+            for case in self._cases.values()
+            if (owner_id is None or case.owner_id == owner_id)
+            and (status is None or case.status == status)
+            and (from_at is None or case.updated_at >= from_at)
+            and (to_at is None or case.updated_at < to_at)
+        ]
+        cases.sort(key=lambda case: case.updated_at, reverse=True)
+        return cases[offset : offset + limit]
 
-    def stats(self):
+    def count(
+        self,
+        *,
+        owner_id: str | None = None,
+        status: str | None = None,
+        from_at=None,
+        to_at=None,
+    ) -> int:
+        return len(
+            self.list(
+                owner_id=owner_id,
+                status=status,
+                from_at=from_at,
+                to_at=to_at,
+                limit=len(self._cases) + 1,
+            )
+        )
+
+    def stats(self, *, owner_id: str | None = None):
         from app.schemas.case import CaseStats
 
         counts = {"analyzing": 0, "awaiting_review": 0, "reviewed": 0}
         for case in self._cases.values():
+            if owner_id is not None and case.owner_id != owner_id:
+                continue
             if case.status in counts:
                 counts[case.status] += 1
-        return CaseStats(total=len(self._cases), **counts)
+        total = sum(counts.values()) + sum(
+            1
+            for case in self._cases.values()
+            if case.status not in counts
+            and (owner_id is None or case.owner_id == owner_id)
+        )
+        return CaseStats(total=total, **counts)
 
 
 def create_app(
@@ -63,13 +122,30 @@ def create_app(
     audit_store=None,
     bootstrap_users: bool = True,
     runtime_settings=None,
+    data_dictionary_store=None,
 ) -> FastAPI:
     runtime_settings = runtime_settings or settings
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        try:
+            recovered = app.state.analysis_job_service.recover_stale()
+            if recovered:
+                logging.getLogger("uveitis.analysis_jobs").info(
+                    "recovered %s stale analysis jobs", recovered
+                )
+        except Exception:
+            logging.getLogger("uveitis.analysis_jobs").exception(
+                "analysis job recovery failed"
+            )
+        yield
+
     app = FastAPI(
         title=runtime_settings.app_name,
         version=runtime_settings.app_version,
         docs_url="/docs",
         openapi_url="/openapi.json",
+        lifespan=lifespan,
     )
 
     app.add_middleware(
@@ -125,21 +201,6 @@ def create_app(
         app.state.audit_store = MemoryAuthAuditStore()
     else:
         app.state.audit_store = AuthAuditStore(case_store._session_factory)
-    app.state.auth_service = AuthService(
-        app.state.user_store,
-        app.state.redis_store,
-        runtime_settings.access_token_ttl_seconds,
-        runtime_settings.refresh_token_ttl_seconds,
-        refresh_grace_seconds=runtime_settings.refresh_rotation_grace_seconds,
-        login_max_attempts=runtime_settings.login_max_attempts,
-        login_window_seconds=runtime_settings.login_window_seconds,
-    )
-    if bootstrap_users:
-        _bootstrap_users(app.state.auth_service, runtime_settings)
-    app.state.knowledge_store = KnowledgeStore(
-        runtime_settings,
-        vector_dir or runtime_settings.vector_dir,
-    )
     secret_material = runtime_settings.integration_secret_key or (
         "development-only-integration-secret-change-me"
     )
@@ -151,14 +212,46 @@ def create_app(
             "生产环境必须配置 APP_INTEGRATION_SECRET_KEY（至少 32 个字符）"
         )
     secret_box = SecretBox(secret_material)
+    if data_dictionary_store is not None:
+        app.state.data_dictionary_store = data_dictionary_store
+    elif not use_environment_database:
+        app.state.data_dictionary_store = MemoryDataDictionaryStore(secret_box)
+    else:
+        app.state.data_dictionary_store = DataDictionaryStore(
+            case_store._session_factory,
+            secret_box,
+        )
+    app.state.auth_service = AuthService(
+        app.state.user_store,
+        app.state.redis_store,
+        runtime_settings.access_token_ttl_seconds,
+        runtime_settings.refresh_token_ttl_seconds,
+        admin_access_ttl_seconds=runtime_settings.admin_access_ttl_seconds,
+        refresh_grace_seconds=runtime_settings.refresh_rotation_grace_seconds,
+        login_max_attempts=runtime_settings.login_max_attempts,
+        login_window_seconds=runtime_settings.login_window_seconds,
+        credential_store=app.state.data_dictionary_store,
+    )
+    if bootstrap_users:
+        _bootstrap_root_admin(
+            app.state.auth_service,
+            runtime_settings,
+            app.state.data_dictionary_store,
+        )
+    app.state.knowledge_store = KnowledgeStore(
+        runtime_settings,
+        vector_dir or runtime_settings.vector_dir,
+    )
     if not use_environment_database:
         app.state.integration_settings_store = MemoryIntegrationSettingsStore(
-            secret_box
+            secret_box,
+            dictionary_store=app.state.data_dictionary_store,
         )
     else:
         app.state.integration_settings_store = PostgresIntegrationSettingsStore(
             case_store._session_factory,
             secret_box,
+            dictionary_store=app.state.data_dictionary_store,
         )
     app.state.integrations = OptionalIntegrations(
         runtime_settings,
@@ -169,10 +262,25 @@ def create_app(
         knowledge_store=app.state.knowledge_store,
         integrations=app.state.integrations,
     )
+    if hasattr(case_store, "_session_factory"):
+        app.state.analysis_job_store = PostgresAnalysisJobStore(
+            case_store._session_factory
+        )
+    else:
+        app.state.analysis_job_store = MemoryAnalysisJobStore()
+    app.state.analysis_job_service = AnalysisJobService(
+        app.state.analysis_job_store,
+        case_store,
+        app.state.analysis_service,
+        app.state.redis_store,
+        lease_seconds=runtime_settings.analysis_job_lease_seconds,
+        max_attempts=runtime_settings.analysis_job_max_attempts,
+    )
 
     app.include_router(health.router)
     app.include_router(auth.router)
     app.include_router(admin.router)
+    app.include_router(data_dictionary.router)
     app.include_router(integrations.router)
     app.include_router(cases.router)
     app.include_router(system.router)
@@ -197,25 +305,42 @@ class _UnavailableUserStore:
         return None
 
 
-def _bootstrap_users(auth_service: AuthService, config) -> None:
-    for username, password, display_name, role in (
-        (
-            config.bootstrap_doctor_username,
-            config.bootstrap_doctor_password,
-            "示例医生",
-            "doctor",
-        ),
-        (
-            config.bootstrap_admin_username,
-            config.bootstrap_admin_password,
-            "系统管理员",
-            "admin",
-        ),
-    ):
-        if username and password:
-            auth_service.users.ensure_user(
-                username,
-                auth_service.hash_password(password),
-                display_name,
-                role,
-            )
+def _bootstrap_root_admin(auth_service: AuthService, config, credential_store) -> None:
+    existing = auth_service.users.get_by_username(ROOT_ADMIN_USERNAME)
+    stored_hash = credential_store.get_value(
+        "auth",
+        "root.password_hash",
+        default="",
+    )
+    legacy_hash = existing[1] if existing is not None else ""
+    if not stored_hash and legacy_hash and legacy_hash != ROOT_PASSWORD_SENTINEL:
+        credential_store.set_value(
+            "auth",
+            "root.password_hash",
+            legacy_hash,
+            value_type="secret",
+            description="root 管理员密码哈希",
+            actor_id="root-bootstrap",
+        )
+        stored_hash = legacy_hash
+    elif not stored_hash and config.bootstrap_admin_password:
+        stored_hash = auth_service.hash_password(config.bootstrap_admin_password)
+        credential_store.set_value(
+            "auth",
+            "root.password_hash",
+            stored_hash,
+            value_type="secret",
+            description="root 管理员密码哈希",
+            actor_id="root-bootstrap",
+        )
+    if not stored_hash and existing is None:
+        raise RuntimeError(
+            "root 管理员首次创建必须配置 APP_BOOTSTRAP_ADMIN_PASSWORD"
+        )
+    root = auth_service.users.ensure_single_admin(
+        ROOT_ADMIN_USERNAME,
+        ROOT_PASSWORD_SENTINEL,
+        ROOT_ADMIN_DISPLAY_NAME,
+    )
+    if existing is None or legacy_hash != ROOT_PASSWORD_SENTINEL:
+        auth_service.users.clear_password_hash(ROOT_ADMIN_USERNAME)

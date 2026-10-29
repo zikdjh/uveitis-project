@@ -10,9 +10,10 @@ router = APIRouter(prefix="/api/v1/system", tags=["system"])
 
 @router.get("/overview", response_model=SystemOverview)
 def overview(request: Request) -> SystemOverview:
-    require_permission(request, Permission.SYSTEM_READ)
+    actor = require_permission(request, Permission.SYSTEM_READ)
+    owner_id = None if actor.role == "admin" else actor.id
     return SystemOverview(
-        stats=request.app.state.case_store.stats(),
+        stats=request.app.state.case_store.stats(owner_id=owner_id),
         model_mode=request.app.state.settings.model_mode,
         models=[
             *request.app.state.analysis_service.model_services(),
@@ -35,9 +36,13 @@ def overview(request: Request) -> SystemOverview:
 def infrastructure(request: Request) -> dict[str, bool]:
     require_permission(request, Permission.SYSTEM_MANAGE)
     case_store = request.app.state.case_store
-    return {
+    result = {
         "postgres": (
             case_store.ping() if hasattr(case_store, "ping") else False
         ),
         "redis": request.app.state.redis_store.ping(),
     }
+    queue = getattr(request.app.state, "analysis_job_store", None)
+    if queue is not None:
+        result["analysis_queue"] = True
+    return result

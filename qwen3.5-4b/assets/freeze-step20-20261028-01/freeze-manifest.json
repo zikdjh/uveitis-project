@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "freeze_id": "freeze-step20-20261028-01",
+  "status": "frozen_candidate_research_use_only",
+  "created_at": "2026-10-28T23:02:26.680570+08:00",
+  "freeze_scope": {
+    "task": "oct_aux_4class",
+    "role": "optional_second_opinion",
+    "clinical_release": false,
+    "runtime_candidate": true,
+    "notes": [
+      "This freeze records the selected research candidate and its evidence; it is not a clinical validation or regulatory release.",
+      "The local runtime remains a serialized, research-use-only service and always returns requires_human_review=true."
+    ]
+  },
+  "decision": {
+    "selection_sha256": "84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a",
+    "rows_per_adapter": 1000,
+    "selected": {
+      "run_id": "local-4060-oct-focus-cont-20261025-01",
+      "step": 20,
+      "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f",
+      "adapter_dir": "model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter"
+    },
+    "baseline": {
+      "run_id": "local-4060-grouped-cont-20261025-01",
+      "step": 100,
+      "adapter_sha256": "517ef19fd231783db87d1e027a35cd3fe28bd22cc340db5d4b9ac4c27c99d27a",
+      "adapter_dir": "model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter"
+    },
+    "selected_metrics": {
+      "accuracy": 0.947,
+      "macro_f1": 0.9472447307516584,
+      "json_valid_rate": 1.0,
+      "per_class_f1": {
+        "CNV": 0.9404761904761905,
+        "DME": 0.9700598802395209,
+        "DRUSEN": 0.9197651663405088,
+        "NORMAL": 0.9586776859504132
+      }
+    },
+    "baseline_metrics": {
+      "accuracy": 0.918,
+      "macro_f1": 0.9182517052346422,
+      "json_valid_rate": 1.0,
+      "per_class_f1": {
+        "CNV": 0.8772563176895307,
+        "DME": 0.9718875502008032,
+        "DRUSEN": 0.8546637744034707,
+        "NORMAL": 0.9691991786447639
+      }
+    },
+    "delta": {
+      "accuracy": 0.029,
+      "macro_f1": 0.0289930255170162,
+      "per_class_f1": {
+        "CNV": 0.0632198727866598,
+        "DME": -0.0018276699612823,
+        "DRUSEN": 0.0651013919370381,
+        "NORMAL": -0.0105214926943507
+      }
+    },
+    "promotion_threshold_macro_f1": 0.02,
+    "promotion_threshold_json_valid_rate": 0.99,
+    "passed": true,
+    "decision": "promote_step20_candidate"
+  },
+  "artifacts": {
+    "base_model": {
+      "path": "model/training/models/qwen/Qwen3.5-4B",
+      "architecture": "qwen3_5",
+      "files": 14,
+      "bytes": 9342907469,
+      "sha256": {
+        "config.json": "ddc63e1c717afa86c865bb5e01313d89d72bb53b97ad4a8a03ba8510c0621670",
+        "model.safetensors.index.json": "cf3f798ee02ba45f9622aa8892a47369ab667d0afbf154ee7c2212de42e6302d",
+        "model.safetensors-00001-of-00002.safetensors": "e408064dc397342394386eea253f7e4dbe2c82aa81bea189f51c0815582374a9",
+        "model.safetensors-00002-of-00002.safetensors": "cb544bd9bfae93dc59b0f22b292f5933573854a7f9b97835c67060d7d910e188",
+        "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+        "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8"
+      }
+    },
+    "adapter": {
+      "path": "model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter",
+      "run_id": "local-4060-oct-focus-cont-20261025-01",
+      "step": 20,
+      "format": "PEFT LoRA",
+      "r": 8,
+      "alpha": 16,
+      "target_modules": [
+        "up_proj",
+        "gate_proj",
+        "o_proj",
+        "k_proj",
+        "down_proj",
+        "q_proj",
+        "v_proj"
+      ],
+      "files": {
+        "adapter_model.safetensors": {
+          "bytes": 42504600,
+          "sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f"
+        },
+        "adapter_config.json": {
+          "bytes": 1277,
+          "sha256": "c7b8c8f602443be4b89cc77ab9b9497ec76bfde97e663d1680be3145828845bb"
+        }
+      }
+    },
+    "training_evidence": {
+      "run_id": "local-4060-oct-focus-cont-20261025-01",
+      "training_summary": {
+        "path": "model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/training_summary.json",
+        "sha256": "63c526eca50eafe502baf4666706a55303a3ee2cf213e1398ebe28fe7051b10f"
+      },
+      "train_metrics": {
+        "path": "model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/train_metrics.jsonl",
+        "sha256": "20b415fce3f59c19766ae18ba16024236127231ee315f83f5320f7d073bd2f02"
+      },
+      "validation_metrics": {
+        "path": "model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/validation_metrics.jsonl",
+        "sha256": "0da925e2ca67f18b11f4aafe3f75f9b991f1c864ee8e4fe03f2a37ffd9e5c08f"
+      }
+    },
+    "evaluation_evidence": {
+      "selection_decision": {
+        "path": "model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/selection_decision.json",
+        "sha256": "bc6dd302b014c98601314acab7a1427ef613754bd2802e169bcbd37b25fed9c4"
+      },
+      "step20": {
+        "eval_metrics": {
+          "path": "model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_metrics.json",
+          "sha256": "c2f10288cefbd8ed09536900f0d7cb6f4e2b59e521d475c311290bee02a20bd2"
+        },
+        "eval_summary": {
+          "path": "model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_summary.json",
+          "sha256": "0bb78c71d8340d9bb8e3b490e5d64fbd77fdad1a30c4ab6468ed5a8c84901d9e"
+        },
+        "eval_manifest": {
+          "path": "model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/eval_manifest.json",
+          "sha256": "4f142e7db4eecfe107826e3e21afa65ddcc77d85a6fc406cb9fb45b8647bd458"
+        },
+        "predictions": {
+          "path": "model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step20/predictions.json",
+          "sha256": "335836814d3277f46b06b4e6fed776f7419b2ef4bdf66c82c9a1b53f080cb0eb"
+        }
+      },
+      "step100": {
+        "eval_metrics": {
+          "path": "model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/step100/eval_metrics.json",
+          "sha256": "8a31586d7ac3735d0e6304ac295f7e408420ddb8981e3b5379171f3457e30187"
+        }
+      }
+    },
+    "runtime_evidence": {
+      "runtime_smoke": {
+        "path": "model/training/assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json",
+        "status": "ok",
+        "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "peak_allocated_gib": 3.275485038757324,
+        "peak_reserved_gib": 3.35546875,
+        "warm_latency_seconds": 3.363,
+        "concurrency": "serialized",
+        "note": "The runtime smoke proves the service path and resource envelope, not accuracy or clinical validity."
+      }
+    }
+  },
+  "data": {
+    "manifest": {
+      "path": "model/training/datasets/training/manifest.csv",
+      "sha256": "0ba7f4f9f56a411bbef43836e8453cc2a10c52b7d86b7ca86a071e7233e91580",
+      "rows": 16638,
+      "split_rows": {
+        "train": 14734,
+        "validation": 177,
+        "test": 1727
+      },
+      "task_rows": {
+        "eye_five_class": 2297,
+        "fundus_odir_multilabel": 2000,
+        "fundus_rfmid_multilabel": 854,
+        "fundus_toxo_binary": 412,
+        "oct_aux_4class": 11000,
+        "oct_uveitis_4class": 75
+      }
+    },
+    "frozen_oct_test": {
+      "task": "oct_aux_4class",
+      "rows": 1000,
+      "class_counts": {
+        "CNV": 250,
+        "DME": 250,
+        "DRUSEN": 250,
+        "NORMAL": 250
+      },
+      "selection_sha256": "84402fdb237835dd7cee154a59b77d910ac99d10dd2afdaf6f163851b12a280a",
+      "source_dataset": "13_zhanglab_oct",
+      "patient_isolated_external_validation": false
+    },
+    "training_audit": {
+      "train_rows_used": 12101,
+      "validation_rows_used": 55,
+      "train_groups": 5184,
+      "validation_groups": 33,
+      "test_images_read": false,
+      "excluded_rows": 71,
+      "exclusion_counts": {
+        "01_uveitis_oct::no_patient_ids_and_all_source_groups_overlap_test": 60,
+        "03_eye_five_class::group_overlaps_test": 11
+      }
+    }
+  },
+  "safety": {
+    "research_use_only": true,
+    "clinical_validation": false,
+    "regulatory_clearance": false,
+    "requires_human_review": true,
+    "diagnosis_replacement": false,
+    "allowed_to_send_case_text_or_images_to_external_apis": false,
+    "runtime_is_local_only": true,
+    "notes": [
+      "The selected labels are CNV, DME, DRUSEN, and NORMAL; this is not a complete uveitis etiology classifier.",
+      "The model may be used only as an optional research second opinion inside the physician-reviewed workflow.",
+      "Patient images and case text must remain on the local runtime and must not be forwarded to external summary or search APIs."
+    ]
+  },
+  "known_limitations": [
+    "No patient-isolated external validation set has been used.",
+    "The 1,000-row OCT evaluation is same-source and grouped, and dataset 01 lacks patient IDs while dataset 03 contains prototype or augmentation relationships.",
+    "Confidence values are not calibrated and can be zero; labels and impressions are not clinical conclusions.",
+    "The frozen candidate does not ingest clinical history or laboratory variables and does not infer uveitis etiology.",
+    "The runtime is serialized and has only been validated on the local RTX 4060 environment.",
+    "Performance on unseen cameras, populations, institutions, and acquisition protocols is unknown.",
+    "No prospective, multi-center, subgroup, or fairness evaluation exists.",
+    "The model must not be used for autonomous diagnosis, treatment selection, or exclusion of disease."
+  ]
+}

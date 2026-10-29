@@ -24,15 +24,15 @@
   </div>
   <h1>模型评估与推理说明</h1>
   <p class="doc-summary">本地评估、冻结测试、显存限制与推理边界</p>
-  <p class="doc-source">规范入口：<code>model-runtime/docs/qwen4b-eval-guide.md</code></p>
+  <p class="doc-source">规范入口：<code>qwen3.5-4b/README.md</code></p>
   <article class="html-body">
 <p>更新日期：2026-10-26</p>
-<p>本页说明 Qwen3.5-4B 原型如何从训练产物进入本地评估，以及当前运行服务实际具备的能力边界。训练流程、基座、数据和 adapter 统一位于 <code>model-training/</code>；本目录只管理运行、评估和部署。</p>
+<p>本页说明 Qwen3.5-4B 原型如何从训练产物进入本地评估，以及当前运行服务实际具备的能力边界。训练流程、基座、数据和 adapter 统一位于 <code>model/training/</code>；本目录只管理运行、评估和部署。</p>
 <h2>当前能力</h2>
 <ul>
-<li><code>model-runtime/app/</code> 提供基座、adapter 健康检查，并通过 <code>POST /v1/judge</code> 执行 Qwen3.5-4B 结构化辅助观察；结果固定要求医生复核，不构成完整诊断。</li>
-<li><code>model-runtime/code/local_qwen4b_eval.py</code> 支持冻结测试集生成式评估、严格 JSON 解析、分任务指标、按类别均衡抽样、预测保存和中断续跑。</li>
-<li><code>model-runtime/scripts/run_local_4060_eval.ps1</code> 是 Windows 本地入口。</li>
+<li><code>qwen3.5-4b/app/</code> 提供基座、adapter 健康检查，并通过 <code>POST /v1/judge</code> 执行 Qwen3.5-4B 结构化辅助观察；结果固定要求医生复核，不构成完整诊断。</li>
+<li><code>qwen3.5-4b/code/local_qwen4b_eval.py</code> 支持冻结测试集生成式评估、严格 JSON 解析、分任务指标、按类别均衡抽样、预测保存和中断续跑。</li>
+<li><code>qwen3.5-4b/scripts/run_local_4060_eval.ps1</code> 是 Windows 本地入口。</li>
 <li>运行侧只读取训练产物，不复制基座权重，也不修改训练记录。</li>
 </ul>
 <p>2026-10-26 已完成第 20 步候选的 16 条四类均衡受控推理 smoke，并完成真实 <code>POST /v1/judge</code> 本地烟测。服务使用 4-bit NF4 基座和 adapter，首次请求约 22 秒，热请求约 2.4–3.6 秒。本轮未启动 Modal，也未新增 Modal 费用。</p>
@@ -47,35 +47,35 @@
 <tbody>
 <tr>
 <td>冻结评估基线</td>
-<td><code>model-training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code></td>
+<td><code>model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter</code></td>
 </tr>
 <tr>
 <td>OCT 候选</td>
-<td><code>model-training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code></td>
+<td><code>qwen3.5-4b/models/best_adapter</code></td>
 </tr>
 <tr>
 <td>冻结同集评估</td>
-<td><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/</code></td>
+<td><code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/</code></td>
 </tr>
 <tr>
 <td>错误来源分析</td>
-<td><code>model-training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code></td>
+<td><code>model/training/assets/qwen3.5-4b/eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json</code></td>
 </tr>
 <tr>
 <td>受控推理 smoke</td>
-<td><code>model-training/assets/qwen3.5-4b/eval-oct-step20-runtime-smoke-20261026-01/</code></td>
+<td><code>model/training/assets/qwen3.5-4b/eval-oct-step20-runtime-smoke-20261026-01/</code></td>
 </tr>
 <tr>
 <td>本地基座</td>
-<td><code>model-training/models/qwen/Qwen3.5-4B/</code></td>
+<td><code>qwen3.5-4b/models/Qwen3.5-4B/</code></td>
 </tr>
 <tr>
 <td>真实运行烟测证据</td>
-<td><code>model-training/assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code></td>
+<td><code>model/training/assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json</code></td>
 </tr>
 <tr>
 <td>训练 manifest</td>
-<td><code>model-training/datasets/training/manifest.csv</code></td>
+<td><code>model/training/datasets/training/manifest.csv</code></td>
 </tr>
 </tbody>
 </table>
@@ -85,12 +85,12 @@
 <p>这些数字来自单一冻结测试集的原型评估，不是临床验证结论，也不代表跨医院、跨设备或患者独立队列上的泛化性能。</p>
 <h2>健康检查</h2>
 <p>从项目根目录使用已验证的 CUDA 运行环境启动服务。首次有效请求才加载 4-bit 基座与 adapter，因此冷启动超时应高于普通 API：</p>
-<pre><code class="language-powershell">cd model-runtime
-$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\model-training\datasets\training').Path
+<pre><code class="language-powershell">cd qwen3.5-4b
+$env:MODEL_RUNTIME_UPLOAD_ROOT = (Resolve-Path '..\model\training\datasets\training').Path
 $env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
 ..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 </code></pre>
-<p>在 <code>model-runtime</code> 目录检查健康状态并发送一个受控请求。以下请求使用训练图像检查链路，不能作为准确率证据：</p>
+<p>在 <code>qwen3.5-4b</code> 目录检查健康状态并发送一个受控请求。以下请求使用训练图像检查链路，不能作为准确率证据：</p>
 <pre><code class="language-powershell">Invoke-RestMethod http://127.0.0.1:8010/health
 Invoke-RestMethod http://127.0.0.1:8010/v1/models
 
@@ -101,7 +101,7 @@ $body = @{
     images = @(@{
       id = 'CNV-1016042-142'
       kind = 'oct'
-      local_path = (Resolve-Path '..\model-training\datasets\training\data\13_zhanglab_oct\13_zhanglab\ZhangLabData\CellData\OCT\train\CNV\CNV-1016042-142.jpeg').Path
+      local_path = (Resolve-Path '..\training\datasets\training\data\13_zhanglab_oct\13_zhanglab\ZhangLabData\CellData\OCT\train\CNV\CNV-1016042-142.jpeg').Path
     })
   }
 } | ConvertTo-Json -Depth 6
@@ -116,17 +116,17 @@ Invoke-RestMethod `
 <p><code>ready</code> 表示基座和 adapter 文件可定位；<code>degraded</code> 表示路径缺失。响应包含标签、发现、置信度、adapter SHA256、时延、生成截断标志与显存峰值，并固定带 <code>requires_human_review=true</code>、<code>research_use_only=true</code>。<code>/v1/models</code> 仍只是模型角色索引，不表示临床部署。</p>
 <h2>本地评估</h2>
 <p>先用每类 4 条验证均衡评估和四类输出：</p>
-<pre><code class="language-powershell">.\model-runtime\scripts\run_local_4060_eval.ps1 `
-  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
-  -OutputDir 'model-training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
+<pre><code class="language-powershell">.\qwen3.5-4b\scripts\run_local_4060_eval.ps1 `
+  -AdapterDir 'qwen3.5-4b\models\best_adapter' `
+  -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
   -Tasks 'oct_aux_4class' -SamplesPerClass 4
 </code></pre>
 <p><code>-SamplesPerClass N</code> 按 <code>task + label</code> 确定性取前 N 条；<code>-MaxSamples N</code> 仍是按排序取前 N 条。两者互斥，实际抽样模式和各类数量会写入结果清单。</p>
 <p>续跑冻结基线时，输出目录必须指向原评估目录，且不要添加 <code>-Overwrite</code>：</p>
 <pre><code class="language-powershell">powershell -NoProfile -ExecutionPolicy Bypass -File `
-  'model-runtime\scripts\run_local_4060_eval.ps1' `
-  -AdapterDir 'model-training\assets\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
-  -OutputDir 'model-training\assets\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01\step100' `
+  'qwen3.5-4b\scripts\run_local_4060_eval.ps1' `
+  -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-grouped-cont-20261025-01\best_adapter' `
+  -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-vs-step100-20261025-01\step100' `
   -Tasks 'oct_aux_4class'
 </code></pre>
 <p>评估器只读取冻结测试图像和 manifest 元数据，不参与训练、学习率调整或 checkpoint 选择。不要把测试结果回写训练标签。</p>
@@ -137,7 +137,7 @@ Invoke-RestMethod `
 <p>预处理修正后的复测请求耗时 <code>3.363 秒</code>、峰值保留 <code>3.355469 GiB</code>，adapter SHA256 不变。该请求读取一张标签为 CNV 的训练图，模型返回 DRUSEN，置信度为 0、impression 为空；因此当前输出可用于检查运行链路和结构化契约，不能作为分类准确率或置信度可信度的证据。</p>
 <h2>输出约定</h2>
 <p>评估结果包含 <code>eval_manifest.json</code>、<code>eval_metrics.json</code>、<code>eval_summary.json</code> 和逐样本预测文件。中断时保留 <code>.partial.jsonl</code>，下一次从已有预测继续。正式结果必须保留 adapter 指纹、manifest 指纹、selection 指纹、抽样模式与类别数、任务集合、样本数、运行耗时和显存峰值。</p>
-<p>模型运行侧的临时结果放入 <code>model-runtime/</code> 或 <code>outputs/</code>；需要长期保留的评估证据应归档到 <code>model-training/assets/qwen3.5-4b/&lt;run-id&gt;/</code>，并在训练产物索引中登记。</p>
+<p>模型运行侧的临时结果放入 <code>qwen3.5-4b/</code> 或 <code>outputs/</code>；需要长期保留的评估证据应归档到 <code>model/training/assets/qwen3.5-4b/&lt;run-id&gt;/</code>，并在训练产物索引中登记。</p>
 <h2>推理边界</h2>
 <p>当前模型是科研原型，只能输出辅助观察和结构化候选，不构成诊断、治疗或用药建议。接入业务链路前仍需完成：</p>
 <ul>

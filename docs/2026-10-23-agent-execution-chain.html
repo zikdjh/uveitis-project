@@ -185,7 +185,7 @@
 <h3>7. SearchAgent</h3>
 <p>状态：可选增强。统一适配 Tavily、Brave Search、Serper、Google Programmable Search (CSE)、Bing Web Search、Exa、Perplexity 和自建 SearXNG，输出可引用的网页证据。服务商密钥、启用集合和尝试顺序由管理员在服务配置页维护，医生没有读写权限。</p>
 <ul>
-<li>默认不把主诉等临床文本发送给外部搜索 API。</li>
+<li>搜索词只使用模型标签和固定医学检索词，绝不把主诉、病史、病例标识或影像信息发送给外部搜索 API。</li>
 <li>查询词优先来自 Qwen 判断标签、补充分类和固定医学检索词。</li>
 <li>单个提供方失败时继续尝试其他提供方；全部失败只记失败，不改变主流程。</li>
 </ul>
@@ -193,7 +193,7 @@
 <p>状态：可选增强。支持 OpenAI Responses、OpenAI Chat Completions 和 Anthropic Messages 三种接口，对结构化判断、RAG 证据、搜索证据和补充分类进行总结梳理。管理员维护协议、地址、模型与密钥，密钥只写不读。</p>
 <ul>
 <li>只接收结构化结果和证据，不接收原始影像。</li>
-<li>默认不发送主诉和病史；如需发送必须显式配置并完成外部数据处理评估。</li>
+<li>只发送模型标签、置信度和检索证据；病例字段、影像字段和未受控自由文本在 HTTP 调用前被硬校验拦截。</li>
 <li>外部总结不是诊断，外部 API 不可用时自动使用确定性回退摘要。</li>
 </ul>
 <h3>9. SafetyAgent</h3>
@@ -426,7 +426,7 @@
 <tr><td><code>APP_RAG_ENABLED</code></td><td>启用本地 BGE-M3 + zvec 检索</td></tr>
 <tr><td><code>APP_DECISION_ENABLED</code></td><td>启用补充决策模型，默认关闭</td></tr>
 <tr><td>管理端网络搜索配置</td><td>管理员维护服务商启用状态、尝试顺序、密钥、地址和最大结果数；运行时从数据库读取，环境变量不提供运营配置入口</td></tr>
-<tr><td>管理端外部总结配置</td><td>管理员维护协议、地址、模型、密钥和临床文本发送开关；启用状态与敏感性开关分开保存</td></tr>
+<tr><td>管理端外部总结配置</td><td>管理员维护协议、地址、模型和密钥；系统不提供病例或影像发送开关，外发内容由代码硬边界限制为模型标签、置信度和检索证据</td></tr>
 <tr><td><code>APP_SUMMARY_TIMEOUT_SECONDS</code></td><td>设置外部总结请求的部署级超时，不包含凭据</td></tr>
 <tr><td><code>APP_INTEGRATION_SECRET_KEY</code></td><td>用于 AES-GCM 加密数据库中的服务密钥；生产环境必须配置至少 32 个字符</td></tr>
 </tbody>
@@ -434,11 +434,11 @@
 <h2>8. 管理员配置与权限</h2>
 <p>外部 API 与网络搜索 API 的配置权限只授予系统管理员。管理端提供 <code>integration:read</code> 与 <code>integration:manage</code> 对应能力；医生可通过 <code>system:read</code> 查看总结与搜索是否启用，但不能查看 API 地址、模型、服务商顺序、掩码提示或修改任何服务配置。</p>
 <ul>
-<li>配置保存在 PostgreSQL 的 <code>integration_settings</code>，管理员后台不使用 SQLite 持久化。</li>
+<li>配置保存在 PostgreSQL 的 <code>t_data_dictionary</code>，旧版 <code>t_integration_setting</code> 仅保留迁移兼容；管理员后台不使用 SQLite 持久化。</li>
 <li>API Key、搜索 Key 和自建实例凭据只写不读；返回字段仅表示“已配置”，不回传加密值或密钥原文。</li>
 <li>每次更新递增 <code>revision</code> 并写入审计事件 <code>integration_config_update</code>；并发覆盖使用 409 冲突保护。</li>
 <li>配置检查需要管理员权限；搜索服务会执行真实连通性检查，总结服务只校验协议、地址、模型与密钥是否齐全。检查失败只显示错误，不把密钥写入日志、审计详情或前端响应。</li>
-<li>启用搜索不等于发送临床文本：主诉发送开关独立且默认关闭。外部总结的临床文本开关同样独立且默认关闭，原始影像始终不发送。</li>
+<li>启用搜索或外部总结不会扩大隐私边界：系统没有病例或影像发送开关，所有外发载荷在 HTTP 调用前只允许模型标签、置信度和检索证据。</li>
 </ul>
   </article>
 </main>

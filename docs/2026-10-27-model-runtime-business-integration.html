@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>真实模型运行与业务回写 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-27-analysis-job-queue.html">上一份</a>
+    <a href="2026-10-28-model-runtime-failure-recovery.html">下一份</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>运行</span>
+    <span>2026-10-27</span>
+  </div>
+  <h1>真实模型运行与业务回写</h1>
+  <p class="doc-summary">本地 Qwen3.5-4B 上传影像调用、adapter 审计元数据、超时边界和病例持久化验收</p>
+  <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-model-runtime-business-integration.html</code></p>
+  <article class="html-body">
+<p>本页记录从业务病例到本地模型运行服务的真实跨进程联调。目标不是新增准确率证据，而是确认上传影像能够被受限模型服务读取，结构化结果能够进入持久任务与病例记录，并且失败时仍保持医生复核主链路。</p>
+
+    <h2>运行边界</h2>
+    <table>
+      <thead><tr><th>边界</th><th>实现</th><th>验证含义</th></tr></thead>
+      <tbody>
+        <tr><td>影像路径</td><td>后端按病例和影像 ID 生成绝对路径；模型运行服务只接受配置根目录内的文件。</td><td>目录穿越、越界路径和未知格式均被拒绝。</td></tr>
+        <tr><td>Docker 共享卷</td><td><code>case-uploads</code> 共享卷以只读方式挂载到模型服务，后端与 worker 使用同一上传目录。</td><td>解决容器内路径不存在或与宿主机路径不一致的问题。</td></tr>
+        <tr><td>内部服务鉴权</td><td>配置 <code>APP_INTERNAL_SERVICE_TOKEN</code> 时，请求必须携带 <code>X-Internal-Service-Token</code>。</td><td>模型服务不是匿名可调用的公开推理端点。</td></tr>
+        <tr><td>出站隐私</td><td>病情和影像只允许进入回环或受控内网的项目自有模型服务；外部总结仅接收标签、置信度和受控证据。</td><td>外部 API 不接收原始病例字段或影像路径。</td></tr>
+        <tr><td>模型输出</td><td>只接受任务白名单中的结构化标签，固定要求医生复核，不生成最终诊断。</td><td>模型是辅助判断分支，不替代临床复核。</td></tr>
+      </tbody>
+    </table>
+
+    <h2>持久化审计元数据</h2>
+    <p>Qwen 分支成功时，病例分析的 <code>runtime_metadata</code> 保存模型名、adapter SHA256、服务端推理时延、生成时间、截断状态、峰值分配/保留显存和研究用途标记。这些字段供审计与运维排查；外部总结载荷继续使用字段白名单，不读取该元数据。</p>
+    <pre><code>{
+  "model": "Qwen3.5-4B",
+  "adapter_sha256": "00ebeb2c...",
+  "latency_ms": 2528,
+  "truncated": false,
+  "peak_allocated_gib": 3.242,
+  "peak_reserved_gib": 3.311,
+  "research_use_only": true
+}</code></pre>
+
+    <h2>超时策略</h2>
+    <p>后端默认 <code>APP_PERCEPTION_TIMEOUT_SECONDS=90</code>，覆盖本地首次模型加载与串行推理。热推理通常为数秒。超时会只把 Qwen 分支标记为 <code>failed</code>，病例继续进入确定性摘要和待复核，不会把未返回结果写成成功。</p>
+    <p>本轮首次 45 秒请求在模型冷加载后超时，业务回写仍保持完整且正确降级；提高默认上限并重启后，热推理跨进程验收成功。该调整只延长允许的等待时间，不改变模型、数据或临床结论。</p>
+
+    <h2>真实本地联调结果</h2>
+    <table>
+      <thead><tr><th>检查项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>硬件</td><td>NVIDIA GeForce RTX 4060 Laptop GPU，8188 MiB。</td></tr>
+        <tr><td>运行服务健康状态</td><td><code>ok</code>；基座与第 20 步 adapter 均定位成功。</td></tr>
+        <tr><td>首次业务请求</td><td>45 秒上限触发 <code>ReadTimeout</code>；病例仍为 <code>awaiting_review</code>，Qwen 分支正确标记失败。</td></tr>
+        <tr><td>修正后热推理</td><td>两次成功，服务端时延分别为 <code>2528 ms</code>、<code>2958 ms</code>。</td></tr>
+        <tr><td>持久结果</td><td>病例分析完成；Qwen 阶段 <code>completed</code>；任务 <code>completed</code>、尝试次数 1、无错误。</td></tr>
+        <tr><td>adapter 指纹</td><td><code>00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f</code>。</td></tr>
+        <tr><td>显存</td><td>单图峰值分配 <code>3.242 GiB</code>，峰值保留 <code>3.311 GiB</code>；服务停止后 GPU 回落至 <code>10 MiB</code>。</td></tr>
+        <tr><td>输出质量</td><td>测试图为 CNV 标签，模型返回 CNV，但置信度 0、印象为空；不能作为准确率、临床置信度或自动分诊证据。</td></tr>
+        <tr><td>测试清理</td><td>3 条联调病例、3 条任务和 1 个临时医生已定向删除，残留计数 0。</td></tr>
+      </tbody>
+    </table>
+
+    <h2>测试覆盖</h2>
+    <ul>
+      <li>后端 Qwen 契约覆盖结构化响应、受控病例字段、运行元数据解析和失败降级。</li>
+      <li>模型运行服务测试覆盖结构化结果、越界影像拒绝、任务白名单、空影像、超时和非法模型输出。</li>
+      <li>持久任务测试覆盖运行元数据保存、任务完成状态和病例待复核状态。</li>
+      <li>外部边界测试继续拒绝把病例字段或影像发往第三方总结服务。</li>
+    </ul>
+
+    <h2>剩余限制</h2>
+    <ul>
+      <li>真实模型输出置信度不可靠，不能用于阈值分诊；医生复核仍是强制边界。</li>
+      <li>Docker Compose 的共享卷与模型路径配置已修正，但本轮真实 GPU 联调使用本机进程与同一上传目录；完整容器部署仍需单独验收。</li>
+      <li>运行服务缺少 <code>causal_conv1d</code> 和 <code>flash-linear-attention</code> 优化内核，目前使用可用的参考实现，热延迟为秒级。</li>
+      <li>当前只完成一个影像任务的跨进程验收，不代表其他病种、外部数据或临床场景的泛化能力。</li>
+    </ul>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>真实模型运行与业务回写 · 2026-10-27</span>
+  <span><a href="2026-10-26-document-catalog.html">返回文档索引</a></span>
+</footer>
+</body>
+</html>
