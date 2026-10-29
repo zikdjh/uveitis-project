@@ -4,7 +4,7 @@
 
 这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除早期 smoke adapter、历史中间 checkpoint、`training_state.pt` 和第二、第三阶段实验权重，并保留第 4、5 阶段实验目录供本轮审计；当前保留两组工作 adapter、阶段实验指标、摘要、决策文件、错误来源分析和受控推理 smoke。实验 adapter 不作为运行候选。完整训练状态仍以 Modal `uveitis-runs` 为唯一真相源。
 
-本目录属于训练侧。模型运行服务只读取 adapter，不在 `model/runtime/` 复制权重。
+本目录属于训练侧。模型运行服务只读取 adapter，不在 `qwen3.5-4b/` 复制权重。
 
 ## Qwen3.5-4B
 
@@ -46,12 +46,12 @@ step 100、200、300 的内部验证 loss 分别为 `0.018165`、`0.020989`、`0
 
 ### pilot 与 smoke
 
-`pilot/` 保存 pilot run 的验证和评估快照；`smoke/` 保存早期配置、旧指标和中断步元数据。`local-4060-*` 冒烟目录中的 adapter、processor 和 checkpoint 已清理，只保留小型指标文件。smoke 指标只证明链路曾运行，不作为准确率证据。
+`pilot/` 保存 pilot run 的验证和评估快照；`smoke/` 保存早期配置、旧指标和中断步元数据。全部 run 的中间态权重（`checkpoints/`、`best_adapter/`、`final_adapter/`）已清理，只保留小型指标与决策文件；完整 run 和优化器状态以 Modal `uveitis-runs` 卷为真相源。smoke 指标只证明链路曾运行，不作为准确率证据。
 
 ### 当前本地工作适配器
 
-- `local-4060-grouped-cont-20261025-01/best_adapter`：第 100 步同源冻结评估基线。
-- `local-4060-oct-focus-cont-20261025-01/best_adapter`：第 20 步选定 OCT 运行候选。
+- `local-4060-grouped-cont-20261025-01/best_adapter`：第 100 步同源冻结评估基线，adapter 权重已随中间态清理，SHA256 见 `qwen3.5-4b/assets/freeze-step20-20261028-01/freeze-manifest.json`。
+- `local-4060-oct-focus-cont-20261025-01/best_adapter`：第 20 步选定 OCT 运行候选，最终产物已迁至 `qwen3.5-4b/models/best_adapter`（run 目录保留训练过程记录，可随中间态清理）。
 - `eval-oct-step20-vs-step100-20261025-01/`：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 `selection_decision.json`。
 - `local-4060-oct-stage2-20261026-01/`、`local-4060-oct-stage2b-20261026-01/`：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。
 - `eval-oct-stage2-20261026-01/stage2_decision.json`：第二阶段结论，决定保留第 20 步候选，不提升实验 final adapter。
@@ -74,7 +74,7 @@ step 100、200、300 的内部验证 loss 分别为 `0.018165`、`0.020989`、`0
 
 ### 第 20 步冻结候选
 
-2026-10-28 提前完成候选冻结，目录为 `freeze-step20-20261028-01/`。目录内包含：
+2026-10-28 提前完成候选冻结，目录已迁至 `qwen3.5-4b/assets/freeze-step20-20261028-01/`。目录内包含：
 
 - `model-card.html`：模型身份、训练数据、同源评估、运行证据、允许用途和禁止用途。
 - `freeze-manifest.json`：基座、adapter、训练摘要、评估证据、指纹和冻结决定。

@@ -238,9 +238,7 @@ class KnowledgeIndexStatus(BaseModel):
     path: str
     documents: int
     dimension: int
-    embedding_mode: Literal["memory", "local", "remote"]
-    model_path: str = ""
-    device: str = ""
+    embedding_mode: Literal["memory", "remote"]
     ready: bool
 
 

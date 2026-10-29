@@ -22,7 +22,7 @@
   <h1>分析任务失败恢复回归</h1>
   <p class="doc-summary">运行服务不可用、推理超时、真实回写与服务恢复四个阶段的端到端验收证据</p>
   <article class="html-body">
-    <p>本页补齐 10-27 业务回写之后剩余的失败恢复回归：验证 Qwen 判断分支在运行服务不可用、推理超时和进程重启场景下独立降级，且病例主链路始终完整进入待复核。回归脚本为 <code>model/runtime/scripts/run_recovery_regression.py</code>，证据文件为 <code>model/training/assets/qwen3.5-4b/runtime-recovery-local-4060-20261028-01/recovery_evidence.json</code>。</p>
+    <p>本页补齐 10-27 业务回写之后剩余的失败恢复回归：验证 Qwen 判断分支在运行服务不可用、推理超时和进程重启场景下独立降级，且病例主链路始终完整进入待复核。回归脚本为 <code>qwen3.5-4b/scripts/run_recovery_regression.py</code>，证据文件为 <code>model/training/assets/qwen3.5-4b/runtime-recovery-local-4060-20261028-01/recovery_evidence.json</code>。</p>
 
     <h2>回归范围</h2>
     <ul>
@@ -44,7 +44,7 @@
     </table>
 
     <h2>复跑方式</h2>
-    <pre><code>cd model\runtime
+    <pre><code>cd qwen3.5-4b
 ..\..\backend\.venv\Scripts\python.exe -X utf8 -u scripts\run_recovery_regression.py</code></pre>
     <p>脚本每次清理并重建 <code>outputs/runtime-recovery-20261028-01/</code> 工作目录，在 8010 端口拉起运行服务、8011 端口拉起慢响应服务，结束后自动停止进程并重写证据 JSON。需要约 2 分钟与约 4 GiB 显存。</p>
 

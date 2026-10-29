@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "contract_id": "qwen3.5-4b-oct-step20-runtime-20261028-01",
+  "status": "research_use_only",
+  "created_at": "2026-10-28T23:02:26.680570+08:00",
+  "service": {
+    "name": "model-runtime",
+    "framework": "FastAPI + Uvicorn",
+    "default_host": "127.0.0.1",
+    "default_port": 8010,
+    "primary_endpoint": "POST /v1/judge",
+    "health_endpoint": "GET /health",
+    "model_index_endpoint": "GET /v1/models",
+    "concurrency": "serialized by an in-process inference lock",
+    "model_dir": "qwen3.5-4b/models/Qwen3.5-4B",
+    "adapter_dir": "qwen3.5-4b/models/best_adapter",
+    "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f"
+  },
+  "model": {
+    "name": "Qwen3.5-4B",
+    "architecture": "qwen3_5",
+    "role": "optional_image_judgment_second_opinion",
+    "frozen_task": "oct_aux_4class",
+    "frozen_labels": [
+      "CNV",
+      "DME",
+      "DRUSEN",
+      "NORMAL"
+    ],
+    "quantization": "4-bit NF4, bfloat16 compute, double quant",
+    "adapter_format": "PEFT LoRA",
+    "adapter_r": 8,
+    "adapter_alpha": 16,
+    "model_loading": "offline local files only; first valid request loads the base model and adapter"
+  },
+  "input_contract": {
+    "method": "POST",
+    "path": "/v1/judge",
+    "case_id": "required, 1-128 characters",
+    "task": "oct_aux_4class for this frozen contract",
+    "images": {
+      "required": true,
+      "default_max_images": 4,
+      "hard_max_images": 8,
+      "formats": [
+        "jpg",
+        "jpeg",
+        "png",
+        "webp"
+      ],
+      "default_max_image_bytes": 26214400,
+      "hard_max_image_bytes": 52428800,
+      "default_max_decoded_pixels": 40000000,
+      "hard_max_decoded_pixels": 100000000,
+      "image_pixels_used_for_inference": 65536
+    },
+    "image_path_policy": "The image must be inside MODEL_RUNTIME_IMAGE_ROOT, MODEL_RUNTIME_UPLOAD_ROOT, or the model/training datasets root; the service rejects paths outside those roots.",
+    "text_policy": "Case text may be accepted by the local service payload but is not used in the image classification prompt and is not sent to external APIs by this contract."
+  },
+  "output_contract": {
+    "response_type": "application/json",
+    "required_fields": [
+      "result.label",
+      "result.confidence",
+      "result.impression",
+      "result.findings",
+      "result.recommendations",
+      "result.requires_human_review",
+      "task",
+      "model",
+      "adapter_sha256",
+      "latency_ms",
+      "generated_at",
+      "truncated",
+      "research_use_only"
+    ],
+    "label_domain": [
+      "CNV",
+      "DME",
+      "DRUSEN",
+      "NORMAL"
+    ],
+    "requires_human_review": true,
+    "research_use_only": true,
+    "empty_confidence_policy": "A zero or empty confidence is allowed by the runtime but must be treated as unusable for automation or triage.",
+    "truncated_policy": "When truncated=true, the response is incomplete and must not be treated as a valid model conclusion."
+  },
+  "generation": {
+    "do_sample": false,
+    "default_max_new_tokens": 32,
+    "default_image_pixels": 65536,
+    "default_max_images": 4,
+    "default_inference_wait_seconds": 35,
+    "backend_request_timeout_seconds": 90,
+    "output_format": "compact JSON"
+  },
+  "environment": {
+    "MODEL_RUNTIME_MODEL_DIR": "base model directory",
+    "MODEL_RUNTIME_ADAPTER_DIR": "adapter directory",
+    "MODEL_RUNTIME_IMAGE_PIXELS": "65536 default; 4096-451584 allowed",
+    "MODEL_RUNTIME_MAX_NEW_TOKENS": "32 default; 8-128 allowed",
+    "MODEL_RUNTIME_MAX_IMAGES": "4 default; 1-8 allowed",
+    "MODEL_RUNTIME_MAX_IMAGE_BYTES": "26214400 default; 1024-52428800 allowed",
+    "MODEL_RUNTIME_MAX_DECODED_PIXELS": "40000000 default; 65536-100000000 allowed",
+    "MODEL_RUNTIME_INFERENCE_WAIT_SECONDS": "35 default; 1-120 allowed",
+    "MODEL_RUNTIME_INTERNAL_TOKEN": "optional; when set, X-Internal-Service-Token must match",
+    "MODEL_RUNTIME_IMAGE_ROOT": "optional additional allowed image root",
+    "MODEL_RUNTIME_UPLOAD_ROOT": "required for business image uploads; must point to the shared upload directory",
+    "HF_HUB_OFFLINE": "forced to 1 when the service loads the local model"
+  },
+  "resource_evidence": {
+    "validated_gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "validated_gpu_total_memory_gib": 7.99560546875,
+    "training_peak_allocated_gib": 5.452396869659424,
+    "training_peak_reserved_gib": 5.69140625,
+    "evaluation_peak_allocated_gib": 3.242013931274414,
+    "evaluation_peak_reserved_gib": 3.310546875,
+    "runtime_single_image_peak_allocated_gib": 3.275485038757324,
+    "runtime_single_image_peak_reserved_gib": 3.35546875,
+    "runtime_cold_start_seconds_approx": 22.2,
+    "runtime_warm_request_seconds": 3.363,
+    "runtime_8_concurrent_requests": "all HTTP 200 through serialized execution",
+    "runtime_oom_observed": false
+  },
+  "failure_behavior": {
+    "load_failure": "503 Model runtime unavailable",
+    "inference_failure": "503 Model inference unavailable",
+    "busy_timeout": "503 Runtime is busy",
+    "invalid_path_or_image": "403 or 422; no GPU load for invalid requests",
+    "too_many_images": "413",
+    "unsupported_task": "422",
+    "backend_policy": "The business analysis pipeline treats Qwen as optional; failure or timeout is recorded as skipped/degraded and must not block case review."
+  },
+  "data_boundary": {
+    "local_only": true,
+    "external_summary_api_allowed": false,
+    "external_search_api_allowed": false,
+    "patient_image_payload_allowed_external": false,
+    "case_text_payload_allowed_external": false,
+    "notes": [
+      "The runtime reads local image paths and performs local GPU inference.",
+      "The business backend remains responsible for keeping case text and image content away from external model and search providers."
+    ]
+  },
+  "acceptance_checks": [
+    "GET /health returns ready when the base model and adapter files are present.",
+    "GET /v1/models lists qwen_judgment, adapter, and disabled decision roles without loading the GPU.",
+    "POST /v1/judge returns compact JSON with the frozen adapter SHA256 and requires_human_review=true.",
+    "Invalid image paths are rejected before GPU loading.",
+    "The backend degrades or skips Qwen when the runtime is unavailable or slow.",
+    "The backend does not send case text or image content to external summary or search APIs."
+  ],
+  "known_limitations": [
+    "This contract defines runtime behavior and resource evidence, not model accuracy or clinical validity.",
+    "The runtime is research-use-only and must not be used for autonomous or unsupervised care.",
+    "The current candidate was evaluated on a same-source grouped OCT test set, not a patient-isolated external validation set.",
+    "Confidence calibration, subgroup performance, camera robustness, and prospective clinical safety remain unknown."
+  ]
+}

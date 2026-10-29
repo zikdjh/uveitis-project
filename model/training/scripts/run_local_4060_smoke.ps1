@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $python = Join-Path $root "model\training\.venv-local\Scripts\python.exe"
 $trainer = Join-Path $root "model\training\code\training\local_qwen4b_smoke.py"
-$model = Join-Path $root "model\training\models\qwen\Qwen3.5-4B"
+$model = Join-Path $root "qwen3.5-4b\models\Qwen3.5-4B"
 $manifest = Join-Path $root "model\training\datasets\training\manifest.csv"
 
 if (-not (Test-Path -LiteralPath $python)) {

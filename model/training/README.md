@@ -46,12 +46,12 @@ model/training/
 - 补充决策模型：Intern-Decision-4B；2026-10-27 决定暂缓训练不启动任何训练任务，但在辅助分析调用链中保留该槽位（默认 `APP_DECISION_ENABLED=false`，结果里标记为跳过）。在真实病例文本、医生处置标签和独立评测集到位前不恢复训练，也不使用弱标签或合成标签生成结论。槽位与规划细则见 [AgentScope 工具链编排](docs/2026-10-27-agent-toolchain-plan.html)。
 - 真相源：本轮训练使用本地 `datasets/training/manifest.csv` 和 `models/qwen/Qwen3.5-4B/`；checkpoint、验证指标和 adapter 位于 `assets/qwen3.5-4b/`。
 - 当前冻结评估基线：`local-4060-grouped-cont-20261025-01/best_adapter`，第 100 步。
-- 当前选定的 OCT 运行候选：`local-4060-oct-focus-cont-20261025-01/best_adapter`，第 20 步。
+- 当前选定的 OCT 运行候选：第 20 步 adapter，最终产物已迁至 `qwen3.5-4b/models/best_adapter`。
 - 发布状态：第 20 步候选和基线均已完成 1,000 条同源 OCT 冻结测试；候选 macro-F1 `0.947245`，基线 `0.918252`，提升 `+0.028993`，通过 `0.02` 选型门槛。当前尚未作为临床模型发布。
 - 错误来源：第 20 步候选主要错误为 `NORMAL->DRUSEN` 18 条、`DRUSEN->CNV` 14 条、`CNV->DME` 8 条；相对第 100 步基线，DRUSEN 纠正 38 条，但 CNV 退化 6 条、NORMAL 退化 4 条。
 - 受控推理 smoke：第 20 步候选在四类各 4 条本地测试中正确 16/16，JSON 有效率 100%，峰值保留显存 `3.31 GiB`；结果只证明链路可用，不作为泛化精度证据。
 - 真实运行服务：`POST /v1/judge` 已加载 4-bit 基座和第 20 步 adapter；冷启动约 22 秒，预处理修正后热请求 `3.363 秒`，单图峰值保留 `3.355469 GiB`，8 并发无 OOM。单张 CNV 训练图返回 DRUSEN、置信度 0，只证明链路和结构契约可用，不能作为准确率或置信度证据。证据见 `assets/qwen3.5-4b/runtime-smoke-local-4060-20261026-01/runtime_smoke.json`。
-- 冻结候选：2026-10-28 提前冻结第 20 步候选为 `assets/qwen3.5-4b/freeze-step20-20261028-01/`。机器可读清单、模型卡、运行契约和已知限制分别见 `freeze-manifest.json`、`model-card.html`、`runtime-contract.json`、`known-limitations.html`；冻结状态仅为研究用途候选，不是临床发布。
+- 冻结候选：2026-10-28 提前冻结第 20 步候选，目录已迁至 `qwen3.5-4b/assets/freeze-step20-20261028-01/`。机器可读清单、模型卡、运行契约和已知限制分别见 `freeze-manifest.json`、`model-card.html`、`runtime-contract.json`、`known-limitations.html`；冻结状态仅为研究用途候选，不是临床发布。
 - 11.10 前收口条件：冻结第 20 步候选 adapter、模型卡、指标文件和运行读取路径，并保留数据来源及患者隔离限制。adapter、模型卡和运行契约已提前冻结；剩余重点是患者隔离验证路径、端到端复跑和最终交付边界确认。
 - Open UWF 700：CC BY 4.0，7 类与葡萄膜炎二分类任务清单位于 `datasets/tasks/`；数据直接从 `datasets/extracted/14_open_uwf700/` 读取。患者组键必须包含诊断，因为源 `Patient ID` 在不同诊断队列中复用。
 
@@ -115,7 +115,7 @@ $env:UV_RUN_ID = "qwen4b-stage1-20261025-01"
 .\model\training\scripts\run_local_4060_formal.ps1 `
   -RunId local-4060-oct-stage2-20261026-01 -Steps 30 -GradAccum 4 `
   -ValidationEvery 5 -SaveEvery 10 -EarlyStopPatience 2 -LearningRate 5e-6 `
-  -InitAdapter 'model\training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
+  -InitAdapter 'qwen3.5-4b\models\best_adapter' `
   -TaskWeights 'oct_aux_4class=4' -DryRun
 
 # Open UWF 任务隔离 DryRun；-Task 可重复传入，不会启动训练
@@ -133,8 +133,8 @@ $env:UV_RUN_ID = "qwen4b-stage1-20261025-01"
 
 # 运行或续跑冻结测试集评估；已有部分预测时不要添加 -Overwrite
 powershell -NoProfile -ExecutionPolicy Bypass -File `
-  'model\runtime\scripts\run_local_4060_eval.ps1' `
-  -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
+  'qwen3.5-4b\scripts\run_local_4060_eval.ps1' `
+  -AdapterDir 'qwen3.5-4b\models\best_adapter' `
   -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
   -Tasks 'oct_aux_4class' -SamplesPerClass 4
 
@@ -156,12 +156,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File `
 | 数据准备与上传脚本 | `model/training/scripts/modal/` | 是 |
 | 训练计划、预算、消耗记录 | `docs/` 的 HTML 专题文档 | 是 |
 | Modal 训练精简数据 | `model/training/datasets/training/` | 是 |
-| 本地 Qwen3.5-4B 基座 | `model/training/models/qwen/Qwen3.5-4B/` | 是 |
+| 本地 Qwen3.5-4B 基座 | `qwen3.5-4b/models/Qwen3.5-4B/` | 是 |
 | 本地评估快照 | `model/training/assets/qwen3.5-4b/` | 是 |
 | Open UWF 任务清单 | `model/training/datasets/tasks/` | 是 |
 | 完整解压数据 | `model/training/datasets/extracted/` | 是 |
 | 新下载数据暂存 | `model/training/datasets/raw/` | 是 |
-| 模型运行服务与评估 | `model/runtime/` | 否，运行侧管理 |
+| 模型运行服务与评估 | `qwen3.5-4b/` | 否，运行侧管理 |
 | 业务推理与 RAG 扩展 | `ai-services/`、`backend/` | 否 |
 
 每次正式训练应更新 HTML 状态页、预算排期和消耗记录；只有完成评估并记录数据版本与 adapter 指纹后，才把 checkpoint 视为候选产物。

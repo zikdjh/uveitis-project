@@ -13,7 +13,7 @@
   <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
   <nav aria-label="文档导航">
     <a href="2026-10-26-document-catalog.html">文档索引</a>
-    <a href="2026-10-26-model-runtime.html">上一份</a>
+    <a href="2026-10-29-model-embedding-service.html">上一份</a>
     <a href="2026-10-28-qwen3.5-4b-model-card.html">下一份</a>
   </nav>
 </header>
@@ -28,7 +28,7 @@
   <article class="html-body">
 <p>整理日期：2026-10-26</p>
 <p>这里保存从 Modal Volume 取回的小型评估结果、checkpoint 元数据和历史对照快照。2026-10-26 已删除早期 smoke adapter、历史中间 checkpoint、<code>training_state.pt</code> 和第二、第三阶段实验权重，并保留第 4、5 阶段实验目录供本轮审计；当前保留两组工作 adapter、阶段实验指标、摘要、决策文件、错误来源分析和受控推理 smoke。实验 adapter 不作为运行候选。完整训练状态仍以 Modal <code>uveitis-runs</code> 为唯一真相源。</p>
-<p>本目录属于训练侧。模型运行服务只读取 adapter，不在 <code>model/runtime/</code> 复制权重。</p>
+<p>本目录属于训练侧。模型运行服务只读取 adapter，不在 <code>qwen3.5-4b/</code> 复制权重。</p>
 <h2>Qwen3.5-4B</h2>
 <h3>focus01-20261025-02（历史实验）</h3>
 <p>该 run 的 step 250 是当时的小样本固定评估候选，不是当前工作 adapter，也不是正式部署 adapter，没有自动覆盖旧 run 的 <code>best_adapter/</code>。</p>
@@ -58,11 +58,11 @@
 <li><code>step100-eval-metrics-paired40.json</code>、<code>step100-eval-predictions-paired40.json</code>：固定 40 样本评估。</li>
 </ul>
 <h3>pilot 与 smoke</h3>
-<p><code>pilot/</code> 保存 pilot run 的验证和评估快照；<code>smoke/</code> 保存早期配置、旧指标和中断步元数据。<code>local-4060-*</code> 冒烟目录中的 adapter、processor 和 checkpoint 已清理，只保留小型指标文件。smoke 指标只证明链路曾运行，不作为准确率证据。</p>
+<p><code>pilot/</code> 保存 pilot run 的验证和评估快照；<code>smoke/</code> 保存早期配置、旧指标和中断步元数据。全部 run 的中间态权重（<code>checkpoints/</code>、<code>best_adapter/</code>、<code>final_adapter/</code>）已清理，只保留小型指标与决策文件；完整 run 和优化器状态以 Modal <code>uveitis-runs</code> 卷为真相源。smoke 指标只证明链路曾运行，不作为准确率证据。</p>
 <h3>当前本地工作适配器</h3>
 <ul>
-<li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：第 100 步同源冻结评估基线。</li>
-<li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：第 20 步选定 OCT 运行候选。</li>
+<li><code>local-4060-grouped-cont-20261025-01/best_adapter</code>：第 100 步同源冻结评估基线，adapter 权重已随中间态清理，SHA256 见 <code>qwen3.5-4b/assets/freeze-step20-20261028-01/freeze-manifest.json</code>。</li>
+<li><code>local-4060-oct-focus-cont-20261025-01/best_adapter</code>：第 20 步选定 OCT 运行候选，最终产物已迁至 <code>qwen3.5-4b/models/best_adapter</code>（run 目录保留训练过程记录，可随中间态清理）。</li>
 <li><code>eval-oct-step20-vs-step100-20261025-01/</code>：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 <code>selection_decision.json</code>。</li>
 <li><code>local-4060-oct-stage2-20261026-01/</code>、<code>local-4060-oct-stage2b-20261026-01/</code>：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。</li>
 <li><code>eval-oct-stage2-20261026-01/stage2_decision.json</code>：第二阶段结论，决定保留第 20 步候选，不提升实验 final adapter。</li>
@@ -83,7 +83,7 @@
 </ul>
 <p>选型决定为 <code>promote_step20_candidate</code>：候选 macro-F1 <code>0.947245</code>，基线 <code>0.918252</code>，提升 <code>+0.028993</code>，JSON 有效率均为 <code>100%</code>。该结果仍受数据来源、增强图和患者隔离限制约束。</p>
 <h3>第 20 步冻结候选</h3>
-<p>2026-10-28 提前完成候选冻结，目录为 <code>freeze-step20-20261028-01/</code>。目录内包含：</p>
+<p>2026-10-28 提前完成候选冻结，目录已迁至 <code>qwen3.5-4b/assets/freeze-step20-20261028-01/</code>。目录内包含：</p>
 <ul>
 <li><code>model-card.html</code>：模型身份、训练数据、同源评估、运行证据、允许用途和禁止用途。</li>
 <li><code>freeze-manifest.json</code>：基座、adapter、训练摘要、评估证据、指纹和冻结决定。</li>
