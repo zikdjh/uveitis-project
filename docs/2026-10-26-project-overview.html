@@ -41,7 +41,8 @@
 │   ├── app/                   判断 API 与健康检查
 │   ├── code/                  本地评估代码
 │   ├── scripts/               运行脚本
-│   └── assets/                运行资产索引
+│   ├── assets/                运行资产索引与冻结契约
+│   └── models/                基座与最终 adapter（gitignore）
 ├── bge-m3/                    BGE-M3 向量模型服务（FastAPI）
 │   ├── app/                   向量 API 与健康检查
 │   └── models/                BGE-M3 权重（gitignore）
@@ -52,7 +53,6 @@
 │       ├── datasets/raw/      新下载压缩包的临时暂存区
 │       ├── datasets/extracted/ 完整解压数据集与 manifests/ 清单
 │       ├── datasets/training/  训练数据与 manifest
-│       ├── models/             Qwen 基座
 │       └── assets/             训练产物与评估快照
 ├── outputs/                   临时运行输出说明
 ├── scripts/
@@ -79,6 +79,7 @@
 <li>[x] BGE-M3 通过 ModelScope 下载到 <code>bge-m3</code>，以独立 FastAPI 服务提供 1024 维向量</li>
 <li>[x] zvec 检索通过接口调用独立 BGE-M3 向量服务，管理端展示向量数据库状态</li>
 <li>[x] 混合判断编排：Qwen 判断、RAG、补充决策、网络搜索和外部总结均为可跳过增强分支</li>
+<li>[x] Qwen3.5-4B 最终训练产物（基座、第 20 步 best_adapter、冻结契约）收拢到 <code>qwen3.5-4b/</code> 包内；数据集与中间态产物保留在 <code>model/training/</code> 待验收后清理</li>
 <li>[x] 项目目录完成训练资产、运行服务和项目文档归类；索引见 <code>docs/2026-10-26-project-layout.html</code></li>
 <li>[x] 前端首轮工作区界面完善：桌面/移动端导航、账号权限概览、账号列表移动卡片化和权限页空状态</li>
 <li>[x] 完成患者首页、病例详情、管理员概览、登录与状态页的统一视觉收口</li>
@@ -97,7 +98,7 @@
 <li>文档总索引：<a href="index.html"><code>docs/index.html</code></a>。</li>
 <li>专题文档统一使用 HTML；除目录级 <code>README.md</code> 外，不保留专题 Markdown。重建与校验命令为 <code>.\model\training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py</code>。</li>
 <li>数据集重新下载后先放 <code>model/training/datasets/raw/</code>；解压、核验后按 <code>model/training/datasets/extracted/&lt;数据集名&gt;/</code> 组织，并清理已展开的临时 ZIP。</li>
-<li>训练评估和验证快照放入 <code>model/training/assets/qwen3.5-4b/&lt;run-id&gt;/</code>；模型运行与评估入口统一在 <code>qwen3.5-4b/</code>；完整 adapter 和优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</li>
+<li>训练评估和验证快照放入 <code>model/training/assets/qwen3.5-4b/&lt;run-id&gt;/</code>；最终运行产物（基座、best_adapter、冻结契约）在 <code>qwen3.5-4b/</code> 包内，训练数据集与中间态产物验收后可整体清理；完整 adapter 和优化器状态仍以 Modal <code>uveitis-runs</code> 为真相源。</li>
 <li>训练子集位于 <code>model/training/datasets/training/</code>；逐文件数据清单位于 <code>model/training/datasets/extracted/manifests/</code>，已删除归档的来源账本也在那里。</li>
 <li>检索脚本仅供归档复用，运行方式见各子目录内 round-*.mjs（ego-browser 环境）。</li>
 </ul>

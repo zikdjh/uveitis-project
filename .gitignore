@@ -37,6 +37,7 @@ backend/.uv-cache/
 qwen3.5-4b/.test-tmp/
 qwen3.5-4b/.tmp-test/
 qwen3.5-4b/pytest-cache-files-*/
+qwen3.5-4b/models/
 bge-m3/models/
 frontend/.npm-cache/
 scripts/ui-check-20261025/*.png

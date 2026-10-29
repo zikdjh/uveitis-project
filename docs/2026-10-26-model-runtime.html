@@ -34,7 +34,7 @@
 <li><code>assets/README.md</code>：可用 adapter 与评估结果索引。</li>
 <li><code>docs/2026-10-26-model-runtime-evaluation.html</code>：评估、续跑、显存限制和推理边界。</li>
 </ul>
-<p>模型基座和训练产物位于 <code>model/training/</code>，运行服务只读取，不在本目录复制权重。</p>
+<p>最终训练产物（基座、第 20 步 <code>best_adapter</code> 与冻结契约）已收拢到本包：<code>models/</code> 存放权重（已加入 <code>.gitignore</code>），<code>assets/freeze-step20-20261028-01/</code> 存放模型卡、已知限制与运行契约。<code>model/training/</code> 只保留训练代码、数据集与中间态产物，其中数据集和中间态在验收后可整体清理，不影响运行服务。</p>
 <h2>健康检查</h2>
 <pre><code class="language-powershell">cd qwen3.5-4b
 ..\.venv-runtime-smoke\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8010
@@ -66,12 +66,12 @@ $env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
 <tbody>
 <tr>
 <td><code>MODEL_RUNTIME_MODEL_DIR</code></td>
-<td style="text-align:right">训练目录内的 Qwen3.5-4B</td>
+<td style="text-align:right">本包 <code>models/Qwen3.5-4B</code></td>
 <td>基座目录</td>
 </tr>
 <tr>
 <td><code>MODEL_RUNTIME_ADAPTER_DIR</code></td>
-<td style="text-align:right">第 20 步 <code>best_adapter</code></td>
+<td style="text-align:right">本包 <code>models/best_adapter</code></td>
 <td>只读 adapter</td>
 </tr>
 <tr>
@@ -114,7 +114,7 @@ $env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
 <p>图像路径必须位于配置的允许根目录内；服务拒绝越界路径、不支持格式、超大文件、超大解码尺寸和未知任务。响应固定带 <code>requires_human_review=true</code> 与 <code>research_use_only=true</code>。</p>
 <h2>本地评估</h2>
 <pre><code class="language-powershell">.\qwen3.5-4b\scripts\run_local_4060_eval.ps1 `
-  -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
+  -AdapterDir 'qwen3.5-4b\models\best_adapter' `
   -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
   -Tasks 'oct_aux_4class' -SamplesPerClass 4
 </code></pre>

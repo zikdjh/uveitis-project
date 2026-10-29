@@ -2,8 +2,8 @@
 
 运行资产不复制权重，统一从 `model/training/assets/qwen3.5-4b/` 读取。
 
-- 冻结评估基线：`local-4060-grouped-cont-20261025-01/best_adapter`
-- 选定的 OCT 运行候选：`local-4060-oct-focus-cont-20261025-01/best_adapter`，第 20 步
+- 冻结评估基线：`model/training/assets/qwen3.5-4b/local-4060-grouped-cont-20261025-01/best_adapter`（训练侧留存）
+- 选定的 OCT 运行候选：本包 `models/best_adapter`（第 20 步，已从训练 run 目录迁入）
 - 冻结评估：`eval-oct-step20-vs-step100-20261025-01/`
 - 错误来源分析：`eval-oct-step20-vs-step100-20261025-01/error-analysis/step20-source-analysis.json`
 - 本地受控推理 smoke：`eval-oct-step20-runtime-smoke-20261026-01/`
@@ -11,7 +11,7 @@
 
 当前运行服务默认索引选定的第 20 步 OCT adapter，并通过 `POST /v1/judge` 执行真实本地推理。同源冻结测试显示其 macro-F1 为 `0.947245`，比第 100 步基线提升 `0.028993`。切换 adapter 时设置 `MODEL_RUNTIME_ADAPTER_DIR`，不需要移动权重文件。
 
-第 20 步候选的服务级冻结契约位于 `model/training/assets/qwen3.5-4b/freeze-step20-20261028-01/runtime-contract.json`，模型卡和已知限制位于同目录。运行侧必须继续遵守本地图像路径白名单、串行推理、超时降级、`requires_human_review=true` 和“病例文本与影像不发送外部 API”的边界。
+第 20 步候选的服务级冻结契约位于本目录 `freeze-step20-20261028-01/runtime-contract.json`，模型卡和已知限制位于同目录。运行侧必须继续遵守本地图像路径白名单、串行推理、超时降级、`requires_human_review=true` 和“病例文本与影像不发送外部 API”的边界。
 
 2026-10-26 的第二阶段受控续训没有产生更好的验证候选：`5e-6` 和 `1e-5` 两组都在第 10 步早停，最佳点仍是初始化时的第 20 步 adapter。运行侧默认 adapter 不变，不读取第二阶段的实验 `final_adapter`。决策证据见 `model/training/assets/qwen3.5-4b/eval-oct-stage2-20261026-01/stage2_decision.json`。
 

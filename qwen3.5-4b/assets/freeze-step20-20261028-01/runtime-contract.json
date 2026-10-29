@@ -12,8 +12,8 @@
     "health_endpoint": "GET /health",
     "model_index_endpoint": "GET /v1/models",
     "concurrency": "serialized by an in-process inference lock",
-    "model_dir": "model/training/models/qwen/Qwen3.5-4B",
-    "adapter_dir": "model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter",
+    "model_dir": "qwen3.5-4b/models/Qwen3.5-4B",
+    "adapter_dir": "qwen3.5-4b/models/best_adapter",
     "adapter_sha256": "00ebeb2c791e0f807b4e8a92d6307155517a2bc7f24442ef2428a2640d8b139f"
   },
   "model": {

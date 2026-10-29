@@ -15,17 +15,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 ROOT = Path(__file__).resolve().parents[2]
+PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 DATASET_ROOT = ROOT / "model" / "training" / "datasets"
-DEFAULT_MODEL_DIR = ROOT / "model" / "training" / "models" / "qwen" / "Qwen3.5-4B"
-DEFAULT_ADAPTER_DIR = (
-    ROOT
-    / "model"
-    / "training"
-    / "assets"
-    / "qwen3.5-4b"
-    / "local-4060-oct-focus-cont-20261025-01"
-    / "best_adapter"
-)
+DEFAULT_MODEL_DIR = PACKAGE_ROOT / "models" / "Qwen3.5-4B"
+DEFAULT_ADAPTER_DIR = PACKAGE_ROOT / "models" / "best_adapter"
 DEFAULT_TASK = "oct_aux_4class"
 TASK_LABELS = {
     "oct_uveitis_4class": [

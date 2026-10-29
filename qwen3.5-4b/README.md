@@ -8,7 +8,7 @@
 - `assets/README.md`：可用 adapter 与评估结果索引。
 - `docs/2026-10-26-model-runtime-evaluation.html`：评估、续跑、显存限制和推理边界。
 
-模型基座和训练产物位于 `model/training/`，运行服务只读取，不在本目录复制权重。
+最终训练产物（基座、第 20 步 `best_adapter` 与冻结契约）已收拢到本包：`models/` 存放权重（已加入 `.gitignore`），`assets/freeze-step20-20261028-01/` 存放模型卡、已知限制与运行契约。`model/training/` 只保留训练代码、数据集与中间态产物，其中数据集和中间态在验收后可整体清理，不影响运行服务。
 
 ## 健康检查
 
@@ -48,8 +48,8 @@ $env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
 
 | 变量 | 默认值 | 说明 |
 |---|---:|---|
-| `MODEL_RUNTIME_MODEL_DIR` | 训练目录内的 Qwen3.5-4B | 基座目录 |
-| `MODEL_RUNTIME_ADAPTER_DIR` | 第 20 步 `best_adapter` | 只读 adapter |
+| `MODEL_RUNTIME_MODEL_DIR` | 本包 `models/Qwen3.5-4B` | 基座目录 |
+| `MODEL_RUNTIME_ADAPTER_DIR` | 本包 `models/best_adapter` | 只读 adapter |
 | `MODEL_RUNTIME_IMAGE_ROOT` | 训练数据目录 | 额外允许读取的图像根目录 |
 | `MODEL_RUNTIME_UPLOAD_ROOT` | 空 | 病例上传根目录；应指向精确上传目录 |
 | `MODEL_RUNTIME_INTERNAL_TOKEN` | 空 | 非空时要求 `X-Internal-Service-Token` |
@@ -64,7 +64,7 @@ $env:MODEL_RUNTIME_INTERNAL_TOKEN = 'replace-with-shared-token'
 
 ```powershell
 .\qwen3.5-4b\scripts\run_local_4060_eval.ps1 `
-  -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
+  -AdapterDir 'qwen3.5-4b\models\best_adapter' `
   -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
   -Tasks 'oct_aux_4class' -SamplesPerClass 4
 ```

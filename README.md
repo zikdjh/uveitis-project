@@ -18,7 +18,8 @@ uveitis-project/
 │   ├── app/                   判断 API 与健康检查
 │   ├── code/                  本地评估代码
 │   ├── scripts/               运行脚本
-│   └── assets/                运行资产索引
+│   ├── assets/                运行资产索引与冻结契约
+│   └── models/                基座与最终 adapter（gitignore）
 ├── bge-m3/                    BGE-M3 向量模型服务（FastAPI）
 │   ├── app/                   向量 API 与健康检查
 │   └── models/                BGE-M3 权重（gitignore）
@@ -29,7 +30,6 @@ uveitis-project/
 │       ├── datasets/raw/      新下载压缩包的临时暂存区
 │       ├── datasets/extracted/ 完整解压数据集与 manifests/ 清单
 │       ├── datasets/training/  训练数据与 manifest
-│       ├── models/             Qwen 基座
 │       └── assets/             训练产物与评估快照
 ├── outputs/                   临时运行输出说明
 ├── scripts/
@@ -59,6 +59,7 @@ uveitis-project/
 - [x] BGE-M3 通过 ModelScope 下载到 `bge-m3`，以独立 FastAPI 服务提供 1024 维向量
 - [x] zvec 检索通过接口调用独立 BGE-M3 向量服务，管理端展示向量数据库状态
 - [x] 混合判断编排：Qwen 判断、RAG、补充决策、网络搜索和外部总结均为可跳过增强分支
+- [x] Qwen3.5-4B 最终训练产物（基座、第 20 步 best_adapter、冻结契约）收拢到 `qwen3.5-4b/` 包内；数据集与中间态产物保留在 `model/training/` 待验收后清理
 - [x] 项目目录完成训练资产、运行服务和项目文档归类；索引见 `docs/2026-10-26-project-layout.html`
 - [x] 前端首轮工作区界面完善：桌面/移动端导航、账号权限概览、账号列表移动卡片化和权限页空状态
 - [x] 完成患者首页、病例详情、管理员概览、登录与状态页的统一视觉收口
@@ -77,7 +78,7 @@ uveitis-project/
 - 文档总索引：[`docs/index.html`](docs/index.html)。
 - 专题文档统一使用 HTML；除目录级 `README.md` 外，不保留专题 Markdown。重建与校验命令为 `.\model\training\.venv-modal\Scripts\python.exe scripts\docs\build_docs.py`。
 - 数据集重新下载后先放 `model/training/datasets/raw/`；解压、核验后按 `model/training/datasets/extracted/<数据集名>/` 组织，并清理已展开的临时 ZIP。
-- 训练评估和验证快照放入 `model/training/assets/qwen3.5-4b/<run-id>/`；模型运行与评估入口统一在 `qwen3.5-4b/`；完整 adapter 和优化器状态仍以 Modal `uveitis-runs` 为真相源。
+- 训练评估和验证快照放入 `model/training/assets/qwen3.5-4b/<run-id>/`；最终运行产物（基座、best_adapter、冻结契约）在 `qwen3.5-4b/` 包内，训练数据集与中间态产物验收后可整体清理；完整 adapter 和优化器状态仍以 Modal `uveitis-runs` 为真相源。
 - 训练子集位于 `model/training/datasets/training/`；逐文件数据清单位于 `model/training/datasets/extracted/manifests/`，已删除归档的来源账本也在那里。
 - 检索脚本仅供归档复用，运行方式见各子目录内 round-*.mjs（ego-browser 环境）。
 

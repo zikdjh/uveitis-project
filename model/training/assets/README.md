@@ -51,7 +51,7 @@ step 100、200、300 的内部验证 loss 分别为 `0.018165`、`0.020989`、`0
 ### 当前本地工作适配器
 
 - `local-4060-grouped-cont-20261025-01/best_adapter`：第 100 步同源冻结评估基线。
-- `local-4060-oct-focus-cont-20261025-01/best_adapter`：第 20 步选定 OCT 运行候选。
+- `local-4060-oct-focus-cont-20261025-01/best_adapter`：第 20 步选定 OCT 运行候选，最终产物已迁至 `qwen3.5-4b/models/best_adapter`（run 目录保留训练过程记录，可随中间态清理）。
 - `eval-oct-step20-vs-step100-20261025-01/`：两个 adapter 的同集冻结评估、逐样本结果、1,000 条基线和 `selection_decision.json`。
 - `local-4060-oct-stage2-20261026-01/`、`local-4060-oct-stage2b-20261026-01/`：从第 20 步候选初始化的受控复核指标和实验日志；两次均在 10 步早停，未产生更好的 best adapter。
 - `eval-oct-stage2-20261026-01/stage2_decision.json`：第二阶段结论，决定保留第 20 步候选，不提升实验 final adapter。
@@ -74,7 +74,7 @@ step 100、200、300 的内部验证 loss 分别为 `0.018165`、`0.020989`、`0
 
 ### 第 20 步冻结候选
 
-2026-10-28 提前完成候选冻结，目录为 `freeze-step20-20261028-01/`。目录内包含：
+2026-10-28 提前完成候选冻结，目录已迁至 `qwen3.5-4b/assets/freeze-step20-20261028-01/`。目录内包含：
 
 - `model-card.html`：模型身份、训练数据、同源评估、运行证据、允许用途和禁止用途。
 - `freeze-manifest.json`：基座、adapter、训练摘要、评估证据、指纹和冻结决定。

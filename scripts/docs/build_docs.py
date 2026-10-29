@@ -41,8 +41,8 @@ PAGES = (
     Page(Path("qwen3.5-4b/README.md"), "2026-10-26-model-runtime.html", "模型运行服务", "运行", "运行 API、评估入口、资产读取边界和健康检查", "2026-10-26", "markdown"),
     Page(Path("bge-m3/README.md"), "2026-10-29-model-embedding-service.html", "向量模型服务", "运行", "BGE-M3 独立 FastAPI 服务、接口契约、启动与对接方式", "2026-10-29", "markdown"),
     Page(Path("model/training/assets/README.md"), "2026-10-26-training-assets-index.html", "训练产物索引", "训练", "当前 adapter、训练指标、冻结评估结果和保存约定", "2026-10-26", "markdown"),
-    Page(Path("model/training/assets/qwen3.5-4b/freeze-step20-20261028-01/model-card.html"), "2026-10-28-qwen3.5-4b-model-card.html", "Qwen3.5-4B 第 20 步模型卡", "训练", "冻结候选、训练范围、同源评估、运行边界和允许用途", "2026-10-28", "html"),
-    Page(Path("model/training/assets/qwen3.5-4b/freeze-step20-20261028-01/known-limitations.html"), "2026-10-28-qwen3.5-4b-known-limitations.html", "Qwen3.5-4B 候选已知限制", "训练", "非临床验证、同源测试、标签范围、校准、外推和隐私边界", "2026-10-28", "html"),
+    Page(Path("qwen3.5-4b/assets/freeze-step20-20261028-01/model-card.html"), "2026-10-28-qwen3.5-4b-model-card.html", "Qwen3.5-4B 第 20 步模型卡", "训练", "冻结候选、训练范围、同源评估、运行边界和允许用途", "2026-10-28", "html"),
+    Page(Path("qwen3.5-4b/assets/freeze-step20-20261028-01/known-limitations.html"), "2026-10-28-qwen3.5-4b-known-limitations.html", "Qwen3.5-4B 候选已知限制", "训练", "非临床验证、同源测试、标签范围、校准、外推和隐私边界", "2026-10-28", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-26-project-layout.html"), "2026-10-26-project-layout.html", "项目目录索引", "项目", "训练、运行、数据、业务代码和证据目录的边界", "2026-10-26", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-26-project-development-progress.html"), "2026-10-26-project-development-progress.html", "项目开发进度与 11.10 收口计划", "项目", "三端开发、鉴权、数据集、模型运行集成的阶段状态和验收排期", "2026-10-26", "html"),
     Page(Path("scripts/docs/.html-source/2026-10-26-progress-tracking.html"), "2026-10-26-progress-tracking.html", "项目进度与模型训练进度跟踪", "项目", "项目、训练、验收、风险和决策记录的滚动跟踪看板", "2026-10-26", "html"),
@@ -84,7 +84,7 @@ PAGES = (
 
 DIRECT_HTML_SOURCE_PREFIXES = (
     "scripts/docs/.html-source/",
-    "model/training/assets/qwen3.5-4b/freeze-",
+    "qwen3.5-4b/assets/freeze-",
 )
 
 LEGACY = {
@@ -466,8 +466,8 @@ def check_layout() -> None:
     if extra:
         raise RuntimeError("Non-README Markdown remains: " + ", ".join(sorted(extra)))
     for parent, names in (
-        (ROOT / "model" / "training", ("models", "datasets", "assets", "environment", "code", "scripts")),
-        (ROOT / "qwen3.5-4b", ("app", "code", "scripts", "assets")),
+        (ROOT / "model" / "training", ("datasets", "assets", "environment", "code", "scripts")),
+        (ROOT / "qwen3.5-4b", ("app", "code", "scripts", "assets", "models")),
         (ROOT / "bge-m3", ("app", "tests")),
     ):
         for name in names:

@@ -51,7 +51,7 @@
 </tr>
 <tr>
 <td>OCT 候选</td>
-<td><code>model/training/assets/qwen3.5-4b/local-4060-oct-focus-cont-20261025-01/best_adapter</code></td>
+<td><code>qwen3.5-4b/models/best_adapter</code></td>
 </tr>
 <tr>
 <td>冻结同集评估</td>
@@ -67,7 +67,7 @@
 </tr>
 <tr>
 <td>本地基座</td>
-<td><code>model/training/models/qwen/Qwen3.5-4B/</code></td>
+<td><code>qwen3.5-4b/models/Qwen3.5-4B/</code></td>
 </tr>
 <tr>
 <td>真实运行烟测证据</td>
@@ -117,7 +117,7 @@ Invoke-RestMethod `
 <h2>本地评估</h2>
 <p>先用每类 4 条验证均衡评估和四类输出：</p>
 <pre><code class="language-powershell">.\qwen3.5-4b\scripts\run_local_4060_eval.ps1 `
-  -AdapterDir 'model\training\assets\qwen3.5-4b\local-4060-oct-focus-cont-20261025-01\best_adapter' `
+  -AdapterDir 'qwen3.5-4b\models\best_adapter' `
   -OutputDir 'model\training\assets\qwen3.5-4b\eval-oct-step20-runtime-smoke-20261026-01' `
   -Tasks 'oct_aux_4class' -SamplesPerClass 4
 </code></pre>
