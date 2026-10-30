@@ -59,6 +59,8 @@ export default function AccessPage() {
   const [auditLoading, setAuditLoading] = useState(true);
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionPage, setSessionPage] = useState(1);
+  const [sessionPageSize, setSessionPageSize] = useState(10);
   const [auditPage, setAuditPage] = useState(1);
   const [auditPageSize, setAuditPageSize] = useState(20);
   const auditRequestRef = useRef(0);
@@ -96,6 +98,10 @@ export default function AccessPage() {
   const pagedUsers = useMemo(
     () => filteredUsers.slice((userPage - 1) * userPageSize, userPage * userPageSize),
     [filteredUsers, userPage, userPageSize],
+  );
+  const pagedSessions = useMemo(
+    () => activeSessions.slice((sessionPage - 1) * sessionPageSize, sessionPage * sessionPageSize),
+    [activeSessions, sessionPage, sessionPageSize],
   );
 
   async function load() {
@@ -170,6 +176,11 @@ export default function AccessPage() {
     const pageCount = Math.max(1, Math.ceil(filteredUsers.length / userPageSize));
     setUserPage((current) => Math.min(current, pageCount));
   }, [filteredUsers.length, userPageSize]);
+
+  useEffect(() => {
+    const pageCount = Math.max(1, Math.ceil(activeSessions.length / sessionPageSize));
+    setSessionPage((current) => Math.min(current, pageCount));
+  }, [activeSessions.length, sessionPageSize]);
 
   function updateUserFilters(next: Partial<{ search: string; status: UserStatusFilter }>) {
     if (next.search !== undefined) setUserSearch(next.search);
@@ -397,7 +408,7 @@ export default function AccessPage() {
 
       <section className="panel active-sessions-panel">
         <div className="section-heading">
-          <div><h2>活跃会话</h2><span>当前在线账号与登录 IP</span></div>
+          <div><h2>活跃会话</h2><span>共 {activeSessions.length} 个活跃会话</span></div>
           <button className="button secondary" type="button" onClick={() => void loadActiveSessions()} disabled={sessionsLoading}>
             <RefreshCw size={16} className={sessionsLoading ? "spin" : ""} /> 刷新
           </button>
@@ -405,29 +416,47 @@ export default function AccessPage() {
         {sessionsLoading ? (
           <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取活跃会话</div>
         ) : (
-          <div className="data-table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>账号</th><th>角色</th><th>登录 IP</th><th>最近活跃</th><th>过期时间</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeSessions.map((session) => (
-                  <tr key={session.session_id}>
-                    <td data-label="账号">{session.display_name || session.username}</td>
-                    <td data-label="角色"><span className={`role-tag ${session.role}`}>{session.role === "admin" ? "管理员" : "医生"}</span></td>
-                    <td data-label="登录 IP">{session.ip_address || "未知"}</td>
-                    <td data-label="最近活跃">{dateFormatter.format(new Date(session.last_seen_at))}</td>
-                    <td data-label="过期时间">{dateFormatter.format(new Date(session.expires_at))}</td>
+          <>
+            <div className="data-table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>账号</th><th>角色</th><th>登录 IP</th><th>最近活跃</th><th>过期时间</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {!activeSessions.length && (
-              <div className="empty-state"><Users size={26} /><p>暂无活跃会话</p><span>登录后将在这里显示。</span></div>
+                </thead>
+                <tbody>
+                  {pagedSessions.map((session) => (
+                    <tr key={session.session_id}>
+                      <td data-label="账号">{session.display_name || session.username}</td>
+                      <td data-label="角色"><span className={`role-tag ${session.role}`}>{session.role === "admin" ? "管理员" : "医生"}</span></td>
+                      <td data-label="登录 IP">{session.ip_address || "未知"}</td>
+                      <td data-label="最近活跃">{dateFormatter.format(new Date(session.last_seen_at))}</td>
+                      <td data-label="过期时间">{dateFormatter.format(new Date(session.expires_at))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!activeSessions.length && (
+                <div className="empty-state"><Users size={26} /><p>暂无活跃会话</p><span>登录后将在这里显示。</span></div>
+              )}
+            </div>
+            {activeSessions.length > 0 && (
+              <Pagination
+                className="case-list-pagination"
+                current={sessionPage}
+                pageSize={sessionPageSize}
+                total={activeSessions.length}
+                showSizeChanger
+                pageSizeOptions={[10, 20, 50]}
+                showTotal={(total) => `共 ${total} 个会话`}
+                onChange={(page, pageSize) => {
+                  const changed = pageSize !== sessionPageSize;
+                  setSessionPageSize(pageSize);
+                  setSessionPage(changed ? 1 : page);
+                }}
+              />
             )}
-          </div>
+          </>
         )}
       </section>
 
