@@ -35,6 +35,7 @@ AUDIT_EVENTS = {
     "password_reset",
     "user_create",
     "user_update",
+    "user_delete",
     "integration_config_update",
 }
 AUDIT_OUTCOMES = {"success", "failed", "blocked"}
@@ -63,9 +64,12 @@ def _audit(
 
 
 @router.get("/users", response_model=list[UserRead])
-def list_users(request: Request) -> list[UserRead]:
+def list_users(
+    request: Request,
+    include_deleted: bool = Query(default=False),
+) -> list[UserRead]:
     require_permission(request, Permission.USER_READ)
-    return request.app.state.user_store.list()
+    return request.app.state.user_store.list(include_deleted=include_deleted)
 
 
 @router.get("/active-sessions", response_model=list[ActiveSessionRead])
@@ -138,6 +142,8 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
     current = users.get(user_id)
     if current is None:
         raise HTTPException(status_code=404, detail="账号不存在")
+    if current.is_deleted:
+        raise HTTPException(status_code=409, detail="已删除账号不能修改")
 
     next_active = current.is_active if payload.is_active is None else payload.is_active
     if current.username == ROOT_ADMIN_USERNAME and next_active is False:
@@ -164,6 +170,33 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
         detail=f"账号状态 {'启用' if updated.is_active else '停用'}",
     )
     return updated
+
+
+@router.delete("/users/{user_id}", status_code=204)
+def delete_user(user_id: str, request: Request) -> Response:
+    actor = require_permission(request, Permission.USER_MANAGE)
+    users = request.app.state.user_store
+    current = users.get(user_id)
+    if current is None:
+        raise HTTPException(status_code=404, detail="账号不存在")
+    if current.username == ROOT_ADMIN_USERNAME:
+        raise HTTPException(status_code=409, detail="固定管理员账号不能删除")
+    if current.id == actor.id:
+        raise HTTPException(status_code=409, detail="不能删除当前登录账号")
+    if current.is_deleted:
+        raise HTTPException(status_code=409, detail="账号已删除")
+    users.soft_delete(user_id)
+    request.app.state.auth_service.revoke_all_sessions(current.id)
+    _audit(
+        request,
+        event="user_delete",
+        outcome="success",
+        username=current.username,
+        user_id=current.id,
+        actor_id=actor.id,
+        detail="逻辑删除医生账号",
+    )
+    return Response(status_code=204)
 
 
 @router.post("/users/{user_id}/password", status_code=204)

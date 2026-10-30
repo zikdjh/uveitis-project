@@ -49,6 +49,9 @@ class UserRow(Base):
     is_active: Mapped[bool] = mapped_column(
         column_name("is_active"), Boolean, default=True, nullable=False
     )
+    is_deleted: Mapped[bool] = mapped_column(
+        column_name("is_deleted"), Boolean, default=False, nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(
         column_name("created_at"), DateTime(timezone=True)
     )

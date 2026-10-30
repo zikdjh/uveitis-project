@@ -10,13 +10,14 @@ import {
   UserX,
   Users,
 } from "lucide-react";
-import { Button, DatePicker, Input, Modal, Pagination, Select } from "antd";
+import { Button, DatePicker, Input, Modal, Pagination, Popconfirm, Select, Tag } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
 import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import {
   createUser,
+  deleteUser,
   getCurrentUser,
   listAuthAuditEvents,
   listActiveSessions,
@@ -28,7 +29,7 @@ import {
   type User,
 } from "@/api/auth";
 
-type UserStatusFilter = "all" | "active" | "inactive";
+type UserStatusFilter = "all" | "active" | "inactive" | "deleted";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
   month: "2-digit",
@@ -49,6 +50,7 @@ const eventLabels: Record<string, string> = {
   password_reset: "重置密码",
   user_create: "创建账号",
   user_update: "更新账号",
+  user_delete: "删除账号",
 };
 
 export default function AccessPage() {
@@ -59,6 +61,8 @@ export default function AccessPage() {
   const [auditLoading, setAuditLoading] = useState(true);
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionPage, setSessionPage] = useState(1);
+  const [sessionPageSize, setSessionPageSize] = useState(10);
   const [auditPage, setAuditPage] = useState(1);
   const [auditPageSize, setAuditPageSize] = useState(20);
   const auditRequestRef = useRef(0);
@@ -74,9 +78,11 @@ export default function AccessPage() {
   const [userPage, setUserPage] = useState(1);
   const [userPageSize, setUserPageSize] = useState(10);
 
-  const activeUsers = users.filter((user) => user.is_active).length;
-  const adminUsers = users.filter((user) => user.role === "admin").length;
-  const inactiveUsers = users.length - activeUsers;
+  const existingUsers = users.filter((user) => !user.is_deleted);
+  const deletedUsers = users.length - existingUsers.length;
+  const activeUsers = existingUsers.filter((user) => user.is_active).length;
+  const adminUsers = existingUsers.filter((user) => user.role === "admin").length;
+  const inactiveUsers = existingUsers.length - activeUsers;
   const selectedEvent = searchParams.get("event") ?? "all";
   const selectedOutcome = searchParams.get("outcome") ?? "all";
   const auditSearch = searchParams.get("search") ?? "";
@@ -88,14 +94,23 @@ export default function AccessPage() {
     const keyword = userSearch.trim().toLowerCase();
     return users.filter((user) => {
       if (keyword && !`${user.display_name} ${user.username}`.toLowerCase().includes(keyword)) return false;
-      if (userStatus === "active" && !user.is_active) return false;
-      if (userStatus === "inactive" && user.is_active) return false;
+      if (userStatus === "deleted") {
+        if (!user.is_deleted) return false;
+      } else {
+        if (user.is_deleted) return false;
+        if (userStatus === "active" && !user.is_active) return false;
+        if (userStatus === "inactive" && user.is_active) return false;
+      }
       return true;
     });
   }, [userSearch, userStatus, users]);
   const pagedUsers = useMemo(
     () => filteredUsers.slice((userPage - 1) * userPageSize, userPage * userPageSize),
     [filteredUsers, userPage, userPageSize],
+  );
+  const pagedSessions = useMemo(
+    () => activeSessions.slice((sessionPage - 1) * sessionPageSize, sessionPage * sessionPageSize),
+    [activeSessions, sessionPage, sessionPageSize],
   );
 
   async function load() {
@@ -170,6 +185,11 @@ export default function AccessPage() {
     const pageCount = Math.max(1, Math.ceil(filteredUsers.length / userPageSize));
     setUserPage((current) => Math.min(current, pageCount));
   }, [filteredUsers.length, userPageSize]);
+
+  useEffect(() => {
+    const pageCount = Math.max(1, Math.ceil(activeSessions.length / sessionPageSize));
+    setSessionPage((current) => Math.min(current, pageCount));
+  }, [activeSessions.length, sessionPageSize]);
 
   function updateUserFilters(next: Partial<{ search: string; status: UserStatusFilter }>) {
     if (next.search !== undefined) setUserSearch(next.search);
@@ -251,6 +271,21 @@ export default function AccessPage() {
     }
   }
 
+  async function handleDelete(user: User) {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await deleteUser(user.id);
+      setNotice(`${user.display_name} 的账号已删除，会话已全部失效。`);
+      await load();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "账号删除失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <section className="page">
       <div className="page-heading">
@@ -279,9 +314,11 @@ export default function AccessPage() {
           <div>
             <h2>账号列表</h2>
             <span>
-              {userSearch.trim() || userStatus !== "all"
-                ? `筛选后 ${filteredUsers.length} / 共 ${users.length} 个账号`
-                : `共 ${users.length} 个账号，仅管理员可维护医生账号`}
+              {userStatus === "deleted"
+                ? `共 ${deletedUsers} 个已删除账号`
+                : userSearch.trim() || userStatus !== "all"
+                  ? `筛选后 ${filteredUsers.length} / 共 ${existingUsers.length} 个账号`
+                  : `共 ${existingUsers.length} 个账号，仅管理员可维护医生账号`}
             </span>
           </div>
           <Users size={20} />
@@ -301,6 +338,7 @@ export default function AccessPage() {
               { value: "all", label: "全部状态" },
               { value: "active", label: "启用" },
               { value: "inactive", label: "停用" },
+              { value: "deleted", label: "已删除" },
             ]}
             aria-label="按账号状态筛选"
           />
@@ -313,7 +351,7 @@ export default function AccessPage() {
               <thead><tr><th>人员</th><th>角色</th><th>状态</th><th>操作</th></tr></thead>
               <tbody>
                 {pagedUsers.map((user) => (
-                  <tr key={user.id}>
+                  <tr key={user.id} className={user.is_deleted ? "is-deleted" : undefined}>
                     <td data-label="人员">
                       <div className="user-identity">
                         <span className="table-avatar">{initials(user)}</span>
@@ -322,16 +360,40 @@ export default function AccessPage() {
                     </td>
                     <td data-label="角色">{user.is_root ? "唯一管理员" : "医生"}</td>
                     <td data-label="状态">
-                      <button
-                        className={`status-toggle ${user.is_active ? "active" : "disabled"}`}
-                        type="button"
-                        disabled={busy || user.id === currentUser?.id || user.is_root}
-                        onClick={() => void handleUpdate(user, { is_active: !user.is_active })}
-                      >
-                        {user.is_active ? "启用" : "停用"}
-                      </button>
+                      {user.is_deleted ? (
+                        <Tag>已删除</Tag>
+                      ) : (
+                        <button
+                          className={`status-toggle ${user.is_active ? "active" : "disabled"}`}
+                          type="button"
+                          disabled={busy || user.id === currentUser?.id || user.is_root}
+                          onClick={() => void handleUpdate(user, { is_active: !user.is_active })}
+                        >
+                          {user.is_active ? "启用" : "停用"}
+                        </button>
+                      )}
                     </td>
-                    <td data-label="操作">{user.is_root ? <span className="muted">系统固定</span> : <button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button>}</td>
+                    <td data-label="操作">
+                      {user.is_root ? (
+                        <span className="muted">系统固定</span>
+                      ) : user.is_deleted ? (
+                        <span className="muted">已删除</span>
+                      ) : (
+                        <>
+                          <button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button>
+                          <Popconfirm
+                            title="删除该医生账号？"
+                            description="删除后账号无法登录且会话立即失效，数据库保留记录。"
+                            okText="删除"
+                            cancelText="取消"
+                            okButtonProps={{ danger: true }}
+                            onConfirm={() => void handleDelete(user)}
+                          >
+                            <button className="text-button danger" type="button" disabled={busy}><UserX size={14} /> 删除</button>
+                          </Popconfirm>
+                        </>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -397,7 +459,7 @@ export default function AccessPage() {
 
       <section className="panel active-sessions-panel">
         <div className="section-heading">
-          <div><h2>活跃会话</h2><span>当前在线账号与登录 IP</span></div>
+          <div><h2>活跃会话</h2><span>共 {activeSessions.length} 个活跃会话</span></div>
           <button className="button secondary" type="button" onClick={() => void loadActiveSessions()} disabled={sessionsLoading}>
             <RefreshCw size={16} className={sessionsLoading ? "spin" : ""} /> 刷新
           </button>
@@ -405,29 +467,47 @@ export default function AccessPage() {
         {sessionsLoading ? (
           <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取活跃会话</div>
         ) : (
-          <div className="data-table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>账号</th><th>角色</th><th>登录 IP</th><th>最近活跃</th><th>过期时间</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeSessions.map((session) => (
-                  <tr key={session.session_id}>
-                    <td data-label="账号">{session.display_name || session.username}</td>
-                    <td data-label="角色"><span className={`role-tag ${session.role}`}>{session.role === "admin" ? "管理员" : "医生"}</span></td>
-                    <td data-label="登录 IP">{session.ip_address || "未知"}</td>
-                    <td data-label="最近活跃">{dateFormatter.format(new Date(session.last_seen_at))}</td>
-                    <td data-label="过期时间">{dateFormatter.format(new Date(session.expires_at))}</td>
+          <>
+            <div className="data-table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>账号</th><th>角色</th><th>登录 IP</th><th>最近活跃</th><th>过期时间</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {!activeSessions.length && (
-              <div className="empty-state"><Users size={26} /><p>暂无活跃会话</p><span>登录后将在这里显示。</span></div>
+                </thead>
+                <tbody>
+                  {pagedSessions.map((session) => (
+                    <tr key={session.session_id}>
+                      <td data-label="账号">{session.display_name || session.username}</td>
+                      <td data-label="角色"><span className={`role-tag ${session.role}`}>{session.role === "admin" ? "管理员" : "医生"}</span></td>
+                      <td data-label="登录 IP">{session.ip_address || "未知"}</td>
+                      <td data-label="最近活跃">{dateFormatter.format(new Date(session.last_seen_at))}</td>
+                      <td data-label="过期时间">{dateFormatter.format(new Date(session.expires_at))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!activeSessions.length && (
+                <div className="empty-state"><Users size={26} /><p>暂无活跃会话</p><span>登录后将在这里显示。</span></div>
+              )}
+            </div>
+            {activeSessions.length > 0 && (
+              <Pagination
+                className="case-list-pagination"
+                current={sessionPage}
+                pageSize={sessionPageSize}
+                total={activeSessions.length}
+                showSizeChanger
+                pageSizeOptions={[10, 20, 50]}
+                showTotal={(total) => `共 ${total} 个会话`}
+                onChange={(page, pageSize) => {
+                  const changed = pageSize !== sessionPageSize;
+                  setSessionPageSize(pageSize);
+                  setSessionPage(changed ? 1 : page);
+                }}
+              />
             )}
-          </div>
+          </>
         )}
       </section>
 

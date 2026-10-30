@@ -44,6 +44,7 @@ def test_database_tables_and_columns_use_project_prefixes() -> None:
         column_name("role"),
         column_name("password_hash"),
         column_name("is_active"),
+        column_name("is_deleted"),
         column_name("created_at"),
     }
     assert {column.name for column in CaseRow.__table__.columns} == {
