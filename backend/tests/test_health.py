@@ -1041,7 +1041,7 @@ def test_existing_root_password_is_only_changed_in_database(tmp_path: Path) -> N
     assert dictionary.get_value("auth", "root.password_hash") == "original-database-hash"
 
 
-def test_bootstrap_encrypts_root_password_hash_in_data_dictionary(
+def test_bootstrap_stores_root_password_as_plain_string(
     tmp_path: Path,
 ) -> None:
     users = MemoryUserStore()
@@ -1068,11 +1068,9 @@ def test_bootstrap_encrypts_root_password_hash_in_data_dictionary(
     assert record[1] == ROOT_PASSWORD_SENTINEL
     entries = dictionary.list_entries(namespace="auth")
     entry = next(item for item in entries if item.key == "root.password_hash")
-    assert entry.is_secret is True
-    assert entry.value is None
-    assert "root-bootstrap-password" not in str(
-        dictionary.get_namespace_values("auth", reveal_secret=False)
-    )
+    assert entry.value_type == "string"
+    assert entry.is_secret is False
+    assert entry.value == "root-bootstrap-password"
 
     client = TestClient(app)
     login = client.post(
@@ -1080,6 +1078,43 @@ def test_bootstrap_encrypts_root_password_hash_in_data_dictionary(
         json={"username": ROOT_ADMIN_USERNAME, "password": "root-bootstrap-password"},
     )
     assert login.status_code == 200
+
+
+def test_bootstrap_migrates_legacy_secret_root_password_to_plain_string(
+    tmp_path: Path,
+) -> None:
+    users = MemoryUserStore()
+    dictionary = MemoryDataDictionaryStore(
+        SecretBox("test-integration-master-key-at-least-32-characters")
+    )
+    dictionary.set_value(
+        "auth",
+        "root.password_hash",
+        "root-plain-password",
+        value_type="secret",
+        description="root 管理员密码",
+        actor_id="legacy-bootstrap",
+    )
+    create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=MemorySessionStore(),
+        runtime_settings=settings,
+        bootstrap_users=True,
+        data_dictionary_store=dictionary,
+    )
+
+    entry = next(
+        item
+        for item in dictionary.list_entries(namespace="auth")
+        if item.key == "root.password_hash"
+    )
+    assert entry.value_type == "string"
+    assert entry.is_secret is False
+    assert entry.value == "root-plain-password"
 
 
 def test_data_dictionary_api_is_admin_only_and_redacts_secrets(tmp_path: Path) -> None:
