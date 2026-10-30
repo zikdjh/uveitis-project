@@ -1226,11 +1226,13 @@ class OptionalIntegrations:
             if not api_key:
                 raise ValueError("百度千帆 AI 搜索 API Key 未配置")
             data = self._post(
-                "https://qianfan.baidubce.com/v2/ai_search",
+                "https://qianfan.baidubce.com/v2/ai_search/web_search",
                 {
                     "messages": [{"role": "user", "content": query}],
+                    "edition": "standard",
                     "search_source": "baidu_search_v2",
                     "resource_type_filter": [{"type": "web", "top_k": limit}],
+                    "search_recency_filter": "year",
                 },
                 timeout=self.settings.integration_timeout_seconds,
                 headers={
@@ -1242,7 +1244,7 @@ class OptionalIntegrations:
                 WebEvidence(
                     title=str(item.get("title") or item.get("url") or "检索结果"),
                     url=str(item.get("url") or item.get("web_anchor") or ""),
-                    snippet=str(item.get("content") or ""),
+                    snippet=str(item.get("content") or item.get("snippet") or ""),
                     provider=provider,
                 )
                 for item in data.get("references", [])

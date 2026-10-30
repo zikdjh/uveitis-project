@@ -677,7 +677,7 @@ def test_domestic_search_provider_adapters() -> None:
                 },
             )
         if host == "qianfan.baidubce.com":
-            assert request.url.path == "/v2/ai_search"
+            assert request.url.path == "/v2/ai_search/web_search"
             assert body["messages"][0]["content"] == "uveitis"
             return httpx.Response(
                 200,
@@ -686,7 +686,7 @@ def test_domestic_search_provider_adapters() -> None:
                         {
                             "title": "Qianfan",
                             "url": "https://source.test/qianfan",
-                            "content": "q",
+                            "snippet": "q",
                         }
                     ]
                 },

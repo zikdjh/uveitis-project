@@ -103,7 +103,7 @@ const providers: ProviderDescriptor[] = [
   {
     id: "baidu_qianfan",
     name: "百度千帆 AI 搜索",
-    detail: "百度 AI 搜索",
+    detail: "百度搜索 · 每日免费额度",
     secret: "baidu_qianfan_api_key",
     configuredField: "baidu_qianfan_api_key_configured",
     hintField: "baidu_qianfan_api_key_hint",
