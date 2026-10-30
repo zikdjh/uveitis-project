@@ -318,30 +318,33 @@ class _UnavailableUserStore:
 
 def _bootstrap_root_admin(auth_service: AuthService, config, credential_store) -> None:
     existing = auth_service.users.get_by_username(ROOT_ADMIN_USERNAME)
-    stored_hash = credential_store.get_value(
-        "auth",
-        "root.password_hash",
-        default="",
-    )
-    legacy_hash = existing[1] if existing is not None else ""
-    if not stored_hash and legacy_hash and legacy_hash != ROOT_PASSWORD_SENTINEL:
-        credential_store.set_value(
+    try:
+        stored_hash = credential_store.get_value(
             "auth",
             "root.password_hash",
-            legacy_hash,
-            value_type="secret",
-            description="root 管理员密码哈希",
-            actor_id="root-bootstrap",
+            default="",
         )
+    except ValueError:
+        # Older manual records may contain a plain value while still marked
+        # as a secret. Preserve it when converting to a normal string.
+        stored_hash = credential_store.get_stored_value(
+            "auth",
+            "root.password_hash",
+            default="",
+        )
+    legacy_hash = existing[1] if existing is not None else ""
+    if not stored_hash and legacy_hash and legacy_hash != ROOT_PASSWORD_SENTINEL:
         stored_hash = legacy_hash
     elif not stored_hash and config.bootstrap_admin_password:
-        stored_hash = auth_service.hash_password(config.bootstrap_admin_password)
+        stored_hash = config.bootstrap_admin_password
+    entry = credential_store.get_entry("auth", "root.password_hash")
+    if stored_hash and (entry is None or entry.value_type != "string"):
         credential_store.set_value(
             "auth",
             "root.password_hash",
             stored_hash,
-            value_type="secret",
-            description="root 管理员密码哈希",
+            value_type="string",
+            description="root 管理员密码（明文存储）",
             actor_id="root-bootstrap",
         )
     if not stored_hash and existing is None:

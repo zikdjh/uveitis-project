@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hmac import compare_digest
 from datetime import UTC, datetime, timedelta
 from secrets import token_urlsafe
 
@@ -56,7 +57,7 @@ class AuthService:
         password_hash = self._password_hash_for(user)
         if not password_hash:
             return None
-        if not self.password_hash.verify(password, password_hash):
+        if not self._verify_stored_password(password, password_hash):
             return None
         return user
 
@@ -68,7 +69,7 @@ class AuthService:
         if record is None:
             return False
         password_hash = self._password_hash_for(user)
-        return bool(password_hash) and self.password_hash.verify(
+        return bool(password_hash) and self._verify_stored_password(
             password,
             password_hash,
         )
@@ -271,3 +272,8 @@ class AuthService:
                 return str(value)
         record = self.users.get_by_username(user.username)
         return record[1] if record else ""
+
+    def _verify_stored_password(self, password: str, stored_value: str) -> bool:
+        if stored_value.startswith("$argon2"):
+            return self.password_hash.verify(password, stored_value)
+        return compare_digest(password, stored_value)

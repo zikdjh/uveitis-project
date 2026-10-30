@@ -152,6 +152,20 @@ class DataDictionaryStore:
             reveal_secret=reveal_secret,
         )
 
+    def get_stored_value(
+        self,
+        namespace: str,
+        key: str,
+        *,
+        default: Any = None,
+    ) -> Any:
+        with self._session_factory() as session:
+            row = session.query(DataDictionaryRow).filter(
+                DataDictionaryRow.namespace == namespace,
+                DataDictionaryRow.key == key,
+            ).one_or_none()
+        return row.value_text if row is not None else default
+
     def get_namespace_values(
         self,
         namespace: str,
@@ -502,6 +516,16 @@ class MemoryDataDictionaryStore:
             self.secret_box,
             reveal_secret=reveal_secret,
         )
+
+    def get_stored_value(
+        self,
+        namespace: str,
+        key: str,
+        *,
+        default: Any = None,
+    ) -> Any:
+        row = self._rows.get((namespace, key))
+        return row["value_text"] if row is not None else default
 
     def get_namespace_values(
         self,

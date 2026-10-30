@@ -26,7 +26,7 @@
   <p class="doc-summary">外部模型路径、API Key、运行参数和 root 密码哈希的加密存储边界</p>
   <p class="doc-source">HTML 源文件：<code>scripts/docs/.html-source/2026-10-27-data-dictionary.html</code></p>
   <article class="html-body">
-<p>数据字典是运行时配置的唯一登记入口，采用“命名空间 + 键”的数据模型。普通值直接保存；密钥和密码哈希先由 AES-GCM 加密，再写入 <code>t_data_dictionary</code> 表。管理端只显示键的元数据和“已配置”状态，不返回明文。</p>
+<p>数据字典是运行时配置的唯一登记入口，采用“命名空间 + 键”的数据模型。普通值直接保存；外部服务和搜索凭据先由 AES-GCM 加密，再写入 <code>t_data_dictionary</code> 表。root 密码按要求以明文普通字符串保存，不做字段级加密。管理端只显示密钥的元数据和“已配置”状态，不返回明文。</p>
 
 <h2>物理命名规范</h2>
 <table>
@@ -48,7 +48,7 @@
     <tr><td><code>namespace</code></td><td>按功能域隔离配置，例如 <code>auth</code>、<code>integration</code>。</td><td>命名空间与键组合唯一。</td></tr>
     <tr><td><code>key</code></td><td>稳定键名，例如 <code>summary.base_url</code>。</td><td>键名可以公开，不能包含凭据。</td></tr>
     <tr><td><code>value_type</code></td><td>文本、整数、浮点、布尔、JSON 或密钥。</td><td>写入时校验，读取时按类型解码。</td></tr>
-    <tr><td><code>value_text</code></td><td>普通值原文或敏感值密文。</td><td>敏感值不得进入日志、审计详情或 API 响应。</td></tr>
+    <tr><td><code>value_text</code></td><td>普通值原文或凭据密文；root 密码为明文普通字符串。</td><td>外部凭据不得进入日志、审计详情或 API 响应。</td></tr>
     <tr><td><code>is_secret</code></td><td>标识该值是否必须脱敏。</td><td>管理端列表将 <code>value</code> 置空。</td></tr>
     <tr><td><code>revision</code></td><td>单个字典项或命名空间配置的并发版本。</td><td>并发写入使用 409 提示刷新。</td></tr>
   </tbody>
@@ -58,7 +58,7 @@
 <table>
   <thead><tr><th>命名空间</th><th>键</th><th>内容</th></tr></thead>
   <tbody>
-    <tr><td><code>auth</code></td><td><code>root.password_hash</code></td><td>root 的 Argon2 哈希，AES-GCM 加密保存；<code>t_user.f_password_hash</code> 只保留占位值。</td></tr>
+    <tr><td><code>auth</code></td><td><code>root.password_hash</code></td><td>root 的明文密码，普通字符串保存，不做字段级加密；<code>t_user.f_password_hash</code> 只保留占位值。</td></tr>
     <tr><td><code>integration</code></td><td><code>summary.base_url</code>、<code>summary.model</code>、<code>summary.protocol</code></td><td>外部总结模型的请求路径、模型名和接口协议。</td></tr>
     <tr><td><code>integration</code></td><td><code>summary.api_key</code></td><td>外部总结 API Key 密文。</td></tr>
     <tr><td><code>integration</code></td><td><code>planner.base_url</code>、<code>planner.model</code>、<code>planner.protocol</code></td><td>AgentScope 规划模型的请求路径、模型名和接口协议。</td></tr>
@@ -75,12 +75,13 @@
   <li><code>auth</code> 与 <code>integration</code> 属于系统维护命名空间，通用字典接口拒绝直接改写，避免绕过认证和配置审计。</li>
   <li>通用数据字典接口需要 <code>data_dictionary:read</code> 或 <code>data_dictionary:manage</code> 权限；医生账号没有这些权限。</li>
   <li>敏感项读取只返回 <code>configured=true</code>，不返回密文或解密值；内部运行链路通过受控存储适配器解密。</li>
-  <li>数据库管理员修改 root 密码时，需要在数据字典中替换加密后的 <code>auth/root.password_hash</code>；应用接口仍保留“不允许重置 root 密码”的规则。</li>
+  <li>数据库管理员修改 root 密码时，需要在数据字典中替换普通字符串保存的 <code>auth/root.password_hash</code>；应用接口仍保留“不允许重置 root 密码”的规则。</li>
 </ol>
 
 <h2>迁移策略</h2>
 <ol>
-  <li>首次启动时，如果数据字典没有 root 哈希，则从现有 <code>t_user.f_password_hash</code> 读取旧值，加密后迁入 <code>auth/root.password_hash</code>，随后把用户表字段改为不可登录占位值。</li>
+  <li>首次启动时，如果数据字典没有 root 密码记录，则从现有 <code>t_user.f_password_hash</code> 读取旧值迁入 <code>auth/root.password_hash</code>；没有旧值时把启动口令以明文写入，随后把用户表字段改为不可登录占位值。</li>
+  <li>旧版 <code>secret</code> 类型的 root 密码记录在启动时统一转为普通字符串；解密失败的记录按原始值保留，避免依赖部署主密钥。</li>
   <li>如果数据字典已有 root 哈希，则环境变量和管理接口都不能覆盖它。</li>
   <li>旧版 UUID 主键会先保留为对应业务键，例如 <code>f_user_key</code>、<code>f_case_key</code>、<code>f_dictionary_key</code>，再新建 <code>f_id</code> 自增主键；审计事件新增 <code>f_event_key</code> 并回填唯一值。</li>
   <li>旧版 <code>t_integration_setting.f_payload_json</code> 存在时，普通字段转为普通字典项，API Key 密文按原加密格式迁入密钥字典项。</li>
@@ -91,7 +92,7 @@
 <ol>
   <li>数据字典表存在 <code>namespace + key</code> 唯一约束，敏感项标记为密钥类型。</li>
   <li>外部总结、AgentScope 规划模型的路径/模型名/协议、搜索顺序和全部 API Key 均可在字典中定位，但 API 响应不含明文。</li>
-  <li>root 哈希迁移后，<code>t_user.f_password_hash</code> 不再保存可登录哈希；数据库字典中的哈希仍可完成 root 登录。</li>
+  <li>root 密码迁移后，<code>t_user.f_password_hash</code> 不再保存可登录凭据；数据字典中的普通字符串记录（明文或历史哈希）仍可完成 root 登录。</li>
   <li>普通命名空间可以按权限读写，系统维护命名空间不能通过通用接口绕过专用流程。</li>
   <li>并发更新返回 409，审计事件覆盖写入和删除动作。</li>
 </ol>
