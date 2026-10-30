@@ -6,6 +6,9 @@ export type SummaryProtocol =
   | "anthropic_messages";
 
 export type SearchProvider =
+  | "bocha"
+  | "zhipu"
+  | "baidu_qianfan"
   | "tavily"
   | "brave"
   | "serper"
@@ -30,6 +33,12 @@ export type IntegrationConfig = {
   web_search_enabled: boolean;
   web_search_max_results: number;
   search_provider_order: SearchProvider[];
+  bocha_api_key_configured: boolean;
+  bocha_api_key_hint: string;
+  zhipu_search_api_key_configured: boolean;
+  zhipu_search_api_key_hint: string;
+  baidu_qianfan_api_key_configured: boolean;
+  baidu_qianfan_api_key_hint: string;
   tavily_api_key_configured: boolean;
   tavily_api_key_hint: string;
   brave_search_api_key_configured: boolean;
@@ -66,6 +75,12 @@ export type IntegrationUpdate = Partial<{
   web_search_enabled: boolean;
   web_search_max_results: number;
   search_provider_order: SearchProvider[];
+  bocha_api_key: string;
+  clear_bocha_api_key: boolean;
+  zhipu_search_api_key: string;
+  clear_zhipu_search_api_key: boolean;
+  baidu_qianfan_api_key: string;
+  clear_baidu_qianfan_api_key: boolean;
   tavily_api_key: string;
   clear_tavily_api_key: boolean;
   brave_search_api_key: string;

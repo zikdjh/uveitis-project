@@ -220,6 +220,9 @@ class OptionalIntegrations:
                     "bing_search_api_key": self.settings.bing_search_api_key,
                     "exa_api_key": self.settings.exa_api_key,
                     "perplexity_api_key": self.settings.perplexity_api_key,
+                    "bocha_api_key": self.settings.bocha_api_key,
+                    "zhipu_search_api_key": self.settings.zhipu_search_api_key,
+                    "baidu_qianfan_api_key": self.settings.baidu_qianfan_api_key,
                     "searxng_base_url": self.settings.searxng_base_url,
                     "summary_protocol": self.settings.external_summary_protocol,
                 }
@@ -463,6 +466,12 @@ class OptionalIntegrations:
         config = self._config()
         if provider == "searxng":
             return bool(str(config.get("searxng_base_url") or "").strip())
+        if provider == "bocha":
+            return bool(str(config.get("bocha_api_key") or "").strip())
+        if provider == "zhipu":
+            return bool(str(config.get("zhipu_search_api_key") or "").strip())
+        if provider == "baidu_qianfan":
+            return bool(str(config.get("baidu_qianfan_api_key") or "").strip())
         if provider == "google_cse":
             return bool(
                 str(config.get("google_cse_api_key") or "").strip()
@@ -581,6 +590,42 @@ class OptionalIntegrations:
             options["proxy"] = proxy
         return options
 
+    def _qwen_search_ready(self, config: dict[str, Any]) -> bool:
+        if not config.get("web_search_enabled"):
+            return False
+        providers = [
+            str(item).strip().lower()
+            for item in config.get("search_provider_order", [])
+            if str(item).strip()
+        ]
+        return any(
+            self._search_provider_configured(provider) for provider in providers
+        )
+
+    def _execute_search_query(self, query: str) -> list[WebEvidence]:
+        """Run the configured provider chain for one query, silently skipping
+        unavailable providers; raises when every provider fails."""
+
+        config = self._config()
+        max_results = max(1, min(10, int(config.get("web_search_max_results", 5))))
+        results: list[WebEvidence] = []
+        for provider in (
+            str(item).strip().lower()
+            for item in config.get("search_provider_order", [])
+            if str(item).strip()
+        ):
+            try:
+                for item in self._run_search_provider(provider, query):
+                    if all(existing.url != item.url for existing in results):
+                        results.append(item)
+            except Exception:
+                continue
+            if len(results) >= max_results:
+                break
+        if not results:
+            raise ValueError("网络搜索未返回结果")
+        return results[:max_results]
+
     def qwen_judgment(self, case: CaseRead) -> IntegrationResult:
         if not self.qwen_available:
             return IntegrationResult("skipped", "Qwen 微调判断服务未配置")
@@ -626,14 +671,74 @@ class OptionalIntegrations:
         }
         try:
             url = self.settings.perception_service_url.rstrip("/") + "/v1/judge"
-            response = self._post(
-                url,
-                payload,
-                timeout=self.settings.perception_timeout_seconds,
-                service="Qwen 模型服务",
-                allow_case_data=True,
-            )
-            data = response.get("result") if isinstance(response.get("result"), dict) else response
+            config = self._config()
+            tools = ["web_search"] if self._qwen_search_ready(config) else []
+            tool_results: list[dict[str, Any]] = []
+            searched_queries: list[str] = []
+            searched_evidence: list[WebEvidence] = []
+            thinking_text = ""
+            tool_rounds = 0
+            response: dict[str, Any] = {}
+            data: dict[str, Any] = {}
+            for _ in range(3):
+                payload = {**payload, "tools": tools, "tool_results": tool_results}
+                response = self._post(
+                    url,
+                    payload,
+                    timeout=self.settings.perception_timeout_seconds,
+                    service="Qwen 模型服务",
+                    allow_case_data=True,
+                )
+                thinking_text = _safe_text(response.get("thinking"))
+                data = (
+                    response.get("result")
+                    if isinstance(response.get("result"), dict)
+                    else response
+                )
+                if str(data.get("status") or "") != "tool_call" or tool_rounds >= 2:
+                    break
+                call = data.get("tool_call") if isinstance(data.get("tool_call"), dict) else {}
+                arguments = (
+                    call.get("arguments")
+                    if isinstance(call.get("arguments"), dict)
+                    else {}
+                )
+                query = _safe_text(call.get("query") or arguments.get("query"))
+                tool_rounds += 1
+                note = ""
+                if query:
+                    try:
+                        query = assert_external_text(
+                            query, case, service="Qwen 网络搜索"
+                        )
+                    except Exception as exc:
+                        note = f"搜索词外发被阻止: {type(exc).__name__}"
+                        query = ""
+                evidence: list[WebEvidence] = []
+                if query:
+                    try:
+                        evidence = self._execute_search_query(query)
+                    except Exception as exc:
+                        note = f"搜索不可用: {type(exc).__name__}: {exc}"
+                searched_queries.append(query)
+                searched_evidence.extend(evidence)
+                tool_results.append(
+                    {
+                        "tool": "web_search",
+                        "query": query,
+                        "note": note,
+                        "results": [
+                            {
+                                "title": item.title,
+                                "url": item.url,
+                                "snippet": item.snippet[:400],
+                            }
+                            for item in evidence[:5]
+                        ],
+                    }
+                )
+            if str(data.get("status") or "") == "tool_call":
+                raise ValueError("Qwen 持续请求搜索工具，未返回最终判断")
             findings = _normalize_findings(data.get("findings"))
             label = str(
                 data.get("label")
@@ -666,6 +771,7 @@ class OptionalIntegrations:
                     "requires_human_review": bool(
                         data.get("requires_human_review", True)
                     ),
+                    "web_evidence": searched_evidence,
                     "runtime": {
                         "model": _safe_text(response.get("model")),
                         "adapter_sha256": _safe_text(
@@ -676,6 +782,9 @@ class OptionalIntegrations:
                             response.get("generated_at")
                         ),
                         "truncated": bool(response.get("truncated", False)),
+                        "tool_rounds": tool_rounds,
+                        "searched_queries": searched_queries,
+                        "thinking": thinking_text[:400],
                         "peak_allocated_gib": response.get(
                             "peak_allocated_gib"
                         ),
@@ -1056,6 +1165,88 @@ class OptionalIntegrations:
                 )
                 for index, url in enumerate(citations[:limit])
                 if str(url).startswith(("http://", "https://"))
+            ]
+        if provider == "bocha":
+            api_key = str(config.get("bocha_api_key") or "")
+            if not api_key:
+                raise ValueError("博查 API Key 未配置")
+            data = self._post(
+                "https://api.bochaai.com/v1/web-search",
+                {
+                    "query": query,
+                    "count": limit,
+                    "summary": True,
+                },
+                timeout=self.settings.integration_timeout_seconds,
+                headers={
+                    "Accept": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                },
+            )
+            pages = (data.get("data") or {}).get("webPages", {}).get("value", [])
+            return [
+                WebEvidence(
+                    title=str(item.get("name") or item.get("url") or "检索结果"),
+                    url=str(item.get("url") or ""),
+                    snippet=str(item.get("summary") or item.get("snippet") or ""),
+                    provider=provider,
+                )
+                for item in pages
+                if isinstance(item, dict) and item.get("url")
+            ]
+        if provider == "zhipu":
+            api_key = str(config.get("zhipu_search_api_key") or "")
+            if not api_key:
+                raise ValueError("智谱网络搜索 API Key 未配置")
+            data = self._post(
+                "https://open.bigmodel.cn/api/paas/v4/web_search",
+                {
+                    "search_engine": "search_std",
+                    "search_query": query,
+                    "count": limit,
+                },
+                timeout=self.settings.integration_timeout_seconds,
+                headers={
+                    "Accept": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                },
+            )
+            return [
+                WebEvidence(
+                    title=str(item.get("title") or item.get("link") or "检索结果"),
+                    url=str(item.get("link") or item.get("url") or ""),
+                    snippet=str(item.get("content") or ""),
+                    provider=provider,
+                )
+                for item in data.get("search_result", [])
+                if isinstance(item, dict) and (item.get("link") or item.get("url"))
+            ]
+        if provider == "baidu_qianfan":
+            api_key = str(config.get("baidu_qianfan_api_key") or "")
+            if not api_key:
+                raise ValueError("百度千帆 AI 搜索 API Key 未配置")
+            data = self._post(
+                "https://qianfan.baidubce.com/v2/ai_search",
+                {
+                    "messages": [{"role": "user", "content": query}],
+                    "search_source": "baidu_search_v2",
+                    "resource_type_filter": [{"type": "web", "top_k": limit}],
+                },
+                timeout=self.settings.integration_timeout_seconds,
+                headers={
+                    "Accept": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                },
+            )
+            return [
+                WebEvidence(
+                    title=str(item.get("title") or item.get("url") or "检索结果"),
+                    url=str(item.get("url") or item.get("web_anchor") or ""),
+                    snippet=str(item.get("content") or ""),
+                    provider=provider,
+                )
+                for item in data.get("references", [])
+                if isinstance(item, dict) and (item.get("url") or item.get("web_anchor"))
             ]
         raise ValueError(f"不支持的网络搜索提供方: {provider}")
 
