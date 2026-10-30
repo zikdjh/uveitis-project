@@ -289,8 +289,38 @@ class OptionalIntegrations:
             return outcome
         return self._test_model_endpoint("planner")
 
+    def _post_with_retry(
+        self,
+        url: str,
+        payload: dict[str, Any],
+        *,
+        timeout: float,
+        headers: dict[str, str],
+        attempts_out: list[int] | None = None,
+    ) -> tuple[dict[str, Any], int]:
+        last_error: Exception | None = None
+        for attempt in range(1, 3):
+            try:
+                response = self._post(
+                    url,
+                    payload,
+                    timeout=timeout,
+                    headers=headers,
+                )
+                return response, attempt
+            except Exception as exc:
+                last_error = exc
+                if attempts_out is not None:
+                    attempts_out[0] = attempt
+                if attempt == 1:
+                    time.sleep(0.2)
+        assert last_error is not None
+        raise last_error
+
     def _test_model_endpoint(self, prefix: str) -> IntegrationTestOutcome:
         started = time.perf_counter()
+        attempts = 1
+        attempt_state = [1]
         try:
             config = self._config()
             missing = [
@@ -314,7 +344,7 @@ class OptionalIntegrations:
             if protocol == "anthropic_messages":
                 if not url.endswith("/messages"):
                     url += "/messages"
-                response = self._post(
+                response, attempts = self._post_with_retry(
                     url,
                     {
                         "model": model,
@@ -327,6 +357,7 @@ class OptionalIntegrations:
                         "x-api-key": api_key,
                         "anthropic-version": "2023-06-01",
                     },
+                    attempts_out=attempt_state,
                 )
                 content = "".join(
                     str(item.get("text") or "")
@@ -336,11 +367,12 @@ class OptionalIntegrations:
             elif protocol == "openai_responses":
                 if not url.endswith("/responses"):
                     url += "/responses"
-                response = self._post(
+                response, attempts = self._post_with_retry(
                     url,
                     {"model": model, "input": probe, "max_output_tokens": 16},
                     timeout=self.settings.summary_timeout_seconds,
                     headers=self._headers(api_key),
+                    attempts_out=attempt_state,
                 )
                 content = str(response.get("output_text") or "")
                 if not content:
@@ -354,7 +386,7 @@ class OptionalIntegrations:
             else:
                 if not url.endswith("/chat/completions"):
                     url += "/chat/completions"
-                response = self._post(
+                response, attempts = self._post_with_retry(
                     url,
                     {
                         "model": model,
@@ -363,6 +395,7 @@ class OptionalIntegrations:
                     },
                     timeout=self.settings.summary_timeout_seconds,
                     headers=self._headers(api_key),
+                    attempts_out=attempt_state,
                 )
                 choices = response.get("choices") or []
                 content = ""
@@ -374,14 +407,15 @@ class OptionalIntegrations:
                 True,
                 f"连接成功，模型 {model} 已返回响应",
                 int((time.perf_counter() - started) * 1000),
-                attempts=1,
+                attempts=attempts,
             )
         except Exception as exc:
+            attempts = attempt_state[0]
             return IntegrationTestOutcome(
                 False,
                 f"连接失败：{type(exc).__name__}: {exc}",
                 int((time.perf_counter() - started) * 1000),
-                attempts=1,
+                attempts=attempts,
             )
 
     def test_search(
