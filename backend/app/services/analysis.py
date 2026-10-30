@@ -398,6 +398,16 @@ class AnalysisService:
             if search_result.status == "completed"
             else []
         )
+        tool_web_evidence = [
+            item
+            for item in (judgment.get("web_evidence") or [])
+            if isinstance(item, WebEvidence)
+        ]
+        merged_web_evidence: list[WebEvidence] = list(web_evidence)
+        for item in tool_web_evidence:
+            if all(existing.url != item.url for existing in merged_web_evidence):
+                merged_web_evidence.append(item)
+        web_evidence = merged_web_evidence[:12]
 
         summary_result = (
             self.integrations.external_summary(

@@ -45,6 +45,9 @@ import {
 const { Text, Title } = Typography;
 const PROVIDERS_PER_PAGE = 4;
 const providerOrderSeed: SearchProvider[] = [
+  "bocha",
+  "zhipu",
+  "baidu_qianfan",
   "tavily",
   "brave",
   "serper",
@@ -58,6 +61,9 @@ const providerOrderSeed: SearchProvider[] = [
 type SecretField =
   | "summary_api_key"
   | "planner_api_key"
+  | "bocha_api_key"
+  | "zhipu_search_api_key"
+  | "baidu_qianfan_api_key"
   | "tavily_api_key"
   | "brave_search_api_key"
   | "serper_api_key"
@@ -78,6 +84,30 @@ type ProviderDescriptor = {
 };
 
 const providers: ProviderDescriptor[] = [
+  {
+    id: "bocha",
+    name: "博查 Bocha",
+    detail: "中文网页检索",
+    secret: "bocha_api_key",
+    configuredField: "bocha_api_key_configured",
+    hintField: "bocha_api_key_hint",
+  },
+  {
+    id: "zhipu",
+    name: "智谱 AI 搜索",
+    detail: "智谱网络搜索",
+    secret: "zhipu_search_api_key",
+    configuredField: "zhipu_search_api_key_configured",
+    hintField: "zhipu_search_api_key_hint",
+  },
+  {
+    id: "baidu_qianfan",
+    name: "百度千帆 AI 搜索",
+    detail: "百度 AI 搜索",
+    secret: "baidu_qianfan_api_key",
+    configuredField: "baidu_qianfan_api_key_configured",
+    hintField: "baidu_qianfan_api_key_hint",
+  },
   {
     id: "tavily",
     name: "Tavily",
@@ -140,6 +170,9 @@ const providers: ProviderDescriptor[] = [
 const secretFields: SecretField[] = [
   "summary_api_key",
   "planner_api_key",
+  "bocha_api_key",
+  "zhipu_search_api_key",
+  "baidu_qianfan_api_key",
   "tavily_api_key",
   "brave_search_api_key",
   "serper_api_key",
