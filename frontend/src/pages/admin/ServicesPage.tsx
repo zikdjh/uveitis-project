@@ -186,7 +186,9 @@ function draftFromConfig(config: IntegrationConfig): Draft {
   const providerEnabled = Object.fromEntries(
     providerOrderSeed.map((provider) => [provider, false]),
   ) as Record<SearchProvider, boolean>;
-  for (const provider of providerOrder) providerEnabled[provider] = true;
+  // Only the saved order lists enabled providers; the completed list is for
+  // display ordering and would otherwise re-enable disabled providers.
+  for (const provider of config.search_provider_order) providerEnabled[provider] = true;
   return {
     summaryEnabled: config.summary_enabled,
     summaryProtocol: config.summary_protocol,
