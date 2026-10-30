@@ -1,10 +1,11 @@
-import { ArrowRight, ClipboardPlus, FileImage, RotateCcw } from "lucide-react";
+import { ArrowRight, ClipboardPlus, RotateCcw } from "lucide-react";
 import { Button, DatePicker, Pagination, Select } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { listCases, type CaseRecord, type CaseStatus } from "@/api/cases";
+import { EmptyState, PageHeader, PageSection } from "@/components/ui";
 
 type StatusFilter = CaseStatus | "all";
 type DateRange = [Dayjs, Dayjs] | null;
@@ -76,15 +77,15 @@ export default function CaseListPage() {
 
   return (
     <section className="page">
-      <div className="page-heading">
-        <div>
-          <h1>病例</h1>
-          <p className="page-lead">查看病例资料、辅助结果和复核状态。</p>
-        </div>
-        <Link className="button primary" to="/doctor/cases/new">
-          <ClipboardPlus size={16} /> 新建病例
-        </Link>
-      </div>
+      <PageHeader
+        title="病例"
+        description="查看病例资料、辅助结果和复核状态。"
+        actions={
+          <Link className="button primary" to="/doctor/cases/new">
+            <ClipboardPlus size={16} /> 新建病例
+          </Link>
+        }
+      />
       {error && <div className="notice error-notice">{error}</div>}
       <div className="case-filters">
         <Select<StatusFilter>
@@ -110,42 +111,47 @@ export default function CaseListPage() {
           </Button>
         )}
       </div>
-      <div className="case-table">
-        {visibleCases.map((item) => (
-          <Link to={`/doctor/cases/${item.id}/summary`} key={item.id}>
-            <div>
-              <strong>{item.patient_age} 岁 · {sexText[item.patient_sex]}</strong>
-              <p>{item.complaint}</p>
-              <small>{new Date(item.updated_at).toLocaleString("zh-CN")} · {item.images.length} 张影像</small>
-            </div>
-            <span className={`status ${item.status}`}>{statusText[item.status]}</span>
-            <ArrowRight size={16} />
-          </Link>
-        ))}
-        {!loading && !error && total === 0 && (
-          <div className="empty-state">
-            <FileImage size={26} />
-            <p>{hasFilters ? "没有符合筛选条件的病例" : "还没有病例"}</p>
-            <span>{hasFilters ? "请调整状态或更新时间范围。" : "从右上角新建第一份病例。"}</span>
-          </div>
-        )}
-      </div>
-      {total > 0 && (
-        <Pagination
-          className="case-list-pagination"
-          current={page}
-          pageSize={pageSize}
-          total={total}
-          showSizeChanger={total > 8}
-          pageSizeOptions={[8, 16, 32]}
-          showTotal={(total) => `共 ${total} 例`}
-          onChange={(nextPage, nextPageSize) => {
-            const pageSizeChanged = nextPageSize !== pageSize;
-            setPageSize(nextPageSize);
-            setPage(pageSizeChanged ? 1 : nextPage);
-          }}
-        />
-      )}
+      <PageSection
+        title="病例列表"
+        description={`${total > 0 ? `共 ${total} 例记录` : "暂无记录"} · 按更新时间展示`}
+        footer={
+          total > 0 ? (
+            <Pagination
+              current={page}
+              pageSize={pageSize}
+              total={total}
+              showSizeChanger={total > 8}
+              pageSizeOptions={[8, 16, 32]}
+              showTotal={(total) => `共 ${total} 例`}
+              onChange={(nextPage, nextPageSize) => {
+                const pageSizeChanged = nextPageSize !== pageSize;
+                setPageSize(nextPageSize);
+                setPage(pageSizeChanged ? 1 : nextPage);
+              }}
+            />
+          ) : null
+        }
+      >
+        <div className="case-table">
+          {visibleCases.map((item) => (
+            <Link to={`/doctor/cases/${item.id}/summary`} key={item.id}>
+              <div>
+                <strong>{item.patient_age} 岁 · {sexText[item.patient_sex]}</strong>
+                <p>{item.complaint}</p>
+                <small>{new Date(item.updated_at).toLocaleString("zh-CN")} · {item.images.length} 张影像</small>
+              </div>
+              <span className={`status ${item.status}`}>{statusText[item.status]}</span>
+              <ArrowRight size={16} />
+            </Link>
+          ))}
+          {!loading && !error && total === 0 && (
+            <EmptyState
+              title={hasFilters ? "没有符合筛选条件的病例" : "还没有病例"}
+              description={hasFilters ? "请调整状态或更新时间范围。" : "从右上角新建第一份病例。"}
+            />
+          )}
+        </div>
+      </PageSection>
     </section>
   );
 }

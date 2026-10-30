@@ -20,6 +20,7 @@ import {
   type Session,
   type User,
 } from "@/api/auth";
+import { PageHeader, PageSection } from "@/components/ui";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
   month: "2-digit",
@@ -147,21 +148,20 @@ export default function SecurityPage() {
 
   return (
     <section className="page">
-      <div className="page-heading">
-        <div><h1>账号安全</h1><p className="page-lead">维护当前账号密码与登录会话。</p></div>
-        <button className="button secondary" type="button" onClick={() => void load()} disabled={loading || busy}>
-          <RefreshCw size={16} className={loading ? "spin" : ""} /> 刷新
-        </button>
-      </div>
+      <PageHeader
+        title="账号安全"
+        description="维护当前账号密码与登录会话。"
+        actions={
+          <button className="button secondary" type="button" onClick={() => void load()} disabled={loading || busy}>
+            <RefreshCw size={16} className={loading ? "spin" : ""} /> 刷新
+          </button>
+        }
+      />
       {error && <div className="notice error-notice" role="alert"><AlertCircle size={17} /> {error}</div>}
       {notice && <div className="notice success-notice"><CheckCircle2 size={17} /> {notice}</div>}
 
       <div className="security-grid">
-        <section className="panel">
-          <div className="section-heading">
-            <div><h2>账号信息</h2><span>当前登录身份</span></div>
-            <ShieldCheck size={20} />
-          </div>
+        <PageSection title="账号信息" description="当前登录身份" icon={ShieldCheck}>
           {user ? (
             <dl className="account-facts">
               <div><dt>姓名</dt><dd>{user.display_name}</dd></div>
@@ -172,13 +172,9 @@ export default function SecurityPage() {
           ) : (
             <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取账号</div>
           )}
-        </section>
+        </PageSection>
 
-        <section className="panel">
-          <div className="section-heading">
-            <div><h2>修改密码</h2><span>更新后撤销其他会话</span></div>
-            <KeyRound size={20} />
-          </div>
+        <PageSection title="修改密码" description="更新后撤销其他会话" icon={KeyRound}>
           <form className="form-grid compact password-form" onSubmit={(event) => void handlePassword(event)}>
             <label>当前密码<input name="current_password" type="password" autoComplete="current-password" required /></label>
             <label>新密码<input name="new_password" type="password" minLength={12} maxLength={200} autoComplete="new-password" required /></label>
@@ -189,16 +185,19 @@ export default function SecurityPage() {
               </button>
             </div>
           </form>
-        </section>
+        </PageSection>
       </div>
 
-      <section className="panel session-panel">
-        <div className="section-heading">
-          <div><h2>登录会话</h2><span>共 {sessions.length} 个有效会话</span></div>
+      <PageSection
+        title="登录会话"
+        description={`共 ${sessions.length} 个有效会话`}
+        actions={
           <button className="button secondary" type="button" onClick={() => void handleRevokeOthers()} disabled={busy || sessions.length <= 1}>
             <MonitorSmartphone size={16} /> 撤销其他会话
           </button>
-        </div>
+        }
+        className="session-panel"
+      >
         <div className="session-filters">
           <Input
             allowClear
@@ -257,7 +256,7 @@ export default function SecurityPage() {
             }}
           />
         )}
-      </section>
+      </PageSection>
     </section>
   );
 }

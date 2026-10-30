@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { listCases, type CaseRecord, type CaseStatus } from "@/api/cases";
+import { EmptyState, PageHeader, PageSection } from "@/components/ui";
 
 type StatusFilter = CaseStatus | "all";
 type DateRange = [Dayjs, Dayjs] | null;
@@ -74,7 +75,7 @@ export default function AdminCasesPage() {
 
   return (
     <section className="page">
-      <div className="page-heading"><div><h1>病例审计</h1><p className="page-lead">查看病例处理与复核状态。</p></div></div>
+      <PageHeader title="病例审计" description="查看病例处理与复核状态。" />
       {error && <div className="notice error-notice">{error}</div>}
       <div className="case-filters">
         <Select<StatusFilter>
@@ -100,36 +101,42 @@ export default function AdminCasesPage() {
           </Button>
         )}
       </div>
-      <div className="case-table">
-        {cases.map((item) => (
-          <Link to={`/admin/cases/${item.id}`} key={item.id}>
-            <div><strong>{item.complaint}</strong><small>{item.owner_name || "未分配医生"} · {item.patient_age} 岁 · 建档 {new Date(item.created_at).toLocaleString("zh-CN")}</small></div>
-            <span className={`status ${item.status}`}>{statusText[item.status]}</span><ArrowRight size={16} />
-          </Link>
-        ))}
-        {!loading && !error && total === 0 && (
-          <div className="empty-state">
-            <p>{hasFilters ? "没有符合筛选条件的病例" : "暂无病例记录"}</p>
-            {hasFilters && <span>请调整状态或更新时间范围。</span>}
-          </div>
-        )}
-      </div>
-      {total > 0 && (
-        <Pagination
-          className="case-list-pagination"
-          current={page}
-          pageSize={pageSize}
-          total={total}
-          showSizeChanger={total > 8}
-          pageSizeOptions={[8, 16, 32]}
-          showTotal={(total) => `共 ${total} 例`}
-          onChange={(nextPage, nextPageSize) => {
-            const pageSizeChanged = nextPageSize !== pageSize;
-            setPageSize(nextPageSize);
-            setPage(pageSizeChanged ? 1 : nextPage);
-          }}
-        />
-      )}
+      <PageSection
+        title="病例记录"
+        description={`${total > 0 ? `共 ${total} 例记录` : "暂无记录"} · 建档时间与处理状态`}
+        footer={
+          total > 0 ? (
+            <Pagination
+              current={page}
+              pageSize={pageSize}
+              total={total}
+              showSizeChanger={total > 8}
+              pageSizeOptions={[8, 16, 32]}
+              showTotal={(total) => `共 ${total} 例`}
+              onChange={(nextPage, nextPageSize) => {
+                const pageSizeChanged = nextPageSize !== pageSize;
+                setPageSize(nextPageSize);
+                setPage(pageSizeChanged ? 1 : nextPage);
+              }}
+            />
+          ) : null
+        }
+      >
+        <div className="case-table">
+          {cases.map((item) => (
+            <Link to={`/admin/cases/${item.id}`} key={item.id}>
+              <div><strong>{item.complaint}</strong><small>{item.owner_name || "未分配医生"} · {item.patient_age} 岁 · 建档 {new Date(item.created_at).toLocaleString("zh-CN")}</small></div>
+              <span className={`status ${item.status}`}>{statusText[item.status]}</span><ArrowRight size={16} />
+            </Link>
+          ))}
+          {!loading && !error && total === 0 && (
+            <EmptyState
+              title={hasFilters ? "没有符合筛选条件的病例" : "暂无病例记录"}
+              description={hasFilters ? "请调整状态或更新时间范围。" : undefined}
+            />
+          )}
+        </div>
+      </PageSection>
     </section>
   );
 }
