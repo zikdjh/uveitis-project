@@ -70,6 +70,12 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    username: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=100,
+        pattern=r"^[A-Za-z0-9._-]+$",
+    )
     display_name: str | None = Field(default=None, min_length=1, max_length=100)
     is_active: bool | None = None
 

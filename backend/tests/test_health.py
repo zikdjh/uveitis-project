@@ -579,6 +579,65 @@ def test_admin_can_edit_doctor_display_name(tmp_path: Path) -> None:
     assert any("显示名改为 改名后" in item["detail"] for item in audit["items"])
 
 
+def test_admin_can_edit_doctor_username(tmp_path: Path) -> None:
+    admin = make_client(tmp_path, role="admin")
+    created = admin.post(
+        "/api/v1/admin/users",
+        json={
+            "username": "rename.target",
+            "display_name": "改名医生",
+            "password": "rename-password-123",
+        },
+    ).json()
+    renamed = admin.patch(
+        f"/api/v1/admin/users/{created['id']}",
+        json={"username": "rename.new"},
+    )
+    assert renamed.status_code == 200
+    assert renamed.json()["username"] == "rename.new"
+
+    reserved = admin.patch(
+        f"/api/v1/admin/users/{created['id']}",
+        json={"username": "root"},
+    )
+    assert reserved.status_code == 409
+
+    root_user = next(
+        item
+        for item in admin.get("/api/v1/admin/users").json()
+        if item["is_root"]
+    )
+    root_rename = admin.patch(
+        f"/api/v1/admin/users/{root_user['id']}",
+        json={"username": "notroot"},
+    )
+    assert root_rename.status_code == 409
+
+    other = admin.post(
+        "/api/v1/admin/users",
+        json={
+            "username": "rename.other",
+            "display_name": "另一名医生",
+            "password": "rename-password-123",
+        },
+    ).json()
+    duplicate = admin.patch(
+        f"/api/v1/admin/users/{other['id']}",
+        json={"username": "rename.new"},
+    )
+    assert duplicate.status_code == 409
+
+    doctor = TestClient(admin.app)
+    login = doctor.post(
+        "/api/v1/auth/login",
+        json={"username": "rename.new", "password": "rename-password-123"},
+    )
+    assert login.status_code == 200
+
+    audit = admin.get("/api/v1/admin/audit-events?event=user_update").json()
+    assert any("登录账号改为 rename.new" in item["detail"] for item in audit["items"])
+
+
 def test_password_change_revokes_other_sessions(tmp_path: Path) -> None:
     client = make_client(tmp_path)
     sessions = client.get("/api/v1/auth/sessions")
