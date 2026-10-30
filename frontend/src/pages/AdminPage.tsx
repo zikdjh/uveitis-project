@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { getSystemOverview, type SystemOverview } from "@/api/system";
+import AnalysisQueuePanel from "@/components/AnalysisQueuePanel";
 
 const statusLabel = { mock: "运行中", configured: "运行中", offline: "未启用" };
 
@@ -95,6 +96,8 @@ export default function AdminPage() {
                 </span>
               </div>
             </section>
+
+            <AnalysisQueuePanel role="admin" />
 
             <section className="panel">
               <div className="section-heading">
