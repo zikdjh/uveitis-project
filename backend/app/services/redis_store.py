@@ -264,7 +264,12 @@ class RedisStore:
         if not values:
             return
         user_id = values.get("user_id", "")
+        # Extending key TTLs alone would leave the stored refresh_expires_at at
+        # the login-time value, so sliding sessions would still report and later
+        # clamp to the original expiry.
+        sliding_expiry = (datetime.now(UTC) + timedelta(seconds=ttl_seconds)).isoformat()
         with self.client.pipeline(transaction=True) as pipe:
+            pipe.hset(data_key, mapping={"refresh_expires_at": sliding_expiry})
             pipe.expire(_mapping_key(token_kind, token), ttl_seconds)
             pipe.expire(data_key, ttl_seconds)
             if user_id:
