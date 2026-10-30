@@ -324,7 +324,10 @@ def test_summary_connection_probe_uses_selected_protocol() -> None:
 
 
 def test_summary_connection_probe_reports_unreachable_service() -> None:
+    requests: list[httpx.Request] = []
+
     def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
         return httpx.Response(503, json={"error": "unavailable"})
 
     store = _store()
@@ -349,6 +352,8 @@ def test_summary_connection_probe_reports_unreachable_service() -> None:
     assert result.ok is False
     assert "连接失败" in result.detail
     assert "503" in result.detail
+    assert result.attempts == 2
+    assert len(requests) == 2
 
 
 def test_planner_connection_probe_uses_selected_protocol() -> None:
