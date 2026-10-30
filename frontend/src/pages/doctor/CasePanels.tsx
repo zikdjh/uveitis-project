@@ -138,12 +138,13 @@ export function CaseAnalysisPage() {
   const { item, setItem, analysisJob, setAnalysisJob } = useCase();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [enableThinking, setEnableThinking] = useState(false);
 
   async function analyze() {
     setBusy(true);
     setError(null);
     try {
-      const current = await analyzeCase(item.id);
+      const current = await analyzeCase(item.id, { enable_thinking: enableThinking });
       setItem(current);
       setAnalysisJob(null);
     } catch (reason) {
@@ -164,6 +165,7 @@ export function CaseAnalysisPage() {
             <div><span>状态</span><strong>{analysisJob ? jobStatusText[analysisJob.status] : analysisText[item.analysis.status]}</strong></div>
             <div><span>执行尝试</span><strong>{analysisJob ? `${analysisJob.attempt_count}/${analysisJob.max_attempts}` : "1/1"}</strong></div>
             <div><span>完成时间</span><strong>{item.analysis.completed_at ? new Date(item.analysis.completed_at).toLocaleString("zh-CN") : "处理中"}</strong></div>
+            <div><span>Qwen 思考</span><strong>{item.analysis.runtime_metadata?.doctor_options?.qwen_enable_thinking ? "已开启" : "已关闭"}</strong></div>
           </div>
           {item.analysis.impression ? (
             <div className="result-box"><span>模型初判</span><p>{item.analysis.impression}</p></div>
@@ -198,6 +200,15 @@ export function CaseAnalysisPage() {
       ) : (
         <p className="analysis-placeholder">尚未启动辅助分析。</p>
       )}
+      <label className="checkbox-row">
+        <input
+          type="checkbox"
+          checked={enableThinking}
+          disabled={busy || item.status === "analyzing"}
+          onChange={(event) => setEnableThinking(event.target.checked)}
+        />
+        <span>启用 Qwen 思考模式</span>
+      </label>
       <div className="form-actions"><button className="button primary" type="button" disabled={busy || item.status === "analyzing"} onClick={() => void analyze()}>{busy ? <LoaderCircle className="spin" size={16} /> : <ArrowRight size={16} />} {item.analysis ? "重新分析" : "启动辅助分析"}</button></div>
     </section>
   );

@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse
 from app.core.security import require_permission
 from app.schemas.case import (
     AnalysisJobRead,
+    AnalysisOptions,
     AnalysisQueueItem,
     CaseCreate,
     CaseImage,
@@ -316,7 +317,10 @@ def get_image(case_id: str, image_id: str, request: Request) -> FileResponse:
 
 @router.post("/{case_id}/analyze", response_model=CaseRead, status_code=202)
 def analyze_case(
-    case_id: str, request: Request, background_tasks: BackgroundTasks
+    case_id: str,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    options: AnalysisOptions | None = None,
 ) -> CaseRead:
     actor = require_permission(request, Permission.CASE_WRITE)
     _require_clinical_actor(actor)
@@ -324,7 +328,7 @@ def analyze_case(
     if case.status == "analyzing":
         raise HTTPException(status_code=409, detail="该病例正在分析")
     service: AnalysisService = request.app.state.analysis_service
-    queued = service.start()
+    queued = service.start(enable_thinking=bool(options and options.enable_thinking))
     case.status = "analyzing"
     case.analysis = queued
     case.updated_at = datetime.now(UTC)

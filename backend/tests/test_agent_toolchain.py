@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+import json
 import httpx
 
 from app.agents.planner import ToolchainPlanner
@@ -244,8 +245,11 @@ def test_planner_falls_back_when_backend_raises(monkeypatch) -> None:
 
 
 def test_analysis_service_records_plan_and_keeps_decision_slot() -> None:
+    received: list[dict] = []
+
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.host == "qwen.local":
+            received.append(json.loads(request.content))
             return httpx.Response(
                 200,
                 json={
@@ -272,13 +276,15 @@ def test_analysis_service_records_plan_and_keeps_decision_slot() -> None:
     )
     service = AnalysisService(settings, knowledge_store=None, integrations=integrations)
 
-    result = service.analyze(make_case(), service.start())
+    result = service.analyze(make_case(), service.start(enable_thinking=True))
 
     stages = {stage.key: stage for stage in result.stages}
     assert stages["planning"].status == "completed"
     assert "确定性兜底规划" in stages["planning"].detail
     assert result.toolchain_plan["planner"] == "heuristic"
     assert result.toolchain_plan["steps"] == ["qwen_judgment"]
+    assert received[0]["enable_thinking"] is True
+    assert result.runtime_metadata["doctor_options"]["qwen_enable_thinking"] is True
 
     decision_component = next(
         item for item in result.component_results if item.key == "decision"
