@@ -182,6 +182,7 @@ class UserStore:
         self,
         user_id: str,
         *,
+        username: str | None = None,
         display_name: str | None = None,
         role: UserRole | None = None,
         is_active: bool | None = None,
@@ -190,6 +191,17 @@ class UserStore:
             row = self._row_by_key(session, user_id)
             if row is None:
                 return None
+            if username is not None:
+                normalized = username.strip().lower()
+                if normalized != row.username:
+                    exists = (
+                        session.query(UserRow)
+                        .filter(UserRow.username == normalized)
+                        .one_or_none()
+                    )
+                    if exists is not None:
+                        raise ValueError("账号已存在")
+                    row.username = normalized
             if display_name is not None:
                 row.display_name = display_name.strip()
             if role is not None:
@@ -359,22 +371,34 @@ class MemoryUserStore:
         self,
         user_id: str,
         *,
+        username: str | None = None,
         display_name: str | None = None,
         role: UserRole | None = None,
         is_active: bool | None = None,
     ) -> UserRead | None:
-        for username, (user, password_hash) in list(self._users.items()):
+        for username_key, (user, password_hash) in list(self._users.items()):
             if user.id != user_id:
                 continue
+            updated_fields: dict[str, object] = {
+                "display_name": display_name.strip() if display_name else user.display_name,
+                "role": role or user.role,
+                "is_active": user.is_active if is_active is None else is_active,
+                "permissions": permissions_for_role(role or user.role),
+            }
+            next_key = username_key
+            if username is not None:
+                normalized = username.strip().lower()
+                if normalized != username_key and normalized in self._users:
+                    raise ValueError("账号已存在")
+                if normalized != username_key:
+                    updated_fields["username"] = normalized
+                    next_key = normalized
             updated = user.model_copy(
-                update={
-                    "display_name": display_name.strip() if display_name else user.display_name,
-                    "role": role or user.role,
-                    "is_active": user.is_active if is_active is None else is_active,
-                    "permissions": permissions_for_role(role or user.role),
-                }
+                update=updated_fields
             )
-            self._users[username] = (updated, password_hash)
+            if next_key != username_key:
+                del self._users[username_key]
+            self._users[next_key] = (updated, password_hash)
             return updated
         return None
 

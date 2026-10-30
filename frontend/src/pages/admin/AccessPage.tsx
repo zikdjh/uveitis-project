@@ -293,7 +293,11 @@ export default function AccessPage() {
     if (!editingUser) return;
     const form = new FormData(event.currentTarget);
     const displayName = String(form.get("display_name") ?? "").trim();
-    if (!displayName || displayName === editingUser.display_name) {
+    const username = String(form.get("username") ?? "").trim();
+    const patch: { username?: string; display_name?: string } = {};
+    if (username && username.toLowerCase() !== editingUser.username) patch.username = username;
+    if (displayName && displayName !== editingUser.display_name) patch.display_name = displayName;
+    if (!Object.keys(patch).length) {
       setEditingUser(null);
       return;
     }
@@ -301,8 +305,8 @@ export default function AccessPage() {
     setError(null);
     setNotice(null);
     try {
-      await updateUser(editingUser.id, { display_name: displayName });
-      setNotice(`已更新 ${displayName} 的账号信息。`);
+      await updateUser(editingUser.id, patch);
+      setNotice(`已更新 ${patch.username ?? editingUser.username} 的账号信息。`);
       setEditingUser(null);
       await load();
     } catch (reason) {
@@ -495,7 +499,7 @@ export default function AccessPage() {
           width={440}
         >
           <form className="form-grid compact" key={editingUser.id} onSubmit={(event) => void handleEdit(event)}>
-            <label>登录账号<input value={editingUser.username} readOnly disabled /></label>
+            <label>登录账号<input name="username" defaultValue={editingUser.username} required minLength={3} maxLength={100} pattern="[A-Za-z0-9._-]+" /></label>
             <label>姓名<input name="display_name" defaultValue={editingUser.display_name} required maxLength={100} /></label>
             <div className="form-actions span-2">
               <button className="button secondary" type="button" onClick={() => setEditingUser(null)}>取消</button>

@@ -154,7 +154,7 @@ export function createUser(input: {
 
 export function updateUser(
   userId: string,
-  input: Partial<Pick<User, "display_name" | "is_active">>,
+  input: Partial<Pick<User, "username" | "display_name" | "is_active">>,
 ): Promise<User> {
   return request(`/api/v1/admin/users/${encodeURIComponent(userId)}`, {
     method: "PATCH",
