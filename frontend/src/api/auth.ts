@@ -23,6 +23,7 @@ export type User = {
   display_name: string;
   role: UserRole;
   is_active: boolean;
+  is_deleted: boolean;
   is_root: boolean;
   permissions: Permission[];
 };
@@ -137,7 +138,7 @@ export function changePassword(input: {
 }
 
 export function listUsers(): Promise<User[]> {
-  return request("/api/v1/admin/users");
+  return request("/api/v1/admin/users?include_deleted=true");
 }
 
 export function createUser(input: {
@@ -158,6 +159,12 @@ export function updateUser(
   return request(`/api/v1/admin/users/${encodeURIComponent(userId)}`, {
     method: "PATCH",
     body: JSON.stringify(input),
+  });
+}
+
+export function deleteUser(userId: string): Promise<void> {
+  return request(`/api/v1/admin/users/${encodeURIComponent(userId)}`, {
+    method: "DELETE",
   });
 }
 

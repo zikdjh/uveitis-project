@@ -18,6 +18,7 @@ def _user_read(
     display_name: str,
     role: str,
     is_active: bool = True,
+    is_deleted: bool = False,
 ) -> UserRead:
     normalized_role: UserRole = "admin" if role == "admin" else "doctor"
     return UserRead(
@@ -26,6 +27,7 @@ def _user_read(
         display_name=display_name,
         role=normalized_role,
         is_active=is_active,
+        is_deleted=is_deleted,
         is_root=username == ROOT_ADMIN_USERNAME,
         permissions=permissions_for_role(normalized_role),
     )
@@ -54,11 +56,21 @@ class UserStore:
                         "BOOLEAN NOT NULL DEFAULT TRUE"
                     )
                 )
+        is_deleted_column = column_name("is_deleted")
+        if is_deleted_column not in columns:
+            with engine.begin() as connection:
+                connection.execute(
+                    text(
+                        f'ALTER TABLE "{table}" ADD COLUMN "{is_deleted_column}" '
+                        "BOOLEAN NOT NULL DEFAULT FALSE"
+                    )
+                )
 
     def get_by_username(self, username: str) -> tuple[UserRead, str] | None:
         with self._session_factory() as session:
             row = session.query(UserRow).filter(
-                UserRow.username == username.strip().lower()
+                UserRow.username == username.strip().lower(),
+                UserRow.is_deleted.is_(False),
             ).one_or_none()
         if row is None:
             return None
@@ -69,9 +81,12 @@ class UserStore:
             row = self._row_by_key(session, user_id)
         return self._from_row(row) if row else None
 
-    def list(self) -> list[UserRead]:
+    def list(self, include_deleted: bool = False) -> list[UserRead]:
         with self._session_factory() as session:
-            rows = session.query(UserRow).order_by(UserRow.created_at.asc()).all()
+            query = session.query(UserRow).order_by(UserRow.created_at.asc())
+            if not include_deleted:
+                query = query.filter(UserRow.is_deleted.is_(False))
+            rows = query.all()
         return [self._from_row(row) for row in rows]
 
     def create(
@@ -183,6 +198,15 @@ class UserStore:
                 row.is_active = is_active
         return self._from_row(row)
 
+    def soft_delete(self, user_id: str) -> UserRead | None:
+        with self._session_factory.begin() as session:
+            row = self._row_by_key(session, user_id)
+            if row is None:
+                return None
+            row.is_deleted = True
+            row.is_active = False
+            return self._from_row(row)
+
     def set_password(self, user_id: str, password_hash: str) -> UserRead | None:
         with self._session_factory.begin() as session:
             row = self._row_by_key(session, user_id)
@@ -227,6 +251,7 @@ class UserStore:
             display_name=row.display_name,
             role=row.role,
             is_active=bool(row.is_active),
+            is_deleted=bool(row.is_deleted),
         )
 
 
@@ -237,7 +262,10 @@ class MemoryUserStore:
         self._users: dict[str, tuple[UserRead, str]] = {}
 
     def get_by_username(self, username: str) -> tuple[UserRead, str] | None:
-        return self._users.get(username.strip().lower())
+        record = self._users.get(username.strip().lower())
+        if record is not None and record[0].is_deleted:
+            return None
+        return record
 
     def get(self, user_id: str) -> UserRead | None:
         return next(
@@ -245,8 +273,12 @@ class MemoryUserStore:
             None,
         )
 
-    def list(self) -> list[UserRead]:
-        return [user for user, _ in self._users.values()]
+    def list(self, include_deleted: bool = False) -> list[UserRead]:
+        return [
+            user
+            for user, _ in self._users.values()
+            if include_deleted or not user.is_deleted
+        ]
 
     def create(
         self,
@@ -341,6 +373,17 @@ class MemoryUserStore:
                     "is_active": user.is_active if is_active is None else is_active,
                     "permissions": permissions_for_role(role or user.role),
                 }
+            )
+            self._users[username] = (updated, password_hash)
+            return updated
+        return None
+
+    def soft_delete(self, user_id: str) -> UserRead | None:
+        for username, (user, password_hash) in list(self._users.items()):
+            if user.id != user_id:
+                continue
+            updated = user.model_copy(
+                update={"is_deleted": True, "is_active": False}
             )
             self._users[username] = (updated, password_hash)
             return updated
