@@ -333,17 +333,30 @@
   </tbody>
 </table>
 
+<h3>R-13 外部服务复测与连通性重试修复（2026-10-30）</h3>
+<p>范围：确认当前管理员配置仍保留外部总结模型与搜索服务商凭据，并用真实出站请求复测连通性；随后处理 R-04 遗留的瞬时失败判定问题。决策模型保持 <code>APP_DECISION_ENABLED=false</code>，调用链槽位继续保留。</p>
+<table>
+  <thead><tr><th>检查项</th><th>实际</th><th>结论</th></tr></thead>
+  <tbody>
+    <tr><td>外部总结配置</td><td><code>summary_enabled=true</code>，<code>anthropic_messages</code> + <code>https://api.deepseek.com/anthropic</code> + <code>deepseek-flash</code>，密钥已配置</td><td>保留</td></tr>
+    <tr><td>搜索服务配置</td><td><code>web_search_enabled=true</code>，服务商顺序仅 <code>tavily</code>，Tavily Key 已配置</td><td>保留</td></tr>
+    <tr><td>总结 API 真实复测</td><td><code>ok:true</code>，<code>deepseek-flash</code> 返回响应，时延 1,484ms，尝试 1 次</td><td>通过</td></tr>
+    <tr><td>Tavily 搜索真实复测</td><td><code>ok:true</code>，查询 <code>uveitis clinical guideline</code> 返回 2 条结果，时延 2,945ms</td><td>通过</td></tr>
+    <tr><td>R-04 连通性重试</td><td>模型探针失败时自动重试一次；Mock 503 连续两次请求，结果 <code>attempts=2</code>；成功路径仍只请求一次</td><td>通过</td></tr>
+    <tr><td>回归结果</td><td>后端全量 <strong>97 passed, 7 skipped</strong></td><td>通过</td></tr>
+  </tbody>
+</table>
+
 <h2>下一步</h2>
 <ol>
   <li>基于第一轮验收结果冻结第一版测试基线。</li>
   <li>同步项目开发进度文档与进度跟踪文档。</li>
   <li>R-08 记录的 D-01、D-02、D-03 已全部修复并验证（见 R-09）；账号生命周期、审计面板与管理员端 390px 回归亦已完成（见 R-07）。</li>
   <li>B-01 真实模型端到端与 B-02 失败恢复已在重构后的运行栈复跑通过（见 R-10）。</li>
-  <li>为外部总结连通性测试增加失败自动重试，避免一次瞬时失败被判定为不可用。</li>
-  <li>补齐至少一家搜索服务商凭据后重跑搜索批量测试，验证外部检索结果进入链路。</li>
   <li>B-04 双 Token 无感刷新、B-05 知识检索端到端、B-03 390px 移动端连续流程均已验收通过，并修复 D-04、D-05（见 R-11、R-12）。</li>
   <li>B-06 文档冻结本轮执行：<code>build_docs.py</code> 重建 48 页、<code>--check</code> 通过、<code>git diff --check</code> 无输出；后端全量 <strong>97 passed, 7 skipped</strong>。</li>
-  <li>剩余待办：P-08 决策模型 11-03 门槛复核；外部总结连通性自动重试与搜索服务商凭据补齐仍待数据与密钥到位。</li>
+  <li>外部服务复测已完成：DeepSeek 总结 API 与 Tavily 搜索 API 均真实连通；R-04 的失败自动重试已实现并回归（见 R-13）。</li>
+  <li>剩余待办：P-08 决策模型按 11-03 门槛继续跳过并复核；11-04 完成整体端到端复跑与冻结复核。</li>
 </ol>
 
   </article>
