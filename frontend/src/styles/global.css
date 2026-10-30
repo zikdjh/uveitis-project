@@ -483,6 +483,7 @@ a {
 
 .page-heading {
   margin-bottom: 26px;
+  flex-wrap: wrap;
 }
 
 .page-heading h1 {
@@ -499,6 +500,15 @@ a {
   margin: 7px 0 0;
   color: var(--muted);
   font-size: 14px;
+}
+
+.page-heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-left: auto;
 }
 
 .dictionary-toolbar {
@@ -581,6 +591,20 @@ a {
   border-radius: 8px;
   background: var(--panel);
   box-shadow: var(--shadow);
+}
+
+.panel-body {
+  min-width: 0;
+}
+
+.panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
 }
 
 .panel + .panel {

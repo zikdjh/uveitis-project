@@ -38,6 +38,7 @@
     "path": "/v1/judge",
     "case_id": "required, 1-128 characters",
     "task": "oct_aux_4class for this frozen contract",
+    "thinking_mode": "per-request enable_thinking; false is the business default and doctors may enable it",
     "images": {
       "required": true,
       "default_max_images": 4,
@@ -72,6 +73,8 @@
       "latency_ms",
       "generated_at",
       "truncated",
+      "thinking_mode",
+      "thinking_fallback_used",
       "research_use_only"
     ],
     "label_domain": [
@@ -87,18 +90,22 @@
   },
   "generation": {
     "do_sample": false,
-    "default_max_new_tokens": 32,
+    "default_max_new_tokens": 128,
+    "default_thinking_max_new_tokens": 512,
     "default_image_pixels": 65536,
     "default_max_images": 4,
     "default_inference_wait_seconds": 35,
-    "backend_request_timeout_seconds": 90,
+    "backend_request_timeout_seconds": "90 default; 180 when doctor enables thinking",
+    "thinking_failure_behavior": "automatically retry once without thinking; return compact JSON or let the backend degrade",
     "output_format": "compact JSON"
   },
   "environment": {
     "MODEL_RUNTIME_MODEL_DIR": "base model directory",
     "MODEL_RUNTIME_ADAPTER_DIR": "adapter directory",
     "MODEL_RUNTIME_IMAGE_PIXELS": "65536 default; 4096-451584 allowed",
-    "MODEL_RUNTIME_MAX_NEW_TOKENS": "32 default; 8-128 allowed",
+    "MODEL_RUNTIME_MAX_NEW_TOKENS": "128 default; 8-128 allowed",
+    "MODEL_RUNTIME_ENABLE_THINKING": "false default; per-request override is accepted",
+    "MODEL_RUNTIME_THINKING_MAX_NEW_TOKENS": "512 default; 64-8192 allowed",
     "MODEL_RUNTIME_MAX_IMAGES": "4 default; 1-8 allowed",
     "MODEL_RUNTIME_MAX_IMAGE_BYTES": "26214400 default; 1024-52428800 allowed",
     "MODEL_RUNTIME_MAX_DECODED_PIXELS": "40000000 default; 65536-100000000 allowed",
@@ -120,6 +127,23 @@
     "runtime_cold_start_seconds_approx": 22.2,
     "runtime_warm_request_seconds": 3.363,
     "runtime_8_concurrent_requests": "all HTTP 200 through serialized execution",
+    "runtime_two_worker_4_request_benchmark": {
+      "worker_count": 2,
+      "requests": 4,
+      "outcomes": "all HTTP 200",
+      "elapsed_seconds_range": [21.719, 24.972],
+      "per_request_peak_reserved_gib": 3.349609375,
+      "nvidia_smi_used_total_mib": 7110,
+      "nvidia_smi_total_mib": 8188
+    },
+    "thinking_fallback_benchmark": {
+      "enable_thinking": true,
+      "status": 200,
+      "default_thinking_max_new_tokens": 512,
+      "elapsed_seconds_range": [79.029, 98.451],
+      "fallback_used": true,
+      "label": "DME"
+    },
     "runtime_oom_observed": false
   },
   "failure_behavior": {
@@ -151,6 +175,7 @@
     "The backend does not send case text or image content to external summary or search APIs."
   ],
   "known_limitations": [
+    "Doctor-enabled thinking mode is experimental; the runtime caps reasoning at 512 tokens and retries once without thinking when no structured JSON is produced.",
     "This contract defines runtime behavior and resource evidence, not model accuracy or clinical validity.",
     "The runtime is research-use-only and must not be used for autonomous or unsupervised care.",
     "The current candidate was evaluated on a same-source grouped OCT test set, not a patient-isolated external validation set.",

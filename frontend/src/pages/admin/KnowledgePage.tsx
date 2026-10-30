@@ -2,6 +2,7 @@ import { CheckCircle2, FileText, LoaderCircle } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 import { request } from "@/api/client";
+import { PageHeader, PageSection } from "@/components/ui";
 
 export default function AdminKnowledgePage() {
   const [notice, setNotice] = useState<string | null>(null);
@@ -36,16 +37,10 @@ export default function AdminKnowledgePage() {
 
   return (
     <section className="page">
-      <div className="page-heading">
-        <div><h1>知识库</h1><p className="page-lead">维护医生检索使用的指南、文献和病例资料。</p></div>
-      </div>
+      <PageHeader title="知识库" description="维护医生检索使用的指南、文献和病例资料。" />
       {error && <div className="notice error-notice">{error}</div>}
       {notice && <div className="notice success-notice"><CheckCircle2 size={17} /> {notice}</div>}
-      <section className="panel">
-        <div className="section-heading">
-          <div><h2>新增知识文档</h2><span>保存后可被临床知识检索引用</span></div>
-          <FileText size={20} />
-        </div>
+      <PageSection title="新增知识文档" description="保存后可被临床知识检索引用" icon={FileText}>
         <form className="form-grid" onSubmit={(event) => void submit(event)}>
           <label className="span-2">标题<input name="title" required maxLength={300} /></label>
           <label>分类<select name="category" defaultValue="guideline"><option value="guideline">临床指南</option><option value="literature">文献</option><option value="case">病例资料</option><option value="other">其他</option></select></label>
@@ -53,7 +48,7 @@ export default function AdminKnowledgePage() {
           <label className="span-2">正文<textarea name="content" required minLength={2} maxLength={20000} /></label>
       <div className="form-actions span-2"><button className="button primary" type="submit" disabled={busy}>{busy ? <LoaderCircle className="spin" size={16} /> : <FileText size={16} />} 保存并建立索引</button></div>
         </form>
-      </section>
+      </PageSection>
     </section>
   );
 }

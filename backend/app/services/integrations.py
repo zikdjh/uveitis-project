@@ -626,7 +626,12 @@ class OptionalIntegrations:
             raise ValueError("网络搜索未返回结果")
         return results[:max_results]
 
-    def qwen_judgment(self, case: CaseRead) -> IntegrationResult:
+    def qwen_judgment(
+        self,
+        case: CaseRead,
+        *,
+        enable_thinking: bool = False,
+    ) -> IntegrationResult:
         if not self.qwen_available:
             return IntegrationResult("skipped", "Qwen 微调判断服务未配置")
         started = time.perf_counter()
@@ -640,6 +645,7 @@ class OptionalIntegrations:
             image_payloads.append(image_payload)
         payload = {
             "task": "oct_aux_4class",
+            "enable_thinking": enable_thinking,
             "case": {
                 "case_id": case.id,
                 "owner_id": case.owner_id,
@@ -680,12 +686,17 @@ class OptionalIntegrations:
             tool_rounds = 0
             response: dict[str, Any] = {}
             data: dict[str, Any] = {}
+            request_timeout = (
+                self.settings.perception_timeout_seconds * 2
+                if enable_thinking
+                else self.settings.perception_timeout_seconds
+            )
             for _ in range(3):
                 payload = {**payload, "tools": tools, "tool_results": tool_results}
                 response = self._post(
                     url,
                     payload,
-                    timeout=self.settings.perception_timeout_seconds,
+                    timeout=request_timeout,
                     service="Qwen 模型服务",
                     allow_case_data=True,
                 )
@@ -785,6 +796,9 @@ class OptionalIntegrations:
                         "tool_rounds": tool_rounds,
                         "searched_queries": searched_queries,
                         "thinking": thinking_text[:400],
+                        "thinking_fallback_used": bool(
+                            response.get("thinking_fallback_used", False)
+                        ),
                         "peak_allocated_gib": response.get(
                             "peak_allocated_gib"
                         ),

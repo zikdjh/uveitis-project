@@ -36,7 +36,7 @@ class FakeRuntime:
         self.model_dir = model_dir
         self.loaded = False
         self._adapter_sha256 = "test-adapter-hash"
-        self.calls: list[tuple[str, list[Path]]] = []
+        self.calls: list[tuple[str, list[Path], bool | None]] = []
         self.failure: Exception | None = None
 
     def load(self) -> None:
@@ -45,12 +45,20 @@ class FakeRuntime:
     def peak_memory(self) -> tuple[float | None, float | None]:
         return 3.5, 3.7
 
-    def judge(self, task: str, image_paths: list[Path]):
-        self.calls.append((task, image_paths))
+    def judge(
+        self,
+        task: str,
+        image_paths: list[Path],
+        tools: list[str] | None = None,
+        tool_results: list[dict] | None = None,
+        thinking_override: bool | None = None,
+    ):
+        self.calls.append((task, image_paths, thinking_override))
         if self.failure:
             raise self.failure
-        return (
-            {
+        return {
+            "status": "result",
+            "result": {
                 "label": "CNV",
                 "confidence": 0.82,
                 "impression": "可见黄斑区异常信号",
@@ -64,8 +72,7 @@ class FakeRuntime:
                 "recommendations": [],
                 "requires_human_review": True,
             },
-            False,
-        )
+        }, False, ""
 
 
 @pytest.fixture
@@ -104,6 +111,7 @@ def test_judge_returns_stable_structured_result(client, image_root: Path) -> Non
     assert body["adapter_sha256"] == "test-adapter-hash"
     assert body["truncated"] is False
     assert runtime.calls[0][0] == "oct_aux_4class"
+    assert runtime.calls[0][2] is None
     assert runtime.calls[0][1] == [(image_root / "img-1.png").resolve()]
     assert body["model"] == "Qwen3.5-4B"
     assert body["peak_reserved_gib"] == 3.7
@@ -144,6 +152,18 @@ def test_judge_rejects_unsupported_task(client) -> None:
 
     assert response.status_code == 422
     assert runtime.loaded is False
+
+
+def test_judge_forwards_doctor_thinking_choice(client, image_root: Path) -> None:
+    api, runtime = client
+    body = payload(image_root / "img-1.png")
+    body["enable_thinking"] = True
+
+    response = api.post("/v1/judge", json=body)
+
+    assert response.status_code == 200, response.text
+    assert runtime.calls[0][2] is True
+    assert response.json()["thinking_mode"] is True
 
 
 def test_judge_reports_busy_runtime_and_invalid_model_response(client) -> None:

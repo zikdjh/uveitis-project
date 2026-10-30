@@ -101,6 +101,13 @@ class AnalysisResult(BaseModel):
 AnalysisJobStatus = Literal["queued", "running", "finalizing", "completed", "failed"]
 
 
+class AnalysisOptions(BaseModel):
+    enable_thinking: bool = Field(
+        default=False,
+        description="Whether the optional Qwen runtime may use thinking mode.",
+    )
+
+
 class AnalysisJobRead(BaseModel):
     id: int
     case_id: str
