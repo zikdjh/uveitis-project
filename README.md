@@ -6,39 +6,68 @@ Qwen3.5-4B 微调判断 + 可选 RAG、决策模型、网络搜索和外部 API 
 
 ```text
 uveitis-project/
-├── README.md                  本文件
-├── docs/2026-10-26-project-layout.html 项目目录索引
-├── docs/                      项目文档与训练记录
-│   ├── index.html              浏览器文档入口
-│   ├── 2026-10-26-model-training-status.html 当前训练状态
-│   ├── 2026-10-25-training-cost-ledger-modal.html  Modal 训练消耗与结果
-│   ├── 2026-10-25-training-budget-plan-modal-l40s.html 训练预算计划
-│   └── 2026-10-26-model-runtime-evaluation.html 评估与推理说明
-├── qwen3.5-4b/                Qwen3.5-4B 模型运行服务（FastAPI）
-│   ├── app/                   判断 API 与健康检查
-│   ├── code/                  本地评估代码
-│   ├── scripts/               运行脚本
-│   ├── assets/                运行资产索引与冻结契约
-│   └── models/                基座与最终 adapter（gitignore）
-├── bge-m3/                    BGE-M3 向量模型服务（FastAPI）
-│   ├── app/                   向量 API 与健康检查
-│   └── models/                BGE-M3 权重（gitignore）
-├── model/                     模型训练统一目录
-│   └── training/              模型训练统一管理入口
-│       ├── code/training/     Qwen QLoRA 和 Modal 训练代码
-│       ├── scripts/modal/     训练子集与 Volume 同步脚本
-│       ├── datasets/raw/      新下载压缩包的临时暂存区
-│       ├── datasets/extracted/ 完整解压数据集与 manifests/ 清单
-│       ├── datasets/training/  训练数据与 manifest
-│       └── assets/             训练产物与评估快照
-├── outputs/                   临时运行输出说明
+├── README.md                   本文件
+├── LICENSE                     MIT License
+├── docker-compose.yml          PostgreSQL、Redis 与本地服务编排
+├── docker-compose.e2e.yml      端到端测试编排
+├── docs/                       构建生成的 HTML 文档
+├── backend/                    FastAPI 业务服务
+│   ├── app/
+│   │   ├── agents/             AgentScope 工具链规划
+│   │   ├── core/               配置、鉴权与外发边界
+│   │   ├── db/                 PostgreSQL 数据访问
+│   │   ├── routers/            API 路由
+│   │   ├── schemas/            请求与响应模型
+│   │   └── services/           病例、分析、集成与知识服务
+│   ├── data/
+│   │   ├── uploads/            病例影像运行时目录
+│   │   └── zvec/               向量索引运行时目录
+│   └── tests/                  后端测试
+├── frontend/                   React 三端前端
+│   ├── src/api/                前端 API 封装
+│   ├── src/components/         通用组件
+│   ├── src/pages/              患者、医生与管理员页面
+│   ├── src/styles/             样式
+│   └── dist/                   生产构建输出
+├── qwen3.5-4b/                 Qwen3.5-4B 模型运行服务（FastAPI）
+│   ├── app/                    判断 API 与健康检查
+│   ├── assets/                 冻结契约与运行资产索引
+│   ├── code/                   本地评估代码
+│   ├── models/                 基座与最终 adapter
+│   ├── scripts/                评估与运行辅助脚本
+│   └── tests/                  运行服务测试
+├── bge-m3/                     BGE-M3 向量模型服务（FastAPI）
+│   ├── app/                    向量 API 与健康检查
+│   ├── models/                 BGE-M3 权重
+│   └── tests/                  向量服务测试
+├── model/                      模型训练统一目录
+│   └── training/
+│       ├── assets/             训练产物与评估快照
+│       ├── code/training/      Qwen QLoRA 与 Modal 训练代码
+│       ├── datasets/
+│       │   ├── raw/            原始下载暂存
+│       │   ├── extracted/      解压数据与 manifests
+│       │   ├── training/       训练子集
+│       │   └── tasks/          任务清单
+│       ├── environment/        训练环境配置
+│       └── scripts/modal/      Volume 同步与 Modal 脚本
 ├── scripts/
-│   ├── datasets/              数据集清单校验与维护脚本
-│   └── research/              浏览器检索脚本存档（.mjs，按任务日期归档）
-├── backend/                   FastAPI 业务服务
-├── frontend/                  React 三端
-└── ai-services/              预留的 AI 服务扩展目录
+│   ├── datasets/               数据集清单校验与维护
+│   ├── docs/                   文档构建入口与 HTML 源
+│   ├── e2e-*/                  端到端与浏览器验收脚本
+│   ├── research/               检索脚本存档
+│   └── ui-check-*/             UI 检查脚本
+├── ai-services/                预留的 AI 服务扩展目录
+├── data/                       历史本地文件
+├── outputs/                    临时运行输出
+└── python/                     本地 Python 运行时缓存
 ```
+
+目录约定：
+
+- `docs/` 是构建产物，HTML 源文件统一维护在 `scripts/docs/.html-source/`。
+- `backend/data/`、`model/training/datasets/` 中的本地数据，以及 `qwen3.5-4b/models/`、`bge-m3/models/` 中的权重不进入 Git。
+- `.venv-runtime-smoke/`、`backend/.venv/`、`frontend/node_modules/`、`outputs/` 为本地运行时目录，不作为版本化源代码维护。
 
 ## 当前状态（2026-10-28）
 
@@ -135,7 +164,7 @@ Docker Compose 已包含 `analysis-worker` 服务。任务默认 300 秒租约�
 
 真实模型运行要求后端与运行服务共享病例上传根目录。Docker Compose 使用 `case-uploads` 卷，后端和 worker 可写、模型服务只读；本机启动时设置 `APP_DATA_DIR`、`MODEL_RUNTIME_UPLOAD_ROOT` 和相同的 `APP_INTERNAL_SERVICE_TOKEN`。本地 Qwen 冷启动与推理合计可能超过 45 秒，后端默认 `APP_PERCEPTION_TIMEOUT_SECONDS=90`。真实回写和资源证据见 [`2026-10-27-model-runtime-business-integration.html`](docs/2026-10-27-model-runtime-business-integration.html)。
 
-后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。数据库表和字段统一使用 `t_${业务名}`、`f_${业务名}`；每张表使用 `f_id BIGINT` 自增主键，API 和跨表引用使用独立的唯一业务键。管理员账号固定为 `root`，`APP_BOOTSTRAP_ADMIN_PASSWORD` 只在首次创建 root 时使用；root 已存在后，重启和应用层操作都不会覆盖密码，唯一变更方式是直接修改 `t_data_dictionary` 中的加密哈希记录。医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
+后端只使用 PostgreSQL 持久化；`APP_DATABASE_URL` 未配置或数据库不可达时启动失败，不会回落到 SQLite。`APP_DATABASE_CONNECT_TIMEOUT_SECONDS` 默认 5 秒。`app.main:create_app` 是应用工厂，ASGI 启动入口为 `app.asgi:app`。数据库表和字段统一使用 `t_${业务名}`、`f_${业务名}`；每张表使用 `f_id BIGINT` 自增主键，API 和跨表引用使用独立的唯一业务键。管理员账号固定为 `root`，`APP_BOOTSTRAP_ADMIN_PASSWORD` 只在首次创建 root 时使用；root 已存在后，重启和应用层操作都不会覆盖密码，唯一变更方式是直接修改 `t_data_dictionary` 中的 root 密码记录，该密码以明文普通字符串保存，不做数据字典字段级加密。医生账号只能由管理员创建，系统不提供注册入口。管理员和医生分别从 `/admin/login`、`/login` 进入，两个入口在服务端分别校验角色。
 
 前端：
 
@@ -154,7 +183,7 @@ npm run dev
 | 角色 | 入口 | 说明 |
 |---|---|---|
 | 医生 | `http://127.0.0.1:5173/login` | 账号由管理员创建；首次登录后可修改密码 |
-| 管理员 | `http://127.0.0.1:5173/admin/login` | 用户名固定为 `root`，密码只能通过修改 `t_data_dictionary` 中的加密哈希变更 |
+| 管理员 | `http://127.0.0.1:5173/admin/login` | 用户名固定为 `root`，密码以明文普通字符串保存在 `t_data_dictionary`；修改时直接替换该记录，不做字段级加密 |
 
 系统不提供自助注册。医生会话为双 Token 无感刷新（15 分钟 access + 30 天 refresh）；管理员会话为单一 10 分钟短期令牌，每次操作成功后自动续期。
 
