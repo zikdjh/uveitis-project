@@ -48,6 +48,11 @@ export type AnalysisResult = {
   summary: string;
   external_summary_used: boolean;
   external_payload: Record<string, unknown>;
+  runtime_metadata: {
+    doctor_options?: {
+      qwen_enable_thinking?: boolean;
+    };
+  } & Record<string, unknown>;
   toolchain_plan: {
     planner: string;
     steps: string[];
@@ -124,6 +129,10 @@ export type CaseListPage = {
   total: number;
   page: number;
   page_size: number;
+};
+
+export type AnalysisOptionsInput = {
+  enable_thinking: boolean;
 };
 
 export type CaseListQuery = {
@@ -222,8 +231,14 @@ export async function uploadCaseImages(
   return response.json() as Promise<CaseRecord>;
 }
 
-export function analyzeCase(caseId: string): Promise<CaseRecord> {
-  return request<CaseRecord>(`/api/v1/cases/${caseId}/analyze`, { method: "POST" });
+export function analyzeCase(
+  caseId: string,
+  options: AnalysisOptionsInput = { enable_thinking: false },
+): Promise<CaseRecord> {
+  return request<CaseRecord>(`/api/v1/cases/${caseId}/analyze`, {
+    method: "POST",
+    body: JSON.stringify(options),
+  });
 }
 
 export function reviewCase(caseId: string, input: ReviewInput): Promise<CaseRecord> {

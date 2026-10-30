@@ -248,12 +248,17 @@ class AnalysisService:
         stage.status = result.status
         stage.detail = result.detail
 
-    def start(self) -> AnalysisResult:
+    def start(self, *, enable_thinking: bool = False) -> AnalysisResult:
         return AnalysisResult(
             status="queued",
             model_mode=self.settings.model_mode,
             stages=self._stages(),
             summary="分析任务已排队，增强模块将按可用性逐个执行。",
+            runtime_metadata={
+                "doctor_options": {
+                    "qwen_enable_thinking": enable_thinking,
+                }
+            },
             started_at=datetime.now(UTC),
         )
 
@@ -339,8 +344,15 @@ class AnalysisService:
         planning_stage.status = "completed"
         planning_stage.detail = self._plan_detail(plan)
 
+        doctor_options = queued.runtime_metadata.get("doctor_options") or {}
+        qwen_enable_thinking = bool(
+            doctor_options.get("qwen_enable_thinking", False)
+        )
         judgment_result = (
-            self.integrations.qwen_judgment(case)
+            self.integrations.qwen_judgment(
+                case,
+                enable_thinking=qwen_enable_thinking,
+            )
             if "qwen_judgment" in plan.steps
             else self._plan_skip(plan, "qwen_judgment", "Qwen 微调判断未执行")
         )
@@ -513,11 +525,16 @@ class AnalysisService:
             external_payload=(
                 summary_result.data if summary_result.status == "completed" else {}
             ),
-            runtime_metadata=(
-                judgment.get("runtime", {})
-                if judgment_result.status == "completed"
-                else {}
-            ),
+            runtime_metadata={
+                **(
+                    judgment.get("runtime", {})
+                    if judgment_result.status == "completed"
+                    else {}
+                ),
+                "doctor_options": {
+                    "qwen_enable_thinking": qwen_enable_thinking,
+                },
+            },
             toolchain_plan=plan.as_dict(),
             confidence=confidence,
             safety_flags=safety_flags,

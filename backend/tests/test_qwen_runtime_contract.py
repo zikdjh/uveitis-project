@@ -91,6 +91,7 @@ def test_qwen_runtime_contract_sends_task_and_reads_nested_result(
     assert result.data["label"] == "CNV"
     assert result.data["findings"][0]["label"] == "CNV"
     assert received[0]["task"] == "oct_aux_4class"
+    assert received[0]["enable_thinking"] is False
     assert received[0]["case"]["images"][0]["local_path"].endswith(
         "image-1.png"
     )

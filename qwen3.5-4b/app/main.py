@@ -40,8 +40,8 @@ TASK_LABELS = {
     "uwf_uveitis_binary": ["non_uveitis", "uveitis"],
 }
 DEFAULT_IMAGE_PIXELS = 65_536
-DEFAULT_MAX_NEW_TOKENS = 32
-DEFAULT_THINKING_MAX_NEW_TOKENS = 1024
+DEFAULT_MAX_NEW_TOKENS = 128
+DEFAULT_THINKING_MAX_NEW_TOKENS = 512
 DEFAULT_MAX_IMAGES = 4
 DEFAULT_MAX_IMAGE_BYTES = 25 * 1024 * 1024
 DEFAULT_MAX_IMAGE_PIXELS = 40_000_000
@@ -85,6 +85,10 @@ class JudgeRequest(BaseModel):
     constraints: list[str] = Field(default_factory=list, max_length=32)
     tools: list[str] = Field(default_factory=list, max_length=8)
     tool_results: list[dict[str, Any]] = Field(default_factory=list, max_length=8)
+    enable_thinking: bool | None = Field(
+        default=None,
+        description="Per-request override; None uses the service default.",
+    )
 
 
 class JudgeToolCall(BaseModel):
@@ -112,6 +116,8 @@ class JudgeResponse(BaseModel):
     generated_at: str
     truncated: bool
     thinking: str = ""
+    thinking_mode: bool
+    thinking_fallback_used: bool = False
     peak_allocated_gib: float | None = None
     peak_reserved_gib: float | None = None
     research_use_only: Literal[True] = True
@@ -153,7 +159,7 @@ def _paths() -> tuple[Path, Path]:
 
 
 def _thinking_enabled() -> bool:
-    return os.environ.get("MODEL_RUNTIME_ENABLE_THINKING", "true").strip().lower() not in {
+    return os.environ.get("MODEL_RUNTIME_ENABLE_THINKING", "false").strip().lower() not in {
         "0",
         "false",
         "no",
@@ -533,6 +539,7 @@ class QwenRuntime:
         image_paths: list[Path],
         tools: list[str] | None = None,
         tool_results: list[dict[str, Any]] | None = None,
+        thinking_override: bool | None = None,
     ) -> tuple[dict[str, Any], bool, str]:
         if not image_paths:
             raise ValueError("At least one image is required")
@@ -540,7 +547,13 @@ class QwenRuntime:
             raise TimeoutError("Runtime is busy")
         try:
             self._load()
-            return self._generate(task, image_paths, tools or [], tool_results or [])
+            return self._generate(
+                task,
+                image_paths,
+                tools or [],
+                tool_results or [],
+                thinking_override,
+            )
         finally:
             self._inference_lock.release()
 
@@ -550,10 +563,14 @@ class QwenRuntime:
         image_paths: list[Path],
         tools: list[str],
         tool_results: list[dict[str, Any]],
+        thinking_override: bool | None = None,
     ) -> tuple[dict[str, Any], bool, str]:
         torch = self._torch
         processor = self._processor
         model = self._model
+        enable_thinking = (
+            self.enable_thinking if thinking_override is None else thinking_override
+        )
         max_decoded_pixels = _env_int(
             "MODEL_RUNTIME_MAX_DECODED_PIXELS",
             DEFAULT_MAX_IMAGE_PIXELS,
@@ -584,7 +601,7 @@ class QwenRuntime:
                 messages,
                 tokenize=False,
                 add_generation_prompt=True,
-                enable_thinking=self.enable_thinking,
+                enable_thinking=enable_thinking,
             )
             inputs = processor(
                 text=[text],
@@ -599,7 +616,7 @@ class QwenRuntime:
             with torch.inference_mode():
                 max_new = (
                     self.thinking_max_new_tokens
-                    if self.enable_thinking
+                    if enable_thinking
                     else self.max_new_tokens
                 )
                 generated = model.generate(
@@ -613,13 +630,55 @@ class QwenRuntime:
                 skip_special_tokens=True,
             )[0]
             answer, thinking = _strip_thinking(raw)
-            result = _parse_output(answer, task, tools)
             truncated = (
                 generated.shape[1] >= max_new
                 and not raw.rstrip().endswith("}")
             )
             torch.cuda.synchronize()
             del inputs, generated
+            try:
+                result = _parse_output(answer, task, tools)
+            except ValueError:
+                if not enable_thinking:
+                    raise
+                # The frozen research adapter may emit useful reasoning without a
+                # final structured JSON. Retry compactly instead of failing after
+                # the doctor deliberately requested the slower path.
+                thinking = (thinking or answer).strip()
+                text = processor.apply_chat_template(
+                    messages,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                    enable_thinking=False,
+                )
+                inputs = processor(
+                    text=[text],
+                    images=images,
+                    return_tensors="pt",
+                    size=resize_size,
+                )
+                inputs = {
+                    key: value.to("cuda") if torch.is_tensor(value) else value
+                    for key, value in inputs.items()
+                }
+                with torch.inference_mode():
+                    generated = model.generate(
+                        **inputs,
+                        max_new_tokens=self.max_new_tokens,
+                        do_sample=False,
+                    )
+                generated = generated[:, inputs["input_ids"].shape[1] :]
+                raw = processor.batch_decode(
+                    generated,
+                    skip_special_tokens=True,
+                )[0]
+                answer, _ = _strip_thinking(raw)
+                result = _parse_output(answer, task, tools)
+                truncated = (
+                    generated.shape[1] >= self.max_new_tokens
+                    and not raw.rstrip().endswith("}")
+                )
+                thinking = f"{thinking}\n\n[thinking fallback used]".strip()
             return result, truncated, thinking
         finally:
             for image in images:
@@ -782,6 +841,7 @@ def judge(payload: JudgeRequest, request: Request) -> JudgeResponse:
             image_paths,
             payload.tools,
             payload.tool_results,
+            payload.enable_thinking,
         )
     except TimeoutError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
@@ -802,6 +862,12 @@ def judge(payload: JudgeRequest, request: Request) -> JudgeResponse:
         generated_at=datetime.now(UTC).isoformat(),
         truncated=truncated,
         thinking=thinking[:2000],
+        thinking_mode=(
+            _thinking_enabled()
+            if payload.enable_thinking is None
+            else payload.enable_thinking
+        ),
+            thinking_fallback_used="[thinking fallback used]" in thinking,
         peak_allocated_gib=runtime.peak_memory()[0],
         peak_reserved_gib=runtime.peak_memory()[1],
     )
