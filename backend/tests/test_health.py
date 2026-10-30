@@ -546,6 +546,39 @@ def test_delete_doctor_is_logical_and_blocks_login(tmp_path: Path) -> None:
     assert audit["total"] >= 1
 
 
+def test_admin_can_edit_doctor_display_name(tmp_path: Path) -> None:
+    admin = make_client(tmp_path, role="admin")
+    created = admin.post(
+        "/api/v1/admin/users",
+        json={
+            "username": "renamed",
+            "display_name": "改名前",
+            "password": "rename-password",
+        },
+    ).json()
+    updated = admin.patch(
+        f"/api/v1/admin/users/{created['id']}",
+        json={"display_name": "改名后"},
+    )
+    assert updated.status_code == 200
+    assert updated.json()["display_name"] == "改名后"
+    assert updated.json()["is_active"] is True
+
+    root_user = next(
+        item
+        for item in admin.get("/api/v1/admin/users").json()
+        if item["is_root"]
+    )
+    root_rename = admin.patch(
+        f"/api/v1/admin/users/{root_user['id']}",
+        json={"display_name": "新管理员名"},
+    )
+    assert root_rename.status_code == 409
+
+    audit = admin.get("/api/v1/admin/audit-events?event=user_update").json()
+    assert any("显示名改为 改名后" in item["detail"] for item in audit["items"])
+
+
 def test_password_change_revokes_other_sessions(tmp_path: Path) -> None:
     client = make_client(tmp_path)
     sessions = client.get("/api/v1/auth/sessions")

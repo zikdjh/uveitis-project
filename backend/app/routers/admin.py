@@ -144,6 +144,12 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
         raise HTTPException(status_code=404, detail="账号不存在")
     if current.is_deleted:
         raise HTTPException(status_code=409, detail="已删除账号不能修改")
+    if (
+        current.username == ROOT_ADMIN_USERNAME
+        and payload.display_name is not None
+        and payload.display_name != current.display_name
+    ):
+        raise HTTPException(status_code=409, detail="固定管理员账号显示名不能修改")
 
     next_active = current.is_active if payload.is_active is None else payload.is_active
     if current.username == ROOT_ADMIN_USERNAME and next_active is False:
@@ -160,6 +166,11 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
         raise HTTPException(status_code=404, detail="账号不存在")
     if not updated.is_active:
         request.app.state.auth_service.revoke_all_sessions(updated.id)
+    detail_parts: list[str] = []
+    if payload.display_name is not None and payload.display_name != current.display_name:
+        detail_parts.append(f"显示名改为 {updated.display_name}")
+    if payload.is_active is not None and payload.is_active != current.is_active:
+        detail_parts.append(f"账号状态{'启用' if updated.is_active else '停用'}")
     _audit(
         request,
         event="user_update",
@@ -167,7 +178,7 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
         username=updated.username,
         user_id=updated.id,
         actor_id=actor.id,
-        detail=f"账号状态 {'启用' if updated.is_active else '停用'}",
+        detail="；".join(detail_parts) if detail_parts else "无字段变更",
     )
     return updated
 
