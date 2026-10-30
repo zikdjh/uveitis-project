@@ -10,9 +10,9 @@ import {
   UserX,
   Users,
 } from "lucide-react";
-import { Button, DatePicker, Input, Pagination, Select } from "antd";
+import { Button, DatePicker, Input, Modal, Pagination, Select } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import {
@@ -27,6 +27,8 @@ import {
   type ActiveSession,
   type User,
 } from "@/api/auth";
+
+type UserStatusFilter = "all" | "active" | "inactive";
 
 const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
   month: "2-digit",
@@ -66,6 +68,11 @@ export default function AccessPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const [userStatus, setUserStatus] = useState<UserStatusFilter>("all");
+  const [userPage, setUserPage] = useState(1);
+  const [userPageSize, setUserPageSize] = useState(10);
 
   const activeUsers = users.filter((user) => user.is_active).length;
   const adminUsers = users.filter((user) => user.role === "admin").length;
@@ -77,6 +84,19 @@ export default function AccessPage() {
   const to = validDate(searchParams.get("to"));
   const auditDateRange: [Dayjs, Dayjs] | null = from && to ? [dayjs(from), dayjs(to)] : null;
   const hasAuditFilters = selectedEvent !== "all" || selectedOutcome !== "all" || Boolean(auditSearch || from || to);
+  const filteredUsers = useMemo(() => {
+    const keyword = userSearch.trim().toLowerCase();
+    return users.filter((user) => {
+      if (keyword && !`${user.display_name} ${user.username}`.toLowerCase().includes(keyword)) return false;
+      if (userStatus === "active" && !user.is_active) return false;
+      if (userStatus === "inactive" && user.is_active) return false;
+      return true;
+    });
+  }, [userSearch, userStatus, users]);
+  const pagedUsers = useMemo(
+    () => filteredUsers.slice((userPage - 1) * userPageSize, userPage * userPageSize),
+    [filteredUsers, userPage, userPageSize],
+  );
 
   async function load() {
     setLoading(true);
@@ -146,6 +166,17 @@ export default function AccessPage() {
     setAuditPage((current) => Math.min(current, pageCount));
   }, [auditPageSize, eventTotal]);
 
+  useEffect(() => {
+    const pageCount = Math.max(1, Math.ceil(filteredUsers.length / userPageSize));
+    setUserPage((current) => Math.min(current, pageCount));
+  }, [filteredUsers.length, userPageSize]);
+
+  function updateUserFilters(next: Partial<{ search: string; status: UserStatusFilter }>) {
+    if (next.search !== undefined) setUserSearch(next.search);
+    if (next.status !== undefined) setUserStatus(next.status);
+    setUserPage(1);
+  }
+
   function updateAuditFilters(next: Partial<Record<"event" | "outcome" | "from" | "to" | "search", string>>) {
     const params = new URLSearchParams(searchParams);
     Object.entries(next).forEach(([key, value]) => {
@@ -170,6 +201,7 @@ export default function AccessPage() {
         password: String(form.get("password") ?? ""),
       });
       formElement.reset();
+      setCreateOpen(false);
       setNotice("账号已创建。");
       await load();
     } catch (reason) {
@@ -223,9 +255,14 @@ export default function AccessPage() {
     <section className="page">
       <div className="page-heading">
         <div><h1>医生账号管理</h1><p className="page-lead">唯一管理员 root 维护医生账号，系统不提供自助注册。</p></div>
-        <button className="button secondary" type="button" onClick={() => void load()} disabled={loading || busy}>
-          <RefreshCw size={16} className={loading ? "spin" : ""} /> 刷新
-        </button>
+        <div className="heading-actions">
+          <button className="button primary" type="button" onClick={() => setCreateOpen(true)}>
+            <UserPlus size={16} /> 新建医生账号
+          </button>
+          <button className="button secondary" type="button" onClick={() => void load()} disabled={loading || busy}>
+            <RefreshCw size={16} className={loading ? "spin" : ""} /> 刷新
+          </button>
+        </div>
       </div>
       {error && <div className="notice error-notice" role="alert"><AlertCircle size={17} /> {error}</div>}
       {notice && <div className="notice success-notice"><CheckCircle2 size={17} /> {notice}</div>}
@@ -237,61 +274,91 @@ export default function AccessPage() {
         <AccessMetric icon={History} label="审计事件" value={eventTotal} note="当前筛选总量" />
       </div>
 
-      <div className="access-layout">
-        <section className="panel">
-          <div className="section-heading">
-            <div><h2>账号列表</h2><span>{users.length} 个账号，仅管理员可维护医生账号</span></div>
-            <Users size={20} />
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <h2>账号列表</h2>
+            <span>
+              {userSearch.trim() || userStatus !== "all"
+                ? `筛选后 ${filteredUsers.length} / 共 ${users.length} 个账号`
+                : `共 ${users.length} 个账号，仅管理员可维护医生账号`}
+            </span>
           </div>
-          {loading && !users.length ? (
-            <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取账号</div>
-          ) : (
-            <div className="data-table-wrap">
-              <table className="data-table">
-                <thead><tr><th>人员</th><th>角色</th><th>状态</th><th>操作</th></tr></thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr key={user.id}>
-                      <td data-label="人员">
-                        <div className="user-identity">
-                          <span className="table-avatar">{initials(user)}</span>
-                          <span><strong>{user.display_name}</strong><small>@{user.username}</small></span>
-                        </div>
-                      </td>
-                      <td data-label="角色">{user.is_root ? "唯一管理员" : "医生"}</td>
-                      <td data-label="状态">
-                        <button
-                          className={`status-toggle ${user.is_active ? "active" : "disabled"}`}
-                          type="button"
-                          disabled={busy || user.id === currentUser?.id || user.is_root}
-                          onClick={() => void handleUpdate(user, { is_active: !user.is_active })}
-                        >
-                          {user.is_active ? "启用" : "停用"}
-                        </button>
-                      </td>
-                      <td data-label="操作">{user.is_root ? <span className="muted">系统固定</span> : <button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button>}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!users.length && <div className="empty-state"><Users size={26} /><p>暂无账号</p><span>创建医生账号后可在这里维护。</span></div>}
-            </div>
-          )}
-        </section>
-
-        <section className="panel">
-          <div className="section-heading">
-            <div><h2>新建医生账号</h2><span>由管理员设置初始密码，密码至少 12 位</span></div>
-            <UserPlus size={20} />
+          <Users size={20} />
+        </div>
+        <div className="account-toolbar">
+          <Input
+            allowClear
+            placeholder="搜索姓名或登录账号"
+            value={userSearch}
+            onChange={(event) => updateUserFilters({ search: event.target.value })}
+            aria-label="搜索医生姓名或登录账号"
+          />
+          <Select
+            value={userStatus}
+            onChange={(value) => updateUserFilters({ status: value as UserStatusFilter })}
+            options={[
+              { value: "all", label: "全部状态" },
+              { value: "active", label: "启用" },
+              { value: "inactive", label: "停用" },
+            ]}
+            aria-label="按账号状态筛选"
+          />
+        </div>
+        {loading && !users.length ? (
+          <div className="loading-panel"><LoaderCircle className="spin" size={22} /> 正在读取账号</div>
+        ) : (
+          <div className="data-table-wrap">
+            <table className="data-table">
+              <thead><tr><th>人员</th><th>角色</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                {pagedUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td data-label="人员">
+                      <div className="user-identity">
+                        <span className="table-avatar">{initials(user)}</span>
+                        <span><strong>{user.display_name}</strong><small>@{user.username}</small></span>
+                      </div>
+                    </td>
+                    <td data-label="角色">{user.is_root ? "唯一管理员" : "医生"}</td>
+                    <td data-label="状态">
+                      <button
+                        className={`status-toggle ${user.is_active ? "active" : "disabled"}`}
+                        type="button"
+                        disabled={busy || user.id === currentUser?.id || user.is_root}
+                        onClick={() => void handleUpdate(user, { is_active: !user.is_active })}
+                      >
+                        {user.is_active ? "启用" : "停用"}
+                      </button>
+                    </td>
+                    <td data-label="操作">{user.is_root ? <span className="muted">系统固定</span> : <button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!users.length && <div className="empty-state"><Users size={26} /><p>暂无账号</p><span>创建医生账号后可在这里维护。</span></div>}
+            {users.length > 0 && !filteredUsers.length && (
+              <div className="empty-state"><Users size={26} /><p>没有符合条件的账号</p><span>请调整搜索关键词或状态筛选。</span></div>
+            )}
           </div>
-          <form className="form-grid compact" onSubmit={(event) => void handleCreate(event)}>
-            <label>姓名<input name="display_name" required maxLength={100} /></label>
-            <label>登录账号<input name="username" required minLength={3} maxLength={100} pattern="[A-Za-z0-9._-]+" /></label>
-            <label>初始密码<input name="password" type="password" required minLength={12} maxLength={200} autoComplete="new-password" /></label>
-            <div className="form-actions span-2"><button className="button primary" type="submit" disabled={busy}><UserPlus size={16} /> 创建医生账号</button></div>
-          </form>
-        </section>
-      </div>
+        )}
+        {filteredUsers.length > 0 && (
+          <Pagination
+            className="case-list-pagination"
+            current={userPage}
+            pageSize={userPageSize}
+            total={filteredUsers.length}
+            showSizeChanger
+            pageSizeOptions={[10, 20, 50]}
+            showTotal={(total) => `共 ${total} 个账号`}
+            onChange={(page, pageSize) => {
+              const changed = pageSize !== userPageSize;
+              setUserPageSize(pageSize);
+              setUserPage(changed ? 1 : page);
+            }}
+          />
+        )}
+      </section>
 
       {resettingUser && (
         <section className="panel reset-panel">
@@ -307,6 +374,26 @@ export default function AccessPage() {
           </form>
         </section>
       )}
+
+      <Modal
+        className="account-create-modal"
+        title="新建医生账号"
+        open={createOpen}
+        onCancel={() => setCreateOpen(false)}
+        footer={null}
+        destroyOnHidden
+        width={440}
+      >
+        <form className="form-grid compact" onSubmit={(event) => void handleCreate(event)}>
+          <label>姓名<input name="display_name" required maxLength={100} /></label>
+          <label>登录账号<input name="username" required minLength={3} maxLength={100} pattern="[A-Za-z0-9._-]+" /></label>
+          <label>初始密码<input name="password" type="password" required minLength={12} maxLength={200} autoComplete="new-password" /></label>
+          <div className="form-actions span-2">
+            <button className="button secondary" type="button" onClick={() => setCreateOpen(false)}>取消</button>
+            <button className="button primary" type="submit" disabled={busy}><UserPlus size={16} /> 创建医生账号</button>
+          </div>
+        </form>
+      </Modal>
 
       <section className="panel active-sessions-panel">
         <div className="section-heading">
