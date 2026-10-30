@@ -20,6 +20,9 @@ SearchProvider = Literal[
     "bing",
     "exa",
     "perplexity",
+    "bocha",
+    "zhipu",
+    "baidu_qianfan",
 ]
 
 SECRET_KEYS = frozenset(
@@ -33,6 +36,9 @@ SECRET_KEYS = frozenset(
         "bing_search_api_key",
         "exa_api_key",
         "perplexity_api_key",
+        "bocha_api_key",
+        "zhipu_search_api_key",
+        "baidu_qianfan_api_key",
     }
 )
 
@@ -78,6 +84,12 @@ class IntegrationConfigRead(BaseModel):
     exa_api_key_hint: str = ""
     perplexity_api_key_configured: bool = False
     perplexity_api_key_hint: str = ""
+    bocha_api_key_configured: bool = False
+    bocha_api_key_hint: str = ""
+    zhipu_search_api_key_configured: bool = False
+    zhipu_search_api_key_hint: str = ""
+    baidu_qianfan_api_key_configured: bool = False
+    baidu_qianfan_api_key_hint: str = ""
     searxng_base_url: str = ""
     revision: int = 0
     updated_at: datetime | None = None
@@ -114,6 +126,12 @@ class IntegrationConfigUpdate(BaseModel):
     clear_exa_api_key: bool = False
     perplexity_api_key: str | None = Field(default=None, max_length=4000)
     clear_perplexity_api_key: bool = False
+    bocha_api_key: str | None = Field(default=None, max_length=4000)
+    clear_bocha_api_key: bool = False
+    zhipu_search_api_key: str | None = Field(default=None, max_length=4000)
+    clear_zhipu_search_api_key: bool = False
+    baidu_qianfan_api_key: str | None = Field(default=None, max_length=4000)
+    clear_baidu_qianfan_api_key: bool = False
     searxng_base_url: str | None = Field(default=None, max_length=1000)
     expected_revision: int | None = None
 

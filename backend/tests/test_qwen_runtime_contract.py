@@ -123,3 +123,93 @@ def test_qwen_runtime_failure_does_not_raise(tmp_path: Path) -> None:
 
     assert result.status == "failed"
     assert "不可用" in result.detail
+
+
+def test_qwen_runtime_tool_call_loop_runs_web_search(tmp_path: Path) -> None:
+    judge_calls: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "runtime.test":
+            body = json.loads(request.content)
+            judge_calls.append(body)
+            if len(judge_calls) == 1:
+                assert body["tools"] == ["web_search"]
+                assert body["tool_results"] == []
+                return httpx.Response(
+                    200,
+                    json={
+                        "status": "tool_call",
+                        "tool_call": {
+                            "tool": "web_search",
+                            "arguments": {"query": "uveitis guideline"},
+                        },
+                        "thinking": "需要检索证据",
+                        "model": "Qwen3.5-4B",
+                        "latency_ms": 120,
+                        "truncated": False,
+                    },
+                )
+            assert body["tool_results"], "second round must carry search results"
+            return httpx.Response(
+                200,
+                json={
+                    "result": {
+                        "label": "CNV",
+                        "confidence": 0.8,
+                        "impression": "黄斑区异常信号",
+                        "findings": [],
+                        "requires_human_review": True,
+                    },
+                    "model": "Qwen3.5-4B",
+                    "latency_ms": 200,
+                    "truncated": False,
+                    "thinking": "已结合检索证据完成判断",
+                },
+            )
+        if request.url.host == "api.bochaai.com":
+            return httpx.Response(
+                200,
+                json={
+                    "data": {
+                        "webPages": {
+                            "value": [
+                                {
+                                    "name": "Guideline",
+                                    "url": "https://source.test/guideline",
+                                    "summary": "s",
+                                }
+                            ]
+                        }
+                    }
+                },
+            )
+        return httpx.Response(404)
+
+    integrations = OptionalIntegrations(
+        Settings(
+            model_mode="remote",
+            qwen_judgment_enabled=True,
+            perception_service_url="http://runtime.test",
+            web_search_enabled=True,
+            web_search_providers="bocha",
+            bocha_api_key="bocha-key",
+            data_dir=tmp_path,
+        ),
+        client_factory=lambda **kwargs: httpx.Client(
+            transport=httpx.MockTransport(handler),
+            **kwargs,
+        ),
+    )
+
+    result = integrations.qwen_judgment(_case(tmp_path / "uploads"))
+
+    assert result.status == "completed", result.detail
+    assert len(judge_calls) == 2
+    tool_result = judge_calls[1]["tool_results"][0]
+    assert tool_result["query"] == "uveitis guideline"
+    assert tool_result["results"][0]["url"] == "https://source.test/guideline"
+    assert result.data["web_evidence"][0].url == "https://source.test/guideline"
+    runtime = result.data["runtime"]
+    assert runtime["tool_rounds"] == 1
+    assert runtime["searched_queries"] == ["uveitis guideline"]
+    assert "已结合检索证据" in runtime["thinking"]

@@ -636,6 +636,88 @@ def test_search_provider_adapters() -> None:
         assert results and results[0].provider == provider
 
 
+def test_domestic_search_provider_adapters() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.headers["Authorization"] == "Bearer domestic-key"
+        body = json.loads(request.content)
+        host = request.url.host
+        if host == "api.bochaai.com":
+            assert request.url.path == "/v1/web-search"
+            assert body["query"] == "uveitis"
+            assert body["summary"] is True
+            return httpx.Response(
+                200,
+                json={
+                    "data": {
+                        "webPages": {
+                            "value": [
+                                {
+                                    "name": "Bocha",
+                                    "url": "https://source.test/bocha",
+                                    "summary": "b",
+                                }
+                            ]
+                        }
+                    }
+                },
+            )
+        if host == "open.bigmodel.cn":
+            assert request.url.path == "/api/paas/v4/web_search"
+            assert body["search_engine"] == "search_std"
+            return httpx.Response(
+                200,
+                json={
+                    "search_result": [
+                        {
+                            "title": "Zhipu",
+                            "link": "https://source.test/zhipu",
+                            "content": "z",
+                        }
+                    ]
+                },
+            )
+        if host == "qianfan.baidubce.com":
+            assert request.url.path == "/v2/ai_search"
+            assert body["messages"][0]["content"] == "uveitis"
+            return httpx.Response(
+                200,
+                json={
+                    "references": [
+                        {
+                            "title": "Qianfan",
+                            "url": "https://source.test/qianfan",
+                            "content": "q",
+                        }
+                    ]
+                },
+            )
+        return httpx.Response(404)
+
+    store = _store()
+    store.update(
+        IntegrationUpdate(
+            web_search_enabled=True,
+            search_provider_order=["bocha", "zhipu", "baidu_qianfan"],
+            bocha_api_key="domestic-key",
+            zhipu_search_api_key="domestic-key",
+            baidu_qianfan_api_key="domestic-key",
+        ),
+        actor_id="admin",
+    )
+    assert "domestic-key" not in json.dumps(store.raw())
+    integrations = OptionalIntegrations(
+        Settings(model_mode="remote"),
+        config_store=store,
+        client_factory=lambda **kwargs: httpx.Client(
+            transport=httpx.MockTransport(handler), **kwargs
+        ),
+    )
+    for provider in ("bocha", "zhipu", "baidu_qianfan"):
+        results = integrations._run_search_provider(provider, "uveitis")
+        assert results and results[0].provider == provider
+        assert results[0].url.startswith("https://source.test/")
+
+
 def test_config_update_encrypts_secret_and_checks_revision() -> None:
     store = _store()
     updated = store.update(

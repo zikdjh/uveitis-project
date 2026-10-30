@@ -26,6 +26,9 @@ from app.schemas.integrations import (
 INTEGRATION_NAMESPACE = "integration"
 
 DEFAULT_PROVIDER_ORDER = [
+    "bocha",
+    "zhipu",
+    "baidu_qianfan",
     "tavily",
     "brave",
     "serper",
@@ -61,6 +64,9 @@ SECRET_FIELD_BY_KEY = {
     "bing_search_api_key": "bing_search_api_key_configured",
     "exa_api_key": "exa_api_key_configured",
     "perplexity_api_key": "perplexity_api_key_configured",
+    "bocha_api_key": "bocha_api_key_configured",
+    "zhipu_search_api_key": "zhipu_search_api_key_configured",
+    "baidu_qianfan_api_key": "baidu_qianfan_api_key_configured",
 }
 
 CLEAR_FIELD_BY_KEY = {
@@ -89,6 +95,9 @@ FIELD_TO_DICTIONARY_KEY = {
     "bing_search_api_key": "search.bing.api_key",
     "exa_api_key": "search.exa.api_key",
     "perplexity_api_key": "search.perplexity.api_key",
+    "bocha_api_key": "search.bocha.api_key",
+    "zhipu_search_api_key": "search.zhipu.api_key",
+    "baidu_qianfan_api_key": "search.baidu_qianfan.api_key",
 }
 
 FIELD_VALUE_TYPES = {
@@ -126,6 +135,9 @@ FIELD_DESCRIPTIONS = {
     "bing_search_api_key": "Bing Search API Key",
     "exa_api_key": "Exa API Key",
     "perplexity_api_key": "Perplexity API Key",
+    "bocha_api_key": "博查 Bocha API Key",
+    "zhipu_search_api_key": "智谱网络搜索 API Key",
+    "baidu_qianfan_api_key": "百度千帆 AI 搜索 API Key",
 }
 
 

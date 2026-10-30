@@ -41,6 +41,7 @@ TASK_LABELS = {
 }
 DEFAULT_IMAGE_PIXELS = 65_536
 DEFAULT_MAX_NEW_TOKENS = 32
+DEFAULT_THINKING_MAX_NEW_TOKENS = 1024
 DEFAULT_MAX_IMAGES = 4
 DEFAULT_MAX_IMAGE_BYTES = 25 * 1024 * 1024
 DEFAULT_MAX_IMAGE_PIXELS = 40_000_000
@@ -82,6 +83,13 @@ class JudgeRequest(BaseModel):
     case: CaseRequest
     output_schema: dict[str, Any] | None = None
     constraints: list[str] = Field(default_factory=list, max_length=32)
+    tools: list[str] = Field(default_factory=list, max_length=8)
+    tool_results: list[dict[str, Any]] = Field(default_factory=list, max_length=8)
+
+
+class JudgeToolCall(BaseModel):
+    name: str
+    arguments: dict[str, Any] = Field(default_factory=dict)
 
 
 class JudgeResult(BaseModel):
@@ -94,13 +102,16 @@ class JudgeResult(BaseModel):
 
 
 class JudgeResponse(BaseModel):
-    result: JudgeResult
+    status: Literal["result", "tool_call"] = "result"
+    result: JudgeResult | None = None
+    tool_call: JudgeToolCall | None = None
     task: str
     model: str
     adapter_sha256: str
     latency_ms: int
     generated_at: str
     truncated: bool
+    thinking: str = ""
     peak_allocated_gib: float | None = None
     peak_reserved_gib: float | None = None
     research_use_only: Literal[True] = True
@@ -139,6 +150,14 @@ def _paths() -> tuple[Path, Path]:
         os.environ.get("MODEL_RUNTIME_ADAPTER_DIR", DEFAULT_ADAPTER_DIR)
     ).resolve()
     return model_dir, adapter_dir
+
+
+def _thinking_enabled() -> bool:
+    return os.environ.get("MODEL_RUNTIME_ENABLE_THINKING", "true").strip().lower() not in {
+        "0",
+        "false",
+        "no",
+    }
 
 
 def _adapter_ready(adapter_dir: Path) -> bool:
@@ -227,6 +246,85 @@ def _task_prompt(task: str) -> str:
         '{"label":"...","requires_human_review":true}. '
         "Do not state a definitive diagnosis."
     )
+
+
+def _tool_prompt(tools: list[str], tool_results: list[dict[str, Any]]) -> str:
+    prompt = ""
+    if "web_search" in tools:
+        prompt += (
+            " You may request one web literature search when the image alone"
+            " is insufficient. To request it, reply only with compact JSON"
+            ' {"tool_call":{"name":"web_search","query":"<short query>"}}.'
+            " If the visible evidence is already sufficient, skip the search"
+            " and return the final compact JSON with"
+            ' {"label":"...","confidence":0.0,"impression":"...",'
+            '"requires_human_review":true}.'
+        )
+    for item in tool_results:
+        query = str(item.get("query") or "")
+        entries = item.get("results") if isinstance(item.get("results"), list) else []
+        prompt += f" Web search results for {query!r}:"
+        for index, entry in enumerate(entries[:5], start=1):
+            if not isinstance(entry, dict):
+                continue
+            prompt += (
+                f" [{index}] {entry.get('title', '')}:"
+                f" {str(entry.get('snippet', ''))[:400]}."
+            )
+        if not entries:
+            prompt += " no results."
+    return prompt
+
+
+def _strip_thinking(raw: str) -> tuple[str, str]:
+    """Split a Qwen thinking response into answer text and thinking notes."""
+
+    match = re.search(r"<think>(.*?)</think>", raw, flags=re.DOTALL)
+    if match:
+        thinking = match.group(1).strip()
+        answer = (raw[: match.start()] + raw[match.end() :]).strip()
+        return answer, thinking
+    if raw.lstrip().startswith("<think>"):
+        # Generation stopped inside the thinking block; no answer available.
+        return "", raw.strip()
+    return raw.strip(), ""
+
+
+def _parse_output(raw: str, task: str, tools: list[str]) -> dict[str, Any]:
+    objects = _json_objects(raw)
+    if "web_search" in tools:
+        tool_payload = next(
+            (
+                item
+                for item in objects
+                if isinstance(item.get("tool_call"), dict)
+            ),
+            None,
+        )
+        if tool_payload is not None:
+            call = dict(tool_payload["tool_call"])
+            name = str(call.get("name") or "").strip()
+            if name != "web_search":
+                raise ValueError(f"Unsupported tool: {name}")
+            query = str(call.get("query") or call.get("arguments", {}).get("query") or "").strip()
+            if not query:
+                raise ValueError("Tool call is missing a query")
+            return {
+                "status": "tool_call",
+                "tool_call": {"name": name, "arguments": {"query": query[:400]}},
+            }
+    payload = next(
+        (
+            item
+            for item in objects
+            if isinstance(item.get("label"), str)
+            and item["label"] in TASK_LABELS[task]
+        ),
+        None,
+    )
+    if payload is None:
+        raise ValueError("Model did not return an allowed structured label")
+    return {"status": "result", "result": _parse_result(raw, task)}
 
 
 def _json_objects(text: str) -> list[dict[str, Any]]:
@@ -346,12 +444,16 @@ class QwenRuntime:
         *,
         image_pixels: int,
         max_new_tokens: int,
+        enable_thinking: bool = True,
+        thinking_max_new_tokens: int = DEFAULT_THINKING_MAX_NEW_TOKENS,
         inference_wait_seconds: int,
     ) -> None:
         self.model_dir = model_dir
         self.adapter_dir = adapter_dir
         self.image_pixels = image_pixels
         self.max_new_tokens = max_new_tokens
+        self.enable_thinking = enable_thinking
+        self.thinking_max_new_tokens = thinking_max_new_tokens
         self.inference_wait_seconds = inference_wait_seconds
         self._load_lock = threading.Lock()
         self._inference_lock = threading.Lock()
@@ -425,14 +527,20 @@ class QwenRuntime:
     def load(self) -> None:
         self._load()
 
-    def judge(self, task: str, image_paths: list[Path]) -> tuple[dict[str, Any], bool]:
+    def judge(
+        self,
+        task: str,
+        image_paths: list[Path],
+        tools: list[str] | None = None,
+        tool_results: list[dict[str, Any]] | None = None,
+    ) -> tuple[dict[str, Any], bool, str]:
         if not image_paths:
             raise ValueError("At least one image is required")
         if not self._inference_lock.acquire(timeout=self.inference_wait_seconds):
             raise TimeoutError("Runtime is busy")
         try:
             self._load()
-            return self._generate(task, image_paths)
+            return self._generate(task, image_paths, tools or [], tool_results or [])
         finally:
             self._inference_lock.release()
 
@@ -440,7 +548,9 @@ class QwenRuntime:
         self,
         task: str,
         image_paths: list[Path],
-    ) -> tuple[dict[str, Any], bool]:
+        tools: list[str],
+        tool_results: list[dict[str, Any]],
+    ) -> tuple[dict[str, Any], bool, str]:
         torch = self._torch
         processor = self._processor
         model = self._model
@@ -463,13 +573,18 @@ class QwenRuntime:
                 # after the original image passes the decoded-dimension guard.
                 images.append(_load_rgb_image(path, max_decoded_pixels))
             content = [{"type": "image", "image": image} for image in images]
-            content.append({"type": "text", "text": _task_prompt(task)})
+            content.append(
+                {
+                    "type": "text",
+                    "text": _task_prompt(task) + _tool_prompt(tools, tool_results),
+                }
+            )
             messages = [{"role": "user", "content": content}]
             text = processor.apply_chat_template(
                 messages,
                 tokenize=False,
                 add_generation_prompt=True,
-                enable_thinking=False,
+                enable_thinking=self.enable_thinking,
             )
             inputs = processor(
                 text=[text],
@@ -482,9 +597,14 @@ class QwenRuntime:
                 for key, value in inputs.items()
             }
             with torch.inference_mode():
+                max_new = (
+                    self.thinking_max_new_tokens
+                    if self.enable_thinking
+                    else self.max_new_tokens
+                )
                 generated = model.generate(
                     **inputs,
-                    max_new_tokens=self.max_new_tokens,
+                    max_new_tokens=max_new,
                     do_sample=False,
                 )
             generated = generated[:, inputs["input_ids"].shape[1] :]
@@ -492,14 +612,15 @@ class QwenRuntime:
                 generated,
                 skip_special_tokens=True,
             )[0]
-            result = _parse_result(raw, task)
+            answer, thinking = _strip_thinking(raw)
+            result = _parse_output(answer, task, tools)
             truncated = (
-                generated.shape[1] >= self.max_new_tokens
+                generated.shape[1] >= max_new
                 and not raw.rstrip().endswith("}")
             )
             torch.cuda.synchronize()
             del inputs, generated
-            return result, truncated
+            return result, truncated, thinking
         finally:
             for image in images:
                 image.close()
@@ -549,6 +670,13 @@ def _get_runtime() -> QwenRuntime:
                     8,
                     128,
                 ),
+                enable_thinking=_thinking_enabled(),
+                thinking_max_new_tokens=_env_int(
+                    "MODEL_RUNTIME_THINKING_MAX_NEW_TOKENS",
+                    DEFAULT_THINKING_MAX_NEW_TOKENS,
+                    64,
+                    8192,
+                ),
                 inference_wait_seconds=_env_int(
                     "MODEL_RUNTIME_INFERENCE_WAIT_SECONDS",
                     35,
@@ -582,6 +710,7 @@ def health() -> dict:
             "status": "ready" if model_ready and adapter_ready else "degraded",
             "loaded": bool(_runtime and _runtime.loaded),
             "task": DEFAULT_TASK,
+            "thinking": _thinking_enabled(),
             "requires_human_review": True,
         },
         "decision_model": {
@@ -648,7 +777,12 @@ def judge(payload: JudgeRequest, request: Request) -> JudgeResponse:
             detail=f"Model runtime unavailable: {type(exc).__name__}",
         ) from exc
     try:
-        result, truncated = runtime.judge(payload.task, image_paths)
+        result, truncated, thinking = runtime.judge(
+            payload.task,
+            image_paths,
+            payload.tools,
+            payload.tool_results,
+        )
     except TimeoutError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except ValueError as exc:
@@ -660,14 +794,17 @@ def judge(payload: JudgeRequest, request: Request) -> JudgeResponse:
             detail=f"Model inference unavailable: {type(exc).__name__}",
         ) from exc
 
-    return JudgeResponse(
-        result=JudgeResult(**result),
+    common = dict(
         task=payload.task,
         model=runtime.model_dir.name,
         adapter_sha256=runtime._adapter_sha256,
         latency_ms=int((time.perf_counter() - started) * 1000),
         generated_at=datetime.now(UTC).isoformat(),
         truncated=truncated,
+        thinking=thinking[:2000],
         peak_allocated_gib=runtime.peak_memory()[0],
         peak_reserved_gib=runtime.peak_memory()[1],
     )
+    if result["status"] == "tool_call":
+        return JudgeResponse(status="tool_call", tool_call=JudgeToolCall(**result["tool_call"]), **common)
+    return JudgeResponse(status="result", result=JudgeResult(**result["result"]), **common)

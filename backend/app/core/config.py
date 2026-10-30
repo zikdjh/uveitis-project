@@ -64,6 +64,9 @@ class Settings(BaseSettings):
     bing_search_api_key: str = ""
     exa_api_key: str = ""
     perplexity_api_key: str = ""
+    bocha_api_key: str = ""
+    zhipu_search_api_key: str = ""
+    baidu_qianfan_api_key: str = ""
     searxng_base_url: str = ""
     external_summary_enabled: bool = False
     external_summary_protocol: Literal[
