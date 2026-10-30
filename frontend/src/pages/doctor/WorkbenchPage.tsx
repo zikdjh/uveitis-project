@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 
 import { listCases, type CaseRecord } from "@/api/cases";
 import { getSystemOverview } from "@/api/system";
+import AnalysisQueuePanel from "@/components/AnalysisQueuePanel";
 
 export default function WorkbenchPage() {
   const [cases, setCases] = useState<CaseRecord[]>([]);
@@ -92,6 +93,7 @@ export default function WorkbenchPage() {
             )}
           </div>
         </section>
+        <AnalysisQueuePanel role="doctor" />
       </div>
     </section>
   );

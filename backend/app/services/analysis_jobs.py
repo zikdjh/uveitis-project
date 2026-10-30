@@ -45,6 +45,9 @@ class AnalysisJobService:
     def get_latest_for_case(self, case_id: str):
         return self.job_store.get_latest_for_case(case_id)
 
+    def list_recent(self, *, limit: int = 50):
+        return self.job_store.list_recent(limit=limit)
+
     def run_job(self, job_id: str) -> JobRunResult:
         job = self.job_store.get(job_id)
         if job is None:

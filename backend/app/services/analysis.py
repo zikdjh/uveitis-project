@@ -305,17 +305,21 @@ class AnalysisService:
         parts: list[str] = []
         label = judgment.get("label") or judgment.get("impression")
         if label:
-            parts.append(f"Qwen 判断：{label}")
+            parts.append(f"Qwen 判断：{label} / Qwen judgment: {label}")
         primary = decision.get("primary_class")
         if primary:
-            parts.append(f"补充决策：{primary}")
+            parts.append(f"补充决策：{primary} / Supplemental decision: {primary}")
         if evidence:
-            parts.append(f"RAG 证据 {len(evidence)} 条")
+            parts.append(f"RAG 证据 {len(evidence)} 条 / RAG evidence: {len(evidence)}")
         if web_evidence:
-            parts.append(f"网络辅助结果 {len(web_evidence)} 条")
+            parts.append(f"网络辅助结果 {len(web_evidence)} 条 / Web results: {len(web_evidence)}")
         if not parts:
-            parts.append("当前未获得可复核的模型证据")
-        return "；".join(parts) + "。该内容仅作辅助参考，必须由医生结合原始资料复核。"
+            parts.append("当前未获得可复核的模型证据 / No reviewable model evidence was produced")
+        return (
+            "；".join(parts)
+            + "。该内容仅作辅助参考，必须由医生结合原始资料复核。 "
+            + "This content is for reference only and must be reviewed by a clinician against the original records."
+        )
 
     def analyze(self, case: CaseRead, queued: AnalysisResult) -> AnalysisResult:
         stages = self._stages()
@@ -448,7 +452,10 @@ class AnalysisService:
         impression = (
             str(judgment.get("impression") or "").strip()
             or str(decision.get("primary_class") or "").strip()
-            or "本次未形成可复核的临床结论，请结合检查资料进行判断。"
+            or (
+                "本次未形成可复核的临床结论，请结合检查资料进行判断。 "
+                "No reviewable clinical conclusion was produced; please judge from the examination records."
+            )
         )
         confidence = max(
             float(judgment.get("confidence") or 0),
