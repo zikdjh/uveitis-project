@@ -4,6 +4,7 @@ import {
   History,
   KeyRound,
   LoaderCircle,
+  Pencil,
   RefreshCw,
   ShieldCheck,
   UserPlus,
@@ -68,6 +69,7 @@ export default function AccessPage() {
   const auditRequestRef = useRef(0);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [resettingUser, setResettingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -286,6 +288,30 @@ export default function AccessPage() {
     }
   }
 
+  async function handleEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingUser) return;
+    const form = new FormData(event.currentTarget);
+    const displayName = String(form.get("display_name") ?? "").trim();
+    if (!displayName || displayName === editingUser.display_name) {
+      setEditingUser(null);
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await updateUser(editingUser.id, { display_name: displayName });
+      setNotice(`已更新 ${displayName} 的账号信息。`);
+      setEditingUser(null);
+      await load();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "账号更新失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <section className="page">
       <div className="page-heading">
@@ -380,6 +406,7 @@ export default function AccessPage() {
                         <span className="muted">已删除</span>
                       ) : (
                         <>
+                          <button className="text-button" type="button" onClick={() => setEditingUser(user)}><Pencil size={14} /> 编辑</button>
                           <button className="text-button" type="button" onClick={() => setResettingUser(user)}><KeyRound size={14} /> 重置密码</button>
                           <Popconfirm
                             title="删除该医生账号？"
@@ -456,6 +483,27 @@ export default function AccessPage() {
           </div>
         </form>
       </Modal>
+
+      {editingUser && (
+        <Modal
+          className="account-create-modal"
+          title="编辑医生信息"
+          open
+          onCancel={() => setEditingUser(null)}
+          footer={null}
+          destroyOnHidden
+          width={440}
+        >
+          <form className="form-grid compact" key={editingUser.id} onSubmit={(event) => void handleEdit(event)}>
+            <label>登录账号<input value={editingUser.username} readOnly disabled /></label>
+            <label>姓名<input name="display_name" defaultValue={editingUser.display_name} required maxLength={100} /></label>
+            <div className="form-actions span-2">
+              <button className="button secondary" type="button" onClick={() => setEditingUser(null)}>取消</button>
+              <button className="button primary" type="submit" disabled={busy}>保存修改</button>
+            </div>
+          </form>
+        </Modal>
+      )}
 
       <section className="panel active-sessions-panel">
         <div className="section-heading">
