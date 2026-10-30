@@ -638,6 +638,72 @@ def test_admin_can_edit_doctor_username(tmp_path: Path) -> None:
     assert any("登录账号改为 rename.new" in item["detail"] for item in audit["items"])
 
 
+def test_analysis_queue_scopes_by_role(tmp_path: Path) -> None:
+    users = MemoryUserStore()
+    app = create_app(
+        upload_dir=tmp_path / "uploads",
+        vector_dir=tmp_path / "vectors",
+        use_environment_database=False,
+        user_store=users,
+        audit_store=MemoryAuthAuditStore(),
+        redis_store=MemorySessionStore(),
+        bootstrap_users=False,
+    )
+    password = app.state.auth_service.hash_password("test-password")
+    users.ensure_user("doctor-a", password, "医生甲", "doctor")
+    users.ensure_user("doctor-b", password, "医生乙", "doctor")
+    users.ensure_single_admin(ROOT_ADMIN_USERNAME, password, "测试管理员")
+
+    def login(username: str) -> TestClient:
+        client = TestClient(app)
+        response = client.post(
+            "/api/v1/auth/login",
+            json={"username": username, "password": "test-password"},
+        )
+        assert response.status_code == 200
+        client.headers["X-CSRF-Token"] = client.cookies.get("uveitis_csrf")
+        return client
+
+    doctor_a = login("doctor-a")
+    doctor_b = login("doctor-b")
+    admin = TestClient(app)
+    admin_login = admin.post(
+        "/api/v1/auth/admin/login",
+        json={"username": ROOT_ADMIN_USERNAME, "password": "test-password"},
+    )
+    assert admin_login.status_code == 200
+    admin.headers["X-CSRF-Token"] = admin.cookies.get("uveitis_csrf")
+
+    for doctor in (doctor_a, doctor_b):
+        created = doctor.post(
+            "/api/v1/cases",
+            json={
+                "patient_age": 34,
+                "patient_sex": "F",
+                "complaint": "左眼视物模糊三天",
+                "medical_history": "无特殊",
+                "affected_eye": "OS",
+                "consent_confirmed": True,
+            },
+        )
+        assert created.status_code == 201
+        analyzed = doctor.post(f"/api/v1/cases/{created.json()['id']}/analyze")
+        assert analyzed.status_code == 202
+
+    admin_view = admin.get("/api/v1/cases/analysis-jobs")
+    assert admin_view.status_code == 200
+    assert len(admin_view.json()) == 2
+    assert {item["owner_name"] for item in admin_view.json()} == {"医生甲", "医生乙"}
+
+    doctor_view = doctor_a.get("/api/v1/cases/analysis-jobs")
+    assert doctor_view.status_code == 200
+    jobs = doctor_view.json()
+    assert len(jobs) == 1
+    assert jobs[0]["owner_name"] == "医生甲"
+    assert jobs[0]["complaint"] == "左眼视物模糊三天"
+    assert jobs[0]["job_status"] in {"queued", "running", "finalizing", "completed"}
+
+
 def test_password_change_revokes_other_sessions(tmp_path: Path) -> None:
     client = make_client(tmp_path)
     sessions = client.get("/api/v1/auth/sessions")

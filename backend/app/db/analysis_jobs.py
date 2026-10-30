@@ -41,6 +41,8 @@ class AnalysisJobStore(Protocol):
 
     def get_latest_for_case(self, case_id: str) -> AnalysisJob | None: ...
 
+    def list_recent(self, *, limit: int = 50) -> list[AnalysisJob]: ...
+
     def claim(
         self,
         worker_id: str,
@@ -138,6 +140,19 @@ class PostgresAnalysisJobStore:
                     AnalysisJobRow.id.desc(),
                 )
                 .limit(1)
+            )
+
+    def list_recent(self, *, limit: int = 50) -> list[AnalysisJobRow]:
+        with self._session_factory() as session:
+            return list(
+                session.scalars(
+                    select(AnalysisJobRow)
+                    .order_by(
+                        AnalysisJobRow.created_at.desc(),
+                        AnalysisJobRow.id.desc(),
+                    )
+                    .limit(max(1, limit))
+                )
             )
 
     def claim(
@@ -400,6 +415,14 @@ class MemoryAnalysisJobStore:
             return None
         latest = max(jobs, key=lambda item: (item["created_at"], item["id"]))
         return _MemoryJob(latest)
+
+    def list_recent(self, *, limit: int = 50) -> list[_MemoryJob]:
+        jobs = sorted(
+            self._jobs.values(),
+            key=lambda item: (item["created_at"], item["id"]),
+            reverse=True,
+        )
+        return [_MemoryJob(job) for job in jobs[: max(1, limit)]]
 
     def claim(
         self,

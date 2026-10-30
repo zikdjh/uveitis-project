@@ -114,6 +114,24 @@ class AnalysisJobRead(BaseModel):
     completed_at: datetime | None = None
 
 
+class AnalysisQueueItem(BaseModel):
+    job_id: str
+    case_id: str
+    owner_name: str = ""
+    complaint: str = ""
+    patient_age: int | None = None
+    patient_sex: str = ""
+    case_status: str = ""
+    job_status: AnalysisJobStatus
+    attempt_count: int = Field(ge=0)
+    max_attempts: int = Field(ge=1)
+    error: str = ""
+    created_at: datetime
+    updated_at: datetime
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+
+
 ReviewDecision = Literal["accepted", "modified", "rejected"]
 
 

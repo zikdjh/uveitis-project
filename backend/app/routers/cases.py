@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse
 from app.core.security import require_permission
 from app.schemas.case import (
     AnalysisJobRead,
+    AnalysisQueueItem,
     CaseCreate,
     CaseImage,
     CaseListPage,
@@ -170,6 +171,47 @@ def list_cases(
                 item = item.model_copy(update={"owner_name": owner.display_name})
         visible_items.append(item)
     return CaseListPage(items=visible_items, total=total, page=page, page_size=page_size)
+
+
+@router.get("/analysis-jobs", response_model=list[AnalysisQueueItem])
+def list_analysis_jobs(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=100),
+) -> list[AnalysisQueueItem]:
+    actor = require_permission(request, Permission.CASE_READ)
+    scope = _owner_scope(actor)
+    jobs = request.app.state.analysis_job_service.list_recent(limit=limit)
+    items: list[AnalysisQueueItem] = []
+    for job in jobs:
+        case = request.app.state.case_store.get(job.case_id)
+        if case is None:
+            continue
+        if scope is not None and case.owner_id != scope:
+            continue
+        owner_name = case.owner_name
+        if not owner_name:
+            owner = request.app.state.user_store.get(case.owner_id)
+            owner_name = owner.display_name if owner else ""
+        items.append(
+            AnalysisQueueItem(
+                job_id=job.job_key,
+                case_id=case.id,
+                owner_name=owner_name,
+                complaint=case.complaint,
+                patient_age=case.patient_age,
+                patient_sex=case.patient_sex,
+                case_status=case.status,
+                job_status=job.status,
+                attempt_count=job.attempt_count,
+                max_attempts=job.max_attempts,
+                error=job.error,
+                created_at=job.created_at,
+                updated_at=job.updated_at,
+                started_at=job.started_at,
+                completed_at=job.completed_at,
+            )
+        )
+    return items
 
 
 @router.get("/{case_id}", response_model=CaseRead)
