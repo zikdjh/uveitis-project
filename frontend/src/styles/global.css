@@ -1449,6 +1449,40 @@ a {
   line-height: 1.6;
 }
 
+.evidence-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--green);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.evidence-link:hover {
+  color: var(--green-dark);
+}
+
+.evidence-link svg {
+  align-self: center;
+  flex: none;
+}
+
+.evidence-link .evidence-title {
+  font-weight: 600;
+}
+
+.evidence-link small {
+  color: var(--muted);
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.evidence-provider {
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .result-box small {
   color: var(--muted);
   font-size: 10px;
