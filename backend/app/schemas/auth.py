@@ -54,6 +54,7 @@ class UserRead(BaseModel):
     display_name: str
     role: UserRole
     is_active: bool = True
+    is_deleted: bool = False
     is_root: bool = False
     permissions: list[Permission] = Field(default_factory=list)
 

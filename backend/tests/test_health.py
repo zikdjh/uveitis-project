@@ -496,6 +496,56 @@ def test_disabled_user_cannot_login(tmp_path: Path) -> None:
     assert response.status_code == 401
 
 
+def test_delete_doctor_is_logical_and_blocks_login(tmp_path: Path) -> None:
+    admin = make_client(tmp_path, role="admin")
+    created = admin.post(
+        "/api/v1/admin/users",
+        json={
+            "username": "todelete",
+            "display_name": "待删除医生",
+            "password": "todelete-password",
+        },
+    ).json()
+    doctor_client = TestClient(admin.app)
+    doctor_login = doctor_client.post(
+        "/api/v1/auth/login",
+        json={"username": "todelete", "password": "todelete-password"},
+    )
+    assert doctor_login.status_code == 200
+
+    deleted = admin.delete(f"/api/v1/admin/users/{created['id']}")
+    assert deleted.status_code == 204
+
+    listed = admin.get("/api/v1/admin/users").json()
+    assert all(item["id"] != created["id"] for item in listed)
+    included = admin.get("/api/v1/admin/users?include_deleted=true").json()
+    target = next(item for item in included if item["id"] == created["id"])
+    assert target["is_deleted"] is True
+    assert target["is_active"] is False
+
+    revoked = doctor_client.get("/api/v1/auth/me")
+    assert revoked.status_code == 401
+    relogin = TestClient(admin.app).post(
+        "/api/v1/auth/login",
+        json={"username": "todelete", "password": "todelete-password"},
+    )
+    assert relogin.status_code == 401
+
+    again = admin.delete(f"/api/v1/admin/users/{created['id']}")
+    assert again.status_code == 409
+
+    root_user = next(
+        item
+        for item in admin.get("/api/v1/admin/users?include_deleted=true").json()
+        if item["is_root"]
+    )
+    root_delete = admin.delete(f"/api/v1/admin/users/{root_user['id']}")
+    assert root_delete.status_code == 409
+
+    audit = admin.get("/api/v1/admin/audit-events?event=user_delete").json()
+    assert audit["total"] >= 1
+
+
 def test_password_change_revokes_other_sessions(tmp_path: Path) -> None:
     client = make_client(tmp_path)
     sessions = client.get("/api/v1/auth/sessions")

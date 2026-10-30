@@ -1889,6 +1889,10 @@ a {
   min-width: 128px;
 }
 
+.data-table tr.is-deleted td {
+  opacity: 0.55;
+}
+
 .account-create-modal .form-grid {
   grid-template-columns: 1fr;
 }
