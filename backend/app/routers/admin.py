@@ -150,6 +150,17 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
         and payload.display_name != current.display_name
     ):
         raise HTTPException(status_code=409, detail="固定管理员账号显示名不能修改")
+    if (
+        current.username == ROOT_ADMIN_USERNAME
+        and payload.username is not None
+        and payload.username.strip().lower() != ROOT_ADMIN_USERNAME
+    ):
+        raise HTTPException(status_code=409, detail="固定管理员账号登录名不能修改")
+    if (
+        payload.username is not None
+        and payload.username.strip().lower() == ROOT_ADMIN_USERNAME
+    ):
+        raise HTTPException(status_code=409, detail="root 管理员账号已由系统保留")
 
     next_active = current.is_active if payload.is_active is None else payload.is_active
     if current.username == ROOT_ADMIN_USERNAME and next_active is False:
@@ -157,16 +168,22 @@ def update_user(user_id: str, payload: UserUpdate, request: Request) -> UserRead
     if current.id == actor.id and next_active is False:
         raise HTTPException(status_code=409, detail="不能停用当前登录账号")
 
-    updated = users.update(
-        user_id,
-        display_name=payload.display_name,
-        is_active=payload.is_active,
-    )
+    try:
+        updated = users.update(
+            user_id,
+            username=payload.username,
+            display_name=payload.display_name,
+            is_active=payload.is_active,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     if updated is None:
         raise HTTPException(status_code=404, detail="账号不存在")
     if not updated.is_active:
         request.app.state.auth_service.revoke_all_sessions(updated.id)
     detail_parts: list[str] = []
+    if payload.username is not None and updated.username != current.username:
+        detail_parts.append(f"登录账号改为 {updated.username}")
     if payload.display_name is not None and payload.display_name != current.display_name:
         detail_parts.append(f"显示名改为 {updated.display_name}")
     if payload.is_active is not None and payload.is_active != current.is_active:
