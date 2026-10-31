@@ -189,3 +189,53 @@ def test_legacy_primary_key_is_split_from_business_key(monkeypatch) -> None:
         'ALTER TABLE "t_user" ADD CONSTRAINT '
         '"uq_t_user_f_user_key" UNIQUE ("f_user_key")',
     ]
+
+
+def test_performance_indexes_are_created_for_existing_tables(monkeypatch) -> None:
+    statements: list[str] = []
+
+    class FakeConnection:
+        def execute(self, statement) -> None:
+            statements.append(str(statement))
+
+    class FakeEngine:
+        @contextmanager
+        def begin(self):
+            yield FakeConnection()
+
+    class FakeInspector:
+        def get_table_names(self) -> list[str]:
+            return [
+                table_name("case"),
+                table_name("analysis_job"),
+                table_name("auth_audit_event"),
+            ]
+
+        def get_columns(self, table: str) -> list[dict]:
+            relevant = {
+                table_name("case"): ["f_owner_id", "f_status", "f_updated_at"],
+                table_name("analysis_job"): ["f_status", "f_created_at"],
+                table_name("auth_audit_event"): [
+                    "f_outcome",
+                    "f_user_id",
+                    "f_created_at",
+                ],
+            }
+            return [{"name": name} for name in relevant[table]]
+
+        def get_indexes(self, table: str) -> list[dict]:
+            return []
+
+    monkeypatch.setattr(postgres_db, "inspect", lambda _engine: FakeInspector())
+    postgres_db._ensure_performance_indexes(FakeEngine())
+
+    assert statements == [
+        'CREATE INDEX IF NOT EXISTS "ix_t_case_owner_status_updated" '
+        'ON "t_case" ("f_owner_id", "f_status", "f_updated_at")',
+        'CREATE INDEX IF NOT EXISTS "ix_t_analysis_job_status_created" '
+        'ON "t_analysis_job" ("f_status", "f_created_at")',
+        'CREATE INDEX IF NOT EXISTS "ix_t_auth_audit_event_outcome_created" '
+        'ON "t_auth_audit_event" ("f_outcome", "f_created_at")',
+        'CREATE INDEX IF NOT EXISTS "ix_t_auth_audit_event_user_created" '
+        'ON "t_auth_audit_event" ("f_user_id", "f_created_at")',
+    ]

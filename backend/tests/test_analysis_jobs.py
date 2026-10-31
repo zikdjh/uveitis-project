@@ -19,6 +19,16 @@ class QueueOnlyRedis:
     def set_review_queue(self, case_ids) -> None:
         self.queue = list(case_ids)
 
+    def add_review_queue(self, case_ids) -> None:
+        for case_id in case_ids:
+            value = str(case_id)
+            if value not in self.queue:
+                self.queue.append(value)
+
+    def remove_review_queue(self, case_ids) -> None:
+        removed = {str(case_id) for case_id in case_ids}
+        self.queue = [case_id for case_id in self.queue if case_id not in removed]
+
 
 class FailingAnalysisService:
     def start(self):
@@ -75,12 +85,12 @@ def test_job_completes_case_and_marks_review_queue() -> None:
     assert job.id != job.job_key
 
 
-def test_analysis_completion_keeps_more_than_previous_fixed_page_limit() -> None:
+def test_analysis_completion_updates_existing_queue_without_rebuilding_it() -> None:
     jobs = MemoryAnalysisJobStore()
     cases = MemoryCaseStore()
     redis = QueueOnlyRedis()
-    for _ in range(205):
-        cases.save(make_case().model_copy(update={"status": "awaiting_review"}))
+    existing_ids = [str(uuid4()) for _ in range(205)]
+    redis.queue = existing_ids.copy()
     case = make_case()
     cases.save(case)
     job = jobs.enqueue(case.id)
@@ -96,6 +106,7 @@ def test_analysis_completion_keeps_more_than_previous_fixed_page_limit() -> None
     assert result is not None and result.outcome == "completed"
     assert len(redis.queue) == 206
     assert case.id in redis.queue
+    assert redis.queue[:-1] == existing_ids
     assert jobs.get(job.job_key).status == "completed"
 
 

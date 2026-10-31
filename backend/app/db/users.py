@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, select, text
 
 from app.core.auth_policy import ROOT_ADMIN_USERNAME, ROOT_PASSWORD_SENTINEL
 from app.db.models import UserRow
@@ -80,6 +80,16 @@ class UserStore:
         with self._session_factory() as session:
             row = self._row_by_key(session, user_id)
         return self._from_row(row) if row else None
+
+    def get_many(self, user_ids: list[str]) -> dict[str, UserRead]:
+        unique_ids = list(dict.fromkeys(user_ids))
+        if not unique_ids:
+            return {}
+        with self._session_factory() as session:
+            rows = session.scalars(
+                select(UserRow).where(UserRow.user_key.in_(unique_ids))
+            ).all()
+        return {row.user_key: self._from_row(row) for row in rows}
 
     def list(self, include_deleted: bool = False) -> list[UserRead]:
         with self._session_factory() as session:
@@ -284,6 +294,14 @@ class MemoryUserStore:
             (user for user, _ in self._users.values() if user.id == user_id),
             None,
         )
+
+    def get_many(self, user_ids: list[str]) -> dict[str, UserRead]:
+        unique_ids = set(user_ids)
+        return {
+            user.id: user
+            for user, _ in self._users.values()
+            if user.id in unique_ids
+        }
 
     def list(self, include_deleted: bool = False) -> list[UserRead]:
         return [
