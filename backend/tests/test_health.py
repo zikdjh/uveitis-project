@@ -78,6 +78,19 @@ def test_health_returns_ready(tmp_path: Path) -> None:
     assert response.json()["ready"] is True
 
 
+def test_api_responses_expose_timing_headers(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    response = client.get("/api/v1/health")
+    assert response.headers["X-Trace-Id"]
+    process_time = float(response.headers["X-Process-Time-Ms"])
+    assert process_time >= 0
+
+    forwarded = client.get(
+        "/api/v1/health", headers={"X-Trace-Id": "caller-supplied-id"}
+    )
+    assert forwarded.headers["X-Trace-Id"] == "caller-supplied-id"
+
+
 def test_case_analysis_and_review_workflow(tmp_path: Path) -> None:
     client = make_client(tmp_path)
     created = client.post(

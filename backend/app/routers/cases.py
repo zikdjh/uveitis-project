@@ -101,14 +101,10 @@ def _run_analysis(app, case_id: str, queued) -> None:
     case.analysis = result
     case.updated_at = datetime.now(UTC)
     app.state.case_store.save(case)
-    sync_review_queue(app)
-
-
-def sync_review_queue(app) -> None:
-    cases = app.state.case_store.list(status="awaiting_review", limit=10_000)
-    app.state.redis_store.set_review_queue(
-        case.id for case in cases
-    )
+    if case.status == "awaiting_review":
+        app.state.redis_store.add_review_queue([case.id])
+    else:
+        app.state.redis_store.remove_review_queue([case.id])
 
 
 @router.post("", response_model=CaseRead, status_code=201)
@@ -164,12 +160,16 @@ def list_cases(
         offset=(page - 1) * page_size,
         limit=page_size,
     )
+    missing_owner_ids = {
+        item.owner_id for item in items if not item.owner_name and item.owner_id
+    }
+    owners = request.app.state.user_store.get_many(list(missing_owner_ids))
     visible_items = []
     for item in items:
-        if not item.owner_name:
-            owner = request.app.state.user_store.get(item.owner_id)
-            if owner is not None:
-                item = item.model_copy(update={"owner_name": owner.display_name})
+        if not item.owner_name and item.owner_id in owners:
+            item = item.model_copy(
+                update={"owner_name": owners[item.owner_id].display_name}
+            )
         visible_items.append(item)
     return CaseListPage(items=visible_items, total=total, page=page, page_size=page_size)
 
@@ -182,17 +182,30 @@ def list_analysis_jobs(
     actor = require_permission(request, Permission.CASE_READ)
     scope = _owner_scope(actor)
     jobs = request.app.state.analysis_job_service.list_recent(limit=limit)
+    cases_by_id = request.app.state.case_store.get_many(
+        [job.case_id for job in jobs]
+    )
+    visible_cases = [
+        case
+        for case in cases_by_id.values()
+        if scope is None or case.owner_id == scope
+    ]
+    owner_ids = {
+        case.owner_id
+        for case in visible_cases
+        if not case.owner_name and case.owner_id
+    }
+    owners = request.app.state.user_store.get_many(list(owner_ids))
     items: list[AnalysisQueueItem] = []
     for job in jobs:
-        case = request.app.state.case_store.get(job.case_id)
+        case = cases_by_id.get(job.case_id)
         if case is None:
             continue
         if scope is not None and case.owner_id != scope:
             continue
         owner_name = case.owner_name
-        if not owner_name:
-            owner = request.app.state.user_store.get(case.owner_id)
-            owner_name = owner.display_name if owner else ""
+        if not owner_name and case.owner_id in owners:
+            owner_name = owners[case.owner_id].display_name
         items.append(
             AnalysisQueueItem(
                 job_id=job.job_key,
@@ -298,7 +311,6 @@ async def upload_images(
     case.images.extend(new_images)
     case.updated_at = datetime.now(UTC)
     saved = request.app.state.case_store.save(case)
-    sync_review_queue(request.app)
     return saved
 
 
@@ -333,6 +345,7 @@ def analyze_case(
     case.analysis = queued
     case.updated_at = datetime.now(UTC)
     request.app.state.case_store.save(case)
+    request.app.state.redis_store.remove_review_queue([case.id])
     job = request.app.state.analysis_job_service.enqueue(case.id)
     background_tasks.add_task(
         request.app.state.analysis_job_service.run_job,
@@ -355,7 +368,6 @@ def review_case(case_id: str, payload: ReviewUpdate, request: Request) -> CaseRe
     case.status = "reviewed"
     case.updated_at = datetime.now(UTC)
     saved = request.app.state.case_store.save(case)
-    sync_review_queue(request.app)
     return saved
 
 
