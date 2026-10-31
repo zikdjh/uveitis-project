@@ -412,6 +412,24 @@ class RedisStore:
                 pipe.rpush(key, *ids)
             pipe.execute()
 
+    def add_review_queue(self, case_ids: Iterable[str]) -> None:
+        ids = [str(case_id) for case_id in case_ids]
+        if not ids:
+            return
+        with self.client.pipeline(transaction=True) as pipe:
+            for case_id in ids:
+                pipe.rpush("cases:awaiting_review", case_id)
+            pipe.execute()
+
+    def remove_review_queue(self, case_ids: Iterable[str]) -> None:
+        ids = [str(case_id) for case_id in case_ids]
+        if not ids:
+            return
+        with self.client.pipeline(transaction=True) as pipe:
+            for case_id in ids:
+                pipe.lrem("cases:awaiting_review", 0, case_id)
+            pipe.execute()
+
     def review_queue(self, limit: int = 100) -> list[str]:
         return [
             str(value)
@@ -702,6 +720,16 @@ class MemorySessionStore:
 
     def set_review_queue(self, case_ids) -> None:
         self.queue = list(case_ids)
+
+    def add_review_queue(self, case_ids) -> None:
+        for case_id in case_ids:
+            value = str(case_id)
+            if value not in self.queue:
+                self.queue.append(value)
+
+    def remove_review_queue(self, case_ids) -> None:
+        removed = {str(case_id) for case_id in case_ids}
+        self.queue = [case_id for case_id in self.queue if case_id not in removed]
 
     def review_queue(self, limit: int = 100) -> list[str]:
         return self.queue[:limit]

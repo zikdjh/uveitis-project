@@ -1,5 +1,7 @@
 from pathlib import Path
 import logging
+import time
+import uuid
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -54,6 +56,14 @@ class MemoryCaseStore:
 
     def get(self, case_id):
         return self._cases.get(case_id)
+
+    def get_many(self, case_ids):
+        unique_ids = set(case_ids)
+        return {
+            case_id: case
+            for case_id, case in self._cases.items()
+            if case_id in unique_ids
+        }
 
     def list(
         self,
@@ -159,7 +169,9 @@ def create_app(
 
     @app.middleware("http")
     async def security_headers(request, call_next):
+        started_at = time.perf_counter()
         response = await call_next(request)
+        elapsed_ms = (time.perf_counter() - started_at) * 1000
         sets_access_cookie = any(
             header.startswith(f"{ACCESS_COOKIE}=")
             for header in response.headers.getlist("set-cookie")
@@ -174,6 +186,18 @@ def create_app(
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "same-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        if request.url.path.startswith("/api/"):
+            trace_id = request.headers.get("X-Trace-Id") or uuid.uuid4().hex
+            response.headers["X-Trace-Id"] = trace_id
+            response.headers["X-Process-Time-Ms"] = f"{elapsed_ms:.1f}"
+            logging.getLogger("uveitis.http").info(
+                "method=%s path=%s status=%d duration_ms=%.1f trace_id=%s",
+                request.method,
+                request.url.path,
+                response.status_code,
+                elapsed_ms,
+                trace_id,
+            )
         if request.url.path.startswith("/api/v1/auth") or request.url.path.startswith("/api/v1/admin"):
             response.headers["Cache-Control"] = "no-store"
         return response
@@ -314,6 +338,9 @@ class _UnavailableUserStore:
 
     def get(self, user_id):
         return None
+
+    def get_many(self, user_ids):
+        return {}
 
 
 def _bootstrap_root_admin(auth_service: AuthService, config, credential_store) -> None:

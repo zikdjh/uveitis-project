@@ -114,7 +114,10 @@ class AnalysisJobService:
                 worker_id=self.worker_id,
             ) is None:
                 return JobRunResult(job.job_key, job.case_id, "lease_lost")
-            self._sync_review_queue()
+            if case.status == "awaiting_review":
+                self._add_review_queue(case.id)
+            else:
+                self._remove_review_queue(case.id)
             return JobRunResult(job.job_key, job.case_id, "already_completed")
         queued = case.analysis or self.analysis_service.start()
         result, failure = self._analyze_with_lease(job, case, queued)
@@ -143,6 +146,7 @@ class AnalysisJobService:
                 allowed_status="finalizing",
             ) is None:
                 return JobRunResult(job.job_key, job.case_id, "lease_lost", error)
+            self._remove_review_queue(case.id)
             return JobRunResult(job.job_key, job.case_id, "failed", error)
         assert result is not None
         if not self._still_owned(job.job_key):
@@ -160,7 +164,7 @@ class AnalysisJobService:
             allowed_status="finalizing",
         ) is None:
             return JobRunResult(job.job_key, job.case_id, "lease_lost")
-        self._sync_review_queue()
+        self._add_review_queue(case.id)
         return JobRunResult(job.job_key, job.case_id, "completed")
 
     def _analyze_with_lease(
@@ -259,8 +263,8 @@ class AnalysisJobService:
         case.updated_at = datetime.now(UTC)
         self.case_store.save(case)
 
-    def _sync_review_queue(self) -> None:
-        cases = self.case_store.list(status="awaiting_review", limit=10_000)
-        self.redis_store.set_review_queue(
-            case.id for case in cases
-        )
+    def _add_review_queue(self, case_id: str) -> None:
+        self.redis_store.add_review_queue([case_id])
+
+    def _remove_review_queue(self, case_id: str) -> None:
+        self.redis_store.remove_review_queue([case_id])

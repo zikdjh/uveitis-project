@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>系统性能优化准备 · 葡萄膜炎辅助诊断项目</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="stylesheet" href="assets/document-shell.css">
+</head>
+<body>
+<a class="doc-skip" href="#doc-content">跳到正文</a>
+<header class="doc-nav">
+  <a class="doc-brand" href="2026-10-26-project-overview.html">葡萄膜炎项目文档</a>
+  <nav aria-label="文档导航">
+    <a href="2026-10-26-document-catalog.html">文档索引</a>
+    <a href="2026-10-26-progress-tracking.html">进度跟踪</a>
+  </nav>
+</header>
+<main id="doc-content" class="doc-page">
+  <div class="doc-kicker">
+    <span>系统</span>
+    <span>2026-10-31</span>
+  </div>
+  <h1>系统性能优化准备</h1>
+  <p class="doc-summary">记录当前性能基线、第一批快速优化、瓶颈假设和后续验收口径</p>
+
+  <article class="html-body">
+    <h2>当前基线</h2>
+    <table>
+      <thead>
+        <tr><th>领域</th><th>基线</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>前端首屏包体</td>
+          <td>优化前 920.95 kB / gzip 294.78 kB</td>
+          <td>Vite 主包包含医生端、管理员端和 AntD 相关页面代码。</td>
+        </tr>
+        <tr>
+          <td>前端路由分包</td>
+          <td>优化后主包 379.70 kB / gzip 128.26 kB</td>
+          <td>业务页改为路由级懒加载；最大页面包为数据字典页 206.24 kB，共享分页能力 188.66 kB。</td>
+        </tr>
+        <tr>
+          <td>分析队列查询</td>
+          <td>最多 50 个任务</td>
+          <td>原先逐条读取病例与医生信息；已改为按 ID 批量读取。</td>
+        </tr>
+        <tr>
+          <td>后端测试</td>
+          <td>106 passed, 7 skipped</td>
+          <td>覆盖路由、鉴权、任务恢复、服务契约和数据库命名。</td>
+        </tr>
+        <tr>
+          <td>思考模式链路</td>
+          <td>512 token 单图实测 79.029 至 98.451 秒；业务链路 100.490 秒完成</td>
+          <td>仍在 180 秒保护窗口内；思考失败自动非思考回退。</td>
+        </tr>
+        <tr>
+          <td>模型资源</td>
+          <td>单请求峰值保留约 3.311 GiB；双 worker 约 7010 / 8188 MiB</td>
+          <td>4060 上最多保持 2 个模型 worker。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>第一批优化</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>项</th><th>状态</th><th>内容</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PERF-01</td><td>路由分包</td><td>完成</td><td>患者、医生和管理员页面均改为懒加载，登录、状态页、病例详情和重页面不再进入主包。</td></tr>
+        <tr><td>PERF-02</td><td>高频查询批量读取</td><td>完成</td><td>病例列表与分析队列先收集 ID，再用 <code>get_many</code> 批量读取病例和用户，减少逐条查询。</td></tr>
+        <tr><td>PERF-03</td><td>组合索引</td><td>完成</td><td>为病例 owner/status/updated_at、任务 status/created_at、审计 outcome/user/created_at 建立组合索引；已有库启动时自动补建。</td></tr>
+        <tr><td>PERF-04</td><td>复核队列增量更新</td><td>完成</td><td>任务完成后不再扫描 10,000 条病例重建队列；改为按当前病例状态对队列做增量 add/remove，原有队列顺序保留。</td></tr>
+        <tr><td>PERF-05</td><td>服务端耗时采集</td><td>完成</td><td>为所有 /api/ 响应写入 X-Process-Time-Ms 与 X-Trace-Id 响应头；日志只记录方法、路径、状态码、耗时和 trace id，不含病例内容。</td></tr>
+      </tbody>
+    </table>
+
+    <h2>下一批候选</h2>
+    <table>
+      <thead>
+        <tr><th>优先级</th><th>项</th><th>风险控制</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>高</td>
+          <td>分析链路并发：Qwen 判断与 RAG 检索并行，搜索和外部总结保留证据依赖关系</td>
+          <td>必须保留当前失败降级语义；先用模拟链路压测，再接入真实模型；避免无边界线程池。</td>
+        </tr>
+        <tr>
+          <td>中</td>
+          <td>知识索引可用性缓存</td>
+          <td>当前每次分析会执行存在性与数量检查；可缓存索引就绪状态，新增文档时失效。</td>
+        </tr>
+        <tr>
+          <td>中</td>
+          <td>前端共享依赖治理</td>
+          <td>懒加载后继续观察分页、AntD 与数据字典页体积；先保证功能稳定，不做大规模组件替换。</td>
+        </tr>
+        <tr>
+          <td>低</td>
+          <td>数据库负载画像</td>
+          <td>在开发库或脱敏副本上使用 EXPLAIN 验证索引收益；不在生产或真实病例库执行探针。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>验收口径</h2>
+    <ul>
+      <li>首屏主包保持低于 400 kB 原始体积、150 kB gzip；路由切换无空白或布局跳动。</li>
+      <li>病例列表与分析队列在 10,000 条病例规模下完成索引 EXPLAIN 验证，接口服务端耗时低于 300 ms。</li>
+      <li>思考模式继续满足 180 秒后端保护窗口，失败仍自动降级为确定性报告。</li>
+      <li>4060 双 worker 不超过当前显存上限；任何并发调整都必须复测峰值保留与 OOM 表现。</li>
+      <li>所有外部调用保持现有隐私边界：病例原文和原始影像不出站。</li>
+    </ul>
+
+    <h2>执行原则</h2>
+    <p>先测后改。第一批只做无行为变化或可回归验证的调整；并发化、缓存和队列增量更新必须先建立耗时基线，并保留失败路径回归。性能优化不能改变医疗结论必须由医生复核的约束。</p>
+  </article>
+</main>
+<footer class="doc-footer">
+  <span>更新：2026-10-31</span>
+  <span>状态：性能优化准备与第一批快速优化完成</span>
+</footer>
+</body>
+</html>

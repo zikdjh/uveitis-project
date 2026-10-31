@@ -15,6 +15,8 @@ from app.db.naming import (
     LEGACY_COLUMN_RENAMES,
     LEGACY_TABLE_RENAMES,
     PRIMARY_KEY_COLUMN,
+    column_name,
+    table_name,
 )
 from app.schemas.case import CaseRead, CaseStats
 
@@ -52,6 +54,60 @@ def migrate_database_identifiers(engine: Engine) -> None:
     _rename_legacy_identifiers(engine)
     _migrate_primary_keys(engine)
     _ensure_case_ownership(engine)
+    _ensure_performance_indexes(engine)
+
+
+PERFORMANCE_INDEXES = {
+    table_name("case"): (
+        (
+            "ix_t_case_owner_status_updated",
+            (column_name("owner_id"), column_name("status"), column_name("updated_at")),
+        ),
+    ),
+    table_name("analysis_job"): (
+        (
+            "ix_t_analysis_job_status_created",
+            (column_name("status"), column_name("created_at")),
+        ),
+    ),
+    table_name("auth_audit_event"): (
+        (
+            "ix_t_auth_audit_event_outcome_created",
+            (column_name("outcome"), column_name("created_at")),
+        ),
+        (
+            "ix_t_auth_audit_event_user_created",
+            (column_name("user_id"), column_name("created_at")),
+        ),
+    ),
+}
+
+
+def _ensure_performance_indexes(engine: Engine) -> None:
+    """Create filter-plus-sort indexes used by high-frequency list endpoints."""
+    table_names = set(inspect(engine).get_table_names())
+    for table, indexes in PERFORMANCE_INDEXES.items():
+        if table not in table_names:
+            continue
+        inspector = inspect(engine)
+        existing = {item.get("name") for item in inspector.get_indexes(table)}
+        columns = {item["name"] for item in inspector.get_columns(table)}
+        missing = [
+            (name, column_names)
+            for name, column_names in indexes
+            if name not in existing and all(item in columns for item in column_names)
+        ]
+        if not missing:
+            continue
+        with engine.begin() as connection:
+            for name, column_names in missing:
+                quoted_columns = ", ".join(f'"{item}"' for item in column_names)
+                connection.execute(
+                    text(
+                        f'CREATE INDEX IF NOT EXISTS "{name}" '
+                        f'ON "{table}" ({quoted_columns})'
+                    )
+                )
 
 
 def _ensure_case_ownership(engine: Engine) -> None:
@@ -363,6 +419,19 @@ class PostgresCaseStore:
         with self._session_factory() as session:
             row = self._row_by_key(session, case_id)
         return self._decode(row.payload_json, owner_id=row.owner_id) if row else None
+
+    def get_many(self, case_ids: list[str]) -> dict[str, CaseRead]:
+        unique_ids = list(dict.fromkeys(case_ids))
+        if not unique_ids:
+            return {}
+        with self._session_factory() as session:
+            rows = session.scalars(
+                select(CaseRow).where(CaseRow.case_key.in_(unique_ids))
+            ).all()
+        return {
+            row.case_key: self._decode(row.payload_json, owner_id=row.owner_id)
+            for row in rows
+        }
 
     def list(
         self,

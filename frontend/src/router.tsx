@@ -4,46 +4,56 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import PatientShell from "@/components/PatientShell";
 import RouteGuard from "@/components/RouteGuard";
 import WorkspaceShell from "@/components/WorkspaceShell";
-import AdminPage from "@/pages/AdminPage";
-import AdminLoginPage from "@/pages/AdminLoginPage";
-import HomePage from "@/pages/HomePage";
-import LoginPage from "@/pages/LoginPage";
-import PrivacyPage from "@/pages/PrivacyPage";
-import SecurityPage from "@/pages/SecurityPage";
-import { ForbiddenPage, NotFoundPage } from "@/pages/StatusPages";
-import AdminCaseDetailPage from "@/pages/admin/CaseDetailPage";
-import AccessPage from "@/pages/admin/AccessPage";
-import AdminCasesPage from "@/pages/admin/CasesPage";
-import AdminKnowledgePage from "@/pages/admin/KnowledgePage";
-import CaseLayout from "@/pages/doctor/CaseLayout";
-import CaseListPage from "@/pages/doctor/CaseListPage";
-import {
-  CaseAnalysisPage,
-  CaseImagesPage,
-  CaseReportPage,
-  CaseReviewPage,
-  CaseSummaryPage,
-  NewCasePage,
-} from "@/pages/doctor/CasePanels";
-import KnowledgePage from "@/pages/doctor/KnowledgePage";
-import WorkbenchPage from "@/pages/doctor/WorkbenchPage";
+import type { ComponentType } from "react";
 
-const ServicesPage = lazy(() => import("@/pages/admin/ServicesPage"));
-const DataDictionaryPage = lazy(
-  () => import("@/pages/admin/DataDictionaryPage"),
-);
+function lazyElement(loader: () => Promise<{ default: ComponentType }>) {
+  const Page = lazy(loader);
+  return (
+    <Suspense fallback={<div className="page-loading" />}>
+      <Page />
+    </Suspense>
+  );
+}
+
+function namedLazyElement(
+  loader: () => Promise<Record<string, unknown>>,
+  exportName: string,
+) {
+  return lazyElement(async () => {
+    const module = await loader();
+    return { default: module[exportName] as ComponentType };
+  });
+}
 
 const router = createBrowserRouter([
   {
     element: <PatientShell />,
     children: [
-      { path: "/", element: <HomePage /> },
-      { path: "/privacy", element: <PrivacyPage /> },
+      {
+        path: "/",
+        element: lazyElement(() => import("@/pages/HomePage")),
+      },
+      {
+        path: "/privacy",
+        element: lazyElement(() => import("@/pages/PrivacyPage")),
+      },
     ],
   },
-  { path: "/login", element: <LoginPage /> },
-  { path: "/admin/login", element: <AdminLoginPage /> },
-  { path: "/forbidden", element: <ForbiddenPage /> },
+  {
+    path: "/login",
+    element: lazyElement(() => import("@/pages/LoginPage")),
+  },
+  {
+    path: "/admin/login",
+    element: lazyElement(() => import("@/pages/AdminLoginPage")),
+  },
+  {
+    path: "/forbidden",
+    element: namedLazyElement(
+      () => import("@/pages/StatusPages"),
+      "ForbiddenPage",
+    ),
+  },
   {
     element: <RouteGuard roles={["doctor"]} />,
     children: [
@@ -52,24 +62,72 @@ const router = createBrowserRouter([
         element: <WorkspaceShell mode="doctor" />,
         children: [
           { index: true, element: <Navigate to="/doctor/workbench" replace /> },
-          { path: "workbench", element: <WorkbenchPage /> },
-          { path: "cases", element: <CaseListPage /> },
-          { path: "cases/new", element: <NewCasePage /> },
+          {
+            path: "workbench",
+            element: lazyElement(() => import("@/pages/doctor/WorkbenchPage")),
+          },
+          {
+            path: "cases",
+            element: lazyElement(() => import("@/pages/doctor/CaseListPage")),
+          },
+          {
+            path: "cases/new",
+            element: namedLazyElement(
+              () => import("@/pages/doctor/CasePanels"),
+              "NewCasePage",
+            ),
+          },
           {
             path: "cases/:caseId",
-            element: <CaseLayout />,
+            element: lazyElement(() => import("@/pages/doctor/CaseLayout")),
             children: [
               { index: true, element: <Navigate to="summary" replace /> },
-              { path: "summary", element: <CaseSummaryPage /> },
-              { path: "images", element: <CaseImagesPage /> },
-              { path: "analysis", element: <CaseAnalysisPage /> },
-              { path: "review", element: <CaseReviewPage /> },
-              { path: "report", element: <CaseReportPage /> },
+              {
+                path: "summary",
+                element: namedLazyElement(
+                  () => import("@/pages/doctor/CasePanels"),
+                  "CaseSummaryPage",
+                ),
+              },
+              {
+                path: "images",
+                element: namedLazyElement(
+                  () => import("@/pages/doctor/CasePanels"),
+                  "CaseImagesPage",
+                ),
+              },
+              {
+                path: "analysis",
+                element: namedLazyElement(
+                  () => import("@/pages/doctor/CasePanels"),
+                  "CaseAnalysisPage",
+                ),
+              },
+              {
+                path: "review",
+                element: namedLazyElement(
+                  () => import("@/pages/doctor/CasePanels"),
+                  "CaseReviewPage",
+                ),
+              },
+              {
+                path: "report",
+                element: namedLazyElement(
+                  () => import("@/pages/doctor/CasePanels"),
+                  "CaseReportPage",
+                ),
+              },
             ],
           },
           { path: "reviews", element: <Navigate to="/doctor/cases?status=awaiting_review" replace /> },
-          { path: "knowledge", element: <KnowledgePage /> },
-          { path: "security", element: <SecurityPage /> },
+          {
+            path: "knowledge",
+            element: lazyElement(() => import("@/pages/doctor/KnowledgePage")),
+          },
+          {
+            path: "security",
+            element: lazyElement(() => import("@/pages/SecurityPage")),
+          },
         ],
       },
     ],
@@ -81,19 +139,49 @@ const router = createBrowserRouter([
         path: "/admin",
         element: <WorkspaceShell mode="admin" />,
         children: [
-          { index: true, element: <AdminPage /> },
-          { path: "cases", element: <AdminCasesPage /> },
-          { path: "cases/:caseId", element: <AdminCaseDetailPage /> },
-          { path: "knowledge", element: <AdminKnowledgePage /> },
-          { path: "services", element: <Suspense fallback={<div className="page-loading" />}><ServicesPage /></Suspense> },
-          { path: "data-dictionary", element: <Suspense fallback={<div className="page-loading" />}><DataDictionaryPage /></Suspense> },
-          { path: "access", element: <AccessPage /> },
-          { path: "security", element: <SecurityPage /> },
+          {
+            index: true,
+            element: lazyElement(() => import("@/pages/AdminPage")),
+          },
+          {
+            path: "cases",
+            element: lazyElement(() => import("@/pages/admin/CasesPage")),
+          },
+          {
+            path: "cases/:caseId",
+            element: lazyElement(() => import("@/pages/admin/CaseDetailPage")),
+          },
+          {
+            path: "knowledge",
+            element: lazyElement(() => import("@/pages/admin/KnowledgePage")),
+          },
+          {
+            path: "services",
+            element: lazyElement(() => import("@/pages/admin/ServicesPage")),
+          },
+          {
+            path: "data-dictionary",
+            element: lazyElement(() => import("@/pages/admin/DataDictionaryPage")),
+          },
+          {
+            path: "access",
+            element: lazyElement(() => import("@/pages/admin/AccessPage")),
+          },
+          {
+            path: "security",
+            element: lazyElement(() => import("@/pages/SecurityPage")),
+          },
         ],
       },
     ],
   },
-  { path: "*", element: <NotFoundPage /> },
+  {
+    path: "*",
+    element: namedLazyElement(
+      () => import("@/pages/StatusPages"),
+      "NotFoundPage",
+    ),
+  },
 ]);
 
 export default router;
